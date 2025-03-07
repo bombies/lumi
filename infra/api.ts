@@ -1,7 +1,10 @@
-import { bucket } from "./storage";
+import { contentBucket } from "./storage";
 
-export const myApi = new sst.aws.Function("MyApi", {
-  url: true,
-  link: [bucket],
-  handler: "packages/functions/src/api.handler"
+export const trpc = new sst.aws.Function("Trpc", {
+    url: true,
+    link: [contentBucket],
+    copyFiles: [
+        { from: "cdn-keys/private_key.pem", to: "/tmp/cdn_private_key.pem" },
+    ],
+    handler: "packages/functions/api/index.handler",
 });
