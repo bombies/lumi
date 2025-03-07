@@ -1,13 +1,13 @@
-import { trpc } from "./api";
-import { db } from "./db";
-import { contentBucket } from "./storage";
+import { trpc } from './api';
+import { db } from './db';
+import { contentBucket } from './storage';
 
-export const frontend = new sst.aws.Nextjs("Frontend", {
-    path: "packages/frontend",
-    dev: {
-        command: "bun run dev",
-    },
-    openNextVersion: "3.5.1",
-    link: [trpc, contentBucket, db],
-    domain: $app.stage === "production" ? "lumi.ajani.me" : undefined,
+export const frontend = new sst.aws.Nextjs('Frontend', {
+	path: 'packages/frontend',
+	dev: {
+		command: 'bun run dev',
+	},
+	openNextVersion: '3.5.1',
+	link: [trpc, contentBucket, db],
+	domain: $app.stage === 'production' ? 'lumi.ajani.me' : undefined,
 });
