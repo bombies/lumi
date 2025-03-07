@@ -15,6 +15,7 @@ export default $config({
             Website: infra.frontend.url,
             Api: infra.trpc.url,
             ContentCdn: infra.contentCdn.url,
+            Database: infra.db.arn
         };
     },
 });

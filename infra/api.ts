@@ -1,8 +1,9 @@
+import { db } from "./db";
 import { contentBucket } from "./storage";
 
 export const trpc = new sst.aws.Function("Trpc", {
     url: true,
-    link: [contentBucket],
+    link: [contentBucket, db],
     copyFiles: [
         { from: "cdn-keys/private_key.pem", to: "/tmp/cdn_private_key.pem" },
     ],

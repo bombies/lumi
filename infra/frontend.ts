@@ -1,4 +1,5 @@
 import { trpc } from "./api";
+import { db } from "./db";
 import { contentBucket } from "./storage";
 
 export const frontend = new sst.aws.Nextjs("Frontend", {
@@ -7,6 +8,6 @@ export const frontend = new sst.aws.Nextjs("Frontend", {
         command: "bun run dev",
     },
     openNextVersion: "3.5.1",
-    link: [trpc, contentBucket],
+    link: [trpc, contentBucket, db],
     domain: $app.stage === "production" ? "lumi.ajani.me" : undefined,
 });
