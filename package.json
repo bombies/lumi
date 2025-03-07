@@ -4,10 +4,14 @@
   "workspaces": [
     "packages/*"
   ],
-  "scripts": {},
+  "scripts": {
+    "dev": "sst dev",
+		"sync-secrets": "sst shell node packages/scripts/src/sync_secrets.mjs"
+  },
   "devDependencies": {
     "@tsconfig/node22": "^22",
-    "typescript": "^5"
+    "typescript": "^5",
+    "@trivago/prettier-plugin-sort-imports": "^4"
   },
   "dependencies": {
     "sst": "^3"
