@@ -163,7 +163,8 @@ export const verifyOTPForUser = async (userId: string, code: string) => {
 		});
 	}
 
-	await updateUser(userId, { isVerified: true });
+	await updateUser(userId, { verified: true });
+	await deleteOTPForUser(userId);
 
 	return true;
 };

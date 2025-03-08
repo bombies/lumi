@@ -34,7 +34,7 @@ export const updateUserDto = createUserDto
 	.and(
 		z
 			.object({
-				isVerified: z.boolean(),
+				verified: z.boolean(),
 				avatarKey: z.string().optional(),
 				relationshipId: z.string().optional(),
 			})
