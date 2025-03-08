@@ -37,23 +37,23 @@ stage="$1"
 # 2. Get the full directory of this script
 scriptDir="$(cd "$(dirname "$0")" && pwd)"
 
-# Extract everything up to "personal-portfolio-3" (and ensure a trailing slash)
-baseDir="$(echo "$scriptDir" | sed -E 's|(.*personal-portfolio-3).*|\1|')"
+# Extract everything up to "lumi" (and ensure a trailing slash)
+baseDir="$(echo "$scriptDir" | sed -E 's|(.*lumi).*|\1|')"
 baseDir="${baseDir}/"
 
-# Locate the .env file named "<stage>.secrets.env" within personal-portfolio-3
+# Locate the .env file named "<stage>.secrets.env" within lumi
 foundFiles="$(find "$baseDir" -type f -name "$stage.secrets.env")"
 
 # Count how many matches we found
 foundCount="$(echo "$foundFiles" | wc -l | tr -d '[:space:]')"
 
 if [ "$foundCount" -eq 0 ]; then
-  echo "[ERROR] No .env file named '$stage.secrets.env' found in 'personal-portfolio-3'"
+  echo "[ERROR] No .env file named '$stage.secrets.env' found in 'lumi'"
   exit 1
 fi
 
 if [ "$foundCount" -gt 1 ]; then
-  echo "[ERROR] Multiple .env files found for '$stage' in 'personal-portfolio-3':"
+  echo "[ERROR] Multiple .env files found for '$stage' in 'lumi':"
   echo "$foundFiles"
   exit 1
 fi

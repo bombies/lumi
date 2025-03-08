@@ -37,10 +37,10 @@ set stage $argv[1]
 # Get the full directory of this script
 set scriptDir (cd (dirname (status filename)) ; pwd)
 
-# Use string match with a regex that captures everything up to "personal-portfolio-3"
-# The '.*personal-portfolio-3' pattern means: "match any characters, then 'personal-portfolio-3' at the end"
+# Use string match with a regex that captures everything up to "lumi"
+# The '.*lumi' pattern means: "match any characters, then 'lumi' at the end"
 # If you want to ensure a trailing slash, just append it afterward
-set baseDir (string match -r '.*personal-portfolio-3' $scriptDir)
+set baseDir (string match -r '.*lumi' $scriptDir)
 
 # If needed, add a trailing slash
 set baseDir "$baseDir/"
@@ -50,12 +50,12 @@ set foundFiles (find "$baseDir" -type f -name "$stage.secrets.env")
 
 # Handle zero or multiple matches
 if test (count $foundFiles) -eq 0
-    echo "[ERROR] No .env file named '$stage.secrets.env' found in 'personal-portfolio-3'"
+    echo "[ERROR] No .env file named '$stage.secrets.env' found in 'lumi'"
     exit 1
 end
 
 if test (count $foundFiles) -gt 1
-    echo "[ERROR] Multiple .env files found for '$stage' in 'personal-portfolio-3':"
+    echo "[ERROR] Multiple .env files found for '$stage' in 'lumi':"
     echo $foundFiles
     exit 1
 end

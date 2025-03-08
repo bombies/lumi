@@ -1,7 +1,13 @@
 {
-  "extends": "@tsconfig/node22/tsconfig.json",
-  "compilerOptions": {
-    "module": "ESNext",
-    "moduleResolution": "Bundler",
-  },
+	"extends": "@tsconfig/node22/tsconfig.json",
+	"compilerOptions": {
+		"module": "ESNext",
+		"moduleResolution": "Bundler",
+		"jsx": "preserve",
+		"paths": {
+			"@/*": ["./src/*"],
+			"@lumi/core/*": ["../core/src/*"],
+			"@lumi/emails/*": ["../emails/emails/*"]
+		}
+	}
 }

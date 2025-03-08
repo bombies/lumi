@@ -21,7 +21,7 @@ const stage = args[0];
 const shell = process.env.SHELL || process.env.ComSpec || '';
 const cwd = process.cwd();
 
-if (!cwd.endsWith("personal-portfolio-3")) {
+if (!cwd.endsWith("lumi")) {
     console.error('[ERROR] Please run this script from the root of the project with the command: bun run sync-secrets -- <stage>');
     process.exit(1);
 }

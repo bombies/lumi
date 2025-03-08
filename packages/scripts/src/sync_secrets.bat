@@ -16,10 +16,10 @@ REM 1. Get the full directory of this script (without trailing backslash).
 set "SCRIPT_DIR=%~dp0"
 if "%SCRIPT_DIR:~-1%"=="\" set "SCRIPT_DIR=%SCRIPT_DIR:~0,-1%"
 
-REM 2. Extract everything up to "personal-portfolio-3" in %SCRIPT_DIR%.
+REM 2. Extract everything up to "lumi" in %SCRIPT_DIR%.
 call :FindBaseDir "%SCRIPT_DIR%" BASE_DIR
 if "%BASE_DIR%"=="" (
-    echo [ERROR] Could not find 'personal-portfolio-3' in path: %SCRIPT_DIR%
+    echo [ERROR] Could not find 'lumi' in path: %SCRIPT_DIR%
     exit /b 1
 )
 REM Ensure a trailing backslash
@@ -36,13 +36,13 @@ set "FOUND_COUNT=0"
 for /f "delims=" %%C in ('type foundfiles.txt ^| find /v /c ""') do set "FOUND_COUNT=%%C"
 
 if "%FOUND_COUNT%"=="0" (
-    echo [ERROR] No .env file named '%STAGE%.secrets.env' found in 'personal-portfolio-3'
+    echo [ERROR] No .env file named '%STAGE%.secrets.env' found in 'lumi'
     exit /b 1
 ) else if "%FOUND_COUNT%"=="1" (
     for /f "delims=" %%G in (foundfiles.txt) do set "ENV_FILE=%%G"
     echo [INFO] Using .env file: %ENV_FILE%
 ) else (
-    echo [ERROR] Multiple .env files found for '%STAGE%' in 'personal-portfolio-3':
+    echo [ERROR] Multiple .env files found for '%STAGE%' in 'lumi':
     type foundfiles.txt
     exit /b 1
 )
@@ -149,22 +149,22 @@ exit /b 0
 
 REM ------------------------------------------------------------------------------
 REM :FindBaseDir
-REM   Extracts everything up to "personal-portfolio-3" from the given path.
-REM   Usage: call :FindBaseDir "C:\my\personal-portfolio-3\sub\folder" OUTVAR
+REM   Extracts everything up to "lumi" from the given path.
+REM   Usage: call :FindBaseDir "C:\my\lumi\sub\folder" OUTVAR
 REM ------------------------------------------------------------------------------
 :FindBaseDir
 set "INPUT=%~1"
 set "OUTVAR=%2"
 
 set "RESULT="
-REM We'll split on "personal-portfolio-3" and keep the left side + that substring.
-for /f "tokens=1* delims=|" %%I in ('echo %INPUT:\=|% ^| findstr /i /r ".*personal-portfolio-3.*"') do (
+REM We'll split on "lumi" and keep the left side + that substring.
+for /f "tokens=1* delims=|" %%I in ('echo %INPUT:\=|% ^| findstr /i /r ".*lumi.*"') do (
     REM This is a naive approach: we locate the substring and reconstruct the path.
     REM We'll do a substring search with a for loop or set.
 )
 
 REM Simpler approach: we can do a substring search with :str in string
-set "FINDSTR=personal-portfolio-3"
+set "FINDSTR=lumi"
 call set "POS=%%INPUT:%FINDSTR%=%%"
 if "%POS%"=="%INPUT%" (
     REM not found
@@ -209,9 +209,9 @@ for /l %%Z in (0,1,!len!) do (
 
 :__done_sub_search
 
-REM Now i is the index of personal-portfolio-3
+REM Now i is the index of lumi
 set /a end=i+19
-REM "personal-portfolio-3" has 20 characters, but indexing is zero-based
+REM "lumi" has 20 characters, but indexing is zero-based
 set "RESULT=!FULL:~0,%end%!"
 endlocal & set "%OUTVAR%=%RESULT%"
 goto :eof

@@ -26,7 +26,7 @@ const contentCdnPublicKey = new aws.cloudfront.PublicKey('ContentCdnPublicKey', 
 	comment: 'The public key for the content CDN',
 	encodedKey: std
 		.file({
-			input: 'cdn-keys/public_key.pem',
+			input: `${process.cwd()}/cdn-keys/public_key.pem`,
 		})
 		.then(invoke => invoke.result),
 });
@@ -69,11 +69,20 @@ export const contentCdn = new sst.aws.Cdn('ContentCdn', {
 		{
 			pathPattern: 'private/*',
 			viewerProtocolPolicy: 'allow-all',
+			minTtl: 0,
+			defaultTtl: 3600,
+			maxTtl: 86400,
 			compress: true,
 			allowedMethods: ['GET', 'HEAD'],
 			cachedMethods: ['GET', 'HEAD'],
 			targetOriginId: contentBucketOriginId,
 			trustedKeyGroups: [contentCdnKeyGroup.id],
+			forwardedValues: {
+				queryString: false,
+				cookies: {
+					forward: 'none',
+				},
+			},
 		},
 	],
 });

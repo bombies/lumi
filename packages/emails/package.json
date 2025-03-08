@@ -1,0 +1,28 @@
+{
+	"name": "@lumi/emails",
+	"version": "0.0.0",
+	"type": "module",
+	"scripts": {
+		"dev": "email dev"
+	},
+	"exports": {
+		"./*": [
+			"./emails/*.ts",
+			"./emails/*.tsx",
+			"./emails/*/*.ts",
+			"./emails/*/*.tsx"
+		]
+	},
+	"dependencies": {
+		"@lumi/core": "*",
+		"@react-email/components": "0.0.33",
+		"clsx": "^2.1.1",
+		"react": "19.0.0",
+		"react-dom": "19.0.0",
+		"sst": "*",
+		"tailwind-merge": "^3.0.2"
+	},
+	"devDependencies": {
+		"react-email": "3.0.7"
+	}
+}

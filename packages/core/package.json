@@ -1,20 +1,29 @@
 {
-  "name": "@lumi/core",
-  "type": "module",
-  "version": "0.0.0",
-  "scripts": {
-    "test": "sst shell vitest"
-  },
-  "exports": {
-    "./*": [
-      "./src/*/index.ts",
-      "./src/*.ts"
-    ]
-  },
-  "dependencies": {
-    "sst": "*"
-  },
-  "devDependencies": {
-    "vitest": "^2"
-  }
+	"name": "@lumi/core",
+	"type": "module",
+	"version": "0.0.0",
+	"scripts": {
+		"test": "sst shell vitest"
+	},
+	"exports": {
+		"./*": [
+			"./src/*/index.ts",
+			"./src/*.ts",
+			"./src/*/*.ts"
+		]
+	},
+	"dependencies": {
+		"@aws-sdk/client-dynamodb": "^3.758.0",
+		"@aws-sdk/lib-dynamodb": "^3.758.0",
+		"@react-email/components": "^0.0.33",
+		"@trpc/server": "^11.0.0-rc.824",
+		"nodemailer": "^6.10.0",
+		"sst": "*",
+		"zod": "^3.24.2"
+	},
+	"devDependencies": {
+		"@types/nodemailer": "^6.4.17",
+		"@types/react": "^19.0.10",
+		"vitest": "^2"
+	}
 }

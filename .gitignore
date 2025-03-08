@@ -18,3 +18,12 @@ node_modules
 .DS_Store
 
 cdn-keys/
+
+# Environment variables
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+*.secrets.env
+.env

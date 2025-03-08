@@ -1,4 +1,10 @@
 import { db } from './db';
+import {
+	mailerHostSecret,
+	mailerPasswordSecret,
+	mailerPortSecret,
+	mailerUserSecret,
+} from './secrets';
 import { contentBucket } from './storage';
 
 export const trpc = new sst.aws.Function('Trpc', {
@@ -9,8 +15,15 @@ export const trpc = new sst.aws.Function('Trpc', {
 					allowOrigins: [`https://lumi.ajani.me`],
 				},
 			},
-	link: [contentBucket, db],
-	copyFiles: [{ from: 'cdn-keys/private_key.pem', to: '/tmp/cdn_private_key.pem' }],
+	link: [
+		contentBucket,
+		db,
+		mailerHostSecret,
+		mailerPasswordSecret,
+		mailerUserSecret,
+		mailerPortSecret,
+	],
+	copyFiles: [{ from: 'cdn-keys/private_key.pem', to: 'cdn_private_key.pem' }],
 	handler: 'packages/functions/api/index.handler',
 });
 
