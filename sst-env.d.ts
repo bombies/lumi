@@ -5,9 +5,9 @@
 
 declare module "sst" {
   export interface Resource {
-    "AuthServer": {
-      "type": "sst.aws.Auth"
-      "url": string
+    "AuthSecret": {
+      "type": "sst.sst.Secret"
+      "value": string
     }
     "ContentBucket": {
       "name": string

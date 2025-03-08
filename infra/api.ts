@@ -1,5 +1,6 @@
 import { db } from './db';
 import {
+	authSecret,
 	mailerHostSecret,
 	mailerPasswordSecret,
 	mailerPortSecret,
@@ -23,6 +24,10 @@ export const trpc = new sst.aws.Function('Trpc', {
 		mailerUserSecret,
 		mailerPortSecret,
 	],
+	environment: {
+		AUTH_SECRET: authSecret.value,
+		TABLE_NAME: db.name,
+	},
 	copyFiles: [{ from: 'cdn-keys/private_key.pem', to: 'cdn_private_key.pem' }],
 	handler: 'packages/functions/api/index.handler',
 });

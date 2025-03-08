@@ -1,11 +1,10 @@
-'use client';
-
-import { login, logout } from '@/app/auth/actions';
-import { useSubject } from '@/app/auth/hooks';
+import { auth, signIn, signOut } from '@/auth';
+import SignInButton from '@/components/ui/sign-in-button';
+import SignOutButton from '@/components/ui/sign-out-button';
 import Image from 'next/image';
 
-export default function Home() {
-	const { subject, loading: subjectLoading, fetchSubject } = useSubject();
+export default async function Home() {
+	const session = await auth();
 
 	return (
 		<div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
@@ -28,26 +27,13 @@ export default function Home() {
 					</li>
 					<li>Save and see your changes instantly.</li>
 				</ol>
-				{subjectLoading ? (
-					<></>
-				) : subject ? (
+				{session ? (
 					<>
-						<p>Hello {subject.username}</p>
-						<button
-							onClick={async () => {
-								await logout();
-								console.log('logged out');
-								fetchSubject();
-								console.log('fetched subject');
-							}}
-						>
-							logout
-						</button>
+						<p>Hello {session.user.username}</p>
+						<SignOutButton />
 					</>
 				) : (
-					<>
-						<button onClick={() => login()}>login</button>
-					</>
+					<SignInButton />
 				)}
 
 				<div className="flex gap-4 items-center flex-col sm:flex-row">

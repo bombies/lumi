@@ -1,6 +1,5 @@
 {
 	"compilerOptions": {
-		"target": "ES2017",
 		"lib": ["dom", "dom.iterable", "esnext"],
 		"allowJs": true,
 		"skipLibCheck": true,
@@ -20,8 +19,11 @@
 		],
 		"paths": {
 			"@/*": ["./src/*"],
-			"@lumi/core/*": ["../core/src/*"]
-		}
+			"@lumi/core/*": ["../core/src/*"],
+			"@lumi/functions/*": ["../functions/api/*"],
+			"@lumi/emails/*": ["../emails/emails/*"]
+		},
+		"target": "ES2017"
 	},
 	"include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
 	"exclude": ["node_modules"]

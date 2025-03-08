@@ -3,6 +3,10 @@
 	"compilerOptions": {
 		"module": "ESNext",
 		"moduleResolution": "Bundler",
-		"jsx": "preserve"
+		"jsx": "preserve",
+		"paths": {
+			"@/*": ["./emails/*"],
+			"@lumi/core/*": ["../core/src/*"]
+		}
 	}
 }

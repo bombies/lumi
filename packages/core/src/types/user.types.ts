@@ -11,6 +11,7 @@ export type User = {
 	updatedAt: string;
 	avatarKey?: string;
 	relationshipId?: string;
+	verified: boolean;
 };
 
 export type DatabaseUser = User & {

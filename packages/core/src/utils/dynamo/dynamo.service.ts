@@ -24,7 +24,7 @@ export const buildDynamo = (args?: DynamoDBClientConfig) =>
 		},
 	);
 
-export function getDynamicSetStatements(attributes: Record<string, unknown>) {
+export function getDynamicUpdateStatements(attributes: Record<string, unknown>) {
 	const setStatements: string[] = [];
 	const removeStatements: string[] = [];
 	let expressionAttributeValues: Record<string, unknown> | undefined = undefined;

@@ -3,7 +3,7 @@
 	"compilerOptions": {
 		"module": "ESNext",
 		"moduleResolution": "Bundler",
-		"jsx": "preserve",
+		"jsx": "react",
 		"paths": {
 			"@/*": ["./src/*"],
 			"@lumi/core/*": ["../core/src/*"],
