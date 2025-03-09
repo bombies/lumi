@@ -1,7 +1,7 @@
 'use client';
 
+import { cloneElement, ComponentPropsWithoutRef, ReactElement, useEffect } from 'react';
 import { Slot } from '@radix-ui/react-slot';
-import { ComponentPropsWithoutRef, ReactElement, cloneElement, useEffect } from 'react';
 import {
 	ControllerFieldState,
 	ControllerRenderProps,
@@ -12,14 +12,7 @@ import {
 	UseFormStateReturn,
 } from 'react-hook-form';
 
-import {
-	FormControl,
-	FormDescription,
-	FormItem,
-	FormLabel,
-	FormMessage,
-	FormField as ShadFormField,
-} from '../form';
+import { FormControl, FormDescription, FormItem, FormLabel, FormMessage, FormField as ShadFormField } from '../form';
 import { useForm } from './easy-form-provider';
 
 export type EasyFormFieldProps<T extends FieldValues> = Readonly<{
@@ -84,23 +77,16 @@ export default function EasyFormField<T extends FieldValues = FieldValues>({
 							<FormLabel className={labelClassName}>
 								{label}{' '}
 								{optional ? (
-									<span className="italic text-neutral-400 text-xs">
-										(optional)
-									</span>
+									<span className="italic text-neutral-400 text-xs">(optional)</span>
 								) : (
-									requiredAsterisk && (
-										<span className="text-xs text-red-500">*</span>
-									)
+									requiredAsterisk && <span className="text-xs text-red-500">*</span>
 								)}
 							</FormLabel>
 						)}
 						<FormControl defaultValue={defaultValue}>
-							{cloneElement(
-								typeof children === 'function'
-									? children(form, field)
-									: children!,
-								{ ...field },
-							)}
+							{cloneElement(typeof children === 'function' ? children(form, field) : children!, {
+								...field,
+							})}
 						</FormControl>
 						{description && <FormDescription>{description}</FormDescription>}
 						{showErrorMessage && <FormMessage />}

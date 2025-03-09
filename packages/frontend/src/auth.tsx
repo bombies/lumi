@@ -1,11 +1,12 @@
-import authConfig from '@/auth.config';
-import { sign } from '@/lib/jwt';
 import { DynamoDBAdapter } from '@auth/dynamodb-adapter';
 import { verifyUserPassword } from '@lumi/core/users/users.service';
 import { dynamo } from '@lumi/core/utils/dynamo/dynamo.service';
 import NextAuth, { DefaultSession, NextAuthResult, User } from 'next-auth';
 import { JWT } from 'next-auth/jwt';
 import Credentials from 'next-auth/providers/credentials';
+
+import authConfig from '@/auth.config';
+import { sign } from '@/lib/jwt';
 
 const JWT_EXPIRATION = 60 * 60 * 24 * 7; // 7 days
 
@@ -69,8 +70,7 @@ const nextAuth = NextAuth({
 
 				if (!verificationResult) throw new Error('Invalid credentials!');
 
-				const { id, username, firstName, lastName, email, verified } =
-					verificationResult;
+				const { id, username, firstName, lastName, email, verified } = verificationResult;
 				return { id, username, firstName, lastName, email, verified };
 			},
 		}),

@@ -1,19 +1,14 @@
-import ErrorHandler from '@/app/(site)/auth/components/error-handler';
+import { FC } from 'react';
+import { redirect } from 'next/navigation';
+
 import RegisterForm from '@/app/(site)/auth/components/register-form';
 import { auth } from '@/auth';
-import { redirect } from 'next/navigation';
-import { FC } from 'react';
 
 const LoginPage: FC = async () => {
-    const session = await auth();
+	const session = await auth();
 	if (session) redirect('/');
 
-	return (
-		<main>
-			<ErrorHandler />
-			<RegisterForm />
-		</main>
-	);
+	return <RegisterForm />;
 };
 
 export default LoginPage;

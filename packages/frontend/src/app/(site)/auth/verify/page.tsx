@@ -1,9 +1,10 @@
-import VerifyAccountForm from '@/app/(site)/auth/components/verify-account-form';
-import { auth } from '@/auth';
+import { FC } from 'react';
+import { redirect } from 'next/navigation';
 import { generateOTPForUserId, userHasOTPPending } from '@lumi/core/auth/auth.service';
 import { sendAuthCodeEmail } from '@lumi/emails/auth/code';
-import { redirect } from 'next/navigation';
-import { FC } from 'react';
+
+import VerifyAccountForm from '@/app/(site)/auth/components/verify-account-form';
+import { auth } from '@/auth';
 
 const VerifyAccountPage: FC = async () => {
 	const session = (await auth())!;
@@ -18,11 +19,7 @@ const VerifyAccountPage: FC = async () => {
 		});
 	}
 
-	return (
-		<main>
-			<VerifyAccountForm />
-		</main>
-	);
+	return <VerifyAccountForm />;
 };
 
 export default VerifyAccountPage;

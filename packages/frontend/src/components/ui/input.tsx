@@ -1,21 +1,81 @@
-import * as React from "react"
+import * as React from 'react';
+import { useEffect, useState } from 'react';
 
-import { cn } from "@/lib/utils"
+import { cn } from '@/lib/utils';
 
-function Input({ className, type, ...props }: React.ComponentProps<"input">) {
-  return (
-    <input
-      type={type}
-      data-slot="input"
-      className={cn(
-        "border-input file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground flex h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
-        "focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]",
-        "aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
-        className
-      )}
-      {...props}
-    />
-  )
+export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+	startContent?: React.ReactNode;
+	endContent?: React.ReactNode;
+	inputClassName?: string;
+	onValueChange?: (value: string | number) => void;
+	onTypingEnd?: (value: string) => void;
+	typingEndDelay?: number;
 }
 
-export { Input }
+const Input = React.forwardRef<HTMLInputElement, InputProps>(
+	(
+		{
+			className,
+			type,
+			startContent,
+			endContent,
+			inputClassName,
+			onChange,
+			onValueChange,
+			onTypingEnd,
+			typingEndDelay = 100,
+			...props
+		},
+		ref,
+	) => {
+		const [isFocused, setIsFocused] = useState(false);
+		const [currentValue, setCurrentValue] = useState<string>('');
+
+		useEffect(() => {
+			if (!onTypingEnd) return;
+
+			const timeout = setTimeout(() => {
+				onTypingEnd?.(currentValue);
+			}, typingEndDelay);
+
+			return () => clearTimeout(timeout);
+		}, [currentValue, onTypingEnd, typingEndDelay]);
+
+		return (
+			<div
+				className={cn(
+					'flex items-center h-10 w-full bg-input text-foreground rounded-lg border border-primary/10 overflow-hidden',
+					startContent && 'pl-0',
+					endContent && 'pr-0',
+					isFocused ? 'outline-hidden ring-2 ring-primary ring-offset-2' : 'ring-offset-white',
+					className,
+				)}
+			>
+				{startContent && <div className="shrink-0 self-center pr-3">{startContent}</div>}
+				<input
+					type={type}
+					className={cn(
+						'self-center w-full h-full px-3 text-sm text-foreground rounded-xl !ring-0 !outline-hidden file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-neutral-400  disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-800 dark:bg-slate-950 dark:ring-offset-slate-950 dark:placeholder:text-slate-400 dark:focus-visible:ring-slate-300',
+						startContent && 'pl-0 pr-3',
+						endContent && 'pr-0 pl-3',
+						startContent && endContent && 'pr-0 pl-0',
+						inputClassName,
+					)}
+					ref={ref}
+					onChange={e => {
+						if (onChange) onChange(e);
+						setCurrentValue(e.target.value);
+						onValueChange?.(e.target.value);
+					}}
+					onFocus={() => setIsFocused(true)}
+					onBlur={() => setIsFocused(false)}
+					{...props}
+				/>
+				{endContent && <div className="shrink-0 self-center pl-3">{endContent}</div>}
+			</div>
+		);
+	},
+);
+Input.displayName = 'Input';
+
+export { Input };

@@ -1,19 +1,18 @@
 'use client';
 
-import { TRPCProvider } from '@/lib/trpc/client';
-import { Session } from 'next-auth';
 import { FC, PropsWithChildren } from 'react';
 import { Toaster } from 'sonner';
 
-type Props = {
-	session: Session | null;
-};
+import ColorSchemeProvider from '@/components/providers/color-scheme-provider';
+import { TRPCProvider } from '@/lib/trpc/client';
 
-const Providers: FC<PropsWithChildren<Props>> = ({ children, session }) => {
+const Providers: FC<PropsWithChildren> = ({ children }) => {
 	return (
 		<TRPCProvider>
-			{children}
-			<Toaster />
+			<ColorSchemeProvider>
+				{children}
+				<Toaster />
+			</ColorSchemeProvider>
 		</TRPCProvider>
 	);
 };

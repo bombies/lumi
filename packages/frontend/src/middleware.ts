@@ -1,9 +1,9 @@
-import { getToken } from 'next-auth/jwt';
 import { NextRequest, NextResponse } from 'next/server';
+import { getToken } from 'next-auth/jwt';
 
 import { auth } from './auth';
 
-const AUTH_WALLED_MATHCERS: string[] = ['/auth/verify'];
+const AUTH_WALLED_MATHCERS: string[] = ['/auth/verify', '/home'];
 
 type Middleware = (
 	/**
@@ -21,20 +21,14 @@ const middleware: Middleware = auth(async request => {
 	const token = await getToken({
 		req: request,
 		secret: process.env.AUTH_SECRET,
-		cookieName:
-			process.env.NODE_ENV === 'production'
-				? '__Secure-authjs.session-token'
-				: undefined,
+		cookieName: process.env.NODE_ENV === 'production' ? '__Secure-authjs.session-token' : undefined,
 	});
 
-	console.log('[Middleware] ', request.nextUrl.pathname, token);
+	// console.log('[Middleware] ', request.nextUrl.pathname, token);
 
 	// Use the regex matcher to check if the current path is a walled route
 	const pathName = request.nextUrl.pathname;
-	if (
-		AUTH_WALLED_MATHCERS.some(matcher => new RegExp(matcher).test(pathName)) &&
-		!token
-	)
+	if (AUTH_WALLED_MATHCERS.some(matcher => new RegExp(matcher).test(`^${pathName}`)) && !token)
 		return NextResponse.redirect(new URL('/auth/login', request.url));
 
 	// Check if a user is verified

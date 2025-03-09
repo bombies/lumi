@@ -1,12 +1,12 @@
 'use client';
 
+import { useMemo } from 'react';
 import { AppRouter } from '@lumi/functions/types';
 import type { QueryClient } from '@tanstack/react-query';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { httpBatchLink } from '@trpc/client';
 import { createTRPCReact } from '@trpc/react-query';
 import { useSession } from 'next-auth/react';
-import { useMemo } from 'react';
 
 import { makeQueryClient } from './query-client';
 
@@ -55,9 +55,7 @@ export function TRPCProvider(
 
 	return (
 		<trpc.Provider client={trpcClient} queryClient={queryClient}>
-			<QueryClientProvider client={queryClient}>
-				{props.children}
-			</QueryClientProvider>
+			<QueryClientProvider client={queryClient}>{props.children}</QueryClientProvider>
 		</trpc.Provider>
 	);
 }

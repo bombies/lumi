@@ -1,6 +1,6 @@
 'use client';
 
-import { PropsWithChildren, createContext, useContext, useMemo } from 'react';
+import { createContext, PropsWithChildren, useContext, useMemo } from 'react';
 import { FieldValues, UseFormReturn } from 'react-hook-form';
 
 type ContextValues<T extends FieldValues = any> = {
@@ -33,7 +33,7 @@ export default function EasyFormProvider<T extends FieldValues>({
 			disabled: formDisabled,
 			requiredAsterisk,
 		}),
-		[],
+		[form, formDisabled, requiredAsterisk, submitting],
 	);
 
 	return <FormContext.Provider value={value}>{children}</FormContext.Provider>;

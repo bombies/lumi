@@ -1,13 +1,8 @@
 'use client';
 
-import { useSearchParams } from 'next/navigation';
 import { FC, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
-
-const ErrorHandler: FC = () => {
-	useErrorHandler();
-	return <></>;
-};
 
 const useErrorHandler = () => {
 	const searchParams = useSearchParams();
@@ -28,13 +23,11 @@ const useErrorHandler = () => {
 				break;
 			}
 			case 'Verification': {
-				errorMessage =
-					'The link you clicked is invalid or expired. Please log in again.';
+				errorMessage = 'The link you clicked is invalid or expired. Please log in again.';
 				break;
 			}
 			case 'UserBanned': {
-				errorMessage =
-					'Your account has been banned. Please contact support for more information.';
+				errorMessage = 'Your account has been banned. Please contact support for more information.';
 				break;
 			}
 			default: {
@@ -49,6 +42,11 @@ const useErrorHandler = () => {
 
 		return () => clearTimeout(timeoutId);
 	}, [searchParams]);
+};
+
+const ErrorHandler: FC = () => {
+	useErrorHandler();
+	return <></>;
 };
 
 export default ErrorHandler;

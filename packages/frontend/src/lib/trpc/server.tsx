@@ -1,12 +1,12 @@
 'use server';
 
-import { auth } from '@/auth';
+import { cache } from 'react';
 import { appRouter } from '@lumi/functions/router';
 import { createCallerFactory } from '@lumi/functions/utils/trpc';
 import { createHydrationHelpers } from '@trpc/react-query/rsc';
 import { User } from 'next-auth';
-import { cache } from 'react';
 
+import { auth } from '@/auth';
 import { makeQueryClient } from './query-client';
 
 // IMPORTANT: Create a stable getter for the query client that
@@ -19,7 +19,4 @@ const createContext: () => Promise<{ user?: Required<User> | null }> = cache(asy
 });
 
 const caller = createCallerFactory(appRouter)(createContext);
-export const { trpc, HydrateClient } = createHydrationHelpers<typeof appRouter>(
-	caller,
-	getQueryClient,
-);
+export const { trpc, HydrateClient } = createHydrationHelpers<typeof appRouter>(caller, getQueryClient);

@@ -1,11 +1,6 @@
+import { valkeyCache } from './cache';
 import { db } from './db';
-import {
-	authSecret,
-	mailerHostSecret,
-	mailerPasswordSecret,
-	mailerPortSecret,
-	mailerUserSecret,
-} from './secrets';
+import { authSecret, mailerHostSecret, mailerPasswordSecret, mailerPortSecret, mailerUserSecret } from './secrets';
 import { contentBucket } from './storage';
 
 export const trpc = new sst.aws.Function('Trpc', {
@@ -16,14 +11,7 @@ export const trpc = new sst.aws.Function('Trpc', {
 					allowOrigins: [`https://lumi.ajani.me`],
 				},
 			},
-	link: [
-		contentBucket,
-		db,
-		mailerHostSecret,
-		mailerPasswordSecret,
-		mailerUserSecret,
-		mailerPortSecret,
-	],
+	link: [contentBucket, db, valkeyCache, mailerHostSecret, mailerPasswordSecret, mailerUserSecret, mailerPortSecret],
 	environment: {
 		AUTH_SECRET: authSecret.value,
 		TABLE_NAME: db.name,

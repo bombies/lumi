@@ -7,9 +7,11 @@ export const handler = awsLambdaRequestHandler({
 	router: appRouter,
 	createContext,
 	onError({ error, type, path, input, ctx, req }) {
-		console.error('Error:', error);
-		console.debug('Type:', type);
-		console.debug('Path:', path);
-		console.debug('Input:', JSON.stringify(input, null, 4));
+		if (error.code === 'INTERNAL_SERVER_ERROR') {
+			console.error('Error:', error);
+			console.debug('Type:', type);
+			console.debug('Path:', path);
+			console.debug('Input:', JSON.stringify(input, null, 4));
+		}
 	},
 });

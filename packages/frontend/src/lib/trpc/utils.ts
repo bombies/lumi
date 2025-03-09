@@ -1,12 +1,9 @@
 import { TRPCClientError, TRPCClientErrorLike } from '@trpc/client';
-import { AnyTRPCClientTypes } from '@trpc/server';
+import { AnyTRPCClientTypes, TRPCError } from '@trpc/server';
 import { toast } from 'sonner';
 
-export const handleTrpcError = (
-	e: any,
-	defaultMessage: string = 'Something went wrong!',
-) => {
-	if (e instanceof TRPCClientError) {
+export const handleTrpcError = (e: any, defaultMessage: string = 'Something went wrong!') => {
+	if (e instanceof TRPCClientError || e instanceof TRPCError) {
 		toast.error(e.message);
 	} else {
 		console.error(e);

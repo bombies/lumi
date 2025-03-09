@@ -1,5 +1,5 @@
-import { zodResolver } from '@hookform/resolvers/zod';
 import { ReactElement, useEffect } from 'react';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { DefaultValues, FieldValues, SubmitHandler, useForm } from 'react-hook-form';
 import { z } from 'zod';
 
@@ -53,10 +53,7 @@ export default function EasyForm<T extends FieldValues>({
 
 	return (
 		<ShadForm {...form}>
-			<form
-				onSubmit={onSubmit && form.handleSubmit(onSubmit)}
-				className={className}
-			>
+			<form onSubmit={onSubmit && form.handleSubmit(onSubmit)} className={className}>
 				<EasyFormProvider
 					form={form}
 					submitting={submitting}

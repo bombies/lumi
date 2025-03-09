@@ -7,12 +7,7 @@ import { Resource } from 'sst';
 import { DatabaseUserOTP, UserOTP } from '../types/auth.types';
 import { EntityType, KeyPrefix } from '../types/dynamo.types';
 import { User } from '../types/user.types';
-import {
-	createUser,
-	getUserByEmail,
-	getUserById,
-	updateUser,
-} from '../users/users.service';
+import { createUser, getUserByEmail, getUserById, updateUser } from '../users/users.service';
 import { dynamo } from '../utils/dynamo/dynamo.service';
 import { RegisterUserDto } from './auth.dto';
 
@@ -84,7 +79,7 @@ export const generateOTP = async (user: User) => {
 
 	const data = {
 		code: otp,
-		expiresAt: new Date(Date.now() + 5 * 60 * 1000).getTime(),
+		expiresAt: new Date(Date.now() + 5 * 60 * 1000).getTime(), // 5 minutes
 		userId: user.id,
 	} satisfies UserOTP;
 	const res = await dynamo.put({
@@ -152,8 +147,7 @@ export const verifyOTPForUser = async (userId: string, code: string) => {
 	const otp = await getOTPForUser(userId);
 	if (!otp) throw new TRPCError({ code: 'BAD_REQUEST', message: 'No OTP found' });
 
-	if (otp.code !== code)
-		throw new TRPCError({ code: 'BAD_REQUEST', message: 'Invalid OTP' });
+	if (otp.code !== code) throw new TRPCError({ code: 'BAD_REQUEST', message: 'Invalid OTP' });
 
 	if (otp.expiresAt < Date.now()) {
 		await deleteOTPForUser(userId);

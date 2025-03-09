@@ -1,4 +1,4 @@
-import { SignJWT, jwtVerify } from 'jose';
+import { jwtVerify, SignJWT } from 'jose';
 
 type SignOptions = {
 	/**
@@ -36,18 +36,12 @@ export async function sign(payload: object, opts?: SignOptions): Promise<string>
 
 	if (opts?.expirationTime) jwtbuilder.setExpirationTime(opts.expirationTime);
 
-	const token = jwtbuilder
-		.setIssuedAt(iat)
-		.setNotBefore(iat)
-		.sign(new TextEncoder().encode(process.env.AUTH_SECRET));
+	const token = jwtbuilder.setIssuedAt(iat).setNotBefore(iat).sign(new TextEncoder().encode(process.env.AUTH_SECRET));
 
 	return token;
 }
 
-export async function verify<T extends object = any>(
-	token: string,
-	secret: string,
-): Promise<T> {
+export async function verify<T extends object = any>(token: string, secret: string): Promise<T> {
 	const { payload } = await jwtVerify(token, new TextEncoder().encode(secret));
 	return payload as T;
 }

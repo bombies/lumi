@@ -42,6 +42,12 @@ declare module "sst" {
       "type": "sst.aws.Function"
       "url": string
     }
+    "ValkeyCache": {
+      "engine": string
+      "host": string
+      "port": number
+      "type": "aws.elasticache/serverlessCache.ServerlessCache"
+    }
   }
 }
 /// <reference path="sst-env.d.ts" />
