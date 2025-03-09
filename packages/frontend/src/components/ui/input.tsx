@@ -50,6 +50,8 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
 					isFocused ? 'outline-hidden ring-2 ring-primary ring-offset-2' : 'ring-offset-white',
 					className,
 				)}
+				onFocus={() => setIsFocused(true)}
+				onBlur={() => setIsFocused(false)}
 			>
 				{startContent && <div className="shrink-0 self-center pr-3">{startContent}</div>}
 				<input
@@ -67,8 +69,6 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
 						setCurrentValue(e.target.value);
 						onValueChange?.(e.target.value);
 					}}
-					onFocus={() => setIsFocused(true)}
-					onBlur={() => setIsFocused(false)}
 					{...props}
 				/>
 				{endContent && <div className="shrink-0 self-center pl-3">{endContent}</div>}

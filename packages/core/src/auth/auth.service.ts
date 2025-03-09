@@ -147,7 +147,7 @@ export const verifyOTPForUser = async (userId: string, code: string) => {
 	const otp = await getOTPForUser(userId);
 	if (!otp) throw new TRPCError({ code: 'BAD_REQUEST', message: 'No OTP found' });
 
-	if (otp.code !== code) throw new TRPCError({ code: 'BAD_REQUEST', message: 'Invalid OTP' });
+	if (otp.code !== code) throw new TRPCError({ code: 'BAD_REQUEST', message: 'Incorrect OTP.' });
 
 	if (otp.expiresAt < Date.now()) {
 		await deleteOTPForUser(userId);

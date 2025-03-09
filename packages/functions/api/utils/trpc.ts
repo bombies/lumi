@@ -1,25 +1,25 @@
 import { decodeBearerToken } from '@lumi/core/auth/auth.service';
 import { TRPCError, initTRPC } from '@trpc/server';
 import { CreateAWSLambdaContextOptions } from '@trpc/server/adapters/aws-lambda';
-import { APIGatewayProxyEvent } from 'aws-lambda';
+import { APIGatewayProxyEvent, APIGatewayProxyEventHeaders } from 'aws-lambda';
+
+import { ReadonlyHeaders } from '../types';
 
 type Context = Awaited<ReturnType<typeof createContext>>;
 
 export const t = initTRPC.context<Context>().create();
-export function createContext({
-	event,
-	context,
-	info,
-}: CreateAWSLambdaContextOptions<APIGatewayProxyEvent>) {
+export function createContext({ event, context, info }: CreateAWSLambdaContextOptions<APIGatewayProxyEvent>) {
+	const headers = event.headers as Record<string, string | undefined>;
 	const authorizationHeader = event.headers.authorization;
-	if (!authorizationHeader) return {};
+	if (!authorizationHeader) return { headers };
 	try {
 		return {
+			headers,
 			user: decodeBearerToken(authorizationHeader),
 		};
 	} catch (e) {
 		console.error(e);
-		return {};
+		return { headers };
 	}
 }
 
@@ -37,16 +37,14 @@ export const publicProcedure = t.procedure.use(async function procedure(opts) {
 	});
 });
 
-export const protectedProcedure = publicProcedure.use(
-	async function isAuthenticated(opts) {
-		const { ctx } = opts;
-		if (!ctx.user) throw new TRPCError({ code: 'UNAUTHORIZED' });
-		return opts.next({
-			ctx: {
-				user: ctx.user,
-			},
-		});
-	},
-);
+export const protectedProcedure = publicProcedure.use(async function isAuthenticated(opts) {
+	const { ctx } = opts;
+	if (!ctx.user) throw new TRPCError({ code: 'UNAUTHORIZED' });
+	return opts.next({
+		ctx: {
+			user: ctx.user,
+		},
+	});
+});
 
 export const mergeRouters = t.mergeRouters;

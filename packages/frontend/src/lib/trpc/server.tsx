@@ -1,6 +1,7 @@
 'use server';
 
 import { cache } from 'react';
+import { headers } from 'next/headers';
 import { appRouter } from '@lumi/functions/router';
 import { createCallerFactory } from '@lumi/functions/utils/trpc';
 import { createHydrationHelpers } from '@trpc/react-query/rsc';
@@ -13,9 +14,17 @@ import { makeQueryClient } from './query-client';
 //            will return the same client during the same request.
 export const getQueryClient = cache(makeQueryClient);
 
-const createContext: () => Promise<{ user?: Required<User> | null }> = cache(async () => {
+const createContext = cache(async () => {
 	const session = await auth();
-	return { user: session?.user as Required<User> | null };
+	const reqHeaders = (await headers()).entries().reduce(
+		(acc, [key, value]) => {
+			acc[key] = value;
+			return acc;
+		},
+		{} as Record<string, string>,
+	);
+
+	return { user: session?.user as Required<User> | null, headers: reqHeaders };
 });
 
 const caller = createCallerFactory(appRouter)(createContext);

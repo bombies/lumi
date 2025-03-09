@@ -3,7 +3,14 @@ import { getToken } from 'next-auth/jwt';
 
 import { auth } from './auth';
 
-const AUTH_WALLED_MATHCERS: string[] = ['/auth/verify', '/home'];
+const AUTH_WALLED_MATHCERS: string[] = [
+	'/auth/verify',
+	'/home',
+	'/moments',
+	'/affirmations',
+	'/music-sharing',
+	'/settings',
+];
 
 type Middleware = (
 	/**

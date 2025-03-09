@@ -37,16 +37,26 @@ declare module "sst" {
       "type": "sst.sst.Secret"
       "value": string
     }
+    "RedisHost": {
+      "type": "sst.sst.Secret"
+      "value": string
+    }
+    "RedisPassword": {
+      "type": "sst.sst.Secret"
+      "value": string
+    }
+    "RedisPort": {
+      "type": "sst.sst.Secret"
+      "value": string
+    }
+    "RedisUser": {
+      "type": "sst.sst.Secret"
+      "value": string
+    }
     "Trpc": {
       "name": string
       "type": "sst.aws.Function"
       "url": string
-    }
-    "ValkeyCache": {
-      "engine": string
-      "host": string
-      "port": number
-      "type": "aws.elasticache/serverlessCache.ServerlessCache"
     }
   }
 }

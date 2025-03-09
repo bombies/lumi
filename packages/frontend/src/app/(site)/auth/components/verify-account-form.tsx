@@ -1,10 +1,11 @@
 'use client';
 
-import { FC, useCallback, useRef } from 'react';
+import { FC, useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { REGEXP_ONLY_DIGITS_AND_CHARS } from 'input-otp';
 import { useSession } from 'next-auth/react';
 import { SubmitHandler } from 'react-hook-form';
+import { toast } from 'sonner';
 import { z } from 'zod';
 
 import { Button } from '@/components/ui/button';
@@ -23,35 +24,87 @@ type VerifyAccountSchema = z.infer<typeof verifyAccountSchema>;
 
 const VerifyOTP = () =>
 	trpc.auth.verifyOTP.useMutation({
-		onError: handleTrpcError,
+		onSuccess() {
+			toast.success('Account verified successfully.');
+		},
+		onError: e => handleTrpcError(e, 'Could not verify the account.'),
 	});
-const ResendOTP = () => trpc.auth.sendOTP.useMutation();
+const ResendOTP = (onSucess?: () => void) =>
+	trpc.auth.sendOTP.useMutation({
+		onSuccess() {
+			toast.success('OTP re-sent successfully.');
+			onSucess?.();
+		},
+		onError(error) {
+			handleTrpcError(error, 'Could not resend the OTP.');
+		},
+	});
 
-const VerifyAccountForm: FC = () => {
+type Props = {
+	otpExpired?: boolean;
+};
+
+const VerifyAccountForm: FC<Props> = ({ otpExpired }) => {
+	const [isOtpExpired, setIsOtpExpired] = useState(otpExpired ?? false);
+	const [expiredToastId, setExpiredToastId] = useState<string | number | null>(null);
 	const { data: session, update: updateSession } = useSession();
 	const { mutateAsync: verifyOTP, isPending: isVerifying } = VerifyOTP();
-	const { mutateAsync: resendOTP, isPending: isResending } = ResendOTP();
+	const { mutateAsync: resendOTP, isPending: isResending } = ResendOTP(() => {
+		setIsOtpExpired(false);
+	});
 	const router = useRouter();
 	const submitButtonRef = useRef<HTMLButtonElement>(null);
 
 	const onSubmit = useCallback<SubmitHandler<VerifyAccountSchema>>(
 		async ({ code }) => {
-			try {
-				await verifyOTP(code);
-				await updateSession({
-					...session,
-					user: {
-						...session?.user,
-						verified: true,
-					},
-				});
-				router.push('/');
-			} catch {
-				handleTrpcError(code);
-			}
+			await verifyOTP(code);
+			await updateSession({
+				...session,
+				user: {
+					...session?.user,
+					verified: true,
+				},
+			});
+			router.push('/');
 		},
 		[router, session, updateSession, verifyOTP],
 	);
+
+	useEffect(() => {
+		let timeOutId: NodeJS.Timeout | undefined = undefined;
+		if (!isOtpExpired && expiredToastId) {
+			toast.dismiss(expiredToastId);
+			setExpiredToastId(null);
+			timeOutId = setTimeout(
+				() => {
+					setIsOtpExpired(true);
+				},
+				5 * 60 * 1000,
+			);
+		}
+
+		return () => clearTimeout(timeOutId);
+	}, [expiredToastId, isOtpExpired]);
+
+	useEffect(() => {
+		let timeOutId: NodeJS.Timeout | undefined = undefined;
+		if (isOtpExpired && !expiredToastId) {
+			timeOutId = setTimeout(() => {
+				const toastId = toast('Your OTP has expired. Please request a new one.', {
+					action: {
+						label: 'Send OTP',
+						onClick: () => {
+							if (!isResending && !isVerifying) resendOTP();
+						},
+					},
+					duration: Infinity,
+				});
+				setExpiredToastId(toastId);
+			}, 1000);
+		}
+
+		return () => clearTimeout(timeOutId);
+	}, [expiredToastId, isOtpExpired, isResending, isVerifying, resendOTP]);
 
 	return (
 		<EasyForm
@@ -83,12 +136,12 @@ const VerifyAccountForm: FC = () => {
 			<button
 				className="text-xs cursor-pointer block"
 				onClick={() => {
-					if (!isResending && !isVerifying) resendOTP();
+					if (!isResending && !isVerifying) resendOTP().then(() => setIsOtpExpired(false));
 				}}
 			>
 				Didn&apos;t get the code? <span className="text-secondary dark:text-accent">Resend code</span>.
 			</button>
-			<Button type="submit" ref={submitButtonRef} loading={isVerifying} disabled={isResending || isVerifying}>
+			<Button type="submit" ref={submitButtonRef} loading={isResending || isVerifying}>
 				Submit
 			</Button>
 		</EasyForm>

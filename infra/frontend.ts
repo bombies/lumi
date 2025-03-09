@@ -6,6 +6,10 @@ import {
 	mailerPasswordSecret,
 	mailerPortSecret,
 	mailerUserSecret,
+	redisHost,
+	redisPassword,
+	redisPort,
+	redisUser,
 } from './secrets';
 import { contentBucket } from './storage';
 
@@ -23,12 +27,16 @@ export const frontend = new sst.aws.Nextjs('Frontend', {
 		mailerPasswordSecret,
 		mailerUserSecret,
 		mailerPortSecret,
+		redisHost,
+		redisPort,
+		redisUser,
+		redisPassword,
 	],
 	domain: $app.stage === 'production' ? 'lumi.ajani.me' : undefined,
 	environment: {
+		APP_STAGE: $app.stage,
 		AUTH_SECRET: authSecret.value,
-		NEXT_PUBLIC_TRPC_URL:
-			$app.stage === 'production' ? 'https://api.lumi.ajani.me' : trpc.url,
+		NEXT_PUBLIC_TRPC_URL: $app.stage === 'production' ? 'https://api.lumi.ajani.me' : trpc.url,
 		TABLE_NAME: db.name,
 	},
 });

@@ -1,6 +1,6 @@
 'use client';
 
-import { FC, useMemo } from 'react';
+import { FC, PropsWithChildren, useMemo } from 'react';
 import { MoonIcon, SunIcon, SunMoonIcon } from 'lucide-react';
 
 import { useColorScheme } from '@/components/providers/color-scheme-provider';
@@ -9,11 +9,10 @@ import {
 	DropdownMenu,
 	DropdownMenuCheckboxItem,
 	DropdownMenuContent,
-	DropdownMenuLabel,
 	DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
-const ColorSchemeToggle: FC = () => {
+const ColorSchemeToggle: FC<PropsWithChildren> = ({ children }) => {
 	const { currentColorScheme, setCurrentColorScheme } = useColorScheme();
 
 	const schemeIcon = useMemo(
@@ -31,12 +30,13 @@ const ColorSchemeToggle: FC = () => {
 	return (
 		<DropdownMenu>
 			<DropdownMenuTrigger asChild>
-				<Button size="icon" variant="ghost">
-					{schemeIcon}
-				</Button>
+				{children ?? (
+					<Button size="icon" variant="ghost">
+						{schemeIcon}
+					</Button>
+				)}
 			</DropdownMenuTrigger>
 			<DropdownMenuContent className="w-32">
-				<DropdownMenuLabel>Colour Scheme</DropdownMenuLabel>
 				<DropdownMenuCheckboxItem
 					checked={currentColorScheme === 'light'}
 					onCheckedChange={checked => {
