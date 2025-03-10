@@ -1,4 +1,3 @@
-/* eslint-disable import/extensions */
 'use server';
 
 import { getUserById } from '@lumi/core/users/users.service';

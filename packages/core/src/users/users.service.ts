@@ -1,11 +1,12 @@
 import { TRPCError } from '@trpc/server';
 import bcrypt from 'bcryptjs';
-import { v4 as uuidv4 } from 'uuid';
 
 import { EntityType, KeyPrefix } from '../types/dynamo.types';
+import { getInfiniteData } from '../types/infinite-data.dto';
 import { DatabaseUser, User } from '../types/user.types';
 import { dynamo, getDynamicUpdateStatements } from '../utils/dynamo/dynamo.service';
-import { CreateUserDto, UpdateUserDto } from './users.dto';
+import { getUUID } from '../utils/utils';
+import { CreateUserDto, GetUsersByEmailDto, GetUsersByUsernameDto, UpdateUserDto } from './users.dto';
 
 type CreateUserArgs = {
 	sendOTP?: boolean;
@@ -30,7 +31,7 @@ export const createUser = async ({
 			message: 'User with this username already exists',
 		});
 
-	const userId = uuidv4();
+	const userId = getUUID();
 	const [createdAt, updatedAt] = [new Date().toISOString(), new Date().toISOString()];
 	const hashedPassword = password ? await bcrypt.hash(password, 10) : undefined;
 	await dynamo.put({
@@ -59,10 +60,7 @@ export const verifyUserPassword = async (emailOrUsername: string, password: stri
 	const user = await getUserByEmailOrUsername(emailOrUsername);
 	if (!user) return false;
 
-	if (!user.password)
-		throw new Error(
-			'User does not have a password set. Please login with a different provider',
-		);
+	if (!user.password) throw new Error('User does not have a password set. Please login with a different provider');
 
 	const passwordValid = await bcrypt.compare(password, user.password);
 	console.log(password, user.password, passwordValid);
@@ -99,6 +97,46 @@ export const getUserByUsername = async (username: string) => {
 	return res.Items?.[0] as User | undefined;
 };
 
+export const getUsersByUsername = async ({ username, limit, cursor }: GetUsersByUsernameDto) => {
+	const res = await dynamo.query({
+		TableName: process.env.TABLE_NAME,
+		IndexName: 'GSI1',
+		KeyConditionExpression: '#pk = :pk AND begins_with(#sk, :sk)',
+		ExpressionAttributeNames: {
+			'#pk': 'gsi1pk',
+			'#sk': 'gsi1sk',
+		},
+		ExpressionAttributeValues: {
+			':pk': `${KeyPrefix.USER_NAME}`,
+			':sk': `${KeyPrefix.USER}${username}`,
+		},
+		Limit: limit,
+		ExclusiveStartKey: cursor,
+	});
+
+	return getInfiniteData<User>(res);
+};
+
+export const getUsersByEmail = async ({ email, limit, cursor }: GetUsersByEmailDto) => {
+	const res = await dynamo.query({
+		TableName: process.env.TABLE_NAME,
+		IndexName: 'GSI2',
+		KeyConditionExpression: '#pk = :pk AND begins_with(#sk, :sk)',
+		ExpressionAttributeNames: {
+			'#pk': 'gsi2pk',
+			'#sk': 'gsi12k',
+		},
+		ExpressionAttributeValues: {
+			':pk': `${KeyPrefix.USER_EMAIL}`,
+			':sk': `${KeyPrefix.USER}${email}`,
+		},
+		Limit: limit,
+		ExclusiveStartKey: cursor,
+	});
+
+	return getInfiniteData<User>(res);
+};
+
 export const getUserByEmail = async (email: string) => {
 	const res = await dynamo.query({
 		TableName: process.env.TABLE_NAME,
@@ -130,8 +168,10 @@ export const getUserByEmailOrUsername = async (emailOrUsername: string) => {
 };
 
 export const updateUser = async (userId: string, dto: UpdateUserDto) => {
-	const { updateStatements, expressionAttributeNames, expressionAttributeValues } =
-		getDynamicUpdateStatements({ ...dto, updatedAt: new Date().toISOString() });
+	const { updateStatements, expressionAttributeNames, expressionAttributeValues } = getDynamicUpdateStatements<User>({
+		...dto,
+		updatedAt: new Date().toISOString(),
+	});
 
 	if (!(await userExists(userId)))
 		throw new TRPCError({

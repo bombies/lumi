@@ -1,4 +1,3 @@
-/* eslint-disable import/extensions */
 import { FC } from 'react';
 
 import Setting from '@/app/(site)/(internal)/settings/components/setting';

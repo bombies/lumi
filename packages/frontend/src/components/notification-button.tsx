@@ -1,4 +1,3 @@
-/* eslint-disable import/extensions */
 import { FC } from 'react';
 import { BellIcon } from 'lucide-react';
 

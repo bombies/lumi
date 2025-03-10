@@ -2,7 +2,6 @@
 
 import { createContext, FC, PropsWithChildren, useContext, useEffect, useState } from 'react';
 
-// eslint-disable-next-line import/extensions
 import { useLocalStorage } from '@/lib/hooks/useLocalStorage';
 
 export type ColorScheme = 'light' | 'dark' | 'system';

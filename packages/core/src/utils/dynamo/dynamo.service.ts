@@ -1,6 +1,8 @@
 import { DynamoDBClient, DynamoDBClientConfig } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocument, QueryCommandInput } from '@aws-sdk/lib-dynamodb';
 
+import { Nullable } from '../../types/util.types';
+
 const client = new DynamoDBClient();
 export const dynamo = DynamoDBDocument.from(client, {
 	marshallOptions: {
@@ -24,7 +26,7 @@ export const buildDynamo = (args?: DynamoDBClientConfig) =>
 		},
 	);
 
-export function getDynamicUpdateStatements(attributes: Record<string, unknown>) {
+export function getDynamicUpdateStatements<T extends object = any>(attributes: Partial<Nullable<T>>) {
 	const setStatements: string[] = [];
 	const removeStatements: string[] = [];
 	let expressionAttributeValues: Record<string, unknown> | undefined = undefined;
@@ -32,27 +34,21 @@ export function getDynamicUpdateStatements(attributes: Record<string, unknown>) 
 
 	for (let [key, value] of Object.entries(attributes)) {
 		if (value !== undefined && value !== null) {
-			setStatements.push(
-				`${setStatements.length === 0 ? 'SET ' : ''}#${key} = :${key}`,
-			);
+			setStatements.push(`${setStatements.length === 0 ? 'SET ' : ''}#${key} = :${key}`);
 
 			if (!expressionAttributeValues) expressionAttributeValues = {};
 			if (!expressionAttributeNames) expressionAttributeNames = {};
 			expressionAttributeValues[`:${key}`] = value;
 			expressionAttributeNames[`#${key}`] = key;
 		} else if (value === null) {
-			removeStatements.push(
-				`${removeStatements.length === 0 ? 'REMOVE ' : ''}#${key}`,
-			);
+			removeStatements.push(`${removeStatements.length === 0 ? 'REMOVE ' : ''}#${key}`);
 			if (!expressionAttributeNames) expressionAttributeNames = {};
 			expressionAttributeNames[`#${key}`] = key;
 		}
 	}
 
 	return {
-		updateStatements: [setStatements.join(', '), removeStatements.join(', ')].join(
-			'\n',
-		),
+		updateStatements: [setStatements.join(', '), removeStatements.join(', ')].join('\n'),
 		expressionAttributeValues,
 		expressionAttributeNames,
 	};

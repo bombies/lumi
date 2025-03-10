@@ -35,16 +35,7 @@ export default [
 			'react/no-unused-prop-types': 'off',
 			'react/require-default-props': 'off',
 			'react/no-unescaped-entities': 'off',
-			'import/extensions': [
-				'error',
-				'ignorePackages',
-				{
-					ts: 'never',
-					tsx: 'never',
-					js: 'never',
-					jsx: 'never',
-				},
-			],
+			'import/extensions': 'off',
 		},
 	},
 	...compat.extends('plugin:@typescript-eslint/recommended', 'prettier').map(config => ({

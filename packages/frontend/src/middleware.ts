@@ -12,6 +12,8 @@ const AUTH_WALLED_MATHCERS: string[] = [
 	'/settings',
 ];
 
+const RELATIONSHIP_WALLED_MATCHERS: string[] = ['/home', '/moments', '/affirmations', '/music-sharing'];
+
 type Middleware = (
 	/**
 	 * Incoming request object.
@@ -41,6 +43,12 @@ const middleware: Middleware = auth(async request => {
 	// Check if a user is verified
 	if (token && !token.user.verified && request.nextUrl.pathname !== '/auth/verify')
 		return NextResponse.redirect(new URL('/auth/verify', request.url));
+
+	if (
+		RELATIONSHIP_WALLED_MATCHERS.some(matcher => new RegExp(matcher).test(`^${pathName}`)) &&
+		!token?.user.relationshipId
+	)
+		return NextResponse.redirect(new URL('/join', request.url));
 
 	const headers = new Headers(request.headers);
 	headers.set('x-current-path', request.nextUrl.pathname);

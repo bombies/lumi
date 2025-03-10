@@ -1,4 +1,3 @@
-/* eslint-disable import/extensions */
 'use client';
 
 import { ComponentProps, FC, useState } from 'react';

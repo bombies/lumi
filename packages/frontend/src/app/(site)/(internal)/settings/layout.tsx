@@ -1,4 +1,3 @@
-/* eslint-disable import/extensions */
 import { FC, PropsWithChildren } from 'react';
 import { SettingsIcon } from 'lucide-react';
 

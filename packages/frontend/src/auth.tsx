@@ -21,6 +21,7 @@ declare module 'next-auth' {
 		firstName?: string;
 		lastName?: string;
 		verified?: boolean;
+		relationshipId?: string;
 	}
 }
 
@@ -70,14 +71,14 @@ const nextAuth = NextAuth({
 
 				if (!verificationResult) throw new Error('Invalid credentials!');
 
-				const { id, username, firstName, lastName, email, verified } = verificationResult;
-				return { id, username, firstName, lastName, email, verified };
+				const { id, username, firstName, lastName, email, verified, relationshipId } = verificationResult;
+				return { id, username, firstName, lastName, email, verified, relationshipId };
 			},
 		}),
 		...authProviders,
 	],
 	callbacks: {
-		async jwt({ token, user, account, trigger, session }) {
+		async jwt({ token, user, trigger, session }) {
 			// Check if the token is being created on signin
 			if (user) {
 				const backendToken = await sign(user, {
@@ -105,9 +106,6 @@ const nextAuth = NextAuth({
 				backendToken: token.backendToken,
 				user: token.user,
 			};
-		},
-		async signIn({ email }) {
-			return true;
 		},
 	},
 	session: {

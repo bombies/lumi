@@ -1,0 +1,48 @@
+import { QueryCommandOutput } from '@aws-sdk/lib-dynamodb';
+import { z } from 'zod';
+
+export const infiniteDataDto = z
+	.object({
+		limit: z.number().positive(),
+		cursor: z.record(z.string()),
+	})
+	.partial();
+
+export const infiniteDataOrderDto = z.object({
+	order: z.enum(['asc', 'desc']),
+});
+
+export const createInfiniteDataDto = ({
+	minLimit,
+	maxLimit,
+	defaultLimit,
+}: {
+	minLimit?: number;
+	maxLimit?: number;
+	defaultLimit?: number;
+}) => {
+	const limit = z.number().min(minLimit ?? 0);
+
+	if (maxLimit !== undefined) limit.max(maxLimit);
+
+	if (defaultLimit !== undefined) limit.default(defaultLimit);
+
+	return z
+		.object({
+			limit,
+			cursor: z.record(z.string()),
+		})
+		.partial();
+};
+
+export type InfiniteData<T> = {
+	data: T[];
+	cursor: Record<string, string>;
+};
+
+export const getInfiniteData = <T = unknown>(queryResult: QueryCommandOutput) => {
+	return {
+		data: queryResult.Items as T[],
+		cursor: queryResult.LastEvaluatedKey as Record<string, string>,
+	};
+};

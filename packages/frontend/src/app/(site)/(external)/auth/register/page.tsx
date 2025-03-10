@@ -1,7 +1,7 @@
 import { FC } from 'react';
 import { redirect } from 'next/navigation';
 
-import RegisterForm from '@/app/(site)/auth/components/register-form';
+import RegisterForm from '@/app/(site)/(external)/auth/components/register-form';
 import { auth } from '@/auth';
 
 const LoginPage: FC = async () => {

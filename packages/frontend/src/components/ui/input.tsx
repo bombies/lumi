@@ -23,7 +23,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
 			onChange,
 			onValueChange,
 			onTypingEnd,
-			typingEndDelay = 100,
+			typingEndDelay = 400,
 			...props
 		},
 		ref,
