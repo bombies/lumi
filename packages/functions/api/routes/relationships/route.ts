@@ -6,6 +6,7 @@ import {
 	getSentRelationshipRequestsForUser,
 	sendRelationshipRequest,
 } from '@lumi/core/relationships/relationship.service';
+import { createInfiniteDataDto } from '@lumi/core/types/infinite-data.dto';
 import { z } from 'zod';
 
 import { protectedProcedure, router } from '../../utils/trpc';
@@ -30,7 +31,11 @@ export const relationshipsRouter = router({
 		}),
 
 	getSentRelationshipRequests: protectedProcedure
-		.input(getRelationshipRequestsForUserDto)
+		.input(
+			createInfiniteDataDto({
+				defaultLimit: 50,
+			}),
+		)
 		.query(({ input, ctx: { user } }) =>
 			getSentRelationshipRequestsForUser({
 				...input,
@@ -39,7 +44,11 @@ export const relationshipsRouter = router({
 		),
 
 	getReceivedRelationshipRequests: protectedProcedure
-		.input(getRelationshipRequestsForUserDto)
+		.input(
+			createInfiniteDataDto({
+				defaultLimit: 50,
+			}),
+		)
 		.query(({ input, ctx: { user } }) =>
 			getReceivedRelationshipRequestsForUser({
 				...input,

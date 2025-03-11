@@ -1,34 +1,58 @@
 'use client';
 
-import { FC, useMemo, useState } from 'react';
+import { FC, useCallback, useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { skipToken } from '@tanstack/react-query';
-import { UserPlus2Icon } from 'lucide-react';
+import { TRPCClientError } from '@trpc/client';
 import { AnimatePresence, motion } from 'motion/react';
+import { toast } from 'sonner';
 
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { trpc } from '@/lib/trpc/client';
 
 const FetchUsersByUsername = ({ searchQuery }: { searchQuery: string }) =>
-	trpc.users.getUsersByUsername.useInfiniteQuery(searchQuery.length > 0 ? { username: searchQuery } : skipToken, {
-		getNextPageParam: lastPage => lastPage.cursor,
-	});
+	trpc.users.getUsersByUsername.useInfiniteQuery(
+		searchQuery.length > 0 ? { username: searchQuery, projections: ['id', 'username'] } : skipToken,
+		{
+			getNextPageParam: lastPage => lastPage.cursor,
+		},
+	);
+
+const SendUserRelationshipRequest = () => trpc.relationships.sendRelationshipRequest.useMutation();
 
 const SendRelationshipRequestContent: FC = () => {
 	const [searchQuery, setSearchQuery] = useState('');
 	const { data: users, isLoading: usersFetching } = FetchUsersByUsername({ searchQuery });
+	const router = useRouter();
+	const { mutateAsync: sendRelationshipRequest, isPending: isSending } = SendUserRelationshipRequest();
 
 	const flatUsers = useMemo(() => users?.pages.flatMap(page => page.data), [users?.pages]);
 
-	console.log(usersFetching);
+	const sendRequest = useCallback(
+		async (userId: string) => {
+			toast.promise(sendRelationshipRequest(userId), {
+				loading: 'Sending request...',
+				success: data => {
+					if ('partner1' in data) {
+						router.push('/home');
+						return 'Relationship request already exists! You have now created a new space.';
+					} else {
+						return 'Request sent.';
+					}
+				},
+				error: e => (e instanceof TRPCClientError ? e.message : 'Failed to send request.'),
+			});
+		},
+		[router, sendRelationshipRequest],
+	);
 
 	return (
 		<Card>
 			<CardHeader>
 				<CardDescription>
-					<p>Type the username of another use you would like to create a new space with.</p>
+					<p>Type the username of another user you would like to create a new space with.</p>
 				</CardDescription>
 			</CardHeader>
 			<CardContent>
@@ -36,13 +60,9 @@ const SendRelationshipRequestContent: FC = () => {
 					<AnimatePresence>
 						<Input
 							className="z-[21]"
+							disabled={isSending}
 							onTypingEnd={value => setSearchQuery(value as string)}
 							startContent={<p className="ml-2 text-primary/30 pointer-events-none">@</p>}
-							endContent={
-								<Button size="icon">
-									<UserPlus2Icon size={18} />
-								</Button>
-							}
 						/>
 						{searchQuery.length > 0 && (
 							<motion.div
@@ -71,6 +91,8 @@ const SendRelationshipRequestContent: FC = () => {
 									flatUsers?.map(user => (
 										<button
 											key={user.id}
+											disabled={isSending}
+											onClick={() => sendRequest(user.id)}
 											className="cursor-pointer w-full hover:bg-primary/10 p-2 rounded-md"
 										>
 											<p className="text-start">

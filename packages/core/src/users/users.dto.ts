@@ -7,6 +7,20 @@ export const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_])[A-Za-z
 export const FIRST_NAME_REGEX = /^\p{L}[\p{L}\p{M}'-]{0,49}$/u;
 export const LAST_NAME_REGEX = /^\p{L}[\p{L}\p{M}.'\-\s]{0,79}$/u;
 
+export const userDto = z.object({
+	id: z.string(),
+	email: z.string(),
+	username: z.string(),
+	firstName: z.string(),
+	lastName: z.string(),
+	password: z.string().optional(),
+	createdAt: z.string(),
+	updatedAt: z.string(),
+	avatarKey: z.string().optional(),
+	relationshipId: z.string().optional(),
+	verified: z.boolean(),
+});
+
 export const createUserDto = z.object({
 	email: z.string().email(),
 	username: z
@@ -42,17 +56,27 @@ export const updateUserDto = createUserDto
 			.partial(),
 	);
 
-export const getUsersByUsernameDto = createInfiniteDataDto({ defaultLimit: 10 }).and(
-	z.object({
-		username: z.string(),
-	}),
-);
+const userProjections = z
+	.object({
+		projections: z.array(userDto.keyof()),
+	})
+	.partial();
 
-export const getUsersByEmailDto = createInfiniteDataDto({ defaultLimit: 10 }).and(
-	z.object({
-		email: z.string(),
-	}),
-);
+export const getUsersByUsernameDto = createInfiniteDataDto({ defaultLimit: 10 })
+	.and(
+		z.object({
+			username: z.string(),
+		}),
+	)
+	.and(userProjections);
+
+export const getUsersByEmailDto = createInfiniteDataDto({ defaultLimit: 10 })
+	.and(
+		z.object({
+			email: z.string(),
+		}),
+	)
+	.and(userProjections);
 
 export type CreateUserDto = z.infer<typeof createUserDto>;
 export type UpdateUserDto = z.infer<typeof updateUserDto>;

@@ -1,7 +1,9 @@
 import { FC } from 'react';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
+import { EnvelopeIcon, InboxArrowDownIcon, PaperAirplaneIcon } from '@heroicons/react/24/solid';
 
+import ReceivedRelationshipRequestsContent from '@/app/(site)/(external)/join/components/rceived-relationship-requests-content';
 import SendRelationshipRequestContent from '@/app/(site)/(external)/join/components/send-relationship-request-content';
 import { auth } from '@/auth';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -26,14 +28,23 @@ const JoinPage: FC = async () => {
 				</p>
 				<Tabs defaultValue="send" className="w-full phone-big:w-96">
 					<TabsList>
-						<TabsTrigger value="send">Send Request</TabsTrigger>
-						<TabsTrigger value="received">Received Requests</TabsTrigger>
-						<TabsTrigger value="sent">Sent Requests</TabsTrigger>
+						<TabsTrigger value="send">
+							<PaperAirplaneIcon className="size-[18px]" /> Send
+						</TabsTrigger>
+						<TabsTrigger value="received">
+							<InboxArrowDownIcon className="size-[18px]" /> Received
+						</TabsTrigger>
+						<TabsTrigger value="sent">
+							<EnvelopeIcon className="size-[18px]" />
+							Sent
+						</TabsTrigger>
 					</TabsList>
 					<TabsContent value="send">
 						<SendRelationshipRequestContent />
 					</TabsContent>
-					<TabsContent value="received">:3</TabsContent>
+					<TabsContent value="received">
+						<ReceivedRelationshipRequestsContent />
+					</TabsContent>
 					<TabsContent value="sent">3:</TabsContent>
 				</Tabs>
 			</section>

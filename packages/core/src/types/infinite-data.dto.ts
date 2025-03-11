@@ -43,6 +43,13 @@ export type InfiniteData<T> = {
 export const getInfiniteData = <T = unknown>(queryResult: QueryCommandOutput) => {
 	return {
 		data: queryResult.Items as T[],
-		cursor: queryResult.LastEvaluatedKey as Record<string, string>,
+		cursor: queryResult.LastEvaluatedKey as Record<string, string> | undefined,
+	};
+};
+
+export const buildInfiniteData = <T = unknown>(data: T[], cursor?: Record<string, string>) => {
+	return {
+		data,
+		cursor,
 	};
 };

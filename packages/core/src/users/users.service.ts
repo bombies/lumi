@@ -97,11 +97,12 @@ export const getUserByUsername = async (username: string) => {
 	return res.Items?.[0] as User | undefined;
 };
 
-export const getUsersByUsername = async ({ username, limit, cursor }: GetUsersByUsernameDto) => {
+export const getUsersByUsername = async ({ username, limit, cursor, projections }: GetUsersByUsernameDto) => {
 	const res = await dynamo.query({
 		TableName: process.env.TABLE_NAME,
 		IndexName: 'GSI1',
 		KeyConditionExpression: '#pk = :pk AND begins_with(#sk, :sk)',
+		ProjectionExpression: projections?.join(','),
 		ExpressionAttributeNames: {
 			'#pk': 'gsi1pk',
 			'#sk': 'gsi1sk',
@@ -117,11 +118,12 @@ export const getUsersByUsername = async ({ username, limit, cursor }: GetUsersBy
 	return getInfiniteData<User>(res);
 };
 
-export const getUsersByEmail = async ({ email, limit, cursor }: GetUsersByEmailDto) => {
+export const getUsersByEmail = async ({ email, limit, cursor, projections }: GetUsersByEmailDto) => {
 	const res = await dynamo.query({
 		TableName: process.env.TABLE_NAME,
 		IndexName: 'GSI2',
 		KeyConditionExpression: '#pk = :pk AND begins_with(#sk, :sk)',
+		ProjectionExpression: projections?.join(','),
 		ExpressionAttributeNames: {
 			'#pk': 'gsi2pk',
 			'#sk': 'gsi12k',

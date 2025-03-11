@@ -1,18 +1,9 @@
+import { z } from 'zod';
+
+import { userDto } from '../users/users.dto';
 import { EntityType } from './dynamo.types';
 
-export type User = {
-	id: string;
-	email: string;
-	username: string;
-	firstName: string;
-	lastName: string;
-	password?: string;
-	createdAt: string;
-	updatedAt: string;
-	avatarKey?: string;
-	relationshipId?: string;
-	verified: boolean;
-};
+export type User = z.infer<typeof userDto>;
 
 export type DatabaseUser = User & {
 	/**

@@ -1,7 +1,7 @@
 import { TRPCError } from '@trpc/server';
 
 import { EntityType, KeyPrefix } from '../types/dynamo.types';
-import { getInfiniteData } from '../types/infinite-data.dto';
+import { buildInfiniteData, getInfiniteData } from '../types/infinite-data.dto';
 import {
 	DatabaseRelationship,
 	DatabaseRelationshipRequest,
@@ -11,7 +11,7 @@ import {
 import { User } from '../types/user.types';
 import { getUserById } from '../users/users.service';
 import { dynamo, getDynamicUpdateStatements } from '../utils/dynamo/dynamo.service';
-import { getUUID } from '../utils/utils';
+import { chunkArray, getUUID } from '../utils/utils';
 import { GetRelationshipRequestsForUserDto } from './relationship.dto';
 
 export const getRelationshipById = async (relationshipId: string) => {
@@ -57,29 +57,40 @@ export const getPartnerForUser = async (userId: string) => {
 	return getUserById(relationship.partner1 === userId ? relationship.partner2 : relationship.partner1);
 };
 
-export const userHasRequestFromUser = async (userId: string, senderId: string) => {
+export const getRelationshipReqeustBySenderAndReceiver = async (senderId: string, receiverId: string) => {
 	const res = await dynamo.query({
 		TableName: process.env.TABLE_NAME,
-		IndexName: 'GSI2',
-		KeyConditionExpression: '#pk = :pk and #sk = :sk and #gsi1pk = :gsi1pk and #gsi1sk = :gsi1sk',
+		IndexName: 'GSI1',
+		KeyConditionExpression: '#pk = :pk and #sk = :sk',
+		FilterExpression: '#gsi2pk = :gsi2pk and #gsi2sk = :gsi2sk',
 		ExpressionAttributeNames: {
-			'#pk': 'gsi2pk',
-			'#sk': 'gsi2sk',
-			'#gsi1pk': 'gsi1pk',
-			'#gsi1sk': 'gsi1sk',
+			'#pk': 'gsi1pk',
+			'#sk': 'gsi1sk',
+			'#gsi2pk': 'gsi2pk',
+			'#gsi2sk': 'gsi2sk',
 		},
 		ExpressionAttributeValues: {
-			':pk': `${KeyPrefix.RELATIONSHIP_REQUEST_RECEIVER}`,
-			':sk': `${KeyPrefix.RELATIONSHIP_REQUEST_RECEIVER}#${userId}`,
-			':gsi1pk': `${KeyPrefix.RELATIONSHIP_REQUEST_SENDER}`,
-			':gsi1sk': `${KeyPrefix.RELATIONSHIP_REQUEST_SENDER}#${senderId}`,
+			':gsi2pk': `${KeyPrefix.RELATIONSHIP_REQUEST_RECEIVER}`,
+			':gsi2sk': `${KeyPrefix.RELATIONSHIP_REQUEST_RECEIVER}#${receiverId}`,
+			':pk': `${KeyPrefix.RELATIONSHIP_REQUEST_SENDER}`,
+			':sk': `${KeyPrefix.RELATIONSHIP_REQUEST_SENDER}#${senderId}`,
 		},
 	});
 
-	return !!res.Items?.length;
+	return res.Items?.[0] as RelationshipRequest | undefined;
+};
+
+export const userHasRequestFromUser = async (userId: string, senderId: string) => {
+	return !!(await getRelationshipReqeustBySenderAndReceiver(senderId, userId));
 };
 
 export const sendRelationshipRequest = async (senderId: string, receiverId: string) => {
+	if (senderId === receiverId)
+		throw new TRPCError({
+			code: 'BAD_REQUEST',
+			message: 'You cannot send a relationship request to yourself!',
+		});
+
 	if (await userInRelationship(senderId))
 		throw new TRPCError({
 			code: 'BAD_REQUEST',
@@ -92,11 +103,14 @@ export const sendRelationshipRequest = async (senderId: string, receiverId: stri
 			message: 'User is already in a relationship!',
 		});
 
-	if (await userHasRequestFromUser(senderId, receiverId))
+	if (await userHasRequestFromUser(receiverId, receiverId))
 		throw new TRPCError({
 			code: 'BAD_REQUEST',
 			message: 'You already have already sent this user a request!',
 		});
+
+	const requestFromReceiver = await getRelationshipReqeustBySenderAndReceiver(receiverId, senderId);
+	if (requestFromReceiver) return await acceptRelationshipRequest(receiverId, requestFromReceiver.id);
 
 	const id = getUUID();
 	const request: RelationshipRequest = {
@@ -109,8 +123,8 @@ export const sendRelationshipRequest = async (senderId: string, receiverId: stri
 	const res = await dynamo.put({
 		TableName: process.env.TABLE_NAME,
 		Item: {
-			pk: `${KeyPrefix.RELATIONSHIP_REQUEST}${senderId}`,
-			sk: `${KeyPrefix.RELATIONSHIP_REQUEST}${receiverId}`,
+			pk: `${KeyPrefix.RELATIONSHIP_REQUEST}${id}`,
+			sk: `${KeyPrefix.RELATIONSHIP_REQUEST}${id}`,
 			gsi1pk: `${KeyPrefix.RELATIONSHIP_REQUEST_SENDER}`,
 			gsi1sk: `${KeyPrefix.RELATIONSHIP_REQUEST_SENDER}#${senderId}`,
 			gsi2pk: `${KeyPrefix.RELATIONSHIP_REQUEST_RECEIVER}`,
@@ -188,7 +202,48 @@ const getRelationshipRequestsForUser = async ({
 		ExclusiveStartKey: cursor,
 	});
 
-	return getInfiniteData<RelationshipRequest>(res);
+	const data = (res.Items ?? []) as RelationshipRequest[];
+	const batchedData = chunkArray(data, 25);
+	const fetchedUsers = {} as Record<string, Pick<User, 'id' | 'username' | 'firstName' | 'lastName'>>;
+
+	for (const batch of batchedData) {
+		const userIds = {} as Record<string, string>;
+		batch.forEach(request => {
+			if (request.sender !== userId) userIds[request.id] = request.sender;
+			else userIds[request.id] = request.receiver;
+		});
+
+		// Batch fetch users
+		let batchRes = await dynamo.batchGet({
+			RequestItems: {
+				[process.env.TABLE_NAME!]: {
+					Keys: Object.keys(userIds).map(
+						id =>
+							({
+								pk: `${KeyPrefix.USER}${userIds[id]}`,
+								sk: `${KeyPrefix.USER}${userIds[id]}`,
+							}) as const,
+					),
+				},
+			},
+		});
+
+		const resUsers = batchRes.Responses![process.env.TABLE_NAME!] as User[];
+		resUsers.forEach(user => {
+			const { id, username, firstName, lastName } = user;
+			fetchedUsers[user.id] = { id, username, firstName, lastName };
+		});
+	}
+
+	const requestsWithUsers = data.map(request => {
+		const otherUser = fetchedUsers[request.sender === userId ? request.receiver : request.sender];
+		return {
+			...request,
+			otherUser,
+		};
+	});
+
+	return buildInfiniteData(requestsWithUsers, res.LastEvaluatedKey);
 };
 
 export const deleteRelationshipRequestById = async (userId: string, requestId: string) => {
@@ -244,7 +299,7 @@ export const acceptRelationshipRequest = async (userId: string, requestId: strin
 		});
 	}
 
-	if (sender.id !== userId)
+	if (receiver.id !== userId)
 		throw new TRPCError({
 			code: 'UNAUTHORIZED',
 			message: 'You are not authorized to accept this relationship request',
@@ -319,7 +374,7 @@ export const acceptRelationshipRequest = async (userId: string, requestId: strin
 			});
 		}
 
-		return relationship;
+		return { ...relationship, sender };
 	} catch (e) {
 		throw new TRPCError({
 			code: 'INTERNAL_SERVER_ERROR',
