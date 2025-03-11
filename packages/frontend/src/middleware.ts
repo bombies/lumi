@@ -29,7 +29,7 @@ const middleware: Middleware = auth(async request => {
 	const token = await getToken({
 		req: request,
 		secret: process.env.AUTH_SECRET,
-		cookieName: process.env.NODE_ENV === 'production' ? '__Secure-authjs.session-token' : undefined,
+		cookieName: '__Secure-authjs.session-token',
 	});
 
 	// console.log('[Middleware] ', request.nextUrl.pathname, token);
@@ -60,6 +60,6 @@ export const config = {
 		 * - _next/image (image optimization files)
 		 * - favicon.ico, sitemap.xml, robots.txt (metadata files)
 		 */
-		'/((?!api|_next/static|_next/image|images|favicon.ico|sitemap.xml|robots.txt|opengraph-image|twitter-image|_not-found|apple-icon|auth).*)',
+		'/((?!api|_next/static|_next/image|images|favicon.ico|sitemap.xml|robots.txt|opengraph-image|twitter-image|_not-found|apple-icon|auth|favicon.svg|favicon-|web-app-manifest-|notification-worker.js|apple-touch-icon).*)',
 	],
 };

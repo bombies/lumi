@@ -97,6 +97,7 @@
 :root {
 	--background: oklch(99.1% 0.0198 128.68);
 	--foreground: oklch(13.33% 0.0342 126.59);
+	--theme-color: oklch(66.34% 0.1251 132.01);
 	--card: oklch(96.08% 0.0341 128.86);
 	--card-foreground: oklch(13.33% 0.0342 126.59);
 	--popover: oklch(96.08% 0.0341 128.86);
@@ -133,6 +134,7 @@
 .dark {
 	--background: oklch(18.11% 0.0128 129.28);
 	--foreground: oklch(96.08% 0.0341 128.86);
+	--theme-color: oklch(66.34% 0.1251 132.01);
 	--card: oklch(21.5% 0.0164 129.35);
 	--card-foreground: oklch(96.08% 0.0341 128.86);
 	--popover: oklch(21.5% 0.0164 129.35);

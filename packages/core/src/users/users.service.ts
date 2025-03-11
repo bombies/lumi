@@ -63,7 +63,6 @@ export const verifyUserPassword = async (emailOrUsername: string, password: stri
 	if (!user.password) throw new Error('User does not have a password set. Please login with a different provider');
 
 	const passwordValid = await bcrypt.compare(password, user.password);
-	console.log(password, user.password, passwordValid);
 	return passwordValid ? user : false;
 };
 

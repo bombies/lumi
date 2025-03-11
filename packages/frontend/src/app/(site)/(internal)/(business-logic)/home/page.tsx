@@ -2,6 +2,7 @@ import { FC } from 'react';
 import { redirect } from 'next/navigation';
 import { getUserById } from '@lumi/core/users/users.service';
 
+import NotificationsTest from '@/components/notifications/notifications-test';
 import { requireRelationship } from '@/lib/actions/requireRelationship';
 import { getUserBySession } from '@/lib/server-utils';
 
@@ -22,6 +23,7 @@ const HomePage: FC = async () => {
 			<h3 className="text-2xl font-light max-w-[60vw] tablet:max-w-xs">
 				welcome back to your space with <span className="text-primary font-bold">{partner?.firstName}</span>
 			</h3>
+			<NotificationsTest />
 		</main>
 	);
 };

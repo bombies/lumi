@@ -9,6 +9,8 @@ export enum KeyPrefix {
 	RELATIONSHIP = 'rship#',
 	RELATIONSHIP_REQUEST_SENDER = 'rship::sender',
 	RELATIONSHIP_REQUEST_RECEIVER = 'rship::receiver',
+
+	NOTIFICATION_SUBSCRIBER = 'notification::subscriber#',
 }
 
 export enum EntityType {
@@ -16,4 +18,5 @@ export enum EntityType {
 	OTP = 'OTP',
 	RELATIONSHIP_REQUEST = 'RELATIONSHIP_REQUEST',
 	RELATIONSHIP = 'RELATIONSHIP',
+	NOTIFICATION_SUBSCRIBER = 'NOTIFICATION_SUBSCRIBER',
 }

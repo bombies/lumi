@@ -10,6 +10,8 @@ import {
 	redisPassword,
 	redisPort,
 	redisUser,
+	vapidPrivateKey,
+	vapidPublicKey,
 } from './secrets';
 import { contentBucket } from './storage';
 
@@ -37,6 +39,9 @@ export const frontend = new sst.aws.Nextjs('Frontend', {
 		APP_STAGE: $app.stage,
 		AUTH_SECRET: authSecret.value,
 		NEXT_PUBLIC_TRPC_URL: $app.stage === 'production' ? 'https://api.lumi.ajani.me' : trpc.url,
+		NEXT_PUBLIC_CANONICAL_URL: $app.stage === 'production' ? 'https://lumi.ajani.me' : 'http://localhost:3000',
 		TABLE_NAME: db.name,
+		NEXT_PUBLIC_VAPID_PUBLIC_KEY: vapidPublicKey.value,
+		VAPID_PRIVATE_KEY: vapidPrivateKey.value,
 	},
 });

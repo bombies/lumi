@@ -9,3 +9,6 @@ export const redisUser = new sst.Secret('RedisUser');
 export const redisHost = new sst.Secret('RedisHost');
 export const redisPort = new sst.Secret('RedisPort');
 export const redisPassword = new sst.Secret('RedisPassword');
+
+export const vapidPublicKey = new sst.Secret('VapidPublicKey');
+export const vapidPrivateKey = new sst.Secret('VapidPrivateKey');
