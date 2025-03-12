@@ -37,6 +37,11 @@ declare module "sst" {
       "type": "sst.sst.Secret"
       "value": string
     }
+    "RealtimeServer": {
+      "authorizer": string
+      "endpoint": string
+      "type": "sst.aws.Realtime"
+    }
     "RedisHost": {
       "type": "sst.sst.Secret"
       "value": string
@@ -63,6 +68,10 @@ declare module "sst" {
       "value": string
     }
     "VapidPublicKey": {
+      "type": "sst.sst.Secret"
+      "value": string
+    }
+    "WebSocketToken": {
       "type": "sst.sst.Secret"
       "value": string
     }

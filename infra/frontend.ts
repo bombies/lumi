@@ -1,5 +1,6 @@
 import { trpc } from './api';
 import { db } from './db';
+import { notificationsTopic, realtimeServer } from './realtime';
 import {
 	authSecret,
 	mailerHostSecret,
@@ -12,6 +13,7 @@ import {
 	redisUser,
 	vapidPrivateKey,
 	vapidPublicKey,
+	websocketToken,
 } from './secrets';
 import { contentBucket } from './storage';
 
@@ -33,6 +35,8 @@ export const frontend = new sst.aws.Nextjs('Frontend', {
 		redisPort,
 		redisUser,
 		redisPassword,
+		realtimeServer,
+		authSecret,
 	],
 	domain: $app.stage === 'production' ? 'lumi.ajani.me' : undefined,
 	environment: {
@@ -43,5 +47,14 @@ export const frontend = new sst.aws.Nextjs('Frontend', {
 		TABLE_NAME: db.name,
 		NEXT_PUBLIC_VAPID_PUBLIC_KEY: vapidPublicKey.value,
 		VAPID_PRIVATE_KEY: vapidPrivateKey.value,
+		NEXT_PUBLIC_NOTIFICATIONS_TOPIC: notificationsTopic,
+		NEXT_PUBLIC_WEB_SOCKET_TOKEN: websocketToken.value,
 	},
+	permissions: [
+		{
+			actions: ['iot:Connect', 'iot:Publish'],
+			effect: 'allow',
+			resources: ['*'],
+		},
+	],
 });

@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import { getUserById } from '@lumi/core/users/users.service';
 
 import NotificationsTest from '@/components/notifications/notifications-test';
+import WebSocketTest from '@/components/providers/web-sockets/web-socket-test';
 import { requireRelationship } from '@/lib/actions/requireRelationship';
 import { getUserBySession } from '@/lib/server-utils';
 
@@ -24,6 +25,7 @@ const HomePage: FC = async () => {
 				welcome back to your space with <span className="text-primary font-bold">{partner?.firstName}</span>
 			</h3>
 			<NotificationsTest />
+			<WebSocketTest />
 		</main>
 	);
 };

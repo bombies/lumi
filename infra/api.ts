@@ -1,4 +1,5 @@
 import { db } from './db';
+import { notificationsTopic } from './realtime';
 import {
 	authSecret,
 	mailerHostSecret,
@@ -9,6 +10,7 @@ import {
 	redisPassword,
 	redisPort,
 	redisUser,
+	websocketToken,
 } from './secrets';
 import { contentBucket } from './storage';
 
@@ -36,6 +38,8 @@ export const trpc = new sst.aws.Function('Trpc', {
 		APP_STAGE: $app.stage,
 		AUTH_SECRET: authSecret.value,
 		TABLE_NAME: db.name,
+		NOTIFICATIONS_TOPIC: notificationsTopic,
+		WEB_SOCKET_TOKEN: websocketToken.value,
 	},
 	copyFiles: [{ from: 'cdn-keys/private_key.pem', to: 'cdn_private_key.pem' }],
 	handler: 'packages/functions/api/index.handler',

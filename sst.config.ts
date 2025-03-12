@@ -16,6 +16,8 @@ export default $config({
 			Api: infra.trpc.url,
 			ContentCdn: infra.contentCdn.url,
 			Database: infra.db.arn,
+			RealtimeEndpoint: infra.realtimeServer.endpoint,
+			RealtimeAuthorizer: infra.realtimeServer.authorizer,
 		};
 	},
 });

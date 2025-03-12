@@ -14,6 +14,9 @@
     "@trivago/prettier-plugin-sort-imports": "^4.3.0"
   },
   "dependencies": {
+    "@aws-sdk/credential-provider-node": "^3.758.0",
+    "@aws-sdk/credential-providers": "^3.758.0",
+    "aws-iot-device-sdk-v2": "^1.21.1",
     "sst": "^3.9.33"
   }
 }

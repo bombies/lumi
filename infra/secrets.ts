@@ -12,3 +12,5 @@ export const redisPassword = new sst.Secret('RedisPassword');
 
 export const vapidPublicKey = new sst.Secret('VapidPublicKey');
 export const vapidPrivateKey = new sst.Secret('VapidPrivateKey');
+
+export const websocketToken = new sst.Secret('WebSocketToken');
