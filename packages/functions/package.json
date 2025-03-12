@@ -14,7 +14,6 @@
 		"@trpc-limiter/redis": "^0.0.2",
 		"@trpc/client": "^11.0.0-rc.824",
 		"@trpc/server": "^11.0.0-rc.824",
-		"aws-iot-device-sdk-v2": "^1.21.1",
 		"hono": "^4.7.4",
 		"ioredis": "^5.6.0",
 		"otp-generator": "^4.0.1",
