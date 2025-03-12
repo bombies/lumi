@@ -7,7 +7,7 @@ const InternalLayout: FC<PropsWithChildren> = ({ children }) => {
 	return (
 		<>
 			<Header />
-			{children}
+			<div className="pb-[100px]">{children}</div>
 			<Footer />
 		</>
 	);

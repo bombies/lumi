@@ -1,29 +1,35 @@
 'use client';
 
 import { createContext, FC, PropsWithChildren, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { User } from '@lumi/core/types/user.types';
 import { WebSocketSubTopic, WebSocketToken } from '@lumi/core/types/websockets.types';
-import { mqtt } from 'aws-iot-device-sdk-v2';
+import { MqttClientType } from '@lumi/core/websockets/websockets.service';
 
 import {
 	Event,
 	events,
 	InferredWebSocketMessage,
 	WebSocketEventHandler,
+	WebSocketMessage,
+	WebSocketMessageMap,
 } from '@/components/providers/web-sockets/web-socket-messages';
+import { useQueue } from '@/lib/actions/useQueue';
 import { connectToWebsocket } from '@/lib/actions/web-socket-actions';
+import { logger } from '@/lib/logger';
 
 type WebSocketProviderProps = PropsWithChildren<{
 	endpoint: string;
 	authorizer: string;
+	user: User;
 	relationshipId?: string;
 }>;
 
 type WebSocketProviderData = {
-	isConnected: boolean;
-	mqttConnection: mqtt.MqttClientConnection | null;
+	connectionStatus: 'connecting' | 'connected' | 'disconnected';
+	mqttConnection: MqttClientType | null;
 	addEventHandler: <T extends Event>(event: T, handler: WebSocketEventHandler<T>) => void;
 	removeEventHandler: <T extends Event>(event: T, handler: WebSocketEventHandler<T>) => void;
-	emitEvent: <T extends Event>(topic: string, event: T, payload: InferredWebSocketMessage<T>['payload']) => void;
+	emitEvent: <T extends Event>(event: T, payload: InferredWebSocketMessage<T>['payload']) => void;
 };
 
 const WebSocketContext = createContext<WebSocketProviderData | undefined>(undefined);
@@ -35,59 +41,38 @@ export const useWebSocket = () => {
 	return context;
 };
 
-const WebSocketProvider: FC<WebSocketProviderProps> = ({ children, endpoint, authorizer, relationshipId }) => {
-	const [isConnected, setIsConnected] = useState(false);
-	const [mqttConnection, setMqttConnection] = useState<mqtt.MqttClientConnection | null>(null);
+export const relationshipWSTopic = (relationshipId: string) =>
+	`${process.env.NEXT_PUBLIC_NOTIFICATIONS_TOPIC!}/${WebSocketSubTopic.RELATIONSHIP}/${relationshipId}`;
+
+const WebSocketProvider: FC<WebSocketProviderProps> = ({ children, user, endpoint, authorizer, relationshipId }) => {
+	const [connectionStatus, setConnectionStatus] = useState<'connecting' | 'connected' | 'disconnected'>(
+		'disconnected',
+	);
+	const [mqttConnection, setMqttConnection] = useState<MqttClientType | null>(null);
 	const [eventHandlers, setEventHandlers] = useState<Record<Event, WebSocketEventHandler<Event>[]>>(
 		{} as Record<Event, WebSocketEventHandler<Event>[]>,
 	);
-
-	useEffect(() => {
-		(async () => {
-			if (isConnected || !relationshipId) return;
-
-			const mqttConnection = await connectToWebsocket({
-				endpoint,
-				authorizer,
-				token: `${WebSocketToken.RELATIONSHIP_USER}::${relationshipId}`,
-				onConnect: async connection => {
-					console.log('Connected to WebSocket');
-					await connection.subscribe(
-						`${process.env.NEXT_PUBLIC_NOTIFICATIONS_TOPIC!}/${WebSocketSubTopic.RELATIONSHIP}/${relationshipId}`,
-						mqtt.QoS.AtLeastOnce,
-					);
-					setMqttConnection(connection);
-					setIsConnected(true);
-				},
-				onDisconnect: () => {
-					setIsConnected(false);
-				},
-				onMessage(message) {
-					if (
-						message &&
-						typeof message === 'object' &&
-						'type' in message &&
-						typeof message.type === 'string' &&
-						events.includes(message.type as Event)
-					) {
-						const handlers = eventHandlers[message.type as Event];
-						if ('payload' in message && handlers)
-							handlers.forEach(async handler => {
-								if (handler instanceof Promise)
-									await handler(message.payload as InferredWebSocketMessage<Event>['payload']);
-								else handler(message.payload as InferredWebSocketMessage<Event>['payload']);
-							});
-					}
-				},
-			});
-
-			setMqttConnection(mqttConnection);
-		})();
-	}, [authorizer, endpoint, eventHandlers, isConnected]);
+	const { enqueue: enqueueEvent } = useQueue<InferredWebSocketMessage<Event>>({
+		process: async message => {
+			logger.debug('processing event', message);
+			const handlers = eventHandlers[message.type];
+			logger.debug('handlers', handlers);
+			if ('payload' in message && handlers)
+				handlers.forEach(async handler => {
+					if (handler instanceof Promise)
+						await handler(message.payload as InferredWebSocketMessage<Event>['payload']);
+					else handler(message.payload as InferredWebSocketMessage<Event>['payload']);
+				});
+		},
+	});
 
 	const addEventHandler = useCallback(<T extends Event>(event: T, handler: WebSocketEventHandler<T>) => {
 		setEventHandlers(prev => {
 			const handlers = prev[event] || [];
+
+			// Ensure the handler is not already in the list
+			if (handlers.includes(handler)) return prev;
+
 			handlers.push(handler);
 			return { ...prev, [event]: handlers };
 		});
@@ -103,23 +88,135 @@ const WebSocketProvider: FC<WebSocketProviderProps> = ({ children, endpoint, aut
 	}, []);
 
 	const emitEvent = useCallback(
-		<T extends Event>(topic: string, event: T, payload: InferredWebSocketMessage<T>['payload']) => {
-			if (mqttConnection) {
-				mqttConnection.publish(topic, JSON.stringify({ type: event, payload }), mqtt.QoS.AtLeastOnce);
+		<T extends Event>(event: T, payload: InferredWebSocketMessage<T>['payload']) => {
+			if (mqttConnection && relationshipId) {
+				const message = {
+					type: event,
+					payload,
+					timestamp: Date.now(),
+					source: 'client',
+				} satisfies WebSocketMessage<T, typeof payload>;
+				mqttConnection.publish(relationshipWSTopic(relationshipId), JSON.stringify(message));
 			}
 		},
-		[mqttConnection],
+		[mqttConnection, relationshipId],
 	);
+
+	useEffect(() => {
+		(async () => {
+			if (connectionStatus !== 'disconnected' || !relationshipId) return;
+			setConnectionStatus('connecting');
+
+			const mqttConnection = await connectToWebsocket({
+				endpoint,
+				authorizer,
+				identifier: user.id,
+				token: `${WebSocketToken.RELATIONSHIP_USER}::${relationshipId}`,
+				onConnect: async connection => {
+					await connection.subscribeAsync({
+						[relationshipWSTopic(relationshipId)]: {
+							qos: 1,
+						},
+					});
+					logger.debug('connected, now emitting conect event');
+					connection.publish(
+						relationshipWSTopic(relationshipId),
+						JSON.stringify({
+							type: 'connect',
+							payload: { userId: user.id, username: user.username },
+							timestamp: Date.now(),
+							source: 'client',
+						} satisfies WebSocketMessageMap['connect']),
+					);
+
+					mqttConnection.publish(
+						relationshipWSTopic(relationshipId),
+						JSON.stringify({
+							type: 'presence',
+							payload: { userId: user.id, username: user.username, status: 'online' },
+							timestamp: Date.now(),
+							source: 'client',
+						} satisfies WebSocketMessageMap['presence']),
+					);
+
+					setMqttConnection(connection);
+					setConnectionStatus('connected');
+				},
+				onDisconnect: () => {
+					emitEvent('disconnect', {
+						userId: user.id,
+						username: user.username,
+					});
+					setMqttConnection(null);
+					setConnectionStatus('disconnected');
+				},
+				onMessage(message) {
+					if (
+						message &&
+						typeof message === 'object' &&
+						'type' in message &&
+						typeof message.type === 'string' &&
+						events.includes(message.type as Event)
+					) {
+						logger.debug('Callback handling messge', message);
+						enqueueEvent(message as InferredWebSocketMessage<Event>);
+					}
+				},
+			});
+
+			setMqttConnection(mqttConnection);
+		})();
+	}, [
+		authorizer,
+		connectionStatus,
+		emitEvent,
+		endpoint,
+		enqueueEvent,
+		eventHandlers,
+		mqttConnection,
+		relationshipId,
+		user.id,
+		user.username,
+	]);
+
+	// Disconnect handlers
+	useEffect(() => {
+		const handler = () => {
+			mqttConnection?.publish(
+				relationshipWSTopic(relationshipId!),
+				JSON.stringify({
+					type: 'presence',
+					payload: { userId: user.id, username: user.username, status: 'offline' },
+					timestamp: Date.now(),
+					source: 'client',
+				} satisfies WebSocketMessageMap['presence']),
+			);
+
+			mqttConnection?.publish(
+				relationshipWSTopic(relationshipId!),
+				JSON.stringify({
+					type: 'disconnect',
+					payload: { userId: user.id, username: user.username },
+					timestamp: Date.now(),
+					source: 'client',
+				} satisfies WebSocketMessageMap['disconnect']),
+			);
+			mqttConnection?.end();
+		};
+
+		window.addEventListener('beforeunload', handler);
+		return () => window.removeEventListener('beforeunload', handler);
+	}, [emitEvent, mqttConnection, relationshipId, user.id, user.username]);
 
 	const memoizedValues = useMemo(
 		() => ({
-			isConnected,
 			mqttConnection,
 			addEventHandler,
 			removeEventHandler,
 			emitEvent,
+			connectionStatus,
 		}),
-		[addEventHandler, emitEvent, isConnected, mqttConnection, removeEventHandler],
+		[addEventHandler, connectionStatus, emitEvent, mqttConnection, removeEventHandler],
 	);
 
 	return <WebSocketContext.Provider value={memoizedValues}>{children}</WebSocketContext.Provider>;

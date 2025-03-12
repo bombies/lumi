@@ -1,29 +1,33 @@
-import { createWebsocketConnection } from '@lumi/core/websockets/websockets.service';
-import { CrtError, mqtt } from 'aws-iot-device-sdk-v2';
+import { createWebsocketConnection, MqttClientType } from '@lumi/core/websockets/websockets.service';
+import { ErrorWithReasonCode } from 'mqtt';
+
+import { logger } from '@/lib/logger';
 
 type ConnectToWebsocketArgs = {
 	endpoint: string;
 	authorizer: string;
+	identifier?: string;
 	token?: string;
-	onConnect?:
-		| ((connection: mqtt.MqttClientConnection) => void)
-		| ((connection: mqtt.MqttClientConnection) => Promise<void>);
+	onConnect?: ((connection: MqttClientType) => void) | ((connection: MqttClientType) => Promise<void>);
 	onDisconnect?: (() => void) | (() => Promise<void>);
-	onError?: ((e: CrtError) => void) | ((e: CrtError) => Promise<void>);
+	onError?: ((e: Error | ErrorWithReasonCode) => void) | ((e: Error | ErrorWithReasonCode) => Promise<void>);
 	onMessage?: ((message: unknown) => void) | ((message: unknown) => Promise<void>);
 };
 
 export const connectToWebsocket = async (args: ConnectToWebsocketArgs) => {
 	const mqttConnection = await createWebsocketConnection(args.endpoint, args.authorizer, args.token);
 
+	mqttConnection.on('packetsend', packet => {
+		logger.debug('Packet Send:', packet);
+	});
+
+	mqttConnection.on('packetreceive', packet => {
+		logger.debug('Packet Receive:', packet);
+	});
+
 	mqttConnection.on('connect', async () => {
 		if (args?.onConnect instanceof Promise) await args?.onConnect?.(mqttConnection);
 		else args?.onConnect?.(mqttConnection);
-	});
-
-	mqttConnection.on('connection_failure', err => {
-		console.log('Connection failure event: ' + err.error.toString());
-		throw err;
 	});
 
 	mqttConnection.on('disconnect', async () => {
@@ -37,14 +41,15 @@ export const connectToWebsocket = async (args: ConnectToWebsocketArgs) => {
 		else args?.onError?.(e);
 	});
 
-	mqttConnection.on('message', async (_fullTopic, payload) => {
-		const message = new TextDecoder('utf8').decode(new Uint8Array(payload));
+	mqttConnection.on('message', async (topic, event) => {
+		const message = new TextDecoder('utf8').decode(new Uint8Array(event));
 		const jsonMsg = JSON.parse(message);
+		logger.debug('Message:', topic, jsonMsg);
 		if (args?.onMessage instanceof Promise) await args?.onMessage(jsonMsg);
 		else args?.onMessage?.(jsonMsg);
 	});
 
-	await mqttConnection.connect();
+	mqttConnection.connect();
 
 	return mqttConnection;
 };

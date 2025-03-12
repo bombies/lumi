@@ -48,11 +48,11 @@ export const frontend = new sst.aws.Nextjs('Frontend', {
 		NEXT_PUBLIC_VAPID_PUBLIC_KEY: vapidPublicKey.value,
 		VAPID_PRIVATE_KEY: vapidPrivateKey.value,
 		NEXT_PUBLIC_NOTIFICATIONS_TOPIC: notificationsTopic,
-		NEXT_PUBLIC_WEB_SOCKET_TOKEN: websocketToken.value,
+		NEXT_PUBLIC_DEV_MODE: $app.stage === 'development' ? 'true' : 'false',
 	},
 	permissions: [
 		{
-			actions: ['iot:Connect', 'iot:Publish'],
+			actions: ['iot:*'],
 			effect: 'allow',
 			resources: ['*'],
 		},

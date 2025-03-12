@@ -3,7 +3,7 @@ import { realtime } from 'sst/aws/realtime';
 
 export const handler = realtime.authorizer(async token => {
 	// Validate the token
-	const [identifier, id, extra] = token.split('::');
+	const [client_id, identifier, id] = token.split('::');
 
 	let allowedSubscriptions: {
 		subscribe: string[];
@@ -24,23 +24,14 @@ export const handler = realtime.authorizer(async token => {
 			};
 			break;
 		default:
-			throw new Error('Invalid identifier');
+			allowedSubscriptions = {
+				subscribe: [],
+				publish: [],
+			};
 	}
 
 	// Return the topics to subscribe and publish
 	return {
-		policyDocuments: [
-			{
-				Version: '2012-10-17',
-				Statement: [
-					{
-						Action: 'iot:*',
-						Effect: 'Allow',
-						Resource: '*',
-					},
-				],
-			},
-		],
 		...allowedSubscriptions,
 	};
 });

@@ -12,6 +12,7 @@ export default $config({
 	async run() {
 		const infra = await import('./infra');
 		return {
+			AwsAccountID: infra.accountId,
 			Website: infra.frontend.url,
 			Api: infra.trpc.url,
 			ContentCdn: infra.contentCdn.url,
