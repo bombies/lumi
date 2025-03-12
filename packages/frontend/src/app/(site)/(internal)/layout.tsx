@@ -20,7 +20,7 @@ const InternalLayout: FC<PropsWithChildren> = async ({ children }) => {
 			relationshipId={relationship?.id}
 			user={user}
 		>
-			<PresenceWatcher userId={user.id} />
+			<PresenceWatcher user={user} relationshipId={relationship!.id} />
 			{children}
 		</WebSocketProvider>
 	);

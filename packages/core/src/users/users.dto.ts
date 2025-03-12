@@ -19,6 +19,7 @@ export const userDto = z.object({
 	avatarKey: z.string().optional(),
 	relationshipId: z.string().optional(),
 	verified: z.boolean(),
+	status: z.enum(['online', 'offline', 'idle']).optional(),
 });
 
 export const createUserDto = z.object({
@@ -52,6 +53,7 @@ export const updateUserDto = createUserDto
 				verified: z.boolean(),
 				avatarKey: z.string().optional(),
 				relationshipId: z.string().optional(),
+				status: z.enum(['online', 'offline', 'idle']).optional(),
 			})
 			.partial(),
 	);

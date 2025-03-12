@@ -11,6 +11,8 @@ export enum KeyPrefix {
 	RELATIONSHIP_REQUEST_RECEIVER = 'rship::receiver',
 
 	NOTIFICATION_SUBSCRIBER = 'notification::subscriber#',
+
+	WEBSOCKET_HEARTBEAT = 'ws::heartbeat#',
 }
 
 export enum EntityType {
@@ -19,4 +21,5 @@ export enum EntityType {
 	RELATIONSHIP_REQUEST = 'RELATIONSHIP_REQUEST',
 	RELATIONSHIP = 'RELATIONSHIP',
 	NOTIFICATION_SUBSCRIBER = 'NOTIFICATION_SUBSCRIBER',
+	WEBSOCKET_HEARTBEAT = 'WEBSOCKET_HEARTBEAT',
 }

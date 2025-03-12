@@ -2,9 +2,6 @@
 
 import { createContext, FC, PropsWithChildren, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { User } from '@lumi/core/types/user.types';
-import { WebSocketSubTopic, WebSocketToken } from '@lumi/core/types/websockets.types';
-import { MqttClientType } from '@lumi/core/websockets/websockets.service';
-
 import {
 	Event,
 	events,
@@ -12,9 +9,14 @@ import {
 	WebSocketEventHandler,
 	WebSocketMessage,
 	WebSocketMessageMap,
-} from '@/components/providers/web-sockets/web-socket-messages';
-import { useQueue } from '@/lib/actions/useQueue';
+	WebSocketSubTopic,
+	WebSocketToken,
+} from '@lumi/core/types/websockets.types';
+import { MqttClientType } from '@lumi/core/websockets/websockets.service';
+
+import { UpdateUser } from '@/app/(site)/(internal)/settings/(account)/trpc-hooks';
 import { connectToWebsocket } from '@/lib/actions/web-socket-actions';
+import { useQueue } from '@/lib/hooks/useQueue';
 import { logger } from '@/lib/logger';
 
 type WebSocketProviderProps = PropsWithChildren<{
@@ -45,6 +47,7 @@ export const relationshipWSTopic = (relationshipId: string) =>
 	`${process.env.NEXT_PUBLIC_NOTIFICATIONS_TOPIC!}/${WebSocketSubTopic.RELATIONSHIP}/${relationshipId}`;
 
 const WebSocketProvider: FC<WebSocketProviderProps> = ({ children, user, endpoint, authorizer, relationshipId }) => {
+	const { mutateAsync: updateUser } = UpdateUser();
 	const [connectionStatus, setConnectionStatus] = useState<'connecting' | 'connected' | 'disconnected'>(
 		'disconnected',
 	);
@@ -118,6 +121,9 @@ const WebSocketProvider: FC<WebSocketProviderProps> = ({ children, user, endpoin
 							qos: 1,
 						},
 					});
+
+					await updateUser({ status: 'online' });
+
 					logger.debug('connected, now emitting conect event');
 					connection.publish(
 						relationshipWSTopic(relationshipId),
@@ -142,7 +148,8 @@ const WebSocketProvider: FC<WebSocketProviderProps> = ({ children, user, endpoin
 					setMqttConnection(connection);
 					setConnectionStatus('connected');
 				},
-				onDisconnect: () => {
+				onDisconnect: async () => {
+					await updateUser({ status: 'offline' });
 					emitEvent('disconnect', {
 						userId: user.id,
 						username: user.username,
@@ -175,13 +182,16 @@ const WebSocketProvider: FC<WebSocketProviderProps> = ({ children, user, endpoin
 		eventHandlers,
 		mqttConnection,
 		relationshipId,
+		updateUser,
 		user.id,
 		user.username,
 	]);
 
 	// Disconnect handlers
 	useEffect(() => {
-		const handler = () => {
+		const handler = async () => {
+			await updateUser({ status: 'offline' });
+
 			mqttConnection?.publish(
 				relationshipWSTopic(relationshipId!),
 				JSON.stringify({
@@ -206,7 +216,7 @@ const WebSocketProvider: FC<WebSocketProviderProps> = ({ children, user, endpoin
 
 		window.addEventListener('beforeunload', handler);
 		return () => window.removeEventListener('beforeunload', handler);
-	}, [emitEvent, mqttConnection, relationshipId, user.id, user.username]);
+	}, [emitEvent, mqttConnection, relationshipId, updateUser, user.id, user.username]);
 
 	const memoizedValues = useMemo(
 		() => ({
