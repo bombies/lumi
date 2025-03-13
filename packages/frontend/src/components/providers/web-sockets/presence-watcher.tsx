@@ -9,7 +9,7 @@ import { UpdateUser } from '@/app/(site)/(internal)/settings/(account)/trpc-hook
 import { useWebSocket } from '@/components/providers/web-sockets/web-socket-provider';
 import { logger } from '@/lib/logger';
 
-const IDLE_TIMEOUT = 0.083 * 60 * 1000; // 5 minutes
+const IDLE_TIMEOUT = 5 * 60 * 1000; // 5 minutes
 const HEART_BEAT_INTERVAL = 60 * 1000; // 1 minute
 
 type PresenceState = InferredWebSocketMessage<'presence'>['payload']['status'];
@@ -41,8 +41,8 @@ export const usePresenceWatcher = (user: User, relationship: Relationship) => {
 		clearTimer();
 		timerRef.current = window.setTimeout(async () => {
 			if (messageRef.current) {
-				await updateUser({ status: 'idle' });
 				emitEvent('presence', { ...messageRef.current, status: 'idle' });
+				await updateUser({ status: 'idle' });
 				setPresence('idle');
 			}
 		}, IDLE_TIMEOUT);
@@ -89,6 +89,18 @@ export const usePresenceWatcher = (user: User, relationship: Relationship) => {
 			userAcitivtyBuffer.current = null;
 		}, 500);
 	}, [notifyOnline, startTimer]);
+
+	const handlePageVisibilityEvents = useCallback(async () => {
+		console.log('handling visibility event', document.visibilityState);
+		if (document.visibilityState === 'visible') {
+			handleUserActivity();
+		} else if (messageRef.current) {
+			emitEvent('presence', { ...messageRef.current, status: 'idle' });
+			await updateUser({ status: 'idle' });
+			setPresence('idle');
+			clearTimer();
+		}
+	}, [clearTimer, emitEvent, handleUserActivity, updateUser]);
 
 	useEffect(() => {
 		const handlePresence: WebSocketEventHandler<'presence'> = async payload => {
@@ -139,11 +151,13 @@ export const usePresenceWatcher = (user: User, relationship: Relationship) => {
 		const livenessEvents: (keyof WindowEventMap)[] = ['mousemove', 'mousedown', 'keypress', 'scroll'];
 
 		livenessEvents.forEach(event => window.addEventListener(event, handleUserActivity));
+		window.addEventListener('visibilitychange', handlePageVisibilityEvents);
 
 		return () => {
 			livenessEvents.forEach(event => window.removeEventListener(event, handleUserActivity));
+			window.removeEventListener('visibilitychange', handlePageVisibilityEvents);
 		};
-	}, [handleUserActivity]);
+	}, [handlePageVisibilityEvents, handleUserActivity]);
 };
 type PresenceWatcherProps = {
 	user: User;

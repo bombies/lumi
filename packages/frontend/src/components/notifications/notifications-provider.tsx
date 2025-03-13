@@ -3,12 +3,10 @@
 import { createContext, FC, PropsWithChildren, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { urlBase64ToUint8Array } from '@lumi/core/utils/utils';
 
-import {
-	SendNotificationArgs,
-	sendUserNotification,
-	subscribeUser,
-	unsubscribeUser,
-} from '@/components/notifications/notification-actions';
+import { logger } from '@/lib/logger';
+import { Button } from '../ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog';
+import { SendNotificationArgs, sendUserNotification, subscribeUser, unsubscribeUser } from './notification-actions';
 
 type NotificationsData = {
 	isSupported: boolean;
@@ -16,6 +14,7 @@ type NotificationsData = {
 	subscribe: () => Promise<void>;
 	unsubscribe: () => Promise<void>;
 	sendNotification: (args: SendNotificationArgs) => Promise<void>;
+	browserAllowsNotifications: boolean;
 };
 
 const NotificationsContext = createContext<NotificationsData | undefined>(undefined);
@@ -26,9 +25,13 @@ export const useNotifications = () => {
 	return context;
 };
 
-const NotificationsProvider: FC<PropsWithChildren> = ({ children }) => {
+type NotificationsProviderProps = PropsWithChildren;
+
+const NotificationsProvider: FC<NotificationsProviderProps> = ({ children }) => {
+	const [browserAllowsNotifications, setBrowserAllowsNotifications] = useState(false);
 	const [isSupported, setIsSupported] = useState(false);
 	const [subscription, setSubscription] = useState<PushSubscription | null>(null);
+	const [showNotificationDialog, setShowNotificationDialog] = useState(false);
 
 	const registerServiceWorker = useCallback(async () => {
 		const registration = await navigator.serviceWorker.register('/notification-worker.js', {
@@ -66,13 +69,39 @@ const NotificationsProvider: FC<PropsWithChildren> = ({ children }) => {
 	);
 
 	useEffect(() => {
-		if ('serviceWorker' in navigator && 'PushManager' in window) {
-			setIsSupported(true);
-			registerServiceWorker();
-
-			if (!subscription) subscribe();
+		try {
+			// eslint-disable-next-line @typescript-eslint/no-unused-expressions
+			Notification;
+			setBrowserAllowsNotifications(true);
+		} catch (e: any) {
+			if (e instanceof ReferenceError && e.message.includes('Notification')) setBrowserAllowsNotifications(false);
+			else logger.error(e);
 		}
-	}, [registerServiceWorker, subscribe, subscription]);
+	}, []);
+
+	useEffect(() => {
+		if ('serviceWorker' in navigator && 'PushManager' in window) {
+			(async () => {
+				// @ts-expect-error Type def not setup for chromium based browsers
+				if (!!window.chrome) {
+					const canNotify = await Notification.requestPermission();
+					if (canNotify === 'granted') {
+						setIsSupported(true);
+						registerServiceWorker();
+
+						if (!subscription) subscribe();
+					}
+				} else {
+					if (Notification.permission === 'granted') {
+						setIsSupported(true);
+						registerServiceWorker();
+
+						if (!subscription) subscribe();
+					} else setShowNotificationDialog(true);
+				}
+			})();
+		}
+	}, [registerServiceWorker, showNotificationDialog, subscribe, subscription]);
 
 	const dataValue = useMemo<NotificationsData>(
 		() => ({
@@ -81,11 +110,42 @@ const NotificationsProvider: FC<PropsWithChildren> = ({ children }) => {
 			subscribe,
 			unsubscribe,
 			sendNotification,
+			browserAllowsNotifications,
 		}),
-		[isSupported, sendNotification, subscribe, subscription, unsubscribe],
+		[browserAllowsNotifications, isSupported, sendNotification, subscribe, subscription, unsubscribe],
 	);
 
-	return <NotificationsContext.Provider value={dataValue}>{children}</NotificationsContext.Provider>;
+	return (
+		<NotificationsContext.Provider value={dataValue}>
+			<Dialog
+				open={browserAllowsNotifications && Notification.permission === 'default' && showNotificationDialog}
+			>
+				<DialogContent>
+					<DialogHeader>
+						<DialogTitle>Enable Notifications</DialogTitle>
+					</DialogHeader>
+					<p>You can receive real-time notifcations from lumi. Press the button below to opt in or out.</p>
+					<Button
+						onClick={async () => {
+							const canNotify = await Notification.requestPermission();
+							if (canNotify === 'granted') {
+								if ('serviceWorker' in navigator && 'PushManager' in window) {
+									setIsSupported(true);
+									registerServiceWorker();
+
+									if (!subscription) subscribe();
+								}
+							}
+							setShowNotificationDialog(false);
+						}}
+					>
+						Setup Notifications
+					</Button>
+				</DialogContent>
+			</Dialog>
+			{children}
+		</NotificationsContext.Provider>
+	);
 };
 
 export default NotificationsProvider;

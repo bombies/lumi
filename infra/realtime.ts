@@ -6,9 +6,11 @@ export const notificationsTopic = `${$app.name}/${$app.stage}/notifications`;
 export const realtimeServer = new sst.aws.Realtime('RealtimeServer', {
 	authorizer: {
 		handler: 'packages/functions/websocket/authorizer.handler',
+		link: [db],
 		environment: {
 			NOTIFICATIONS_TOPIC: notificationsTopic,
 			AWS_ACCOUNT_ID: accountId,
+			TABLE_NAME: db.name,
 		},
 	},
 });

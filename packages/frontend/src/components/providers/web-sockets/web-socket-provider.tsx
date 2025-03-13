@@ -15,7 +15,7 @@ import {
 import { MqttClientType } from '@lumi/core/websockets/websockets.service';
 
 import { UpdateUser } from '@/app/(site)/(internal)/settings/(account)/trpc-hooks';
-import { connectToWebsocket } from '@/lib/actions/web-socket-actions';
+import { connectToWebsocket } from '@/components/providers/web-sockets/web-socket-actions';
 import { useQueue } from '@/lib/hooks/useQueue';
 import { logger } from '@/lib/logger';
 
@@ -31,7 +31,13 @@ type WebSocketProviderData = {
 	mqttConnection: MqttClientType | null;
 	addEventHandler: <T extends Event>(event: T, handler: WebSocketEventHandler<T>) => void;
 	removeEventHandler: <T extends Event>(event: T, handler: WebSocketEventHandler<T>) => void;
-	emitEvent: <T extends Event>(event: T, payload: InferredWebSocketMessage<T>['payload']) => void;
+	emitEvent: <T extends Event>(
+		event: T,
+		payload: InferredWebSocketMessage<T>['payload'],
+		args?: {
+			topic?: string;
+		},
+	) => void;
 };
 
 const WebSocketContext = createContext<WebSocketProviderData | undefined>(undefined);
@@ -45,6 +51,8 @@ export const useWebSocket = () => {
 
 export const relationshipWSTopic = (relationshipId: string) =>
 	`${process.env.NEXT_PUBLIC_NOTIFICATIONS_TOPIC!}/${WebSocketSubTopic.RELATIONSHIP}/${relationshipId}`;
+
+export const userNotificationsTopic = (userId: string) => `${process.env.NEXT_PUBLIC_NOTIFICATIONS_TOPIC!}/${userId}`;
 
 const WebSocketProvider: FC<WebSocketProviderProps> = ({ children, user, endpoint, authorizer, relationshipId }) => {
 	const { mutateAsync: updateUser } = UpdateUser();
@@ -91,7 +99,13 @@ const WebSocketProvider: FC<WebSocketProviderProps> = ({ children, user, endpoin
 	}, []);
 
 	const emitEvent = useCallback(
-		<T extends Event>(event: T, payload: InferredWebSocketMessage<T>['payload']) => {
+		<T extends Event>(
+			event: T,
+			payload: InferredWebSocketMessage<T>['payload'],
+			args?: {
+				topic?: string;
+			},
+		) => {
 			if (mqttConnection) {
 				const message = {
 					type: event,
@@ -99,7 +113,7 @@ const WebSocketProvider: FC<WebSocketProviderProps> = ({ children, user, endpoin
 					timestamp: Date.now(),
 					source: 'client',
 				} satisfies WebSocketMessage<T, typeof payload>;
-				mqttConnection.publish(relationshipWSTopic(relationshipId), JSON.stringify(message));
+				mqttConnection.publish(args?.topic ?? relationshipWSTopic(relationshipId), JSON.stringify(message));
 			}
 		},
 		[mqttConnection, relationshipId],
@@ -110,13 +124,16 @@ const WebSocketProvider: FC<WebSocketProviderProps> = ({ children, user, endpoin
 		const connection = connectToWebsocket({
 			endpoint,
 			authorizer,
-			identifier: user.id,
+			identifier: 'user:' + user.id,
 			token: `${WebSocketToken.RELATIONSHIP_USER}::${relationshipId}`,
 			async onConnect(_, clientId) {
 				try {
 					logger.debug(`Connected to websocket! Attempting to subscribe to topic... (${clientId})`);
 					await connection.subscribeAsync({
 						[relationshipWSTopic(relationshipId!)]: {
+							qos: 1,
+						},
+						[userNotificationsTopic(user.id)]: {
 							qos: 1,
 						},
 					});

@@ -9,6 +9,8 @@ import { HydrateClient } from '@/lib/trpc/server';
 
 import './globals.css';
 
+import { getUserById } from '@lumi/core/users/users.service';
+
 const sfProDisplay = localFont({
 	src: [
 		{
@@ -123,6 +125,7 @@ export default async function RootLayout({
 	children: React.ReactNode;
 }>) {
 	const session = await auth();
+
 	return (
 		<html lang="en" className={`${sfProDisplay.variable} ${cookie.variable}`}>
 			<body className={`antialiased`}>

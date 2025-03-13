@@ -2,6 +2,7 @@
 
 import { FC, PropsWithChildren } from 'react';
 import { ProgressProvider } from '@bprogress/next/app';
+import { User } from '@lumi/core/types/user.types';
 import { Toaster } from 'sonner';
 
 import InstallPrompt from '@/components/notifications/install-prompt';
@@ -10,7 +11,9 @@ import ColorSchemeProvider from '@/components/providers/color-scheme-provider';
 import { buttonVariants } from '@/components/ui/button';
 import { TRPCProvider } from '@/lib/trpc/client';
 
-const Providers: FC<PropsWithChildren> = ({ children }) => {
+type ProvidersProps = PropsWithChildren;
+
+const Providers: FC<ProvidersProps> = ({ children }) => {
 	return (
 		<TRPCProvider>
 			<ColorSchemeProvider>

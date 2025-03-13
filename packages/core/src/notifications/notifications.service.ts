@@ -1,10 +1,11 @@
 import { TRPCError } from '@trpc/server';
+import webpush from 'web-push';
 
 import { EntityType, KeyPrefix } from '../types/dynamo.types';
 import { DatabaseNotificationSubscriber, NotificationSubscriber } from '../types/notification.types';
 import { dynamo } from '../utils/dynamo/dynamo.service';
 
-export const createSubscription = async (userId: string, subscription: PushSubscription) => {
+export const createNotificationSubscription = async (userId: string, subscription: PushSubscription) => {
 	const sub: NotificationSubscriber = {
 		subscriberId: userId,
 		endpoint: subscription.endpoint,
@@ -32,7 +33,7 @@ export const createSubscription = async (userId: string, subscription: PushSubsc
 	return sub;
 };
 
-export const deleteSubscription = async (userId: string, endpoint: string) => {
+export const deleteNotificationSubscription = async (userId: string, endpoint: string) => {
 	const res = await dynamo.delete({
 		TableName: process.env.TABLE_NAME,
 		Key: {
@@ -48,7 +49,7 @@ export const deleteSubscription = async (userId: string, endpoint: string) => {
 		});
 };
 
-export const getSubscription = async (userId: string, endpoint: string) => {
+export const getNotificationSubscription = async (userId: string, endpoint: string) => {
 	const res = await dynamo.get({
 		TableName: process.env.TABLE_NAME,
 		Key: {
@@ -62,7 +63,7 @@ export const getSubscription = async (userId: string, endpoint: string) => {
 	return res.Item as DatabaseNotificationSubscriber;
 };
 
-export const getSubscriptions = async (userId: string) => {
+export const getNotificationSubscriptions = async (userId: string) => {
 	const res = await dynamo.query({
 		TableName: process.env.TABLE_NAME,
 		KeyConditionExpression: 'pk = :pk',

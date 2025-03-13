@@ -37,18 +37,39 @@ export type WebSocketMessage<E extends string, T extends object> = {
 };
 
 export type WebSocketMessageMap = {
+	// Relationship prefix
 	test: WebSocketMessage<'test', { sender: string; message: string }>;
 	connect: WebSocketMessage<'connect', { userId: string; username: string }>;
 	disconnect: WebSocketMessage<'disconnect', { userId: string; username: string }>;
 	presence: WebSocketMessage<'presence', { userId: string; username: string; status: User['status'] }>;
 	heartbeat: WebSocketMessage<'heartbeat', { userId: string; username: string; relationshipId: string }>;
+
+	// Specific user notifications
+	notification: WebSocketMessage<
+		'notification',
+		{
+			from: { type: 'user' | 'system'; id?: string };
+			message: {
+				title: string;
+				content: string;
+			};
+		}
+	>;
 };
 
-export const events = ['test', 'connect', 'disconnect', 'presence', 'heartbeat'] as (keyof WebSocketMessageMap)[];
+export const events = [
+	'test',
+	'connect',
+	'disconnect',
+	'presence',
+	'heartbeat',
+	'notification',
+] as (keyof WebSocketMessageMap)[];
 
 export type Event = (typeof events)[number];
 
 export type InferredWebSocketMessage<T extends Event> = WebSocketMessageMap[T];
+export type InferredWebSocketMessagePayload<T extends Event> = WebSocketMessageMap[T]['payload'];
 
 export type WebSocketEventHandler<T extends Event> =
 	| ((payload: InferredWebSocketMessage<T>['payload']) => void)

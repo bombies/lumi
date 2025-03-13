@@ -1,9 +1,9 @@
 'use server';
 
 import {
-	createSubscription,
-	deleteSubscription,
-	getSubscriptions,
+	createNotificationSubscription,
+	deleteNotificationSubscription,
+	getNotificationSubscriptions,
 } from '@lumi/core/notifications/notifications.service';
 import { NotificationSubscriber } from '@lumi/core/types/notification.types';
 import webpush from 'web-push';
@@ -22,7 +22,7 @@ const subscriptions: Record<
 > = {};
 
 const fetchSubscriptionsForUser = async (userId: string) => {
-	const subs = await getSubscriptions(userId);
+	const subs = await getNotificationSubscriptions(userId);
 	if (!subs.length) return;
 
 	subscriptions[userId] = subs.map(sub => ({
@@ -36,7 +36,7 @@ export async function subscribeUser(sub: PushSubscription) {
 	const session = await auth();
 	if (!session) return { success: false, error: 'Unauthorized' };
 
-	await createSubscription(session.user.id!, sub);
+	await createNotificationSubscription(session.user.id!, sub);
 	fetchSubscriptionsForUser(session.user.id!);
 	return { success: true };
 }
@@ -45,7 +45,7 @@ export async function unsubscribeUser(endpoint: string) {
 	const session = await auth();
 	if (!session) return { success: false, error: 'Unauthorized' };
 
-	deleteSubscription(session.user.id!, endpoint);
+	deleteNotificationSubscription(session.user.id!, endpoint);
 	subscriptions[session.user.id!] = subscriptions[session.user.id!]?.filter(sub => sub?.endpoint !== endpoint);
 	return { success: true };
 }

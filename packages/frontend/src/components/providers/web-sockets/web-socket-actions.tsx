@@ -21,7 +21,12 @@ type ConnectToWebsocketArgs = {
 };
 
 export const connectToWebsocket = (args: ConnectToWebsocketArgs) => {
-	const { client: mqttConnection, clientId } = createWebsocketConnection(args.endpoint, args.authorizer, args.token);
+	const { client: mqttConnection, clientId } = createWebsocketConnection(
+		args.endpoint,
+		args.authorizer,
+		args.token,
+		args.identifier,
+	);
 
 	mqttConnection.on('packetsend', packet => {
 		logger.debug(`Packet Send: (${clientId})`, packet);
