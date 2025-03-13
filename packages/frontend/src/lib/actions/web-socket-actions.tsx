@@ -8,45 +8,50 @@ type ConnectToWebsocketArgs = {
 	authorizer: string;
 	identifier?: string;
 	token?: string;
-	onConnect?: ((connection: MqttClientType) => void) | ((connection: MqttClientType) => Promise<void>);
-	onDisconnect?: (() => void) | (() => Promise<void>);
-	onError?: ((e: Error | ErrorWithReasonCode) => void) | ((e: Error | ErrorWithReasonCode) => Promise<void>);
-	onMessage?: ((message: unknown) => void) | ((message: unknown) => Promise<void>);
+	onConnect?:
+		| ((connection: MqttClientType, clientId: string) => void)
+		| ((connection: MqttClientType, clientId: string) => Promise<void>);
+	onDisconnect?: ((clientId: string) => void) | ((clientId: string) => Promise<void>);
+	onError?:
+		| ((e: Error | ErrorWithReasonCode, clientId: string) => void)
+		| ((e: Error | ErrorWithReasonCode, clientId: string) => Promise<void>);
+	onMessage?:
+		| ((message: unknown, clientId: string) => void)
+		| ((message: unknown, clientId: string) => Promise<void>);
 };
 
-export const connectToWebsocket = async (args: ConnectToWebsocketArgs) => {
-	const mqttConnection = await createWebsocketConnection(args.endpoint, args.authorizer, args.token);
+export const connectToWebsocket = (args: ConnectToWebsocketArgs) => {
+	const { client: mqttConnection, clientId } = createWebsocketConnection(args.endpoint, args.authorizer, args.token);
 
 	mqttConnection.on('packetsend', packet => {
-		logger.debug('Packet Send:', packet);
+		logger.debug(`Packet Send: (${clientId})`, packet);
 	});
 
 	mqttConnection.on('packetreceive', packet => {
-		logger.debug('Packet Receive:', packet);
+		logger.debug(`Packet Receive: (${clientId})`, packet);
 	});
 
 	mqttConnection.on('connect', async () => {
-		if (args?.onConnect instanceof Promise) await args?.onConnect?.(mqttConnection);
-		else args?.onConnect?.(mqttConnection);
+		const cb = args?.onConnect?.(mqttConnection, clientId);
+		if (cb instanceof Promise) await cb;
 	});
 
 	mqttConnection.on('disconnect', async () => {
-		if (args?.onDisconnect instanceof Promise) await args?.onDisconnect?.();
-		else args?.onDisconnect?.();
+		const cb = args?.onDisconnect?.(clientId);
+		if (cb instanceof Promise) await cb;
 	});
 
 	mqttConnection.on('error', async e => {
 		console.error('WS Error:', e);
-		if (args?.onError instanceof Promise) await args?.onError?.(e);
-		else args?.onError?.(e);
+		const cb = args?.onError?.(e, clientId);
+		if (cb instanceof Promise) await cb;
 	});
 
 	mqttConnection.on('message', async (topic, event) => {
 		const message = new TextDecoder('utf8').decode(new Uint8Array(event));
 		const jsonMsg = JSON.parse(message);
-		logger.debug('Message:', topic, jsonMsg);
-		if (args?.onMessage instanceof Promise) await args?.onMessage(jsonMsg);
-		else args?.onMessage?.(jsonMsg);
+		const cb = args?.onMessage?.(jsonMsg, clientId);
+		if (cb instanceof Promise) await cb;
 	});
 
 	mqttConnection.connect();

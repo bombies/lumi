@@ -22,7 +22,7 @@
 	--color-muted: var(--muted);
 	--color-secondary: var(--secondary);
 	--color-danger: var(--destructive);
-	--color-warning: var(--accent);
+	--color-warning: var(--warning);
 	--border: var(--border);
 
 	/* shadcn stuff */
@@ -112,6 +112,8 @@
 	--accent-foreground: oklch(99.1% 0.0198 128.68);
 	--destructive: oklch(0.577 0.245 27.325);
 	--destructive-foreground: oklch(0.577 0.245 27.325);
+	--warning: oklch(71.02% 0.154362 69.4686);
+	--warning-foreground: oklch(96.08% 0.0341 128.86);
 	--border: oklch(30.71% 0.0318 130.76 / 6.27%);
 	--input: oklch(66.34% 0.1251 132.01 / 6.27%);
 	--ring: oklch(55.6% 0.159863 134.1069);

@@ -23,7 +23,7 @@ type WebSocketProviderProps = PropsWithChildren<{
 	endpoint: string;
 	authorizer: string;
 	user: User;
-	relationshipId?: string;
+	relationshipId: string;
 }>;
 
 type WebSocketProviderData = {
@@ -92,7 +92,7 @@ const WebSocketProvider: FC<WebSocketProviderProps> = ({ children, user, endpoin
 
 	const emitEvent = useCallback(
 		<T extends Event>(event: T, payload: InferredWebSocketMessage<T>['payload']) => {
-			if (mqttConnection && relationshipId) {
+			if (mqttConnection) {
 				const message = {
 					type: event,
 					payload,
@@ -106,26 +106,24 @@ const WebSocketProvider: FC<WebSocketProviderProps> = ({ children, user, endpoin
 	);
 
 	useEffect(() => {
-		(async () => {
-			if (connectionStatus !== 'disconnected' || !relationshipId) return;
-			setConnectionStatus('connecting');
-
-			const mqttConnection = await connectToWebsocket({
-				endpoint,
-				authorizer,
-				identifier: user.id,
-				token: `${WebSocketToken.RELATIONSHIP_USER}::${relationshipId}`,
-				onConnect: async connection => {
+		setConnectionStatus('connecting');
+		const connection = connectToWebsocket({
+			endpoint,
+			authorizer,
+			identifier: user.id,
+			token: `${WebSocketToken.RELATIONSHIP_USER}::${relationshipId}`,
+			async onConnect(_, clientId) {
+				try {
+					logger.debug(`Connected to websocket! Attempting to subscribe to topic... (${clientId})`);
 					await connection.subscribeAsync({
-						[relationshipWSTopic(relationshipId)]: {
+						[relationshipWSTopic(relationshipId!)]: {
 							qos: 1,
 						},
 					});
-
+					logger.debug(`Successfully subscribed to topic! (${clientId})`);
+					logger.debug(`Now sending status updates... (${clientId})`);
 					await updateUser({ status: 'online' });
-
-					logger.debug('connected, now emitting conect event');
-					connection.publish(
+					await connection.publishAsync(
 						relationshipWSTopic(relationshipId),
 						JSON.stringify({
 							type: 'connect',
@@ -135,7 +133,7 @@ const WebSocketProvider: FC<WebSocketProviderProps> = ({ children, user, endpoin
 						} satisfies WebSocketMessageMap['connect']),
 					);
 
-					mqttConnection.publish(
+					await connection.publishAsync(
 						relationshipWSTopic(relationshipId),
 						JSON.stringify({
 							type: 'presence',
@@ -144,79 +142,56 @@ const WebSocketProvider: FC<WebSocketProviderProps> = ({ children, user, endpoin
 							source: 'client',
 						} satisfies WebSocketMessageMap['presence']),
 					);
-
 					setMqttConnection(connection);
 					setConnectionStatus('connected');
-				},
-				onDisconnect: async () => {
-					await updateUser({ status: 'offline' });
-					emitEvent('disconnect', {
-						userId: user.id,
-						username: user.username,
-					});
-					setMqttConnection(null);
-					setConnectionStatus('disconnected');
-				},
-				onMessage(message) {
-					if (
-						message &&
-						typeof message === 'object' &&
-						'type' in message &&
-						typeof message.type === 'string' &&
-						events.includes(message.type as Event)
-					) {
-						logger.debug('Callback handling messge', message);
-						enqueueEvent(message as InferredWebSocketMessage<Event>);
-					}
-				},
-			});
+				} catch (e) {
+					logger.error('Something went wrong while connecting to the websocket', e);
+				}
+			},
+			async onMessage(message, clientId) {
+				if (
+					message &&
+					typeof message === 'object' &&
+					'type' in message &&
+					typeof message.type === 'string' &&
+					events.includes(message.type as Event)
+				) {
+					logger.debug(`Callback handling messge (${clientId})`, message);
+					enqueueEvent(message as InferredWebSocketMessage<Event>);
+				}
+			},
+			async onDisconnect(clientId) {
+				logger.debug(`Handling disconnect for ${clientId}`);
+				await updateUser({ status: 'offline' });
+				await connection.publishAsync(
+					relationshipWSTopic(relationshipId),
+					JSON.stringify({
+						type: 'disconnect',
+						payload: { userId: user.id, username: user.username },
+						timestamp: Date.now(),
+						source: 'client',
+					} satisfies WebSocketMessageMap['disconnect']),
+				);
+				await connection.publishAsync(
+					relationshipWSTopic(relationshipId),
+					JSON.stringify({
+						type: 'presence',
+						payload: { userId: user.id, username: user.username, status: 'offline' },
+						timestamp: Date.now(),
+						source: 'client',
+					} satisfies WebSocketMessageMap['presence']),
+				);
+				setMqttConnection(null);
+				setConnectionStatus('disconnected');
+			},
+		});
 
-			setMqttConnection(mqttConnection);
-		})();
-	}, [
-		authorizer,
-		connectionStatus,
-		emitEvent,
-		endpoint,
-		enqueueEvent,
-		eventHandlers,
-		mqttConnection,
-		relationshipId,
-		updateUser,
-		user.id,
-		user.username,
-	]);
-
-	// Disconnect handlers
-	useEffect(() => {
-		const handler = async () => {
-			await updateUser({ status: 'offline' });
-
-			mqttConnection?.publish(
-				relationshipWSTopic(relationshipId!),
-				JSON.stringify({
-					type: 'presence',
-					payload: { userId: user.id, username: user.username, status: 'offline' },
-					timestamp: Date.now(),
-					source: 'client',
-				} satisfies WebSocketMessageMap['presence']),
-			);
-
-			mqttConnection?.publish(
-				relationshipWSTopic(relationshipId!),
-				JSON.stringify({
-					type: 'disconnect',
-					payload: { userId: user.id, username: user.username },
-					timestamp: Date.now(),
-					source: 'client',
-				} satisfies WebSocketMessageMap['disconnect']),
-			);
-			mqttConnection?.end();
+		return () => {
+			connection.end();
+			setMqttConnection(null);
+			setConnectionStatus('disconnected');
 		};
-
-		window.addEventListener('beforeunload', handler);
-		return () => window.removeEventListener('beforeunload', handler);
-	}, [emitEvent, mqttConnection, relationshipId, updateUser, user.id, user.username]);
+	}, [authorizer, endpoint, enqueueEvent, relationshipId, updateUser, user.id, user.username]);
 
 	const memoizedValues = useMemo(
 		() => ({

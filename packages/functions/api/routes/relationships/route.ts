@@ -7,9 +7,10 @@ import {
 	sendRelationshipRequest,
 } from '@lumi/core/relationships/relationship.service';
 import { createInfiniteDataDto } from '@lumi/core/types/infinite-data.dto';
+import { getUserById } from '@lumi/core/users/users.service';
 import { z } from 'zod';
 
-import { protectedProcedure, router } from '../../utils/trpc';
+import { protectedProcedure, relationshipProcedure, router } from '../../utils/trpc';
 
 export const relationshipsRouter = router({
 	sendRelationshipRequest: protectedProcedure
@@ -55,4 +56,12 @@ export const relationshipsRouter = router({
 				userId: user.id,
 			}),
 		),
+
+	getRelationship: relationshipProcedure.query(({ ctx }) => ctx.relationship),
+
+	getRelationshipPartner: relationshipProcedure.query(async ({ ctx: { user, relationship } }) => {
+		const partnerId = relationship.partner1 === user.id ? relationship.partner2 : relationship.partner1;
+		const partner = await getUserById(partnerId);
+		return partner;
+	}),
 });

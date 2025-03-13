@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation';
 import { getUserById } from '@lumi/core/users/users.service';
 
 import NotificationsTest from '@/components/notifications/notifications-test';
-import RelationshipProvider from '@/components/providers/relationship-provder';
+import RelationshipProvider from '@/components/providers/relationships/relationship-provder';
 import WebSocketTest from '@/components/providers/web-sockets/tests/web-socket-test';
 import { requireRelationship } from '@/lib/actions/requireRelationship';
 import { getUserBySession } from '@/lib/server-utils';

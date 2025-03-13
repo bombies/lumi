@@ -8,20 +8,23 @@ import { dynamo } from '../utils/dynamo/dynamo.service';
 
 export type MqttClientType = mqtt.MqttClient;
 
-export const createWebsocketConnection = async (
+export const createWebsocketConnection = (
 	endpoint: string,
 	authorizer: string,
 	token?: string,
 	identifier?: string,
-): Promise<MqttClientType> => {
+): { client: MqttClientType; clientId: string } => {
 	const clientId = `client_` + (identifier ?? createId());
-	return mqtt.connect(`wss://${endpoint}/mqtt?x-amz-customauthorizer-name=${authorizer}`, {
-		protocolVersion: 5,
-		manualConnect: true,
-		username: '',
-		password: `${clientId}${token ? `::${token}` : ''}`,
+	return {
+		client: mqtt.connect(`wss://${endpoint}/mqtt?x-amz-customauthorizer-name=${authorizer}`, {
+			protocolVersion: 5,
+			manualConnect: true,
+			username: '',
+			password: `${clientId}${token ? `::${token}` : ''}`,
+			clientId,
+		}),
 		clientId,
-	});
+	};
 };
 
 export const storeWebsocketHeartbeat = async (

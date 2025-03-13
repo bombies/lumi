@@ -1,104 +1,156 @@
 'use client';
 
-import { FC, useEffect } from 'react';
+import { FC, useCallback, useEffect, useRef, useState } from 'react';
+import { Relationship } from '@lumi/core/types/relationship.types';
 import { User } from '@lumi/core/types/user.types';
-import { WebSocketEventHandler, WebSocketMessageMap } from '@lumi/core/types/websockets.types';
+import { InferredWebSocketMessage, WebSocketEventHandler } from '@lumi/core/types/websockets.types';
 
 import { UpdateUser } from '@/app/(site)/(internal)/settings/(account)/trpc-hooks';
 import { useWebSocket } from '@/components/providers/web-sockets/web-socket-provider';
+import { logger } from '@/lib/logger';
 
-const IDLE_TIMEOUT = 5 * 60 * 1000; // 5 minutes
+const IDLE_TIMEOUT = 0.083 * 60 * 1000; // 5 minutes
 const HEART_BEAT_INTERVAL = 60 * 1000; // 1 minute
 
-export const usePresenceWatcher = (user: User, relationshipId: string) => {
+type PresenceState = InferredWebSocketMessage<'presence'>['payload']['status'];
+
+export const usePresenceWatcher = (user: User, relationship: Relationship) => {
 	const { emitEvent, addEventHandler, removeEventHandler } = useWebSocket();
 	const { mutateAsync: updateUser } = UpdateUser();
+	const [presence, setPresence] = useState<PresenceState>('offline');
+	const timerRef = useRef<number | null>(null);
+	const heartbeatIntervalRef = useRef<number | null>(null);
+	const presenceRef = useRef<PresenceState>(presence);
+	const messageRef = useRef<InferredWebSocketMessage<'presence'>['payload'] | null>(null);
+	const userAcitivtyBuffer = useRef<number | null>(null);
 
 	useEffect(() => {
-		let timeOut: NodeJS.Timeout | undefined;
-		let heartbeatInterval: NodeJS.Timeout | undefined;
-		let message: WebSocketMessageMap['presence']['payload'] | undefined;
+		presenceRef.current = presence;
+	}, [presence]);
 
-		const createTimeOut = () => {
-			return setTimeout(async () => {
-				if (message) {
-					await updateUser({ status: 'idle' });
-					emitEvent('presence', { ...message, status: 'idle' });
+	const clearTimer = useCallback(() => {
+		if (timerRef.current) {
+			clearTimeout(timerRef.current);
+			timerRef.current = null;
+		}
+	}, []);
+
+	const startTimer = useCallback(async () => {
+		if (messageRef.current?.status === 'idle') await updateUser({ status: 'online' });
+
+		clearTimer();
+		timerRef.current = window.setTimeout(async () => {
+			if (messageRef.current) {
+				await updateUser({ status: 'idle' });
+				emitEvent('presence', { ...messageRef.current, status: 'idle' });
+				setPresence('idle');
+			}
+		}, IDLE_TIMEOUT);
+		logger.debug('Started a new idle timer');
+	}, [clearTimer, emitEvent, updateUser]);
+
+	const startHeartbeatTimeout = useCallback(() => {
+		if (heartbeatIntervalRef.current) return;
+		heartbeatIntervalRef.current = window.setInterval(() => {
+			emitEvent('heartbeat', {
+				userId: user.id,
+				username: user.username,
+				relationshipId: relationship.id,
+			});
+		}, HEART_BEAT_INTERVAL);
+		logger.debug('Started client websocket heartbeat interval');
+
+		return () => {
+			if (heartbeatIntervalRef.current) {
+				clearInterval(heartbeatIntervalRef.current);
+				heartbeatIntervalRef.current = null;
+			}
+		};
+	}, [emitEvent, relationship.id, user.id, user.username]);
+
+	const notifyOnline = useCallback(() => {
+		emitEvent('presence', {
+			userId: user.id,
+			username: user.username,
+			status: 'online',
+		});
+	}, [emitEvent, user.id, user.username]);
+
+	const handleUserActivity = useCallback(async () => {
+		if (userAcitivtyBuffer.current) return;
+
+		userAcitivtyBuffer.current = window.setTimeout(async () => {
+			if (presenceRef.current === 'online') {
+				await startTimer();
+			} else if (presenceRef.current === 'idle') {
+				setPresence('online');
+				notifyOnline();
+			}
+			userAcitivtyBuffer.current = null;
+		}, 500);
+	}, [notifyOnline, startTimer]);
+
+	useEffect(() => {
+		const handlePresence: WebSocketEventHandler<'presence'> = async payload => {
+			if (payload.userId === user.id) {
+				switch (payload.status) {
+					case 'online':
+						setPresence('online');
+						await startTimer();
+						startHeartbeatTimeout();
+						break;
+					case 'offline':
+						setPresence('offline');
+						clearTimer();
+						break;
+					case 'idle':
+						setPresence('idle');
+						clearTimer();
+						break;
 				}
-			}, IDLE_TIMEOUT);
-		};
-
-		const handleTimerReset = async () => {
-			if (message && message.status === 'idle') {
-				await updateUser({ status: 'online' });
-				emitEvent('presence', { ...message, status: 'online' });
-				message.status = 'online';
-				clearTimeout(timeOut);
-				timeOut = createTimeOut();
+				messageRef.current = payload;
 			}
 		};
 
-		const removeBrowserEventListeners = () => {
-			clearTimeout(timeOut);
-			clearInterval(heartbeatInterval);
-			removeEventListener('mousemove', handleTimerReset);
-			removeEventListener('mousedown', handleTimerReset);
-			removeEventListener('keypress', handleTimerReset);
-			removeEventListener('scroll', handleTimerReset);
-		};
-
-		const addBrowserEventListeners = () => {
-			addEventListener('mousemove', handleTimerReset);
-			addEventListener('mousedown', handleTimerReset);
-			addEventListener('keypress', handleTimerReset);
-			addEventListener('scroll', handleTimerReset);
-		};
-
-		const handlePresence: WebSocketEventHandler<'presence'> = payload => {
-			if (payload.userId !== user.id) return;
-
-			message = payload;
-			switch (payload.status) {
-				case 'online':
-					removeBrowserEventListeners();
-					addBrowserEventListeners();
-					createTimeOut();
-					break;
-				case 'offline':
-					clearTimeout(timeOut);
-					break;
-			}
-
-			heartbeatInterval = setInterval(() => {
-				emitEvent('heartbeat', { userId: user.id, username: user.username, relationshipId });
-			}, HEART_BEAT_INTERVAL);
-		};
-
-		const visibilityChangeHandler = async () => {
-			if (!message) return;
-
-			if (document.visibilityState === 'visible' && message.status === 'idle') {
-				await handleTimerReset();
-			}
+		const handleDisconnect: WebSocketEventHandler<'disconnect'> = () => {
+			setPresence('offline');
+			clearTimer();
 		};
 
 		addEventHandler('presence', handlePresence);
-		addEventListener('visibilitychange', visibilityChangeHandler);
+		addEventHandler('disconnect', handleDisconnect);
 
 		return () => {
 			removeEventHandler('presence', handlePresence);
-			removeBrowserEventListeners();
-			removeEventListener('visibilitychange', visibilityChangeHandler);
+			removeEventHandler('disconnect', handleDisconnect);
 		};
-	}, [addEventHandler, emitEvent, relationshipId, removeEventHandler, updateUser, user.id, user.username]);
-};
+	}, [
+		addEventHandler,
+		clearTimer,
+		relationship.partner1,
+		relationship.partner2,
+		removeEventHandler,
+		startHeartbeatTimeout,
+		startTimer,
+		user.id,
+	]);
 
+	useEffect(() => {
+		const livenessEvents: (keyof WindowEventMap)[] = ['mousemove', 'mousedown', 'keypress', 'scroll'];
+
+		livenessEvents.forEach(event => window.addEventListener(event, handleUserActivity));
+
+		return () => {
+			livenessEvents.forEach(event => window.removeEventListener(event, handleUserActivity));
+		};
+	}, [handleUserActivity]);
+};
 type PresenceWatcherProps = {
 	user: User;
-	relationshipId: string;
+	relationship: Relationship;
 };
 
-export const PresenceWatcher: FC<PresenceWatcherProps> = ({ user, relationshipId }) => {
-	usePresenceWatcher(user, relationshipId);
+export const PresenceWatcher: FC<PresenceWatcherProps> = ({ user, relationship }) => {
+	usePresenceWatcher(user, relationship);
 	return <></>;
 };

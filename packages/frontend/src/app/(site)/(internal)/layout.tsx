@@ -3,25 +3,28 @@ import { redirect } from 'next/navigation';
 import { getRelationshipForUser } from '@lumi/core/relationships/relationship.service';
 import { Resource } from 'sst';
 
+import RelationshipProvider from '@/components/providers/relationships/relationship-provder';
 import { PresenceWatcher } from '@/components/providers/web-sockets/presence-watcher';
 import WebSocketProvider from '@/components/providers/web-sockets/web-socket-provider';
+import { requireRelationship } from '@/lib/actions/requireRelationship';
 import { getUserBySession } from '@/lib/server-utils';
 
 const InternalLayout: FC<PropsWithChildren> = async ({ children }) => {
+	const { partner, ...relationship } = await requireRelationship({ withPartner: true });
 	const user = await getUserBySession();
 	if (!user) redirect('/auth/login');
-
-	const relationship = await getRelationshipForUser(user.id);
 
 	return (
 		<WebSocketProvider
 			endpoint={Resource.RealtimeServer.endpoint}
 			authorizer={Resource.RealtimeServer.authorizer}
-			relationshipId={relationship?.id}
+			relationshipId={relationship.id}
 			user={user}
 		>
-			<PresenceWatcher user={user} relationshipId={relationship!.id} />
-			{children}
+			<RelationshipProvider relationship={relationship} partner={partner!}>
+				<PresenceWatcher user={user} relationship={relationship} />
+				{children}
+			</RelationshipProvider>
 		</WebSocketProvider>
 	);
 };

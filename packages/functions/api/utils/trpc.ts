@@ -1,9 +1,8 @@
 import { decodeBearerToken } from '@lumi/core/auth/auth.service';
+import { getRelationshipForUser } from '@lumi/core/relationships/relationship.service';
 import { TRPCError, initTRPC } from '@trpc/server';
 import { CreateAWSLambdaContextOptions } from '@trpc/server/adapters/aws-lambda';
-import { APIGatewayProxyEvent, APIGatewayProxyEventHeaders } from 'aws-lambda';
-
-import { ReadonlyHeaders } from '../types';
+import { APIGatewayProxyEvent } from 'aws-lambda';
 
 type Context = Awaited<ReturnType<typeof createContext>>;
 
@@ -43,6 +42,20 @@ export const protectedProcedure = publicProcedure.use(async function isAuthentic
 	return opts.next({
 		ctx: {
 			user: ctx.user,
+		},
+	});
+});
+
+export const relationshipProcedure = protectedProcedure.use(async function isRelationship(opts) {
+	const { ctx } = opts;
+
+	const relationship = await getRelationshipForUser(ctx.user.id);
+	if (!relationship) throw new TRPCError({ code: 'UNAUTHORIZED', message: 'You are not in a relationship!' });
+
+	return opts.next({
+		ctx: {
+			user: ctx.user,
+			relationship,
 		},
 	});
 });
