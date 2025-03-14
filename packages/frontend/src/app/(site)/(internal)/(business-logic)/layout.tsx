@@ -7,7 +7,7 @@ const BusinessLogicLayout: FC<PropsWithChildren> = ({ children }) => {
 	return (
 		<>
 			<Header />
-			<main className="pb-[100px] px-6">{children}</main>
+			<main className="pb-[100px] px-6 space-y-12 mt-18">{children}</main>
 			<Footer />
 		</>
 	);

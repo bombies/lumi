@@ -53,6 +53,7 @@ export const handler: Handler<SQSEvent> = async event => {
 			}
 			try {
 				if (user.status === 'offline') {
+					console.log(`${user.username} is offline... Sending notification through webpush`);
 					const notificationSubs = await getNotificationSubscriptions(user.id);
 					for (const sub of notificationSubs) {
 						webpush.setVapidDetails(
@@ -71,6 +72,7 @@ export const handler: Handler<SQSEvent> = async event => {
 						);
 					}
 				} else {
+					console.log(`${user.username} is either online or idle... Sending notification through websocket`);
 					await emitWebsocketEvent({
 						client: mqttConnection,
 						topic: `${topicPrefix}${user.id}`,

@@ -16,12 +16,14 @@ const HomePage: FC = async () => {
 
 	return (
 		<>
-			<h1 className="font-bold text-5xl mt-18">
-				hey <span className="text-primary">{user.firstName}</span>
-			</h1>
-			<h3 className="text-2xl font-light max-w-[60vw] tablet:max-w-xs">
-				welcome back to your space with <span className="text-primary font-bold">{partner?.firstName}</span>
-			</h3>
+			<div>
+				<h1 className="font-bold text-5xl">
+					hey <span className="text-primary">{user.firstName}</span>
+				</h1>
+				<h3 className="text-2xl font-light max-w-[60vw] tablet:max-w-xs">
+					welcome back to your space with <span className="text-primary font-bold">{partner?.firstName}</span>
+				</h3>
+			</div>
 		</>
 	);
 };

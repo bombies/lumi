@@ -14,9 +14,10 @@ export const handleTrpcError = (e: any, defaultMessage: string = 'Something went
 	if (e instanceof TRPCClientError || e instanceof TRPCError) {
 		toast.error(e.message);
 	} else {
-		console.error(e);
 		toast.error(defaultMessage);
 	}
+
+	throw e;
 };
 
 export const onGenericTrpcError = <T extends AnyTRPCClientTypes>(

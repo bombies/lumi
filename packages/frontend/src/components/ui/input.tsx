@@ -57,7 +57,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
 				<input
 					type={type}
 					className={cn(
-						'self-center w-full h-full px-3 text-sm text-foreground rounded-xl !ring-0 !outline-hidden file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-neutral-400  disabled:cursor-not-allowed disabled:opacity-50',
+						'self-center w-full h-full px-3 text-sm text-foreground rounded-xl !ring-0 !outline-hidden file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-foreground/20 disabled:cursor-not-allowed disabled:opacity-50',
 						startContent && 'pl-0 pr-3',
 						endContent && 'pr-0 pl-3',
 						startContent && endContent && 'pr-0 pl-0',
