@@ -7,7 +7,7 @@ export default {
 	pages: {
 		signIn: '/auth/login',
 		error: '/auth/login',
-		newUser: '/',
+		newUser: '/home',
 	},
 	secret: process.env.AUTH_SECRET,
 	debug: process.env.NODE_ENV === 'development',

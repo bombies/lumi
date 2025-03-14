@@ -3,14 +3,14 @@ import { FC, PropsWithChildren } from 'react';
 import Footer from '@/components/footer/footer';
 import Header from '@/components/header';
 
-const InternalLayout: FC<PropsWithChildren> = ({ children }) => {
+const BusinessLogicLayout: FC<PropsWithChildren> = ({ children }) => {
 	return (
 		<>
 			<Header />
-			<div className="pb-[100px]">{children}</div>
+			<main className="pb-[100px] px-6">{children}</main>
 			<Footer />
 		</>
 	);
 };
 
-export default InternalLayout;
+export default BusinessLogicLayout;

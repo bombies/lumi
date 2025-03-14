@@ -7,12 +7,10 @@ import {
 	events,
 	InferredWebSocketMessage,
 	WebSocketEventHandler,
-	WebSocketMessage,
-	WebSocketMessageMap,
 	WebSocketSubTopic,
 	WebSocketToken,
 } from '@lumi/core/types/websockets.types';
-import { MqttClientType } from '@lumi/core/websockets/websockets.service';
+import { emitWebsocketEvent, emitWebsocketEventSync, MqttClientType } from '@lumi/core/websockets/websockets.service';
 
 import { UpdateUser } from '@/app/(site)/(internal)/settings/(account)/trpc-hooks';
 import { connectToWebsocket } from '@/components/providers/web-sockets/web-socket-actions';
@@ -107,13 +105,12 @@ const WebSocketProvider: FC<WebSocketProviderProps> = ({ children, user, endpoin
 			},
 		) => {
 			if (mqttConnection) {
-				const message = {
-					type: event,
+				emitWebsocketEventSync({
+					client: mqttConnection,
+					topic: args?.topic ?? relationshipWSTopic(relationshipId),
+					event,
 					payload,
-					timestamp: Date.now(),
-					source: 'client',
-				} satisfies WebSocketMessage<T, typeof payload>;
-				mqttConnection.publish(args?.topic ?? relationshipWSTopic(relationshipId), JSON.stringify(message));
+				});
 			}
 		},
 		[mqttConnection, relationshipId],
@@ -140,25 +137,21 @@ const WebSocketProvider: FC<WebSocketProviderProps> = ({ children, user, endpoin
 					logger.debug(`Successfully subscribed to topic! (${clientId})`);
 					logger.debug(`Now sending status updates... (${clientId})`);
 					await updateUser({ status: 'online' });
-					await connection.publishAsync(
-						relationshipWSTopic(relationshipId),
-						JSON.stringify({
-							type: 'connect',
-							payload: { userId: user.id, username: user.username },
-							timestamp: Date.now(),
-							source: 'client',
-						} satisfies WebSocketMessageMap['connect']),
-					);
+					await emitWebsocketEvent({
+						client: connection,
+						topic: relationshipWSTopic(relationshipId),
+						event: 'connect',
+						payload: { userId: user.id, username: user.username },
+						source: 'client',
+					});
 
-					await connection.publishAsync(
-						relationshipWSTopic(relationshipId),
-						JSON.stringify({
-							type: 'presence',
-							payload: { userId: user.id, username: user.username, status: 'online' },
-							timestamp: Date.now(),
-							source: 'client',
-						} satisfies WebSocketMessageMap['presence']),
-					);
+					await emitWebsocketEvent({
+						client: connection,
+						topic: userNotificationsTopic(user.id),
+						event: 'presence',
+						payload: { userId: user.id, username: user.username, status: 'online' },
+						source: 'client',
+					});
 					setMqttConnection(connection);
 					setConnectionStatus('connected');
 				} catch (e) {
@@ -180,24 +173,18 @@ const WebSocketProvider: FC<WebSocketProviderProps> = ({ children, user, endpoin
 			async onDisconnect(clientId) {
 				logger.debug(`Handling disconnect for ${clientId}`);
 				await updateUser({ status: 'offline' });
-				await connection.publishAsync(
-					relationshipWSTopic(relationshipId),
-					JSON.stringify({
-						type: 'disconnect',
-						payload: { userId: user.id, username: user.username },
-						timestamp: Date.now(),
-						source: 'client',
-					} satisfies WebSocketMessageMap['disconnect']),
-				);
-				await connection.publishAsync(
-					relationshipWSTopic(relationshipId),
-					JSON.stringify({
-						type: 'presence',
-						payload: { userId: user.id, username: user.username, status: 'offline' },
-						timestamp: Date.now(),
-						source: 'client',
-					} satisfies WebSocketMessageMap['presence']),
-				);
+				await emitWebsocketEvent({
+					client: connection,
+					topic: relationshipWSTopic(relationshipId),
+					event: 'disconnect',
+					payload: { userId: user.id, username: user.username },
+				});
+				await emitWebsocketEvent({
+					client: connection,
+					topic: relationshipWSTopic(relationshipId),
+					event: 'presence',
+					payload: { userId: user.id, username: user.username, status: 'offline' },
+				});
 				setMqttConnection(null);
 				setConnectionStatus('disconnected');
 			},

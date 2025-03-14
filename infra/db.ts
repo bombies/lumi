@@ -33,3 +33,23 @@ export const db = new sst.aws.Dynamo('Database', {
 	},
 	ttl: 'expireAt',
 });
+
+db.subscribe(
+	'RelationshipStreamHandler',
+	{
+		handler: 'packages/function/db/stream.handler',
+	},
+	{
+		filters: [
+			{
+				dynamodb: {
+					Keys: {
+						pk: {
+							S: [{ prefix: 'rship#' }],
+						},
+					},
+				},
+			},
+		],
+	},
+);

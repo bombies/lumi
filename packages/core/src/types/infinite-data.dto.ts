@@ -37,7 +37,7 @@ export const createInfiniteDataDto = ({
 
 export type InfiniteData<T> = {
 	data: T[];
-	cursor: Record<string, string>;
+	cursor?: Record<string, string> | null;
 };
 
 export const getInfiniteData = <T = unknown>(queryResult: QueryCommandOutput) => {

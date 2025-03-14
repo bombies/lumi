@@ -399,15 +399,6 @@ export const deleteUserRelationship = async (userId: string) => {
 		const res = await dynamo.transactWrite({
 			TransactItems: [
 				{
-					Delete: {
-						TableName: process.env.TABLE_NAME,
-						Key: {
-							pk: `${KeyPrefix.RELATIONSHIP}${relationship.id}`,
-							sk: `${KeyPrefix.RELATIONSHIP}${relationship.id}`,
-						},
-					},
-				},
-				{
 					Update: {
 						TableName: process.env.TABLE_NAME,
 						Key: {
@@ -429,6 +420,15 @@ export const deleteUserRelationship = async (userId: string) => {
 						UpdateExpression: updateStatements,
 						ExpressionAttributeNames: expressionAttributeNames,
 						ExpressionAttributeValues: expressionAttributeValues,
+					},
+				},
+				{
+					Delete: {
+						TableName: process.env.TABLE_NAME,
+						Key: {
+							pk: `${KeyPrefix.RELATIONSHIP}${relationship.id}`,
+							sk: `${KeyPrefix.RELATIONSHIP}${relationship.id}`,
+						},
 					},
 				},
 			],

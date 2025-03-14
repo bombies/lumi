@@ -144,6 +144,7 @@ export const usePresenceWatcher = (user: User, relationship: Relationship) => {
 		removeEventHandler,
 		startHeartbeatTimeout,
 		startTimer,
+		updateUser,
 		user.id,
 	]);
 

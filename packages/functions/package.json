@@ -8,7 +8,9 @@
 		"./api/utils/trpc.ts"
 	],
 	"dependencies": {
+		"@aws-sdk/client-sqs": "^3.758.0",
 		"@aws-sdk/credential-providers": "^3.758.0",
+		"@datastructures-js/priority-queue": "^6.3.2",
 		"@lumi/core": "*",
 		"@lumi/emails": "*",
 		"@trpc-limiter/redis": "^0.0.2",

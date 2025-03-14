@@ -3,7 +3,15 @@ import { TRPCError } from '@trpc/server';
 import mqtt from 'mqtt';
 
 import { EntityType, KeyPrefix } from '../types/dynamo.types';
-import { DatabaseWebSocketHeartbeat, InferredWebSocketMessage, WebSocketHeartbeat } from '../types/websockets.types';
+import {
+	DatabaseWebSocketHeartbeat,
+	Event,
+	InferredWebSocketMessage,
+	InferredWebSocketMessagePayload,
+	WebSocketHeartbeat,
+	WebSocketMessage,
+	WebSocketMessageMap,
+} from '../types/websockets.types';
 import { dynamo } from '../utils/dynamo/dynamo.service';
 
 export type MqttClientType = mqtt.MqttClient;
@@ -26,6 +34,48 @@ export const createWebsocketConnection = (
 		clientId,
 	};
 };
+
+type EmitWebSocketEventArgs<T extends Event> = {
+	client: mqtt.MqttClient;
+	topic: string;
+	event: T;
+	payload: InferredWebSocketMessagePayload<T>;
+	source?: 'client' | 'server';
+};
+
+export const emitWebsocketEvent = async <T extends Event>({
+	client,
+	topic,
+	event,
+	payload,
+	source,
+}: EmitWebSocketEventArgs<T>) =>
+	await client.publishAsync(
+		topic,
+		JSON.stringify({
+			type: event,
+			timestamp: Date.now(),
+			source: source ?? 'server',
+			payload,
+		} satisfies WebSocketMessage<T, typeof payload>),
+	);
+
+export const emitWebsocketEventSync = <T extends Event>({
+	client,
+	topic,
+	event,
+	payload,
+	source,
+}: EmitWebSocketEventArgs<T>) =>
+	client.publish(
+		topic,
+		JSON.stringify({
+			type: event,
+			timestamp: Date.now(),
+			source: source ?? 'server',
+			payload,
+		} satisfies WebSocketMessage<T, typeof payload>),
+	);
 
 export const storeWebsocketHeartbeat = async (
 	clientId: string,

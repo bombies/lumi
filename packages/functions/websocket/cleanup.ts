@@ -3,11 +3,12 @@ import { User } from '@lumi/core/types/user.types';
 import {
 	DatabaseWebSocketHeartbeat,
 	InferredWebSocketMessage,
+	WebSocketMessageMap,
 	WebSocketSubTopic,
 	WebSocketToken,
 } from '@lumi/core/types/websockets.types';
 import { dynamo, getDynamicUpdateStatements } from '@lumi/core/utils/dynamo/dynamo.service';
-import { createWebsocketConnection } from '@lumi/core/websockets/websockets.service';
+import { createWebsocketConnection, emitWebsocketEvent } from '@lumi/core/websockets/websockets.service';
 import { APIGatewayProxyEvent, Handler } from 'aws-lambda';
 import { ISubscriptionMap } from 'mqtt';
 import { Resource } from 'sst';
@@ -103,14 +104,17 @@ export const handler: Handler<APIGatewayProxyEvent> = async () => {
 
 				try {
 					console.log('Publishing offline message for relationship ', relationshipId);
-					await mqttConnection.publishAsync(
-						`${topicPrefix}${relationshipId}`,
-						JSON.stringify({
+					await emitWebsocketEvent({
+						client: mqttConnection,
+						topic: `${topicPrefix}${relationshipId}`,
+						source: 'server',
+						event: 'presence',
+						payload: {
 							userId,
 							status: 'offline',
 							username,
-						} satisfies InferredWebSocketMessage<'presence'>['payload']),
-					);
+						},
+					});
 					console.log('Published offline message for relationship ', relationshipId);
 				} catch (e) {
 					console.error('Failed to publish offline message', e);

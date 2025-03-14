@@ -5,6 +5,14 @@
 
 declare module "sst" {
   export interface Resource {
+    "AffirmationSenderDLQ": {
+      "type": "sst.aws.Queue"
+      "url": string
+    }
+    "AffirmationSenderQueue": {
+      "type": "sst.aws.Queue"
+      "url": string
+    }
     "AuthSecret": {
       "type": "sst.sst.Secret"
       "value": string
