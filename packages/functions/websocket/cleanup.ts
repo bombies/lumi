@@ -80,11 +80,11 @@ export const handler: Handler<APIGatewayProxyEvent> = async () => {
 		await Promise.all(updateRequests);
 
 		// Send a message to the relationship websocket topic to notify the other user.
-		const { client: mqttConnection } = createWebsocketConnection(
-			Resource.RealtimeServer.endpoint,
-			Resource.RealtimeServer.authorizer,
-			`${WebSocketToken.GLOBAL}`,
-		);
+		const { client: mqttConnection } = createWebsocketConnection({
+			endpoint: Resource.RealtimeServer.endpoint,
+			authorizer: Resource.RealtimeServer.authorizer,
+			token: WebSocketToken.GLOBAL,
+		});
 
 		mqttConnection.on('connect', async () => {
 			console.log('Connected to websocket! Now sending out updates');

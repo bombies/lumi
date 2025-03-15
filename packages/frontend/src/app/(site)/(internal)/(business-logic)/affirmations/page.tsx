@@ -10,7 +10,9 @@ const AffirmationsPage: FC = () => {
 		<>
 			<Title>Affirmations</Title>
 			<Link href="/affirmations/manage">
-				<Button>Manage Affirmations</Button>
+				<Button className="mb-8" variant="default:flat">
+					Manage Affirmations
+				</Button>
 			</Link>
 			<ReceivedAffirmationsContainer />
 		</>

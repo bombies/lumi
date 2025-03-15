@@ -16,13 +16,21 @@ import { dynamo } from '../utils/dynamo/dynamo.service';
 
 export type MqttClientType = mqtt.MqttClient;
 
-export const createWebsocketConnection = (
-	endpoint: string,
-	authorizer: string,
-	token?: string,
-	identifier?: string,
-): { client: MqttClientType; clientId: string } => {
-	const clientId = `client_` + (identifier ?? createId());
+type CreateWebsocketConnectionArgs = {
+	endpoint: string;
+	authorizer: string;
+	token?: string;
+	identifier?: string;
+} & mqtt.IClientOptions;
+
+export const createWebsocketConnection = ({
+	endpoint,
+	authorizer,
+	token,
+	identifier,
+	...args
+}: CreateWebsocketConnectionArgs): { client: MqttClientType; clientId: string } => {
+	const clientId = `client_` + (identifier ? identifier + '_' + createId() : createId());
 	return {
 		client: mqtt.connect(`wss://${endpoint}/mqtt?x-amz-customauthorizer-name=${authorizer}`, {
 			protocolVersion: 5,
@@ -30,6 +38,7 @@ export const createWebsocketConnection = (
 			username: '',
 			password: `${clientId}${token ? `::${token}` : ''}`,
 			clientId,
+			...args,
 		}),
 		clientId,
 	};

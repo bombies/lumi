@@ -46,8 +46,8 @@ const WebSocketTest: FC = () => {
 				<Input className="w-96" value={inputValue} onValueChange={val => setInputValue(val as string)} />
 				<Button
 					className="flex gap-2"
-					onClick={() => {
-						emitEvent('test', { sender: session!.user.username!, message: inputValue });
+					onClick={async () => {
+						await emitEvent('test', { sender: session!.user.username!, message: inputValue });
 					}}
 				>
 					send message

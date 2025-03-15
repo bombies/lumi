@@ -6,6 +6,7 @@ import { User } from '@lumi/core/types/user.types';
 import { WebSocketEventHandler } from '@lumi/core/types/websockets.types';
 
 import { useWebSocket } from '@/components/providers/web-sockets/web-socket-provider';
+import { logger } from '@/lib/logger';
 
 type RelationshipProviderData = {
 	relationship: Relationship;
@@ -31,7 +32,9 @@ const RelationshipProvider: FC<RelationshipProviderProps> = ({ children, relatio
 
 	useEffect(() => {
 		const presenceHandler: WebSocketEventHandler<'presence'> = payload => {
+			logger.debug('presence event received', payload);
 			if (payload.userId !== partner.id) return;
+			logger.debug('handling partner presence event', payload);
 			setUserState(state => ({ ...state, status: payload.status }));
 		};
 

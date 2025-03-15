@@ -28,7 +28,7 @@ export type DatabaseWebSocketHeartbeat = WebSocketHeartbeat & {
 	entityType: EntityType.WEBSOCKET_HEARTBEAT;
 };
 
-export type WebSocketMessage<E extends string, T extends object> = {
+export type WebSocketMessage<E extends keyof WebSocketMessageMap, T = InferredWebSocketMessagePayload<E>> = {
 	type: E;
 	payload: T;
 	timestamp: number;

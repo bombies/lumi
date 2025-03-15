@@ -2,27 +2,36 @@
 
 import { FC } from 'react';
 import { LogOutIcon } from 'lucide-react';
-import { signOut } from 'next-auth/react';
+import { signOut, useSession } from 'next-auth/react';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
+import { sendSignOutNotification } from '@/lib/actions/relationship-actions';
 
 type Props = {
 	iconOnly?: boolean;
 };
 
 const SignOutButton: FC<Props> = ({ iconOnly }) => {
+	const { data: session } = useSession();
+
 	return (
 		<Button
 			size={iconOnly ? 'icon' : undefined}
 			variant="destructive"
-			onClick={() =>
+			onClick={async () => {
+				if (!session) return;
+				const user = session.user;
+				await sendSignOutNotification(user.id!, user.username!);
+
 				toast.promise(signOut(), {
 					loading: 'Signing out...',
-					success: 'Signed out successfully.',
+					async success() {
+						return 'Signed out successfully.';
+					},
 					error: 'Could not sign out.',
-				})
-			}
+				});
+			}}
 			tooltip={iconOnly ? 'Sign Out' : undefined}
 		>
 			{iconOnly ? (

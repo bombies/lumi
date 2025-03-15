@@ -66,7 +66,7 @@ const ReceivedAffirmationsContainer = () => {
 					<Spinner />
 				</>
 			) : todaysAffirmation || affirmationElements.length > 0 ? (
-				<div className="space-y-6">
+				<div className="space-y-6 max-w-full tablet:max-w-[45rem]">
 					{todaysAffirmation && (
 						<div className="w-full rounded-xl bg-primary text-primary-foreground p-6 tablet:w-96 space-y-4">
 							<h3 className="text-xl font-bold">Today&apos;s Affirmation</h3>

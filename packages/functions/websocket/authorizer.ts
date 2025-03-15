@@ -21,7 +21,7 @@ export const handler = realtime.authorizer(async token => {
 			];
 
 			if (client_id.startsWith('client_user')) {
-				const userId = client_id.split(':')[1];
+				const userId = client_id.split(':')[1].split('_')[0];
 				allowedSubscriptionChannels.push(`${process.env.NOTIFICATIONS_TOPIC!}/${userId}`);
 				allowedPublishingChannels.push(`${process.env.NOTIFICATIONS_TOPIC!}/${userId}`);
 

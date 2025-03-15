@@ -23,11 +23,11 @@ export const handler: Handler<SQSEvent> = async event => {
 	if (!relationship) throw new Error(`Relationship ${relationshipId} not found`);
 
 	// Setup the websocket connection
-	const { client: mqttConnection } = createWebsocketConnection(
-		Resource.RealtimeServer.endpoint,
-		Resource.RealtimeServer.authorizer,
-		`${WebSocketToken.GLOBAL}`,
-	);
+	const { client: mqttConnection } = createWebsocketConnection({
+		endpoint: Resource.RealtimeServer.endpoint,
+		authorizer: Resource.RealtimeServer.authorizer,
+		token: WebSocketToken.GLOBAL,
+	});
 
 	mqttConnection.on('connect', async () => {
 		console.log('Connected to websocket! Now sending out notifications');

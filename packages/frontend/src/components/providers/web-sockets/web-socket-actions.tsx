@@ -8,6 +8,7 @@ type ConnectToWebsocketArgs = {
 	authorizer: string;
 	identifier?: string;
 	token?: string;
+	clean?: boolean;
 	onConnect?:
 		| ((connection: MqttClientType, clientId: string) => void)
 		| ((connection: MqttClientType, clientId: string) => Promise<void>);
@@ -21,12 +22,13 @@ type ConnectToWebsocketArgs = {
 };
 
 export const connectToWebsocket = (args: ConnectToWebsocketArgs) => {
-	const { client: mqttConnection, clientId } = createWebsocketConnection(
-		args.endpoint,
-		args.authorizer,
-		args.token,
-		args.identifier,
-	);
+	const { client: mqttConnection, clientId } = createWebsocketConnection({
+		endpoint: args.endpoint,
+		authorizer: args.authorizer,
+		token: args.token,
+		identifier: args.identifier,
+		clean: args.clean,
+	});
 
 	mqttConnection.on('packetsend', packet => {
 		logger.debug(`Packet Send: (${clientId})`, packet);

@@ -26,7 +26,7 @@ affirmationSenderQueue.subscribe({
 });
 
 export const affirmationSenderJob = new sst.aws.Cron('AffirmationAggregatorJob', {
-	schedule: $dev ? 'rate(1 minute)' : 'cron(0 12 * * ? *)',
+	schedule: $dev ? 'rate(30 minutes)' : 'cron(0 12 * * ? *)',
 	function: {
 		handler: 'packages/functions/affirmations/aggregator.handler',
 		link: [db, affirmationSenderQueue],

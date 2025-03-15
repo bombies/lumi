@@ -41,7 +41,7 @@ export const usePresenceWatcher = (user: User, relationship: Relationship) => {
 		clearTimer();
 		timerRef.current = window.setTimeout(async () => {
 			if (messageRef.current) {
-				emitEvent('presence', { ...messageRef.current, status: 'idle' });
+				await emitEvent('presence', { ...messageRef.current, status: 'idle' });
 				await updateUser({ status: 'idle' });
 				setPresence('idle');
 			}
@@ -51,8 +51,8 @@ export const usePresenceWatcher = (user: User, relationship: Relationship) => {
 
 	const startHeartbeatTimeout = useCallback(() => {
 		if (heartbeatIntervalRef.current) return;
-		heartbeatIntervalRef.current = window.setInterval(() => {
-			emitEvent('heartbeat', {
+		heartbeatIntervalRef.current = window.setInterval(async () => {
+			await emitEvent('heartbeat', {
 				userId: user.id,
 				username: user.username,
 				relationshipId: relationship.id,
@@ -68,8 +68,8 @@ export const usePresenceWatcher = (user: User, relationship: Relationship) => {
 		};
 	}, [emitEvent, relationship.id, user.id, user.username]);
 
-	const notifyOnline = useCallback(() => {
-		emitEvent('presence', {
+	const notifyOnline = useCallback(async () => {
+		await emitEvent('presence', {
 			userId: user.id,
 			username: user.username,
 			status: 'online',
@@ -84,7 +84,7 @@ export const usePresenceWatcher = (user: User, relationship: Relationship) => {
 				await startTimer();
 			} else if (presenceRef.current === 'idle') {
 				setPresence('online');
-				notifyOnline();
+				await notifyOnline();
 			}
 			userAcitivtyBuffer.current = null;
 		}, 500);
@@ -95,7 +95,7 @@ export const usePresenceWatcher = (user: User, relationship: Relationship) => {
 		if (document.visibilityState === 'visible') {
 			handleUserActivity();
 		} else if (messageRef.current) {
-			emitEvent('presence', { ...messageRef.current, status: 'idle' });
+			await emitEvent('presence', { ...messageRef.current, status: 'idle' });
 			await updateUser({ status: 'idle' });
 			setPresence('idle');
 			clearTimer();
