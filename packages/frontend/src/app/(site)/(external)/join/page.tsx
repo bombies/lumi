@@ -2,16 +2,29 @@ import { FC } from 'react';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { EnvelopeIcon, InboxArrowDownIcon, PaperAirplaneIcon } from '@heroicons/react/24/solid';
+import { getRelationshipForUser } from '@lumi/core/relationships/relationship.service';
 
-import ReceivedRelationshipRequestsContent from '@/app/(site)/(external)/join/components/rceived-relationship-requests-content';
+import ReceivedRelationshipRequestsContent from '@/app/(site)/(external)/join/components/received-relationship-requests-content';
 import SendRelationshipRequestContent from '@/app/(site)/(external)/join/components/send-relationship-request-content';
-import { auth } from '@/auth';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { createSupabaseServerClient, getServerSession } from '@/lib/supabase/server';
 
 const JoinPage: FC = async () => {
-	const session = (await auth())!;
+	const session = (await getServerSession())!;
 
-	if (session.user.relationshipId) redirect('/home');
+	const relationship = await getRelationshipForUser(session.id);
+	if (relationship) {
+		if (!session.user_metadata.relationshipId) {
+			const supabase = await createSupabaseServerClient();
+			await supabase.auth.updateUser({
+				data: {
+					...session.user_metadata,
+					relationshipId: relationship.id,
+				},
+			});
+		}
+		redirect('/home');
+	}
 
 	return (
 		<main className="p-12">

@@ -37,7 +37,8 @@ export const db = new sst.aws.Dynamo('Database', {
 db.subscribe(
 	'RelationshipStreamHandler',
 	{
-		handler: 'packages/function/db/stream.handler',
+		handler: 'packages/functions/db/stream.handler',
+		link: [db],
 	},
 	{
 		filters: [
@@ -46,6 +47,28 @@ db.subscribe(
 					Keys: {
 						pk: {
 							S: [{ prefix: 'rship#' }],
+						},
+					},
+				},
+			},
+		],
+	},
+);
+
+db.subscribe(
+	'TokenDeletionChainHandler',
+	{
+		handler: 'packages/functions/db/token-deletion.handler',
+		link: [db],
+	},
+	{
+		filters: [
+			{
+				eventName: ['REMOVE'],
+				dynamodb: {
+					Keys: {
+						pk: {
+							S: [{ prefix: 'refresh#' }],
 						},
 					},
 				},

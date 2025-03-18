@@ -1,14 +1,9 @@
 import { TRPCError } from '@trpc/server';
-import { JsonWebTokenError, JwtPayload, SignOptions, sign, verify } from 'jsonwebtoken';
-import { User as NextAuthUser } from 'next-auth';
-import otopGenerator from 'otp-generator';
-import { Resource } from 'sst';
+import { SignJWT, jwtVerify } from 'jose';
+import { JWTExpired } from 'jose/errors';
 
-import { DatabaseUserOTP, UserOTP } from '../types/auth.types';
-import { EntityType, KeyPrefix } from '../types/dynamo.types';
-import { User } from '../types/user.types';
-import { createUser, getUserByEmail, getUserById, updateUser } from '../users/users.service';
-import { dynamo } from '../utils/dynamo/dynamo.service';
+import { SupabaseAccessToken } from '../types/auth.types';
+import { createUser, getUserByEmail } from '../users/users.service';
 import { RegisterUserDto } from './auth.dto';
 
 export const registerUser = async (dto: RegisterUserDto) => {
@@ -29,136 +24,84 @@ export const registerUser = async (dto: RegisterUserDto) => {
 	return createUser(dto);
 };
 
-export function encodeJwtToken(payload: NextAuthUser, opts?: SignOptions) {
-	return sign(payload, process.env.AUTH_SECRET!, {
-		expiresIn: '7d',
-		...opts,
+type SignOptions = {
+	/**
+	 * Set the "exp" (Expiration Time) Claim.
+	 *
+	 * - If a `number` is passed as an argument it is used as the claim directly.
+	 * - If a `Date` instance is passed as an argument it is converted to unix timestamp and used as the
+	 *   claim.
+	 * - If a `string` is passed as an argument it is resolved to a time span, and then added to the
+	 *   current unix timestamp and used as the claim.
+	 *
+	 * Format used for time span should be a number followed by a unit, such as "5 minutes" or "1
+	 * day".
+	 *
+	 * Valid units are: "sec", "secs", "second", "seconds", "s", "minute", "minutes", "min", "mins",
+	 * "m", "hour", "hours", "hr", "hrs", "h", "day", "days", "d", "week", "weeks", "w", "year",
+	 * "years", "yr", "yrs", and "y". It is not possible to specify months. 365.25 days is used as an
+	 * alias for a year.
+	 *
+	 * If the string is suffixed with "ago", or prefixed with a "-", the resulting time span gets
+	 * subtracted from the current unix timestamp. A "from now" suffix can also be used for
+	 * readability when adding to the current unix timestamp.
+	 *
+	 */
+	expirationTime?: number | string | Date;
+	iat: number | string | Date;
+};
+
+export function encodeJwtToken(payload: any, opts: SignOptions) {
+	const jwtbuilder = new SignJWT({ ...payload }).setProtectedHeader({
+		alg: 'HS256',
+		typ: 'JWT',
 	});
+
+	if (opts?.expirationTime) jwtbuilder.setExpirationTime(opts.expirationTime);
+
+	const token = jwtbuilder
+		.setIssuedAt(opts.iat)
+		.setNotBefore(opts.iat)
+		.sign(new TextEncoder().encode(process.env.AUTH_SECRET));
+
+	return token;
 }
 
-export const decodeBearerToken = (token: string) => {
+export async function verify<T extends object = any>(
+	token: string,
+	secret: string,
+	args?: {
+		acceptExpired?: boolean;
+	},
+): Promise<T> {
+	try {
+		const { payload } = await jwtVerify(token, new TextEncoder().encode(secret));
+		return payload as T;
+	} catch (e) {
+		if (e instanceof JWTExpired && args?.acceptExpired) return e.payload as T;
+		throw e;
+	}
+}
+
+export const decodeBearerToken = async (token: string) => {
 	if (!token) return null;
 
 	const [type, value] = token.split(' ');
 	if (type !== 'Bearer') throw new Error('Invalid token type');
 	if (!value) return null;
 
-	let decodedJwt: string | JwtPayload | undefined = undefined;
+	let decodedJwt: SupabaseAccessToken | undefined = undefined;
+
 	try {
-		decodedJwt = verify(value, process.env.AUTH_SECRET!);
+		decodedJwt = await verify<SupabaseAccessToken>(value, process.env.AUTH_SECRET!);
+		return decodedJwt;
 	} catch (e) {
-		if (e instanceof JsonWebTokenError)
+		if (e instanceof JWTExpired) {
 			throw new TRPCError({
-				message: `Error with decoding JWT token!\n${JSON.stringify(e, null, 2)}`,
 				code: 'UNAUTHORIZED',
+				message: 'Access token expired!',
 			});
+		}
 		throw e;
 	}
-
-	return typeof decodedJwt === 'string'
-		? (JSON.parse(decodedJwt) as Required<NextAuthUser>)
-		: (decodedJwt as Required<NextAuthUser>);
-};
-
-export const generateOTPForUserId = async (userId: string) => {
-	const user = await getUserById(userId);
-	if (!user)
-		throw new TRPCError({
-			code: 'NOT_FOUND',
-			message: 'There is no user with that ID!',
-		});
-
-	return generateOTP(user);
-};
-
-export const generateOTP = async (user: User) => {
-	const otp = otopGenerator.generate(6, {
-		lowerCaseAlphabets: false,
-		specialChars: false,
-	});
-
-	const data = {
-		code: otp,
-		expiresAt: new Date(Date.now() + 5 * 60 * 1000).getTime(), // 5 minutes
-		userId: user.id,
-	} satisfies UserOTP;
-	const res = await dynamo.put({
-		TableName: Resource.Database.name,
-		Item: {
-			pk: `${KeyPrefix.OTP}${user.id}`,
-			sk: `${KeyPrefix.OTP}${user.id}`,
-			...data,
-			entityType: EntityType.OTP,
-		} satisfies DatabaseUserOTP,
-	});
-
-	if (res.$metadata.httpStatusCode !== 200)
-		throw new TRPCError({
-			message: `Error with generating OTP: Code ${res.$metadata.httpStatusCode}`,
-			code: 'INTERNAL_SERVER_ERROR',
-		});
-
-	return data;
-};
-
-export const deleteOTPForUser = async (userId: string) => {
-	const res = await dynamo.delete({
-		TableName: Resource.Database.name,
-		Key: {
-			pk: `${KeyPrefix.OTP}${userId}`,
-			sk: `${KeyPrefix.OTP}${userId}`,
-		},
-	});
-
-	if (res.$metadata.httpStatusCode !== 200)
-		throw new TRPCError({
-			message: `Error with deleting OTP: Code ${res.$metadata.httpStatusCode}`,
-			code: 'INTERNAL_SERVER_ERROR',
-		});
-
-	return true;
-};
-
-export const getOTPForUser = async (userId: string) => {
-	const res = await dynamo.get({
-		TableName: Resource.Database.name,
-		Key: {
-			pk: `${KeyPrefix.OTP}${userId}`,
-			sk: `${KeyPrefix.OTP}${userId}`,
-		},
-	});
-
-	return res.Item as UserOTP | undefined;
-};
-
-export const userHasOTPPending = async (userId: string) => {
-	const otp = await getOTPForUser(userId);
-	if (!otp) return false;
-
-	if (otp.expiresAt < Date.now()) {
-		deleteOTPForUser(userId);
-		return false;
-	}
-
-	return true;
-};
-
-export const verifyOTPForUser = async (userId: string, code: string) => {
-	const otp = await getOTPForUser(userId);
-	if (!otp) throw new TRPCError({ code: 'BAD_REQUEST', message: 'No OTP found' });
-
-	if (otp.code !== code) throw new TRPCError({ code: 'BAD_REQUEST', message: 'Incorrect OTP.' });
-
-	if (otp.expiresAt < Date.now()) {
-		await deleteOTPForUser(userId);
-		throw new TRPCError({
-			code: 'BAD_REQUEST',
-			message: 'OTP has expired. Please request a new one',
-		});
-	}
-
-	await updateUser(userId, { verified: true });
-	await deleteOTPForUser(userId);
-
-	return true;
 };

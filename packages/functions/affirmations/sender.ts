@@ -9,7 +9,11 @@ import {
 	WebSocketToken,
 } from '@lumi/core/types/websockets.types';
 import { getUserById } from '@lumi/core/users/users.service';
-import { createWebsocketConnection, emitWebsocketEvent } from '@lumi/core/websockets/websockets.service';
+import {
+	createAsyncWebsocketConnection,
+	createWebsocketConnection,
+	emitAsyncWebsocketEvent,
+} from '@lumi/core/websockets/websockets.service';
 import { Handler, SQSEvent } from 'aws-lambda';
 import { Resource } from 'sst';
 import webpush from 'web-push';
@@ -23,14 +27,15 @@ export const handler: Handler<SQSEvent> = async event => {
 	if (!relationship) throw new Error(`Relationship ${relationshipId} not found`);
 
 	// Setup the websocket connection
-	const { client: mqttConnection } = createWebsocketConnection({
-		endpoint: Resource.RealtimeServer.endpoint,
-		authorizer: Resource.RealtimeServer.authorizer,
-		token: WebSocketToken.GLOBAL,
-	});
+	try {
+		const mqttConnection = await createAsyncWebsocketConnection({
+			endpoint: Resource.RealtimeServer.endpoint,
+			authorizer: Resource.RealtimeServer.authorizer,
+			token: WebSocketToken.GLOBAL,
+		});
 
-	mqttConnection.on('connect', async () => {
 		console.log('Connected to websocket! Now sending out notifications');
+
 		const topicPrefix = `${process.env.NOTIFICATIONS_TOPIC}/`;
 
 		await mqttConnection.subscribeAsync({
@@ -73,7 +78,7 @@ export const handler: Handler<SQSEvent> = async event => {
 					}
 				} else {
 					console.log(`${user.username} is either online or idle... Sending notification through websocket`);
-					await emitWebsocketEvent({
+					await emitAsyncWebsocketEvent({
 						client: mqttConnection,
 						topic: `${topicPrefix}${user.id}`,
 						event: 'notification',
@@ -100,10 +105,9 @@ export const handler: Handler<SQSEvent> = async event => {
 		if (partner1) await handleNotifications(partner1);
 		if (partner2) await handleNotifications(partner2);
 
-		console.log('All done!');
-
 		mqttConnection.end();
-	});
-
-	mqttConnection.connect();
+		console.log('All done!');
+	} catch (e) {
+		console.error('There was an unhandled error!', e);
+	}
 };

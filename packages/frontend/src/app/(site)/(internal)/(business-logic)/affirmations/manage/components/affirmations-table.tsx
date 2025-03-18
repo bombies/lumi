@@ -7,6 +7,8 @@ import ManagedTable from '@/components/ui/table/managed-table';
 import ManagedTableHeader from '@/components/ui/table/managed-table-header';
 import { GetOwnedAffirmations } from '../../hooks';
 import AddAffirmationButton from './add-affirmation-button';
+import DeleteAffirmationButton from './delete-affirmation-button';
+import EditAffirmationButton from './edit-affirmation-button';
 
 export const AffirmationsTable: FC = () => {
 	const { data: affirmations, isLoading: affirmationsLoading } = GetOwnedAffirmations();
@@ -31,7 +33,12 @@ export const AffirmationsTable: FC = () => {
 					header: ({ column }) => <ManagedTableHeader column={column} title="Actions" />,
 					cell: ({ row, column }) => {
 						const affirmation = row.getValue<Affirmation>(column.id);
-						return <div className="flex gap-2"></div>;
+						return (
+							<div className="flex gap-2">
+								<EditAffirmationButton affirmation={affirmation} />
+								<DeleteAffirmationButton affirmation={affirmation} />
+							</div>
+						);
 					},
 					enableHiding: false,
 					enableSorting: false,

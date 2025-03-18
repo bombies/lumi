@@ -2,11 +2,11 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { ArrowRight } from 'lucide-react';
 
-import { auth } from '@/auth';
 import { Button } from '@/components/ui/button';
+import { getServerSession } from '@/lib/supabase/server';
 
 export default async function Home() {
-	const session = await auth();
+	const session = await getServerSession();
 	if (session) redirect('/home');
 
 	return (

@@ -14,13 +14,13 @@ export const handler: Handler<DynamoDBStreamEvent> = async event => {
 		try {
 			switch (record.eventName) {
 				case 'REMOVE':
-					const oldImage = record.dynamodb.OldImage as Relationship | undefined;
+					const oldImage = record.dynamodb.OldImage;
 					if (!oldImage) {
 						console.error('Old image is missing for REMOVE event');
 						continue;
 					}
 
-					await deleteAffirmationsForRelationship(oldImage.id);
+					await deleteAffirmationsForRelationship(oldImage.id.S!);
 					break;
 			}
 		} catch (e) {

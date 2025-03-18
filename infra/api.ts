@@ -1,4 +1,5 @@
 import { db } from './db';
+import { apiDNS, webDNS } from './dns';
 import { notificationsTopic } from './realtime';
 import {
 	authSecret,
@@ -19,7 +20,7 @@ export const trpc = new sst.aws.Function('Trpc', {
 		? true
 		: {
 				cors: {
-					allowOrigins: [`https://lumi.ajani.me`],
+					allowOrigins: [`https://${webDNS}`],
 				},
 			},
 	link: [
@@ -62,7 +63,7 @@ if (!$dev)
 				},
 			},
 		],
-		domain: 'api.lumi.ajani.me',
+		domain: apiDNS,
 		defaultCacheBehavior: {
 			allowedMethods: ['DELETE', 'GET', 'HEAD', 'OPTIONS', 'PATCH', 'POST', 'PUT'],
 			cachedMethods: ['GET', 'HEAD', 'OPTIONS'],

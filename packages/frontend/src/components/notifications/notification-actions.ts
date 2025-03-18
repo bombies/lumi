@@ -8,7 +8,7 @@ import {
 import { NotificationSubscriber } from '@lumi/core/types/notification.types';
 import webpush from 'web-push';
 
-import { auth } from '@/auth';
+import { getServerSession } from '@/lib/supabase/server';
 
 webpush.setVapidDetails(
 	'mailto:contact@ajani.me',
@@ -33,20 +33,20 @@ const fetchSubscriptionsForUser = async (userId: string) => {
 };
 
 export async function subscribeUser(sub: PushSubscription) {
-	const session = await auth();
+	const session = await getServerSession();
 	if (!session) return { success: false, error: 'Unauthorized' };
 
-	await createNotificationSubscription(session.user.id!, sub);
-	fetchSubscriptionsForUser(session.user.id!);
+	await createNotificationSubscription(session.id, sub);
+	fetchSubscriptionsForUser(session.id);
 	return { success: true };
 }
 
 export async function unsubscribeUser(endpoint: string) {
-	const session = await auth();
+	const session = await getServerSession();
 	if (!session) return { success: false, error: 'Unauthorized' };
 
-	deleteNotificationSubscription(session.user.id!, endpoint);
-	subscriptions[session.user.id!] = subscriptions[session.user.id!]?.filter(sub => sub?.endpoint !== endpoint);
+	deleteNotificationSubscription(session.id, endpoint);
+	subscriptions[session.id] = subscriptions[session.id]?.filter(sub => sub?.endpoint !== endpoint);
 	return { success: true };
 }
 
@@ -57,10 +57,10 @@ export type SendNotificationArgs = {
 };
 
 export async function sendUserNotification({ message, title, icon = '/favicon-96x96.png' }: SendNotificationArgs) {
-	const session = await auth();
+	const session = await getServerSession();
 	if (!session) return { success: false, error: 'Unauthorized' };
 
-	const subs = subscriptions[session.user.id!];
+	const subs = subscriptions[session.id];
 	if (!subs) return { success: false, error: 'No subscriptions found' };
 
 	for (const sub of subs) {

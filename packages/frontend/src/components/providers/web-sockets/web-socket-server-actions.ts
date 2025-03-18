@@ -2,7 +2,6 @@
 
 import {
 	Event,
-	InferredWebSocketMessage,
 	InferredWebSocketMessagePayload,
 	WebSocketMessage,
 	WebSocketToken,

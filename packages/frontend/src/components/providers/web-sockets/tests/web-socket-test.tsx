@@ -2,12 +2,12 @@
 
 import { FC, useEffect, useState } from 'react';
 import { WebSocketEventHandler } from '@lumi/core/types/websockets.types';
-import { useSession } from 'next-auth/react';
 
 import { useWebSocket } from '@/components/providers/web-sockets/web-socket-provider';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { logger } from '@/lib/logger';
+import { useSession } from '../../session-provider';
 
 const WebSocketTest: FC = () => {
 	const { data: session } = useSession();
@@ -47,7 +47,7 @@ const WebSocketTest: FC = () => {
 				<Button
 					className="flex gap-2"
 					onClick={async () => {
-						await emitEvent('test', { sender: session!.user.username!, message: inputValue });
+						await emitEvent('test', { sender: session.user!.user_metadata.username, message: inputValue });
 					}}
 				>
 					send message

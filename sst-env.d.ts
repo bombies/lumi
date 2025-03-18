@@ -66,6 +66,14 @@ declare module "sst" {
       "type": "sst.sst.Secret"
       "value": string
     }
+    "SupabaseKey": {
+      "type": "sst.sst.Secret"
+      "value": string
+    }
+    "SupabaseUrl": {
+      "type": "sst.sst.Secret"
+      "value": string
+    }
     "Trpc": {
       "name": string
       "type": "sst.aws.Function"

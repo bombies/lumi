@@ -76,7 +76,7 @@ const ReceivedAffirmationsContainer = () => {
 					<div className="space-y-3">{affirmationElements}</div>
 				</div>
 			) : (
-				<p>No affirmations received...</p>
+				<p className="p-6 rounded-lg border border-border w-fit font-semibold">No affirmations received...</p>
 			)}
 			<InfiniteLoader loading={isFetchingNextPage} hasMore={hasNextPage} fetchMore={fetchNextPage} />
 		</>

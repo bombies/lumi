@@ -6,8 +6,8 @@ import type { QueryClient } from '@tanstack/react-query';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { httpBatchLink } from '@trpc/client';
 import { createTRPCReact } from '@trpc/react-query';
-import { useSession } from 'next-auth/react';
 
+import { createSupabaseBrowserClient } from '../supabase/client';
 import { makeQueryClient } from './query-client';
 
 export const trpc = createTRPCReact<AppRouter>();
@@ -32,7 +32,7 @@ export function TRPCProvider(
 	//       have a suspense boundary between this and the code that may
 	//       suspend because React will throw away the client on the initial
 	//       render if it suspends and there is no boundary
-	const { data: session } = useSession();
+	const supabase = createSupabaseBrowserClient();
 	const queryClient = getQueryClient();
 	const trpcClient = useMemo(
 		() =>
@@ -41,8 +41,9 @@ export function TRPCProvider(
 					httpBatchLink({
 						// transformer: superjson, <-- if you use a data transformer
 						url: getUrl(),
-						headers: () => {
-							const token = session?.backendToken;
+						headers: async () => {
+							const session = await supabase.auth.getSession();
+							const token = session?.data.session?.access_token;
 							return {
 								authorization: token ? `Bearer ${token}` : '',
 							};
@@ -50,7 +51,7 @@ export function TRPCProvider(
 					}),
 				],
 			}),
-		[session?.backendToken],
+		[supabase.auth],
 	);
 
 	return (

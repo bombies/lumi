@@ -1,5 +1,8 @@
 export const authSecret = new sst.Secret('AuthSecret');
 
+export const supabaseUrl = new sst.Secret('SupabaseUrl');
+export const supabaseKey = new sst.Secret('SupabaseKey');
+
 export const mailerHostSecret = new sst.Secret('MailerHost');
 export const mailerPortSecret = new sst.Secret('MailerPort');
 export const mailerUserSecret = new sst.Secret('MailerUser');

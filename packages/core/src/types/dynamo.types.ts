@@ -3,6 +3,7 @@ export enum KeyPrefix {
 	USER_NAME = 'user#username',
 	USER_EMAIL = 'user#email',
 
+	REFRESH_TOKEN = 'refresh#',
 	OTP = 'otp#',
 
 	RELATIONSHIP_REQUEST = 'rshipreq#',
@@ -20,6 +21,7 @@ export enum KeyPrefix {
 
 export enum EntityType {
 	USER = 'USER',
+	REFRESH_TOKEN = 'REFRESH_TOKEN',
 	OTP = 'OTP',
 	RELATIONSHIP_REQUEST = 'RELATIONSHIP_REQUEST',
 	RELATIONSHIP = 'RELATIONSHIP',

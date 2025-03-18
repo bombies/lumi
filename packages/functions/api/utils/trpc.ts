@@ -7,14 +7,18 @@ import { APIGatewayProxyEvent } from 'aws-lambda';
 type Context = Awaited<ReturnType<typeof createContext>>;
 
 export const t = initTRPC.context<Context>().create();
-export function createContext({ event, context, info }: CreateAWSLambdaContextOptions<APIGatewayProxyEvent>) {
+export async function createContext({ event, context, info }: CreateAWSLambdaContextOptions<APIGatewayProxyEvent>) {
 	const headers = event.headers as Record<string, string | undefined>;
 	const authorizationHeader = event.headers.authorization;
 	if (!authorizationHeader) return { headers };
 	try {
+		const decodedToken = await decodeBearerToken(authorizationHeader);
+		if (!decodedToken) return { headers };
 		return {
 			headers,
-			user: decodeBearerToken(authorizationHeader),
+			user: {
+				id: decodedToken.sub,
+			},
 		};
 	} catch (e) {
 		console.error(e);

@@ -1,6 +1,6 @@
-const originAccessIdentity = new aws.cloudfront.OriginAccessIdentity(
-	'ContentCdnOriginAccessIdentity',
-);
+import { appify } from './utils';
+
+const originAccessIdentity = new aws.cloudfront.OriginAccessIdentity(appify('ContentCdnOriginAccessIdentity'));
 
 export const contentBucket = new sst.aws.Bucket(`ContentBucket`, {
 	transform: {
@@ -22,7 +22,7 @@ export const contentBucket = new sst.aws.Bucket(`ContentBucket`, {
 	},
 });
 
-const contentCdnPublicKey = new aws.cloudfront.PublicKey('ContentCdnPublicKey', {
+const contentCdnPublicKey = new aws.cloudfront.PublicKey(appify('ContentCdnPublicKey'), {
 	comment: 'The public key for the content CDN',
 	encodedKey: std
 		.file({
@@ -31,13 +31,13 @@ const contentCdnPublicKey = new aws.cloudfront.PublicKey('ContentCdnPublicKey', 
 		.then(invoke => invoke.result),
 });
 
-const contentCdnKeyGroup = new aws.cloudfront.KeyGroup('ContentCdnKeyGroup', {
+const contentCdnKeyGroup = new aws.cloudfront.KeyGroup(appify('ContentCdnKeyGroup'), {
 	comment: 'The key group for the content CDN',
 	items: [contentCdnPublicKey.id],
-	name: 'content-cdn-key-group',
+	name: `${appify('content-cdn-key-group')}`,
 });
 
-const contentBucketOriginId = 'ContentBucketOriginId';
+const contentBucketOriginId = appify('ContentBucketOriginId');
 export const contentCdn = new sst.aws.Cdn('ContentCdn', {
 	origins: [
 		{

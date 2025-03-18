@@ -1,12 +1,14 @@
 'use client';
 
 import { FC } from 'react';
+import { useRouter } from 'next/navigation';
 import { LogOutIcon } from 'lucide-react';
-import { signOut, useSession } from 'next-auth/react';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
 import { sendSignOutNotification } from '@/lib/actions/relationship-actions';
+import { createSupabaseBrowserClient } from '@/lib/supabase/client';
+import { useSession } from '../providers/session-provider';
 
 type Props = {
 	iconOnly?: boolean;
@@ -14,6 +16,8 @@ type Props = {
 
 const SignOutButton: FC<Props> = ({ iconOnly }) => {
 	const { data: session } = useSession();
+	const router = useRouter();
+	const supabase = createSupabaseBrowserClient();
 
 	return (
 		<Button
@@ -21,12 +25,13 @@ const SignOutButton: FC<Props> = ({ iconOnly }) => {
 			variant="destructive"
 			onClick={async () => {
 				if (!session) return;
-				const user = session.user;
-				await sendSignOutNotification(user.id!, user.username!);
+				const user = session.user!;
+				await sendSignOutNotification(user.id, user.user_metadata.username);
 
-				toast.promise(signOut(), {
+				toast.promise(supabase.auth.signOut(), {
 					loading: 'Signing out...',
 					async success() {
+						router.push('/auth/login');
 						return 'Signed out successfully.';
 					},
 					error: 'Could not sign out.',

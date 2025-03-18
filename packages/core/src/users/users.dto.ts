@@ -13,16 +13,15 @@ export const userDto = z.object({
 	username: z.string(),
 	firstName: z.string(),
 	lastName: z.string(),
-	password: z.string().optional(),
 	createdAt: z.string(),
 	updatedAt: z.string(),
 	avatarKey: z.string().optional(),
 	relationshipId: z.string().optional(),
-	verified: z.boolean(),
 	status: z.enum(['online', 'offline', 'idle']).optional(),
 });
 
 export const createUserDto = z.object({
+	id: z.string().optional(),
 	email: z.string().email(),
 	username: z
 		.string()
@@ -32,13 +31,6 @@ export const createUserDto = z.object({
 		),
 	firstName: z.string().regex(FIRST_NAME_REGEX, 'Invalid first name.'),
 	lastName: z.string().regex(LAST_NAME_REGEX, 'Invalid last name.'),
-	password: z
-		.string()
-		.regex(
-			PASSWORD_REGEX,
-			'The password must be between 8 and 255 characters long and should include: a upper and lowercase character, a number and a special character.',
-		)
-		.optional(),
 });
 
 export const updateUserDto = createUserDto

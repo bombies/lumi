@@ -1,15 +1,14 @@
 import type { Metadata } from 'next';
 import { Cookie } from 'next/font/google';
 import localFont from 'next/font/local';
-import { SessionProvider } from 'next-auth/react';
 
-import { auth } from '@/auth';
 import Providers from '@/components/providers/providers';
 import { HydrateClient } from '@/lib/trpc/server';
 
 import './globals.css';
 
-import { getUserById } from '@lumi/core/users/users.service';
+import SessionProvider from '@/components/providers/session-provider';
+import { createSupabaseServerClient } from '@/lib/supabase/server';
 
 const sfProDisplay = localFont({
 	src: [
@@ -124,12 +123,13 @@ export default async function RootLayout({
 }: Readonly<{
 	children: React.ReactNode;
 }>) {
-	const session = await auth();
+	const supabaseSession = await createSupabaseServerClient();
+	const supabaseUser = await supabaseSession.auth.getUser();
 
 	return (
 		<html lang="en" className={`${sfProDisplay.variable} ${cookie.variable}`}>
 			<body className={`antialiased`}>
-				<SessionProvider session={session}>
+				<SessionProvider userResponse={supabaseUser}>
 					<Providers>
 						<HydrateClient>{children}</HydrateClient>
 					</Providers>

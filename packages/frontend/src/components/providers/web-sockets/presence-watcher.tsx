@@ -91,7 +91,6 @@ export const usePresenceWatcher = (user: User, relationship: Relationship) => {
 	}, [notifyOnline, startTimer]);
 
 	const handlePageVisibilityEvents = useCallback(async () => {
-		console.log('handling visibility event', document.visibilityState);
 		if (document.visibilityState === 'visible') {
 			handleUserActivity();
 		} else if (messageRef.current) {

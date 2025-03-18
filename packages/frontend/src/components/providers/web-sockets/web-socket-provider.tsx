@@ -9,7 +9,7 @@ import {
 	WebSocketEventHandler,
 	WebSocketToken,
 } from '@lumi/core/types/websockets.types';
-import { emitWebsocketEvent, MqttClientType } from '@lumi/core/websockets/websockets.service';
+import { emitAsyncWebsocketEvent, MqttClientType } from '@lumi/core/websockets/websockets.service';
 
 import { UpdateUser } from '@/app/(site)/(internal)/settings/(account)/trpc-hooks';
 import { connectToWebsocket } from '@/components/providers/web-sockets/web-socket-actions';
@@ -99,7 +99,7 @@ const WebSocketProvider: FC<WebSocketProviderProps> = ({ children, user, endpoin
 			},
 		) => {
 			if (mqttConnection) {
-				await emitWebsocketEvent({
+				await emitAsyncWebsocketEvent({
 					client: mqttConnection,
 					topic: args?.topic ?? relationshipWSTopic(relationshipId),
 					event,
@@ -112,13 +112,14 @@ const WebSocketProvider: FC<WebSocketProviderProps> = ({ children, user, endpoin
 	);
 
 	useEffect(() => {
-		console.log('CREATING A NEW CONNECTION.');
+		logger.debug('CREATING A NEW CONNECTION.');
 		setConnectionStatus('connecting');
 		const connection = connectToWebsocket({
 			endpoint,
 			authorizer,
 			identifier: 'user:' + user.id,
 			token: `${WebSocketToken.RELATIONSHIP_USER}::${relationshipId}`,
+			keepalive: 600,
 			async onConnect(_, clientId) {
 				try {
 					logger.debug(`Connected to websocket! Attempting to subscribe to topic... (${clientId})`);
@@ -133,7 +134,7 @@ const WebSocketProvider: FC<WebSocketProviderProps> = ({ children, user, endpoin
 					logger.debug(`Successfully subscribed to topic! (${clientId})`);
 					logger.debug(`Now sending status updates... (${clientId})`);
 					await updateUser({ status: 'online' });
-					await emitWebsocketEvent({
+					await emitAsyncWebsocketEvent({
 						client: connection,
 						topic: relationshipWSTopic(relationshipId),
 						event: 'connect',
@@ -141,7 +142,7 @@ const WebSocketProvider: FC<WebSocketProviderProps> = ({ children, user, endpoin
 						source: 'client',
 					});
 
-					await emitWebsocketEvent({
+					await emitAsyncWebsocketEvent({
 						client: connection,
 						topic: relationshipWSTopic(relationshipId),
 						event: 'presence',
@@ -169,13 +170,13 @@ const WebSocketProvider: FC<WebSocketProviderProps> = ({ children, user, endpoin
 			async onDisconnect(clientId) {
 				logger.debug(`Handling disconnect for ${clientId}`);
 				await updateUser({ status: 'offline' });
-				await emitWebsocketEvent({
+				await emitAsyncWebsocketEvent({
 					client: connection,
 					topic: relationshipWSTopic(relationshipId),
 					event: 'disconnect',
 					payload: { userId: user.id, username: user.username },
 				});
-				await emitWebsocketEvent({
+				await emitAsyncWebsocketEvent({
 					client: connection,
 					topic: relationshipWSTopic(relationshipId),
 					event: 'presence',

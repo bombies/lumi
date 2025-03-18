@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 
 const useErrorHandler = () => {
 	const searchParams = useSearchParams();
+	let args: Parameters<typeof toast.error>[1];
 
 	useEffect(() => {
 		const error = searchParams.get('error');
@@ -15,6 +16,10 @@ const useErrorHandler = () => {
 		switch (error) {
 			case 'AcessDenied': {
 				errorMessage = 'Invalid credentials.';
+				break;
+			}
+			case 'UserNotFound': {
+				errorMessage = 'There is no user with that email or username!';
 				break;
 			}
 			case 'OAuthAccountNotLinked': {
@@ -30,18 +35,34 @@ const useErrorHandler = () => {
 				errorMessage = 'Your account has been banned. Please contact support for more information.';
 				break;
 			}
+			case 'InvalidToken': {
+				errorMessage = 'The token you provided is invalid.';
+				break;
+			}
+			case 'ExpiredToken': {
+				errorMessage = 'The token you provided has expired. Check your email for a new one.';
+				break;
+			}
+			case 'InternalServerError': {
+				errorMessage = 'An internal server error occurred. Please try again later.';
+				break;
+			}
+			case 'UsernameAlreadyExists': {
+				errorMessage = 'The username you provided is already taken.';
+				break;
+			}
 			default: {
-				errorMessage = 'There was an error trying to sign in. Please try again.';
+				errorMessage = error;
 				break;
 			}
 		}
 
 		const timeoutId = setTimeout(() => {
-			toast.error(errorMessage);
+			toast.error(errorMessage, args);
 		}, 1000);
 
 		return () => clearTimeout(timeoutId);
-	}, [searchParams]);
+	}, [args, searchParams]);
 };
 
 const ErrorHandler: FC = () => {

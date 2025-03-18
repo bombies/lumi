@@ -3,7 +3,6 @@
 import { FC, useCallback, useState } from 'react';
 import { registerUserDto } from '@lumi/core/auth/auth.dto';
 import { PASSWORD_REGEX } from '@lumi/core/users/users.dto';
-import { signIn } from 'next-auth/react';
 import { SubmitHandler } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
@@ -13,8 +12,7 @@ import EasyForm from '@/components/ui/form-extras/easy-form';
 import EasyFormField from '@/components/ui/form-extras/easy-form-field';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
-import { trpc } from '@/lib/trpc/client';
-import { handleTrpcError } from '@/lib/trpc/utils';
+import { register } from '../actions';
 
 const registerSchema = registerUserDto.and(
 	z.object({
@@ -24,45 +22,23 @@ const registerSchema = registerUserDto.and(
 
 type RegisterSchema = z.infer<typeof registerSchema>;
 
-const RegisterUser = () => {
-	return trpc.auth.register.useMutation();
-};
-
 const RegisterForm: FC = () => {
-	const { mutateAsync: register, isPending: isRegistering } = RegisterUser();
 	const [isAuthenticating, setIsAuthenticating] = useState(false);
-	const onSubmit = useCallback<SubmitHandler<RegisterSchema>>(
-		async ({ confirmPassword, ...data }) => {
-			setIsAuthenticating(true);
+	const onSubmit = useCallback<SubmitHandler<RegisterSchema>>(async ({ confirmPassword, ...data }) => {
+		setIsAuthenticating(true);
+		if (data.password !== confirmPassword) return toast.error('Passwords do not match');
+		await register(data);
+		setIsAuthenticating(false);
 
-			if (data.password !== confirmPassword) return toast.error('Passwords do not match');
-
-			try {
-				await register({
-					...data,
-					args: {
-						sendOTP: true,
-					},
-				});
-				toast.success('Account created successfully');
-				await signIn('credentials', {
-					username: data.username,
-					password: data.password,
-					redirectTo: '/',
-				});
-			} catch (e) {
-				handleTrpcError(e);
-			} finally {
-				setIsAuthenticating(false);
-			}
-		},
-		[register],
-	);
+		return () => {
+			setIsAuthenticating(false);
+		};
+	}, []);
 
 	return (
 		<EasyForm
 			schema={registerSchema}
-			disabled={isAuthenticating || isRegistering}
+			disabled={isAuthenticating}
 			onSubmit={onSubmit}
 			className="w-full max-w-[35rem] space-y-6 bg-card p-6 rounded-lg border border-border"
 		>
@@ -88,7 +64,7 @@ const RegisterForm: FC = () => {
 			<EasyFormField<RegisterSchema> name="confirmPassword" label="Confirm Password" showErrorMessage>
 				<Input type="password" />
 			</EasyFormField>
-			<Button type="submit" loading={isAuthenticating || isRegistering}>
+			<Button type="submit" loading={isAuthenticating}>
 				Register
 			</Button>
 		</EasyForm>

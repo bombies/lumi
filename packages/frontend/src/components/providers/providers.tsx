@@ -2,7 +2,6 @@
 
 import { FC, PropsWithChildren } from 'react';
 import { ProgressProvider } from '@bprogress/next/app';
-import { User } from '@lumi/core/types/user.types';
 import { Toaster } from 'sonner';
 
 import InstallPrompt from '@/components/notifications/install-prompt';

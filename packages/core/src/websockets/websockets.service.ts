@@ -44,6 +44,31 @@ export const createWebsocketConnection = ({
 	};
 };
 
+type CreateAsyncWebsocketConnectionArgs = {
+	endpoint: string;
+	authorizer: string;
+	token?: string;
+	identifier?: string;
+} & mqtt.IClientOptions;
+
+export const createAsyncWebsocketConnection = async ({
+	endpoint,
+	authorizer,
+	token,
+	identifier,
+	...args
+}: CreateAsyncWebsocketConnectionArgs) => {
+	const clientId = `client_` + (identifier ? identifier + '_' + createId() : createId());
+	return mqtt.connectAsync(`wss://${endpoint}/mqtt?x-amz-customauthorizer-name=${authorizer}`, {
+		protocolVersion: 5,
+		username: '',
+		password: `${clientId}${token ? `::${token}` : ''}`,
+		clientId,
+		manualConnect: false,
+		...args,
+	});
+};
+
 type EmitWebSocketEventArgs<T extends Event> = {
 	client: mqtt.MqttClient;
 	topic: string;
@@ -52,7 +77,7 @@ type EmitWebSocketEventArgs<T extends Event> = {
 	source?: 'client' | 'server';
 };
 
-export const emitWebsocketEvent = async <T extends Event>({
+export const emitAsyncWebsocketEvent = async <T extends Event>({
 	client,
 	topic,
 	event,

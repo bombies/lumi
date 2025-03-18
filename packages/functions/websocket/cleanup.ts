@@ -8,7 +8,11 @@ import {
 	WebSocketToken,
 } from '@lumi/core/types/websockets.types';
 import { dynamo, getDynamicUpdateStatements } from '@lumi/core/utils/dynamo/dynamo.service';
-import { createWebsocketConnection, emitWebsocketEvent } from '@lumi/core/websockets/websockets.service';
+import {
+	createAsyncWebsocketConnection,
+	createWebsocketConnection,
+	emitAsyncWebsocketEvent,
+} from '@lumi/core/websockets/websockets.service';
 import { APIGatewayProxyEvent, Handler } from 'aws-lambda';
 import { ISubscriptionMap } from 'mqtt';
 import { Resource } from 'sst';
@@ -80,13 +84,13 @@ export const handler: Handler<APIGatewayProxyEvent> = async () => {
 		await Promise.all(updateRequests);
 
 		// Send a message to the relationship websocket topic to notify the other user.
-		const { client: mqttConnection } = createWebsocketConnection({
+		const mqttConnection = await createAsyncWebsocketConnection({
 			endpoint: Resource.RealtimeServer.endpoint,
 			authorizer: Resource.RealtimeServer.authorizer,
 			token: WebSocketToken.GLOBAL,
 		});
 
-		mqttConnection.on('connect', async () => {
+		try {
 			console.log('Connected to websocket! Now sending out updates');
 
 			const topicPrefix = `${process.env.NOTIFICATIONS_TOPIC!}/${WebSocketSubTopic.RELATIONSHIP}/`;
@@ -104,7 +108,7 @@ export const handler: Handler<APIGatewayProxyEvent> = async () => {
 
 				try {
 					console.log('Publishing offline message for relationship ', relationshipId);
-					await emitWebsocketEvent({
+					await emitAsyncWebsocketEvent({
 						client: mqttConnection,
 						topic: `${topicPrefix}${relationshipId}`,
 						source: 'server',
@@ -120,8 +124,10 @@ export const handler: Handler<APIGatewayProxyEvent> = async () => {
 					console.error('Failed to publish offline message', e);
 				}
 			}
-		});
+		} catch (e) {
+			console.error('There was an unhandled error!', e);
+		}
 
-		mqttConnection.connect();
+		mqttConnection.end();
 	}
 };

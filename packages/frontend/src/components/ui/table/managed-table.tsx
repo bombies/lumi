@@ -54,10 +54,10 @@ export default function ManagedTable<T>({
 				onRowSelectionChange={onRowSelectionChange}
 				loading={loading}
 			>
-				{header}
+				{header && <div className="mb-6">{header}</div>}
 				<EasyTableDisplay className={className} />
 				<ManagedTablePagination {...paginationProps} />
-				{footer}
+				{footer && <div className="mt-6">{footer}</div>}
 			</ManagedTableProvider>
 		</div>
 	);

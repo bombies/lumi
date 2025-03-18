@@ -1,5 +1,5 @@
 import { createWebsocketConnection, MqttClientType } from '@lumi/core/websockets/websockets.service';
-import { ErrorWithReasonCode } from 'mqtt';
+import { ErrorWithReasonCode, IClientOptions } from 'mqtt';
 
 import { logger } from '@/lib/logger';
 
@@ -8,7 +8,6 @@ type ConnectToWebsocketArgs = {
 	authorizer: string;
 	identifier?: string;
 	token?: string;
-	clean?: boolean;
 	onConnect?:
 		| ((connection: MqttClientType, clientId: string) => void)
 		| ((connection: MqttClientType, clientId: string) => Promise<void>);
@@ -19,15 +18,25 @@ type ConnectToWebsocketArgs = {
 	onMessage?:
 		| ((message: unknown, clientId: string) => void)
 		| ((message: unknown, clientId: string) => Promise<void>);
-};
+} & IClientOptions;
 
-export const connectToWebsocket = (args: ConnectToWebsocketArgs) => {
+export const connectToWebsocket = ({
+	endpoint,
+	authorizer,
+	token,
+	identifier,
+	onConnect,
+	onDisconnect,
+	onError,
+	onMessage,
+	...clientArgs
+}: ConnectToWebsocketArgs) => {
 	const { client: mqttConnection, clientId } = createWebsocketConnection({
-		endpoint: args.endpoint,
-		authorizer: args.authorizer,
-		token: args.token,
-		identifier: args.identifier,
-		clean: args.clean,
+		endpoint,
+		authorizer,
+		token,
+		identifier,
+		...clientArgs,
 	});
 
 	mqttConnection.on('packetsend', packet => {
@@ -39,25 +48,25 @@ export const connectToWebsocket = (args: ConnectToWebsocketArgs) => {
 	});
 
 	mqttConnection.on('connect', async () => {
-		const cb = args?.onConnect?.(mqttConnection, clientId);
+		const cb = onConnect?.(mqttConnection, clientId);
 		if (cb instanceof Promise) await cb;
 	});
 
 	mqttConnection.on('disconnect', async () => {
-		const cb = args?.onDisconnect?.(clientId);
+		const cb = onDisconnect?.(clientId);
 		if (cb instanceof Promise) await cb;
 	});
 
 	mqttConnection.on('error', async e => {
 		console.error('WS Error:', e);
-		const cb = args?.onError?.(e, clientId);
+		const cb = onError?.(e, clientId);
 		if (cb instanceof Promise) await cb;
 	});
 
 	mqttConnection.on('message', async (topic, event) => {
 		const message = new TextDecoder('utf8').decode(new Uint8Array(event));
 		const jsonMsg = JSON.parse(message);
-		const cb = args?.onMessage?.(jsonMsg, clientId);
+		const cb = onMessage?.(jsonMsg, clientId);
 		if (cb instanceof Promise) await cb;
 	});
 

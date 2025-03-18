@@ -1,5 +1,4 @@
 import { TRPCError } from '@trpc/server';
-import bcrypt from 'bcryptjs';
 
 import { EntityType, KeyPrefix } from '../types/dynamo.types';
 import { getInfiniteData } from '../types/infinite-data.dto';
@@ -13,7 +12,6 @@ type CreateUserArgs = {
 };
 
 export const createUser = async ({
-	password,
 	args,
 	...dto
 }: CreateUserDto & {
@@ -31,9 +29,8 @@ export const createUser = async ({
 			message: 'User with this username already exists',
 		});
 
-	const userId = getUUID();
+	const userId = dto.id ?? getUUID();
 	const [createdAt, updatedAt] = [new Date().toISOString(), new Date().toISOString()];
-	const hashedPassword = password ? await bcrypt.hash(password, 10) : undefined;
 	await dynamo.put({
 		TableName: process.env.TABLE_NAME,
 		Item: {
@@ -44,26 +41,15 @@ export const createUser = async ({
 			gsi2pk: `${KeyPrefix.USER}email`,
 			gsi2sk: `${KeyPrefix.USER}${dto.email}`,
 			entityType: EntityType.USER,
-			id: userId,
-			password: hashedPassword,
 			createdAt: new Date().toISOString(),
 			updatedAt: new Date().toISOString(),
 			verified: false,
 			...dto,
+			id: userId,
 		} satisfies DatabaseUser,
 	});
 
 	return { id: userId, createdAt, updatedAt, verified: false, ...dto } as User;
-};
-
-export const verifyUserPassword = async (emailOrUsername: string, password: string) => {
-	const user = await getUserByEmailOrUsername(emailOrUsername);
-	if (!user) return false;
-
-	if (!user.password) throw new Error('User does not have a password set. Please login with a different provider');
-
-	const passwordValid = await bcrypt.compare(password, user.password);
-	return passwordValid ? user : false;
 };
 
 export const getUserById = async (userId: string) => {

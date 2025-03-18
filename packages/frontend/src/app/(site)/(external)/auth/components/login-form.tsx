@@ -2,8 +2,6 @@
 
 import { FC, useCallback, useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { signIn } from 'next-auth/react';
 import { SubmitHandler } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
@@ -14,6 +12,7 @@ import EasyFormField from '@/components/ui/form-extras/easy-form-field';
 import { Input } from '@/components/ui/input';
 import PasswordInput from '@/components/ui/password-input';
 import { Separator } from '@/components/ui/separator';
+import { login } from '../actions';
 
 const loginSchema = z.object({
 	usernameOrEmail: z.string().nonempty(),
@@ -23,31 +22,25 @@ const loginSchema = z.object({
 type LoginSchema = z.infer<typeof loginSchema>;
 
 const LoginForm: FC = () => {
-	const router = useRouter();
 	const [isAuthenticating, setIsAuthenticating] = useState(false);
-	const onSubmit = useCallback<SubmitHandler<LoginSchema>>(
-		({ usernameOrEmail, password }) => {
-			setIsAuthenticating(true);
+	const onSubmit = useCallback<SubmitHandler<LoginSchema>>(async ({ usernameOrEmail, password }) => {
+		setIsAuthenticating(true);
 
-			signIn('credentials', {
-				username: usernameOrEmail,
-				password,
-				redirect: false,
-			})
-				.then(cb => {
-					console.error(cb?.error);
-					if (cb?.error) toast.error('Invalid credentials! Please check your details and try again.');
-					else if (cb?.ok) {
-						toast.success('Logged in!');
-						router.push('/');
-					}
-				})
-				.finally(() => {
-					setIsAuthenticating(false);
-				});
-		},
-		[router],
-	);
+		toast.promise(login(usernameOrEmail, password), {
+			loading: 'Logging in...',
+			success: 'Logged in successfully!',
+			error: e => {
+				setIsAuthenticating(false);
+				if ('message' in e) return e.message;
+				console.error(e);
+				return 'Something went wrong';
+			},
+		});
+
+		return () => {
+			setIsAuthenticating(false);
+		};
+	}, []);
 
 	return (
 		<EasyForm

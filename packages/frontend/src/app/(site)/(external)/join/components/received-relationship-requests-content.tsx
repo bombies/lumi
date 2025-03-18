@@ -5,9 +5,9 @@ import { useRouter } from 'next/navigation';
 import { RelationshipRequest } from '@lumi/core/types/relationship.types';
 import { User } from '@lumi/core/types/user.types';
 import { CheckIcon, XIcon } from 'lucide-react';
-import { useSession } from 'next-auth/react';
 import { toast } from 'sonner';
 
+import { useSession } from '@/components/providers/session-provider';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -25,20 +25,16 @@ const FetchReceivedRequests = () =>
 
 const AcceptRelationshipRequest = () => {
 	const invalidateRoute = useRouteInvalidation([trpc.relationships.getReceivedRelationshipRequests]);
-	const { data: session, update: updateSession } = useSession();
+	const { update: updateSession } = useSession();
 	const router = useRouter();
 	return trpc.relationships.acceptRelationshipRequest.useMutation({
 		async onSuccess(relationship) {
 			await updateSession({
-				user: {
-					...session!.user,
-					relationshipId: relationship.id,
-				},
+				relationshipId: relationship.id,
 			});
 
-			router.push('/home');
-
 			invalidateRoute();
+			router.push('/home');
 		},
 	});
 };
@@ -50,6 +46,50 @@ const RejectRelationshipRequest = () => {
 			invalidateRoute();
 		},
 	});
+};
+
+type RelationshipRequestProps = {
+	request: RelationshipRequest;
+	sender: Partial<User>;
+	disabled?: boolean;
+	onAccept: (req: RelationshipRequest) => void;
+	onReject: (req: RelationshipRequest) => void;
+};
+
+const RelationshipRequestElement: FC<RelationshipRequestProps> = ({
+	request,
+	sender,
+	disabled,
+	onAccept,
+	onReject,
+}) => {
+	return (
+		<div className="bg-card border border-border p-4 rounded-md flex w-full h-fit justify-between items-center">
+			<div className="space-y-2">
+				<p className="text-primary">
+					<span className="text-xs text-foreground">@</span>
+					{sender.username ?? 'Unknown'}
+				</p>
+				<p className="text-xs text-foreground-secondary/50">
+					{new Date(request.createdAt).toLocaleDateString()}
+				</p>
+			</div>
+			<div className="flex gap-2">
+				<Button size="icon" tooltip="Accept request" disabled={disabled} onClick={() => onAccept(request)}>
+					<CheckIcon className="size-[18px]" />
+				</Button>
+				<Button
+					size="icon"
+					tooltip="Reject request"
+					variant="destructive"
+					disabled={disabled}
+					onClick={() => onReject(request)}
+				>
+					<XIcon className="size-[18px]" />
+				</Button>
+			</div>
+		</div>
+	);
 };
 
 const ReceivedRelationshipRequestsContent: FC = () => {
@@ -110,50 +150,6 @@ const ReceivedRelationshipRequestsContent: FC = () => {
 				)}
 			</CardContent>
 		</Card>
-	);
-};
-
-type RelationshipRequestProps = {
-	request: RelationshipRequest;
-	sender: Partial<User>;
-	disabled?: boolean;
-	onAccept: (req: RelationshipRequest) => void;
-	onReject: (req: RelationshipRequest) => void;
-};
-
-const RelationshipRequestElement: FC<RelationshipRequestProps> = ({
-	request,
-	sender,
-	disabled,
-	onAccept,
-	onReject,
-}) => {
-	return (
-		<div className="bg-card border border-border p-4 rounded-md flex w-full h-fit justify-between items-center">
-			<div className="space-y-2">
-				<p className="text-primary">
-					<span className="text-xs text-foreground">@</span>
-					{sender.username ?? 'Unknown'}
-				</p>
-				<p className="text-xs text-foreground-secondary/50">
-					{new Date(request.createdAt).toLocaleDateString()}
-				</p>
-			</div>
-			<div className="flex gap-2">
-				<Button size="icon" tooltip="Accept request" disabled={disabled} onClick={() => onAccept(request)}>
-					<CheckIcon className="size-[18px]" />
-				</Button>
-				<Button
-					size="icon"
-					tooltip="Reject request"
-					variant="destructive"
-					disabled={disabled}
-					onClick={() => onReject(request)}
-				>
-					<XIcon className="size-[18px]" />
-				</Button>
-			</div>
-		</div>
 	);
 };
 
