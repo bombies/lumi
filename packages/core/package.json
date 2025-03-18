@@ -24,11 +24,8 @@
 		"@trpc/server": "^11.0.0-rc.824",
 		"bcryptjs": "^3.0.2",
 		"ioredis": "^5.6.0",
-		"jose": "^6.0.10",
-		"jsonwebtoken": "^9.0.2",
 		"mqtt": "^5.10.4",
 		"nodemailer": "^6.10.0",
-		"otp-generator": "^4.0.1",
 		"request-ip": "^3.3.0",
 		"sst": "*",
 		"uuid": "^11.1.0",
@@ -36,8 +33,6 @@
 		"zod": "^3.24.2"
 	},
 	"devDependencies": {
-		"@types/bcrypt": "^5.0.2",
-		"@types/jsonwebtoken": "^9.0.9",
 		"@types/nodemailer": "^6.4.17",
 		"@types/otp-generator": "^4.0.2",
 		"@types/react": "^19.0.10",

@@ -16,7 +16,6 @@ import {
 	supabaseUrl,
 	vapidPrivateKey,
 	vapidPublicKey,
-	websocketToken,
 } from './secrets';
 import { contentBucket } from './storage';
 
@@ -49,7 +48,7 @@ export const frontend = new sst.aws.Nextjs('Frontend', {
 		NEXT_PUBLIC_SUPABASE_ANON_KEY: supabaseKey.value,
 		AUTH_TRUST_HOST: !$dev ? 'true' : undefined,
 		NEXT_PUBLIC_TRPC_URL: $app.stage === 'production' ? `https://${apiDNS}` : trpc.url,
-		NEXT_PUBLIC_CANONICAL_URL: $app.stage === 'production' ? `https://${webDNS}` : 'http://localhost:3000',
+		NEXT_PUBLIC_CANONICAL_URL: !$dev ? `https://${webDNS}` : 'https://localhost:3000',
 		TABLE_NAME: db.name,
 		NEXT_PUBLIC_VAPID_PUBLIC_KEY: vapidPublicKey.value,
 		VAPID_PRIVATE_KEY: vapidPrivateKey.value,

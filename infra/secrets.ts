@@ -2,6 +2,7 @@ export const authSecret = new sst.Secret('AuthSecret');
 
 export const supabaseUrl = new sst.Secret('SupabaseUrl');
 export const supabaseKey = new sst.Secret('SupabaseKey');
+export const supabaseSendEmailHookSecret = new sst.Secret('SupabaseSendEmailHookSecret');
 
 export const mailerHostSecret = new sst.Secret('MailerHost');
 export const mailerPortSecret = new sst.Secret('MailerPort');

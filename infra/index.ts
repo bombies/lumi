@@ -6,3 +6,4 @@ export * from './api';
 export * from './frontend';
 export * from './constants';
 export * from './cron';
+export * from './emails';

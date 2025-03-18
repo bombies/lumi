@@ -3,7 +3,7 @@
 	"version": "0.0.0",
 	"type": "module",
 	"scripts": {
-		"dev": "email dev"
+		"dev": "sst shell email dev"
 	},
 	"exports": {
 		"./*": [

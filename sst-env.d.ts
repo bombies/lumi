@@ -25,6 +25,11 @@ declare module "sst" {
       "name": string
       "type": "sst.aws.Dynamo"
     }
+    "EmailSender": {
+      "name": string
+      "type": "sst.aws.Function"
+      "url": string
+    }
     "Frontend": {
       "type": "sst.aws.Nextjs"
       "url": string
@@ -67,6 +72,10 @@ declare module "sst" {
       "value": string
     }
     "SupabaseKey": {
+      "type": "sst.sst.Secret"
+      "value": string
+    }
+    "SupabaseSendEmailHookSecret": {
       "type": "sst.sst.Secret"
       "value": string
     }

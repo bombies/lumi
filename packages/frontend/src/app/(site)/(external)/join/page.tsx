@@ -6,6 +6,7 @@ import { getRelationshipForUser } from '@lumi/core/relationships/relationship.se
 
 import ReceivedRelationshipRequestsContent from '@/app/(site)/(external)/join/components/received-relationship-requests-content';
 import SendRelationshipRequestContent from '@/app/(site)/(external)/join/components/send-relationship-request-content';
+import SignOutButton from '@/components/ui/sign-out-button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { createSupabaseServerClient, getServerSession } from '@/lib/supabase/server';
 
@@ -27,7 +28,7 @@ const JoinPage: FC = async () => {
 	}
 
 	return (
-		<main className="p-12">
+		<main className="p-12 space-y-6">
 			<Link href="/">
 				<h1 className="font-cursive text-2xl mb-6">Lumi.</h1>
 			</Link>
@@ -61,6 +62,7 @@ const JoinPage: FC = async () => {
 					<TabsContent value="sent">3:</TabsContent>
 				</Tabs>
 			</section>
+			<SignOutButton variant="destructive:flat" disableNotification />
 		</main>
 	);
 };

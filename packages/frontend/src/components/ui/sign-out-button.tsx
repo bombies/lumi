@@ -12,9 +12,12 @@ import { useSession } from '../providers/session-provider';
 
 type Props = {
 	iconOnly?: boolean;
+	className?: string;
+	disableNotification?: boolean;
+	variant?: 'destructive' | 'destructive:flat';
 };
 
-const SignOutButton: FC<Props> = ({ iconOnly }) => {
+const SignOutButton: FC<Props> = ({ iconOnly, className, disableNotification, variant }) => {
 	const { data: session } = useSession();
 	const router = useRouter();
 	const supabase = createSupabaseBrowserClient();
@@ -22,11 +25,12 @@ const SignOutButton: FC<Props> = ({ iconOnly }) => {
 	return (
 		<Button
 			size={iconOnly ? 'icon' : undefined}
-			variant="destructive"
+			className={className}
+			variant={variant || 'destructive'}
 			onClick={async () => {
 				if (!session) return;
 				const user = session.user!;
-				await sendSignOutNotification(user.id, user.user_metadata.username);
+				if (!disableNotification) await sendSignOutNotification(user.id, user.user_metadata.username);
 
 				toast.promise(supabase.auth.signOut(), {
 					loading: 'Signing out...',

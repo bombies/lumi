@@ -19,6 +19,7 @@ export default $config({
 			Database: infra.db.arn,
 			RealtimeEndpoint: infra.realtimeServer.endpoint,
 			RealtimeAuthorizer: infra.realtimeServer.authorizer,
+			EmailSender: infra.emailSender.url,
 		};
 	},
 });
