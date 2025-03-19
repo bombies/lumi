@@ -40,9 +40,9 @@ export type InfiniteData<T> = {
 	cursor?: Record<string, string> | null;
 };
 
-export const getInfiniteData = <T = unknown>(queryResult: QueryCommandOutput) => {
+export const getInfiniteData = <T = unknown>(queryResult: QueryCommandOutput, itemMapper?: (item: T) => T) => {
 	return {
-		data: queryResult.Items as T[],
+		data: (itemMapper ? queryResult?.Items?.map(item => itemMapper(item as T)) : (queryResult.Items as T[])) ?? [],
 		cursor: queryResult.LastEvaluatedKey as Record<string, string> | undefined,
 	};
 };

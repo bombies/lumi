@@ -3,7 +3,10 @@ import { z } from 'zod';
 import { userDto } from '../users/users.dto';
 import { EntityType } from './dynamo.types';
 
-export type User = z.infer<typeof userDto>;
+export type User = z.infer<typeof userDto> & UserExtras;
+export type UserExtras = Partial<{
+	avatarUrl: string;
+}>;
 
 export type DatabaseUser = User & {
 	/**

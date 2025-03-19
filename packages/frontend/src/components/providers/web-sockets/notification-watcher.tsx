@@ -4,8 +4,8 @@ import { FC, useEffect } from 'react';
 import { InferredWebSocketMessagePayload } from '@lumi/core/types/websockets.types';
 import { toast } from 'sonner';
 
-import { GetSelfUserOnDemand } from '@/app/(site)/(internal)/settings/(account)/trpc-hooks';
 import { useNotifications } from '@/components/notifications/notifications-provider';
+import { GetSelfUserOnDemand } from '@/hooks/trpc/user-hooks';
 import { useWebSocket } from './web-socket-provider';
 
 const NotificationWatcher: FC = () => {

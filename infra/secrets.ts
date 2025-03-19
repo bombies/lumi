@@ -1,3 +1,5 @@
+import * as fs from 'fs';
+
 export const authSecret = new sst.Secret('AuthSecret');
 
 export const supabaseUrl = new sst.Secret('SupabaseUrl');
@@ -18,3 +20,5 @@ export const vapidPublicKey = new sst.Secret('VapidPublicKey');
 export const vapidPrivateKey = new sst.Secret('VapidPrivateKey');
 
 export const websocketToken = new sst.Secret('WebSocketToken');
+
+export let cdnPrivateKey = fs.readFileSync(`${process.cwd()}/cdn-keys/private_key.pem`, 'utf8');

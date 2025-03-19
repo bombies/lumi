@@ -2,9 +2,9 @@
 
 import { FC } from 'react';
 
-import { GetSelfUser } from '@/app/(site)/(internal)/settings/(account)/trpc-hooks';
 import { useNotifications } from '@/components/notifications/notifications-provider';
 import { Button } from '@/components/ui/button';
+import { GetSelfUser } from '@/hooks/trpc/user-hooks';
 
 const NotificationsTest: FC = () => {
 	const { data: user } = GetSelfUser();

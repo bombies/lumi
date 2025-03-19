@@ -21,6 +21,11 @@ declare module "sst" {
       "name": string
       "type": "sst.aws.Bucket"
     }
+    "ContentCdnKeyGroup": {
+      "id": string
+      "items": any
+      "type": "aws.cloudfront/keyGroup.KeyGroup"
+    }
     "Database": {
       "name": string
       "type": "sst.aws.Dynamo"

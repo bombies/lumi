@@ -1,11 +1,20 @@
 import { TRPCError } from '@trpc/server';
+import mime from 'mime';
+import { Resource } from 'sst';
 
 import { EntityType, KeyPrefix } from '../types/dynamo.types';
 import { getInfiniteData } from '../types/infinite-data.dto';
 import { DatabaseUser, User } from '../types/user.types';
 import { dynamo, getDynamicUpdateStatements } from '../utils/dynamo/dynamo.service';
+import { ContentPaths, StorageClient } from '../utils/s3/s3.service';
 import { getUUID } from '../utils/utils';
-import { CreateUserDto, GetUsersByEmailDto, GetUsersByUsernameDto, UpdateUserDto } from './users.dto';
+import {
+	CreateUserDto,
+	GetUserAvatarUploadUrlDto,
+	GetUsersByEmailDto,
+	GetUsersByUsernameDto,
+	UpdateUserDto,
+} from './users.dto';
 
 type CreateUserArgs = {
 	sendOTP?: boolean;
@@ -43,7 +52,6 @@ export const createUser = async ({
 			entityType: EntityType.USER,
 			createdAt: new Date().toISOString(),
 			updatedAt: new Date().toISOString(),
-			verified: false,
 			...dto,
 			id: userId,
 		} satisfies DatabaseUser,
@@ -51,6 +59,23 @@ export const createUser = async ({
 
 	return { id: userId, createdAt, updatedAt, verified: false, ...dto } as User;
 };
+
+function attachAvatarToUser(args: { user?: User; throws: true }): User;
+
+function attachAvatarToUser(args: { user?: User; throws?: false }): User | undefined;
+
+function attachAvatarToUser({ user, throws }: { user?: User; throws?: boolean }): User | undefined {
+	if (!user)
+		if (throws) throw new TRPCError({ code: 'NOT_FOUND', message: 'User not found' });
+		else return undefined;
+
+	if (user.avatarKey)
+		user.avatarUrl = ContentPaths.userAvatar(user.id, user.avatarKey, {
+			withHost: true,
+		});
+
+	return user;
+}
 
 export const getUserById = async (userId: string) => {
 	const res = await dynamo.get({
@@ -61,7 +86,7 @@ export const getUserById = async (userId: string) => {
 		},
 	});
 
-	return res.Item as User | undefined;
+	return attachAvatarToUser({ user: res.Item as User | undefined });
 };
 
 export const getUserByUsername = async (username: string) => {
@@ -79,7 +104,7 @@ export const getUserByUsername = async (username: string) => {
 		},
 	});
 
-	return res.Items?.[0] as User | undefined;
+	return attachAvatarToUser({ user: res.Items?.[0] as User | undefined });
 };
 
 export const getUsersByUsername = async ({ username, limit, cursor, projections }: GetUsersByUsernameDto) => {
@@ -100,7 +125,12 @@ export const getUsersByUsername = async ({ username, limit, cursor, projections 
 		ExclusiveStartKey: cursor,
 	});
 
-	return getInfiniteData<User>(res);
+	return getInfiniteData<User>(res, user =>
+		attachAvatarToUser({
+			user,
+			throws: true,
+		}),
+	);
 };
 
 export const getUsersByEmail = async ({ email, limit, cursor, projections }: GetUsersByEmailDto) => {
@@ -121,7 +151,12 @@ export const getUsersByEmail = async ({ email, limit, cursor, projections }: Get
 		ExclusiveStartKey: cursor,
 	});
 
-	return getInfiniteData<User>(res);
+	return getInfiniteData<User>(res, user =>
+		attachAvatarToUser({
+			user,
+			throws: true,
+		}),
+	);
 };
 
 export const getUserByEmail = async (email: string) => {
@@ -139,7 +174,7 @@ export const getUserByEmail = async (email: string) => {
 		},
 	});
 
-	return res.Items?.[0] as User | undefined;
+	return attachAvatarToUser({ user: res.Items?.[0] as User | undefined });
 };
 
 export const userExists = async (value: string) => {
@@ -185,4 +220,18 @@ export const updateUser = async (userId: string, dto: UpdateUserDto) => {
 		});
 
 	return res.Attributes as User;
+};
+
+export const getUserAvatarUploadUrl = async ({
+	userId,
+	objectKey,
+	fileExtension,
+}: GetUserAvatarUploadUrlDto & {
+	userId: string;
+}) => {
+	const storageBucket = new StorageClient(Resource.ContentBucket.name);
+	return storageBucket.getSignedPutUrl(ContentPaths.userAvatar(userId, objectKey + '.' + fileExtension), {
+		expires: 5 * 60,
+		contentType: fileExtension && (mime.getType(fileExtension) ?? undefined),
+	});
 };

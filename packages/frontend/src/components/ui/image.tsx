@@ -43,8 +43,8 @@ const Image: FC<Props> = ({
 			viewport={fadeIn ? { once: true } : undefined}
 			className={clsx('!relative overflow-hidden', className, globalClassName)}
 			style={{
-				width: width && `${width}rem`,
-				height: width && `${height ?? width}rem`,
+				width,
+				height,
 			}}
 		>
 			<NextImage
@@ -54,8 +54,8 @@ const Image: FC<Props> = ({
 					if (fallbackSrc) setCurrentSrc(fallbackSrc);
 				}}
 				className={cn(globalClassName)}
-				width={imgWidth}
-				height={imgHeight}
+				width={imgWidth ?? width}
+				height={imgHeight ?? height}
 				style={{ objectFit }}
 				draggable={false}
 			/>

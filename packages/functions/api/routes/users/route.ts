@@ -1,5 +1,16 @@
-import { getUsersByEmailDto, getUsersByUsernameDto, updateUserDto } from '@lumi/core/users/users.dto';
-import { getUserById, getUsersByEmail, getUsersByUsername, updateUser } from '@lumi/core/users/users.service';
+import {
+	getUserAvatarUploadUrlDto,
+	getUsersByEmailDto,
+	getUsersByUsernameDto,
+	updateUserDto,
+} from '@lumi/core/users/users.dto';
+import {
+	getUserAvatarUploadUrl,
+	getUserById,
+	getUsersByEmail,
+	getUsersByUsername,
+	updateUser,
+} from '@lumi/core/users/users.service';
 
 import { protectedProcedure, publicProcedure, router } from '../../utils/trpc';
 
@@ -13,5 +24,13 @@ export const usersRouter = router({
 		.mutation(({ input, ctx: { user } }) => updateUser(user.id, input)),
 
 	getSelf: protectedProcedure.query(({ ctx: { user } }) => getUserById(user.id)),
+
 	getSelfOnDemand: protectedProcedure.mutation(({ ctx: { user } }) => getUserById(user.id)),
+
+	getUserAvatarUploadUrl: protectedProcedure.input(getUserAvatarUploadUrlDto).mutation(({ ctx: { user }, input }) =>
+		getUserAvatarUploadUrl({
+			userId: user.id,
+			...input,
+		}),
+	),
 });

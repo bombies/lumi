@@ -12,7 +12,6 @@ import {
 } from '@heroicons/react/24/solid';
 import { IconType } from '@icons-pack/react-simple-icons';
 
-import { GetRelationship } from '@/components/providers/relationships/hooks';
 import {
 	Sidebar,
 	SidebarContent,
@@ -27,6 +26,7 @@ import {
 	useSidebar,
 } from '@/components/ui/sidebar';
 import SignOutButton from '@/components/ui/sign-out-button';
+import { GetRelationship } from '@/hooks/trpc/relationship-hooks';
 
 type SidebarItem = {
 	groupLabel: string;

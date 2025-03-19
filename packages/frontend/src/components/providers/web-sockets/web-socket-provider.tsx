@@ -11,8 +11,8 @@ import {
 } from '@lumi/core/types/websockets.types';
 import { emitAsyncWebsocketEvent, MqttClientType } from '@lumi/core/websockets/websockets.service';
 
-import { UpdateUser } from '@/app/(site)/(internal)/settings/(account)/trpc-hooks';
 import { connectToWebsocket } from '@/components/providers/web-sockets/web-socket-actions';
+import { UpdateUser } from '@/hooks/trpc/user-hooks';
 import { useQueue } from '@/lib/hooks/useQueue';
 import { logger } from '@/lib/logger';
 import { relationshipWSTopic, userNotificationsTopic } from './topics';

@@ -47,7 +47,7 @@ export const frontend = new sst.aws.Nextjs('Frontend', {
 		NEXT_PUBLIC_SUPABASE_URL: supabaseUrl.value,
 		NEXT_PUBLIC_SUPABASE_ANON_KEY: supabaseKey.value,
 		AUTH_TRUST_HOST: !$dev ? 'true' : undefined,
-		NEXT_PUBLIC_TRPC_URL: $app.stage === 'production' ? `https://${apiDNS}` : trpc.url,
+		NEXT_PUBLIC_TRPC_URL: !$dev ? `https://${apiDNS}` : trpc.url,
 		NEXT_PUBLIC_CANONICAL_URL: !$dev ? `https://${webDNS}` : 'https://localhost:3000',
 		TABLE_NAME: db.name,
 		NEXT_PUBLIC_VAPID_PUBLIC_KEY: vapidPublicKey.value,

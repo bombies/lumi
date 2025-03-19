@@ -5,8 +5,8 @@ import { Relationship } from '@lumi/core/types/relationship.types';
 import { User } from '@lumi/core/types/user.types';
 import { InferredWebSocketMessage, WebSocketEventHandler } from '@lumi/core/types/websockets.types';
 
-import { UpdateUser } from '@/app/(site)/(internal)/settings/(account)/trpc-hooks';
 import { useWebSocket } from '@/components/providers/web-sockets/web-socket-provider';
+import { UpdateUser } from '@/hooks/trpc/user-hooks';
 import { logger } from '@/lib/logger';
 
 const IDLE_TIMEOUT = 5 * 60 * 1000; // 5 minutes

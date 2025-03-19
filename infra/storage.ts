@@ -22,8 +22,9 @@ export const contentBucket = new sst.aws.Bucket(`ContentBucket`, {
 	},
 });
 
-const contentCdnPublicKey = new aws.cloudfront.PublicKey(appify('ContentCdnPublicKey'), {
+const contentCdnPublicKey = new aws.cloudfront.PublicKey('ContentCdnPublicKey', {
 	comment: 'The public key for the content CDN',
+	name: `${appify('cdn-public-key')}`,
 	encodedKey: std
 		.file({
 			input: `${process.cwd()}/cdn-keys/public_key.pem`,
@@ -31,11 +32,15 @@ const contentCdnPublicKey = new aws.cloudfront.PublicKey(appify('ContentCdnPubli
 		.then(invoke => invoke.result),
 });
 
-const contentCdnKeyGroup = new aws.cloudfront.KeyGroup(appify('ContentCdnKeyGroup'), {
+export const contentCdnKeyGroup = new aws.cloudfront.KeyGroup('ContentCdnKeyGroup', {
 	comment: 'The key group for the content CDN',
 	items: [contentCdnPublicKey.id],
-	name: `${appify('content-cdn-key-group')}`,
+	name: `${appify('cdn-key-group')}`,
 });
+
+sst.Linkable.wrap(aws.cloudfront.KeyGroup, kg => ({
+	properties: { id: kg.id, items: kg.items },
+}));
 
 const contentBucketOriginId = appify('ContentBucketOriginId');
 export const contentCdn = new sst.aws.Cdn('ContentCdn', {

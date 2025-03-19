@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 import { createInfiniteDataDto } from '../types/infinite-data.dto';
+import { getUploadUrlDto } from '../types/upload.dto';
 
 export const USERNAME_REGEX = /^[a-z][a-z0-9_]{2,31}/g;
 export const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_])[A-Za-z\d\W_]{8,255}$/g;
@@ -72,7 +73,10 @@ export const getUsersByEmailDto = createInfiniteDataDto({ defaultLimit: 10 })
 	)
 	.and(userProjections);
 
+export const getUserAvatarUploadUrlDto = getUploadUrlDto;
+
 export type CreateUserDto = z.infer<typeof createUserDto>;
 export type UpdateUserDto = z.infer<typeof updateUserDto>;
 export type GetUsersByUsernameDto = z.infer<typeof getUsersByUsernameDto>;
 export type GetUsersByEmailDto = z.infer<typeof getUsersByEmailDto>;
+export type GetUserAvatarUploadUrlDto = z.infer<typeof getUserAvatarUploadUrlDto>;
