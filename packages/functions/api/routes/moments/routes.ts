@@ -6,6 +6,7 @@ import {
 	getMessagesForMoment,
 	getMomentDetailsById,
 	getMomentMessageById,
+	getMomentUploadUrl,
 	getMomentsForRelationship,
 	getMomentsForUser,
 	updateMomentDetails,
@@ -15,6 +16,7 @@ import {
 	createMomentMessageDto,
 	getInfiniteMomentMessagesDto,
 	getInfiniteMomentsDto,
+	getMomentUploadUrlDto,
 	updateMomentDetailsDto,
 } from '@lumi/core/moments/moments.dto';
 import { extractPartnerIdFromRelationship } from '@lumi/core/utils/global-utils';
@@ -39,25 +41,24 @@ export const momentsRouter = router({
 	}),
 
 	getMoments: relationshipProcedure
-		.input(getInfiniteMomentsDto)
-		.query(({ input, ctx: { user, relationship } }) => getMomentsForRelationship(relationship.id, input)),
-
-	getMomentsForUser: relationshipProcedure
 		.input(
 			getInfiniteMomentsDto.and(
 				z.object({
-					userId: z.string(),
+					userId: z.string().optional(),
 				}),
 			),
 		)
-		.query(({ input: { userId, ...input }, ctx: { relationship, user } }) => {
-			const partnerId = extractPartnerIdFromRelationship(user.id, relationship);
-			if (userId !== partnerId && userId !== user.id)
-				throw new TRPCError({
-					code: 'UNAUTHORIZED',
-					message: 'You are not authorized to access the moments for this user!',
-				});
-			return getMomentsForUser(userId, input);
+		.query(({ input: { userId, ...input }, ctx: { user, relationship } }) => {
+			if (!user) return getMomentsForRelationship(relationship.id, input);
+			else {
+				const partnerId = extractPartnerIdFromRelationship(user.id, relationship);
+				if (userId !== partnerId && userId !== user.id)
+					throw new TRPCError({
+						code: 'UNAUTHORIZED',
+						message: 'You are not authorized to access the moments for this user!',
+					});
+				return getMomentsForUser(userId, input);
+			}
 		}),
 
 	updateMomentDetails: relationshipProcedure
@@ -126,23 +127,25 @@ export const momentsRouter = router({
 			return getMessagesForMoment(input);
 		}),
 
-	getMomentMessage: relationshipProcedure
-		.input(z.string())
-		.mutation(async ({ input, ctx: { user, relationship } }) => {
-			const message = await getMomentMessageById(input);
+	deleteMomentMessage: relationshipProcedure.input(z.string()).mutation(async ({ input, ctx: { user } }) => {
+		const message = await getMomentMessageById(input);
 
-			if (!message)
-				throw new TRPCError({
-					code: 'NOT_FOUND',
-					message: 'Moment message not found!',
-				});
+		if (!message)
+			throw new TRPCError({
+				code: 'NOT_FOUND',
+				message: 'Moment message not found!',
+			});
 
-			if (message.senderId !== user.id)
-				throw new TRPCError({
-					code: 'UNAUTHORIZED',
-					message: 'You are not authorized to send a message for this moment!',
-				});
+		if (message.senderId !== user.id)
+			throw new TRPCError({
+				code: 'UNAUTHORIZED',
+				message: 'You are not authorized to delete this message!',
+			});
 
-			return deleteMomentMessage(input);
-		}),
+		return deleteMomentMessage(input);
+	}),
+
+	getMomentUploadUrl: relationshipProcedure
+		.input(getMomentUploadUrlDto)
+		.mutation(({ input, ctx: { relationship } }) => getMomentUploadUrl(relationship.id, input)),
 });

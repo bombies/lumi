@@ -155,7 +155,7 @@ type ReplaceVariablesArgs = {
 
 export class ContentPaths {
 	private static USER_AVATAR = 'user/{userId}/avatar/';
-	private static RELATIONSHIP_MOMENTS = 'private/relationships/{relationshipId}/moments';
+	private static RELATIONSHIP_MOMENTS = 'private/relationships/{relationshipId}/moments/';
 
 	private constructor() {}
 

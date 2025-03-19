@@ -1,16 +1,20 @@
 import { QueryCommandInput, QueryCommandOutput } from '@aws-sdk/lib-dynamodb';
 import { TRPCError } from '@trpc/server';
+import mime from 'mime';
+import { Resource } from 'sst';
 
 import { EntityType, KeyPrefix } from '../types/dynamo.types';
 import { InfiniteData, getInfiniteData } from '../types/infinite-data.dto';
 import { DatabaseMoment, DatabaseMomentMessage, Moment, MomentMessage } from '../types/moment.types';
 import { dynamo, getDynamicUpdateStatements } from '../utils/dynamo/dynamo.service';
+import { ContentPaths, StorageClient } from '../utils/s3/s3.service';
 import { chunkArray, getUUID } from '../utils/utils';
 import {
 	CreateMomentDetailsDto,
 	CreateMomentMessageDto,
 	GetInfiniteMomentMessagesDto,
 	GetInfiniteMomentsDto,
+	GetMomentUploadUrlDto,
 	UpdateMomentDetailsDto,
 } from './moments.dto';
 
@@ -293,4 +297,18 @@ export const deleteMomentDetailsForRelationship = async (relationshipId: string)
 			},
 		});
 	});
+};
+
+export const getMomentUploadUrl = async (
+	relationshipId: string,
+	{ objectKey, fileExtension }: GetMomentUploadUrlDto,
+) => {
+	const storageBucket = new StorageClient(Resource.ContentBucket.name);
+	return storageBucket.getSignedPutUrl(
+		ContentPaths.relationshipMoments(relationshipId, objectKey + '.' + fileExtension),
+		{
+			expires: 60 * 60,
+			contentType: fileExtension && (mime.getType(fileExtension) ?? undefined),
+		},
+	);
 };

@@ -1,6 +1,7 @@
 'use client';
 
 import { RefObject } from 'react';
+import { FormatType, GeneralTrack, MediaInfo, ReadChunkFunc, Track, VideoTrack } from 'mediainfo.js';
 import mime from 'mime';
 import { Area } from 'react-easy-crop';
 import { toast } from 'sonner';
@@ -11,22 +12,33 @@ export const isVideoFile = (file: File): boolean => {
 	return mime.getType(file.name)?.startsWith('video') ?? false;
 };
 
-export const calculateTotalDuration = (file: File): number => {
+export const getMediaInfo = async (
+	file: File,
+	{
+		mediaInfo,
+		makeReadChunk,
+	}: {
+		mediaInfo: MediaInfo<FormatType> | undefined;
+		makeReadChunk: (file: File) => ReadChunkFunc;
+	},
+) => {
+	const readChunk = makeReadChunk(file);
+	return mediaInfo?.analyzeData(file.size, readChunk);
+};
+
+export const isTrackWithDuration = (track: Track): track is GeneralTrack | VideoTrack => {
+	return track['@type'] === 'General' || track['@type'] === 'Video';
+};
+
+export const calculateTotalDuration = (tracks: Array<Track>): number => {
 	let totalDuration = 0;
 
-	const videoEl = document.createElement('video');
-	videoEl.preload = 'metadata';
-
-	videoEl.addEventListener('loadedmetadata', () => {
-		totalDuration += videoEl.duration;
-		videoEl.remove();
-	});
-
-	videoEl.addEventListener('error', () => {
-		console.error('Error loading video metadata');
-	});
-
-	videoEl.src = URL.createObjectURL(file);
+	for (const track of tracks) {
+		if (isTrackWithDuration(track)) {
+			totalDuration += track.Duration ?? 0;
+			break;
+		}
+	}
 
 	return totalDuration;
 };
@@ -55,7 +67,7 @@ const handleVideoDurationError = (
 		maxVideoDuration?: number;
 	},
 ) => {
-	toast.error(`${file.name} is too long! Max duration is ${maxVideoDuration} seconds.`);
+	toast.error(`That video is too long! The maximum duration is ${maxVideoDuration} seconds.`);
 };
 
 const validateFile = async (

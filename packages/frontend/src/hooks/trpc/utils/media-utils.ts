@@ -4,7 +4,12 @@ import { useCallback, useState } from 'react';
 import { DefaultError, UseMutateAsyncFunction } from '@tanstack/react-query';
 import axios from 'axios';
 
-export const useSingleMediaUploader = <TData = unknown, TError = DefaultError, TVariables = void, TContext = unknown>(
+export const useSingleMediaUploader = <
+	TData = unknown,
+	TError = DefaultError,
+	TVariables extends { fileExtension: string; objectKey: string } | void = void,
+	TContext = unknown,
+>(
 	urlFetcher: UseMutateAsyncFunction<TData, TError, TVariables, TContext>,
 ) => {
 	const [isUploading, setIsUploading] = useState(false);
