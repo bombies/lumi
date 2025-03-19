@@ -12,6 +12,11 @@ export const infiniteDataOrderDto = z.object({
 	order: z.enum(['asc', 'desc']),
 });
 
+export const infiniteDataOrderDtoWithDefault = (defaultValue: 'asc' | 'desc') =>
+	z.object({
+		order: z.enum(['asc', 'desc']).default(defaultValue),
+	});
+
 export const createInfiniteDataDto = ({
 	minLimit,
 	maxLimit,

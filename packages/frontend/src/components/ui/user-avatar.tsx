@@ -19,9 +19,11 @@ const UserAvatar: FC<Props> = ({ user, srcOverride, loading, className, hideStat
 	return loading ? (
 		<Skeleton className={cn('size-32 rounded-full', className)} />
 	) : (
-		<Avatar className={cn('relative overflow-hidden size-32', className)} {...args}>
-			<AvatarImage src={srcOverride || user?.avatarUrl} alt={'@' + user?.username} className="object-cover" />
-			<AvatarFallback>{user?.firstName.charAt(0) || '?'}</AvatarFallback>
+		<div className="relative overflow-hidden">
+			<Avatar className={cn(' size-32', className)} {...args}>
+				<AvatarImage src={srcOverride || user?.avatarUrl} alt={'@' + user?.username} className="object-cover" />
+				<AvatarFallback>{user?.firstName.charAt(0) || '?'}</AvatarFallback>
+			</Avatar>
 			{!hideStatus && (
 				<TooltipProvider>
 					<Tooltip>
@@ -43,7 +45,7 @@ const UserAvatar: FC<Props> = ({ user, srcOverride, loading, className, hideStat
 					</Tooltip>
 				</TooltipProvider>
 			)}
-		</Avatar>
+		</div>
 	);
 };
 

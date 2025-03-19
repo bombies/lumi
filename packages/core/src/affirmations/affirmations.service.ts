@@ -191,6 +191,7 @@ export const deleteAffirmation = async (ownerId: string, relationshipId: string,
 };
 
 export const deleteAffirmationsForRelationship = async (relationshipId: string) => {
+	// TODO: Fix this. Need to fetch each affirmation independently and batch delete them in chunks.
 	const res = await dynamo.delete({
 		TableName: process.env.TABLE_NAME,
 		Key: {

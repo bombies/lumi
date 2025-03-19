@@ -3,9 +3,6 @@ export enum KeyPrefix {
 	USER_NAME = 'user#username',
 	USER_EMAIL = 'user#email',
 
-	REFRESH_TOKEN = 'refresh#',
-	OTP = 'otp#',
-
 	RELATIONSHIP_REQUEST = 'rshipreq#',
 	RELATIONSHIP = 'rship#',
 	RELATIONSHIP_REQUEST_SENDER = 'rship::sender',
@@ -14,6 +11,9 @@ export enum KeyPrefix {
 	AFFIRMATION = 'rship::affirmation#',
 	RECEIVED_AFFIRMATION = 'rship::received_affirmation#',
 
+	MOMENT_DETAILS = 'moment::details#',
+	MOMENT_MESSAGE = 'moment::message#',
+
 	NOTIFICATION_SUBSCRIBER = 'notification::subscriber#',
 
 	WEBSOCKET_HEARTBEAT = 'ws::heartbeat#',
@@ -21,12 +21,12 @@ export enum KeyPrefix {
 
 export enum EntityType {
 	USER = 'USER',
-	REFRESH_TOKEN = 'REFRESH_TOKEN',
-	OTP = 'OTP',
 	RELATIONSHIP_REQUEST = 'RELATIONSHIP_REQUEST',
 	RELATIONSHIP = 'RELATIONSHIP',
 	AFFIRMATION = 'AFFIRMATION',
 	RECEIVED_AFFIRMATION = 'RECEIVED_AFFIRMATION',
+	MOMENT_DETAILS = 'MOMENT_DETAILS',
+	MOMENT_MESSAGE = 'MOMENT_MESSAGE',
 	NOTIFICATION_SUBSCRIBER = 'NOTIFICATION_SUBSCRIBER',
 	WEBSOCKET_HEARTBEAT = 'WEBSOCKET_HEARTBEAT',
 }

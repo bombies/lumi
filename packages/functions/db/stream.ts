@@ -1,4 +1,5 @@
 import { deleteAffirmationsForRelationship } from '@lumi/core/affirmations/affirmations.service';
+import { deleteMomentDetailsForRelationship } from '@lumi/core/moments/moment.service';
 import { Relationship } from '@lumi/core/types/relationship.types';
 import { DynamoDBStreamEvent, Handler } from 'aws-lambda';
 
@@ -21,6 +22,7 @@ export const handler: Handler<DynamoDBStreamEvent> = async event => {
 					}
 
 					await deleteAffirmationsForRelationship(oldImage.id.S!);
+					await deleteMomentDetailsForRelationship(oldImage.id.S!);
 					break;
 			}
 		} catch (e) {

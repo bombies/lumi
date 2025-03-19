@@ -1,3 +1,5 @@
+import { contentBucket } from './storage';
+
 export const db = new sst.aws.Dynamo('Database', {
 	fields: {
 		pk: 'string',
@@ -56,10 +58,10 @@ db.subscribe(
 );
 
 db.subscribe(
-	'TokenDeletionChainHandler',
+	'MomentMetadataDeletionHandler',
 	{
-		handler: 'packages/functions/db/token-deletion.handler',
-		link: [db],
+		handler: 'packages/functions/db/moment-deletion.handler',
+		link: [db, contentBucket],
 	},
 	{
 		filters: [
@@ -68,7 +70,7 @@ db.subscribe(
 				dynamodb: {
 					Keys: {
 						pk: {
-							S: [{ prefix: 'refresh#' }],
+							S: [{ prefix: 'moment::details#' }],
 						},
 					},
 				},

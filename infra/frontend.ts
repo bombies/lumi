@@ -54,6 +54,8 @@ export const frontend = new sst.aws.Nextjs('Frontend', {
 		VAPID_PRIVATE_KEY: vapidPrivateKey.value,
 		NEXT_PUBLIC_NOTIFICATIONS_TOPIC: notificationsTopic,
 		NEXT_PUBLIC_DEV_MODE: $app.stage === 'development' ? 'true' : 'false',
+		CONTENT_BUCKET_NAME: contentBucket.name,
+		CONTENT_BUCKET_ENDPOINT: contentBucket.nodes.bucket.bucketRegionalDomainName,
 	},
 	permissions: [
 		{

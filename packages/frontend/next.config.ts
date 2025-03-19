@@ -1,4 +1,5 @@
 import type { NextConfig } from 'next';
+import { withNextVideo } from 'next-video/process';
 
 const nextConfig: NextConfig = {
 	transpilePackages: ['@lumi/core', '@lumi/emails'],
@@ -42,4 +43,12 @@ const nextConfig: NextConfig = {
 	},
 };
 
-export default nextConfig;
+export default withNextVideo(nextConfig, {
+	provider: 'amazon-s3',
+	providerConfig: {
+		'amazon-s3': {
+			endpoint: process.env.CONTENT_BUCKET_ENDPOINT!,
+			bucket: process.env.CONTENT_BUCKET_NAME!,
+		},
+	},
+});
