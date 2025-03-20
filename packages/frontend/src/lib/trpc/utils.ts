@@ -10,11 +10,19 @@ export const getErrorMessage = (e: any, defaultMessage: string = 'Something went
 	}
 };
 
-export const handleTrpcError = (e: any, defaultMessage: string = 'Something went wrong!') => {
+export const handleTrpcError = (
+	e: any,
+	args?: {
+		defaultMessage?: string;
+		useErrorObjectMessage?: boolean;
+	},
+) => {
 	if (e instanceof TRPCClientError || e instanceof TRPCError) {
 		toast.error(e.message);
+	} else if (args?.useErrorObjectMessage && e instanceof Error) {
+		toast.error(e.message);
 	} else {
-		toast.error(defaultMessage);
+		toast.error(args?.defaultMessage || 'Something went wrong!');
 	}
 
 	throw e;

@@ -4,6 +4,7 @@ import { UploadIcon } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import Title from '@/components/ui/title';
+import MomentsGrid from './components/moments-grid';
 
 const MomentsPage: FC = () => {
 	return (
@@ -14,6 +15,7 @@ const MomentsPage: FC = () => {
 					<UploadIcon size={18} className="mr-2" /> Upload Moment
 				</Button>
 			</Link>
+			<MomentsGrid />
 		</>
 	);
 };

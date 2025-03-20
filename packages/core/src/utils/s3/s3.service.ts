@@ -9,6 +9,8 @@ import { Upload } from '@aws-sdk/lib-storage';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { StreamingBlobPayloadInputTypes } from '@smithy/types';
 
+import { substituteVariables } from '../utils';
+
 export class StorageClient {
 	private readonly client = new S3Client();
 
@@ -160,7 +162,7 @@ export class ContentPaths {
 	private constructor() {}
 
 	private static replaceVariables(path: string, variables: Record<string, string>, args?: ReplaceVariablesArgs) {
-		const val = path.replace(/{(\w+)}/g, (match, key) => variables[key] || match);
+		const val = substituteVariables(path, variables);
 		return `${args?.withHost ? process.env.CDN_URL + '/' : ''}${val}`;
 	}
 

@@ -24,3 +24,7 @@ export const urlBase64ToUint8Array = (base64String: string) => {
 	}
 	return outputArray;
 };
+
+export const substituteVariables = (str: string, variables: Record<string, string>) => {
+	return str.replace(/{(\w+)}/g, (match, key) => variables[key] || match);
+};

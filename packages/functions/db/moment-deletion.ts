@@ -32,7 +32,7 @@ export const handler: Handler<DynamoDBStreamEvent> = async event => {
 					'#pk': 'gsi1pk',
 				},
 				ExpressionAttributeValues: {
-					':pk': `${KeyPrefix.MOMENT_MESSAGE}${oldImage.momentId.S!}`,
+					':pk': `${KeyPrefix.MOMENT_MESSAGE}${oldImage.id.S!}`,
 				},
 				ExclusiveStartKey: res?.LastEvaluatedKey,
 			});
@@ -65,6 +65,12 @@ export const handler: Handler<DynamoDBStreamEvent> = async event => {
 		await storageClient.deleteObject(
 			ContentPaths.relationshipMoments(oldImage.relationshipId.S!, oldImage.objectKey.S!),
 		);
+
+		if (oldImage.thumbnailObjectKey.S)
+			await storageClient.deleteObject(
+				ContentPaths.relationshipMoments(oldImage.relationshipId.S!, oldImage.thumbnailObjectKey.S),
+			);
+
 		console.log('Deleted the video from S3!');
 	}
 };

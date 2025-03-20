@@ -47,8 +47,10 @@ export default withNextVideo(nextConfig, {
 	provider: 'amazon-s3',
 	providerConfig: {
 		'amazon-s3': {
-			endpoint: process.env.CONTENT_BUCKET_ENDPOINT!,
+			endpoint: 'https://' + process.env.CONTENT_BUCKET_ENDPOINT!,
 			bucket: process.env.CONTENT_BUCKET_NAME!,
+			accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
+			secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
 		},
 	},
 });

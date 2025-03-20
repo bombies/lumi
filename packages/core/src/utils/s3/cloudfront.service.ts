@@ -13,11 +13,12 @@ type SignCdnUrlArgs = Omit<SignatureOptions, 'keypairId' | 'privateKeyString' | 
 export const signCdnUrl = (url: string, args?: SignCdnUrlArgs) => {
 	const { expiresIn, ...otherArgs } = args || {};
 	const opts: SignatureOptions = {
-		keypairId: Resource.ContentCdnKeyGroup.id,
+		keypairId: process.env.KEY_PAIR_ID!,
 		privateKeyString: process.env.CDN_PRIVATE_KEY,
 		...otherArgs,
 	};
 
 	if (expiresIn) opts.expireTime = Date.now() + expiresIn;
+
 	return cfSign.getSignedUrl(url, opts);
 };

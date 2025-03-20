@@ -45,9 +45,22 @@ export type InfiniteData<T> = {
 	cursor?: Record<string, string> | null;
 };
 
-export const getInfiniteData = <T = unknown>(queryResult: QueryCommandOutput, itemMapper?: (item: T) => T) => {
+export const getInfiniteData = async <T = unknown>(
+	queryResult: QueryCommandOutput,
+	itemMapper?: (item: T) => T | Promise<T>,
+) => {
+	let data: T[] = [];
+	let intermediateData =
+		(itemMapper ? queryResult?.Items?.map(item => itemMapper(item as T)) : (queryResult.Items as T[])) ?? [];
+
+	if (intermediateData.length && intermediateData[0] instanceof Promise) {
+		data = await Promise.all(intermediateData);
+	} else {
+		data = intermediateData as T[];
+	}
+
 	return {
-		data: (itemMapper ? queryResult?.Items?.map(item => itemMapper(item as T)) : (queryResult.Items as T[])) ?? [],
+		data,
 		cursor: queryResult.LastEvaluatedKey as Record<string, string> | undefined,
 	};
 };

@@ -22,7 +22,7 @@ export const contentBucket = new sst.aws.Bucket(`ContentBucket`, {
 	},
 });
 
-const contentCdnPublicKey = new aws.cloudfront.PublicKey('ContentCdnPublicKey', {
+export const contentCdnPublicKey = new aws.cloudfront.PublicKey('ContentCdnPublicKey', {
 	comment: 'The public key for the content CDN',
 	name: `${appify('cdn-public-key')}`,
 	encodedKey: std

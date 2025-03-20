@@ -14,7 +14,7 @@ import {
 	redisUser,
 	websocketToken,
 } from './secrets';
-import { contentBucket, contentCdn, contentCdnKeyGroup } from './storage';
+import { contentBucket, contentCdn, contentCdnKeyGroup, contentCdnPublicKey } from './storage';
 
 export const trpc = new sst.aws.Function('Trpc', {
 	url: $dev
@@ -26,7 +26,6 @@ export const trpc = new sst.aws.Function('Trpc', {
 			},
 	link: [
 		contentBucket,
-		contentCdnKeyGroup,
 		db,
 		mailerHostSecret,
 		mailerPasswordSecret,
@@ -44,6 +43,7 @@ export const trpc = new sst.aws.Function('Trpc', {
 		NOTIFICATIONS_TOPIC: notificationsTopic,
 		WEB_SOCKET_TOKEN: websocketToken.value,
 		CDN_PRIVATE_KEY: cdnPrivateKey,
+		KEY_PAIR_ID: contentCdnPublicKey.id,
 		CDN_URL: contentCdn.url,
 	},
 	handler: 'packages/functions/api/index.handler',

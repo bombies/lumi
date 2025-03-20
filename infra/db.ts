@@ -1,4 +1,5 @@
-import { contentBucket } from './storage';
+import { cdnPrivateKey, redisHost, redisPassword, redisPort, redisUser } from './secrets';
+import { contentBucket, contentCdn, contentCdnPublicKey } from './storage';
 
 export const db = new sst.aws.Dynamo('Database', {
 	fields: {
@@ -67,6 +68,36 @@ db.subscribe(
 		filters: [
 			{
 				eventName: ['REMOVE'],
+				dynamodb: {
+					Keys: {
+						pk: {
+							S: [{ prefix: 'moment::details#' }],
+						},
+					},
+				},
+			},
+		],
+	},
+);
+
+db.subscribe(
+	'MomentThumbnailTranscoder',
+	{
+		handler: 'packages/functions/db/moment-thumbnail-transcoder.handler',
+		link: [contentBucket, db, redisHost, redisPort, redisUser, redisPassword],
+		environment: {
+			APP_STAGE: $app.stage,
+			TABLE_NAME: db.name,
+			CDN_PRIVATE_KEY: cdnPrivateKey,
+			KEY_PAIR_ID: contentCdnPublicKey.id,
+			CDN_URL: contentCdn.url,
+		},
+		nodejs: { install: ['ffmpeg-static'] },
+	},
+	{
+		filters: [
+			{
+				eventName: ['INSERT'],
 				dynamodb: {
 					Keys: {
 						pk: {

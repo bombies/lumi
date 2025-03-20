@@ -1,10 +1,17 @@
 'use client';
 
+import { toast } from 'sonner';
+
 import { useRouteInvalidation } from '@/lib/hooks/useRouteInvalidation';
 import { trpc } from '@/lib/trpc/client';
 import { useSingleMediaUploader } from './utils/media-utils';
 
-export const CreateMomentDetails = () => trpc.moments.createMomentDetails.useMutation();
+export const CreateMomentDetails = () =>
+	trpc.moments.createMomentDetails.useMutation({
+		onSuccess() {
+			toast.success('Successfully uploaded your moment!');
+		},
+	});
 export const GetMomentDetails = (momentId: string) => trpc.moments.getMomentDetails.useQuery(momentId);
 export const GetMoments = (userId?: string) =>
 	trpc.moments.getMoments.useInfiniteQuery(

@@ -9,6 +9,7 @@ import { DatabaseMoment, DatabaseMomentMessage, Moment, MomentMessage } from '..
 import { dynamo, getDynamicUpdateStatements } from '../utils/dynamo/dynamo.service';
 import { ContentPaths, StorageClient } from '../utils/s3/s3.service';
 import { chunkArray, getUUID } from '../utils/utils';
+import { attachUrlsToMoment } from './moment.helpers';
 import {
 	CreateMomentDetailsDto,
 	CreateMomentMessageDto,
@@ -49,10 +50,29 @@ export const createMomentDetails = async (userId: string, relationshipId: string
 			message: 'Failed to create moment details',
 		});
 
-	return moment;
+	return attachUrlsToMoment(moment);
 };
 
-export const getMomentDetailsById = async (id: string) => {
+export async function getMomentDetailsById(
+	id: string,
+	args: {
+		safeReturn: true;
+	},
+): Promise<Moment | null>;
+
+export async function getMomentDetailsById(
+	id: string,
+	args?: {
+		safeReturn?: false;
+	},
+): Promise<Moment>;
+
+export async function getMomentDetailsById(
+	id: string,
+	args?: {
+		safeReturn?: boolean;
+	},
+): Promise<Moment | null> {
 	const res = await dynamo.get({
 		TableName: process.env.TABLE_NAME,
 		Key: {
@@ -62,13 +82,15 @@ export const getMomentDetailsById = async (id: string) => {
 	});
 
 	if (!res.Item)
-		throw new TRPCError({
-			code: 'NOT_FOUND',
-			message: 'Moment details not found',
-		});
+		if (args?.safeReturn) return null;
+		else
+			throw new TRPCError({
+				code: 'NOT_FOUND',
+				message: 'Moment details not found',
+			});
 
-	return res.Item as Moment;
-};
+	return attachUrlsToMoment(res.Item as Moment);
+}
 
 export const getMomentsForRelationship = async (
 	relationshipId: string,
@@ -89,7 +111,7 @@ export const getMomentsForRelationship = async (
 		ExclusiveStartKey: cursor,
 	});
 
-	return getInfiniteData<Moment>(res);
+	return getInfiniteData<Moment>(res, moment => attachUrlsToMoment(moment));
 };
 
 export const getMomentsForUser = async (
@@ -111,7 +133,7 @@ export const getMomentsForUser = async (
 		ExclusiveStartKey: cursor,
 	});
 
-	return getInfiniteData<Moment>(res);
+	return getInfiniteData<Moment>(res, moment => attachUrlsToMoment(moment));
 };
 
 export const updateMomentDetails = async (id: string, data: UpdateMomentDetailsDto): Promise<Moment> => {
@@ -135,7 +157,7 @@ export const updateMomentDetails = async (id: string, data: UpdateMomentDetailsD
 			message: 'Failed to update moment details',
 		});
 
-	return res.Attributes as Moment;
+	return attachUrlsToMoment(res.Attributes as Moment);
 };
 
 export const deleteMomentDetails = async (id: string): Promise<void> => {
