@@ -1,7 +1,19 @@
 import type { NextConfig } from 'next';
+import { RemotePattern } from 'next/dist/shared/lib/image-config';
 import { withNextVideo } from 'next-video/process';
 
+const remotePatterns: RemotePattern[] = [];
+if (process.env.CDN_URL) {
+	remotePatterns.push({
+		protocol: 'https',
+		hostname: process.env.CDN_URL.replace('https://', ''),
+	});
+}
+
 const nextConfig: NextConfig = {
+	images: {
+		remotePatterns: remotePatterns,
+	},
 	transpilePackages: ['@lumi/core', '@lumi/emails'],
 	async headers() {
 		return [

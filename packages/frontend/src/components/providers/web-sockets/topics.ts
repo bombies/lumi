@@ -1,6 +1,23 @@
 import { WebSocketSubTopic } from '@lumi/core/types/websockets.types';
 
-export const relationshipWSTopic = (relationshipId: string) =>
-	`${process.env.NEXT_PUBLIC_NOTIFICATIONS_TOPIC!}/${WebSocketSubTopic.RELATIONSHIP}/${relationshipId}`;
+export class WebsocketTopic {
+	private static prefix = process.env.NEXT_PUBLIC_NOTIFICATIONS_TOPIC!;
 
-export const userNotificationsTopic = (userId: string) => `${process.env.NEXT_PUBLIC_NOTIFICATIONS_TOPIC!}/${userId}`;
+	private constructor() {}
+
+	static relationshipWSTopic(relationshipId: string) {
+		return `${this.prefix}/${WebSocketSubTopic.RELATIONSHIP}/${relationshipId}`;
+	}
+
+	static heartbeatTopic(relationshipId: string) {
+		return `${this.prefix}/${WebSocketSubTopic.RELATIONSHIP}/${relationshipId}/${WebSocketSubTopic.HEARTBEAT}`;
+	}
+
+	static userNotificationsTopic(userId: string) {
+		return `${this.prefix}/${userId}`;
+	}
+
+	static momentChatTopic(relationshipId: string, momentId: string) {
+		return `${this.prefix}/${WebSocketSubTopic.RELATIONSHIP}/${relationshipId}/${WebSocketSubTopic.MOMENT_CHAT}/${momentId}`;
+	}
+}

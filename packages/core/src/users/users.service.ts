@@ -77,13 +77,18 @@ function attachAvatarToUser({ user, throws }: { user?: User; throws?: boolean })
 	return user;
 }
 
-export const getUserById = async (userId: string) => {
+type GetUserByIdArgs = {
+	projections?: (keyof User)[];
+};
+
+export const getUserById = async (userId: string, args?: GetUserByIdArgs) => {
 	const res = await dynamo.get({
 		TableName: process.env.TABLE_NAME,
 		Key: {
 			pk: `${KeyPrefix.USER}${userId}`,
 			sk: `${KeyPrefix.USER}${userId}`,
 		},
+		ProjectionExpression: args?.projections?.join(','),
 	});
 
 	return attachAvatarToUser({ user: res.Item as User | undefined });

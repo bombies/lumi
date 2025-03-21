@@ -11,7 +11,7 @@ const MomentsPage: FC = () => {
 		<>
 			<Title>Your Moments</Title>
 			<Link href="/moments/upload">
-				<Button variant="accent">
+				<Button variant="accent" className="mb-6">
 					<UploadIcon size={18} className="mr-2" /> Upload Moment
 				</Button>
 			</Link>

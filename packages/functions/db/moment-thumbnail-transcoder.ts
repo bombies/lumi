@@ -56,7 +56,7 @@ export const handler: Handler<DynamoDBStreamEvent> = async event => {
 			'-i',
 			videoPath,
 			'-vf',
-			'thumbnail,scale=960:-1',
+			'thumbnail,scale=1920:-1',
 			'-vframes',
 			'1',
 			outputPath,

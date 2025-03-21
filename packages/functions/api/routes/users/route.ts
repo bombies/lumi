@@ -11,6 +11,7 @@ import {
 	getUsersByUsername,
 	updateUser,
 } from '@lumi/core/users/users.service';
+import { z } from 'zod';
 
 import { protectedProcedure, publicProcedure, router } from '../../utils/trpc';
 
@@ -31,6 +32,12 @@ export const usersRouter = router({
 		getUserAvatarUploadUrl({
 			userId: user.id,
 			...input,
+		}),
+	),
+
+	getUserByIdSafe: protectedProcedure.input(z.string()).query(({ input }) =>
+		getUserById(input, {
+			projections: ['id', 'firstName', 'lastName', 'avatarUrl', 'avatarKey', 'username'],
 		}),
 	),
 });

@@ -21,7 +21,7 @@ const InternalLayout: FC<PropsWithChildren> = async ({ children }) => {
 			relationshipId={relationship.id}
 			user={user}
 		>
-			<RelationshipProvider relationship={relationship} partner={partner!}>
+			<RelationshipProvider relationship={relationship} self={user} partner={partner!}>
 				<PresenceWatcher user={user} relationship={relationship} />
 				<NotificationWatcher />
 				{children}

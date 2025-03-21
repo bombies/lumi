@@ -15,7 +15,7 @@ import { connectToWebsocket } from '@/components/providers/web-sockets/web-socke
 import { UpdateUser } from '@/hooks/trpc/user-hooks';
 import { useQueue } from '@/lib/hooks/useQueue';
 import { logger } from '@/lib/logger';
-import { relationshipWSTopic, userNotificationsTopic } from './topics';
+import { WebsocketTopic } from './topics';
 
 type WebSocketProviderProps = PropsWithChildren<{
 	endpoint: string;
@@ -29,6 +29,7 @@ type WebSocketProviderData = {
 	mqttConnection: MqttClientType | null;
 	addEventHandler: <T extends Event>(event: T, handler: WebSocketEventHandler<T>) => void;
 	removeEventHandler: <T extends Event>(event: T, handler: WebSocketEventHandler<T>) => void;
+	subscribeToTopic: (topic: string) => Promise<void | undefined>;
 	emitEvent: <T extends Event>(
 		event: T,
 		payload: InferredWebSocketMessage<T>['payload'],
@@ -68,6 +69,14 @@ const WebSocketProvider: FC<WebSocketProviderProps> = ({ children, user, endpoin
 				});
 		},
 	});
+	const { enqueue: enqueuePostConnectionAction, startProcessing: processPostConnectionActions } = useQueue<
+		() => any | Promise<any>
+	>({
+		process: async fn => {
+			await fn();
+		},
+		lazyProcess: true,
+	});
 
 	const addEventHandler = useCallback(<T extends Event>(event: T, handler: WebSocketEventHandler<T>) => {
 		setEventHandlers(prev => {
@@ -101,7 +110,7 @@ const WebSocketProvider: FC<WebSocketProviderProps> = ({ children, user, endpoin
 			if (mqttConnection) {
 				await emitAsyncWebsocketEvent({
 					client: mqttConnection,
-					topic: args?.topic ?? relationshipWSTopic(relationshipId),
+					topic: args?.topic ?? WebsocketTopic.relationshipWSTopic(relationshipId),
 					event,
 					payload,
 					source: 'client',
@@ -109,6 +118,14 @@ const WebSocketProvider: FC<WebSocketProviderProps> = ({ children, user, endpoin
 			}
 		},
 		[mqttConnection, relationshipId],
+	);
+
+	const subscribeToTopic = useCallback(
+		async (topic: string) => {
+			enqueuePostConnectionAction(() => mqttConnection?.subscribeAsync({ [topic]: { qos: 1 } }));
+		},
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+		[mqttConnection],
 	);
 
 	useEffect(() => {
@@ -124,10 +141,10 @@ const WebSocketProvider: FC<WebSocketProviderProps> = ({ children, user, endpoin
 				try {
 					logger.debug(`Connected to websocket! Attempting to subscribe to topic... (${clientId})`);
 					await connection.subscribeAsync({
-						[relationshipWSTopic(relationshipId!)]: {
+						[WebsocketTopic.relationshipWSTopic(relationshipId!)]: {
 							qos: 1,
 						},
-						[userNotificationsTopic(user.id)]: {
+						[WebsocketTopic.userNotificationsTopic(user.id)]: {
 							qos: 1,
 						},
 					});
@@ -136,7 +153,7 @@ const WebSocketProvider: FC<WebSocketProviderProps> = ({ children, user, endpoin
 					await updateUser({ status: 'online' });
 					await emitAsyncWebsocketEvent({
 						client: connection,
-						topic: relationshipWSTopic(relationshipId),
+						topic: WebsocketTopic.relationshipWSTopic(relationshipId),
 						event: 'connect',
 						payload: { userId: user.id, username: user.username },
 						source: 'client',
@@ -144,13 +161,15 @@ const WebSocketProvider: FC<WebSocketProviderProps> = ({ children, user, endpoin
 
 					await emitAsyncWebsocketEvent({
 						client: connection,
-						topic: relationshipWSTopic(relationshipId),
+						topic: WebsocketTopic.relationshipWSTopic(relationshipId),
 						event: 'presence',
 						payload: { userId: user.id, username: user.username, status: 'online' },
 						source: 'client',
 					});
 					setMqttConnection(connection);
 					setConnectionStatus('connected');
+
+					processPostConnectionActions();
 				} catch (e) {
 					logger.error('Something went wrong while connecting to the websocket', e);
 				}
@@ -172,13 +191,13 @@ const WebSocketProvider: FC<WebSocketProviderProps> = ({ children, user, endpoin
 				await updateUser({ status: 'offline' });
 				await emitAsyncWebsocketEvent({
 					client: connection,
-					topic: relationshipWSTopic(relationshipId),
+					topic: WebsocketTopic.relationshipWSTopic(relationshipId),
 					event: 'disconnect',
 					payload: { userId: user.id, username: user.username },
 				});
 				await emitAsyncWebsocketEvent({
 					client: connection,
-					topic: relationshipWSTopic(relationshipId),
+					topic: WebsocketTopic.relationshipWSTopic(relationshipId),
 					event: 'presence',
 					payload: { userId: user.id, username: user.username, status: 'offline' },
 				});
@@ -192,7 +211,16 @@ const WebSocketProvider: FC<WebSocketProviderProps> = ({ children, user, endpoin
 			setMqttConnection(null);
 			setConnectionStatus('disconnected');
 		};
-	}, [authorizer, endpoint, enqueueEvent, relationshipId, updateUser, user.id, user.username]);
+	}, [
+		authorizer,
+		endpoint,
+		enqueueEvent,
+		processPostConnectionActions,
+		relationshipId,
+		updateUser,
+		user.id,
+		user.username,
+	]);
 
 	const memoizedValues = useMemo(
 		() => ({
@@ -200,9 +228,10 @@ const WebSocketProvider: FC<WebSocketProviderProps> = ({ children, user, endpoin
 			addEventHandler,
 			removeEventHandler,
 			emitEvent,
+			subscribeToTopic,
 			connectionStatus,
 		}),
-		[addEventHandler, connectionStatus, emitEvent, mqttConnection, removeEventHandler],
+		[addEventHandler, connectionStatus, emitEvent, mqttConnection, removeEventHandler, subscribeToTopic],
 	);
 
 	return <WebSocketContext.Provider value={memoizedValues}>{children}</WebSocketContext.Provider>;

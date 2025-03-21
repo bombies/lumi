@@ -15,9 +15,12 @@ export const handler = realtime.authorizer(async token => {
 		case WebSocketToken.RELATIONSHIP_USER:
 			const allowedSubscriptionChannels = [
 				`${process.env.NOTIFICATIONS_TOPIC!}/${WebSocketSubTopic.RELATIONSHIP}/${args}`,
+				`${process.env.NOTIFICATIONS_TOPIC!}/${WebSocketSubTopic.RELATIONSHIP}/${args}/${WebSocketSubTopic.MOMENT_CHAT}/*`,
 			];
 			const allowedPublishingChannels = [
 				`${process.env.NOTIFICATIONS_TOPIC!}/${WebSocketSubTopic.RELATIONSHIP}/${args}`,
+				`${process.env.NOTIFICATIONS_TOPIC!}/${WebSocketSubTopic.RELATIONSHIP}/${args}/${WebSocketSubTopic.MOMENT_CHAT}/*`,
+				`${process.env.NOTIFICATIONS_TOPIC!}/${WebSocketSubTopic.RELATIONSHIP}/${args}/${WebSocketSubTopic.HEARTBEAT}`,
 			];
 
 			if (client_id.startsWith('client_user')) {

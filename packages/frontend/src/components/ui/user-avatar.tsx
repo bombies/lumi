@@ -13,13 +13,14 @@ type Props = {
 	srcOverride?: string;
 	loading?: boolean;
 	hideStatus?: boolean;
+	containerClassName?: string;
 } & AvatarProps;
 
-const UserAvatar: FC<Props> = ({ user, srcOverride, loading, className, hideStatus, ...args }) => {
+const UserAvatar: FC<Props> = ({ user, srcOverride, loading, className, containerClassName, hideStatus, ...args }) => {
 	return loading ? (
 		<Skeleton className={cn('size-32 rounded-full', className)} />
 	) : (
-		<div className="relative overflow-hidden">
+		<div className={cn('relative overflow-hidden', containerClassName)}>
 			<Avatar className={cn(' size-32', className)} {...args}>
 				<AvatarImage src={srcOverride || user?.avatarUrl} alt={'@' + user?.username} className="object-cover" />
 				<AvatarFallback>{user?.firstName.charAt(0) || '?'}</AvatarFallback>

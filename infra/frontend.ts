@@ -4,6 +4,7 @@ import { apiDNS, webDNS } from './dns';
 import { notificationsTopic, realtimeServer } from './realtime';
 import {
 	authSecret,
+	cdnPrivateKey,
 	mailerHostSecret,
 	mailerPasswordSecret,
 	mailerPortSecret,
@@ -17,7 +18,7 @@ import {
 	vapidPrivateKey,
 	vapidPublicKey,
 } from './secrets';
-import { contentBucket } from './storage';
+import { contentBucket, contentCdn, contentCdnPublicKey } from './storage';
 
 export const frontend = new sst.aws.Nextjs('Frontend', {
 	path: 'packages/frontend',
@@ -56,6 +57,9 @@ export const frontend = new sst.aws.Nextjs('Frontend', {
 		NEXT_PUBLIC_DEV_MODE: $app.stage === 'development' ? 'true' : 'false',
 		CONTENT_BUCKET_NAME: contentBucket.name,
 		CONTENT_BUCKET_ENDPOINT: contentBucket.nodes.bucket.bucketRegionalDomainName,
+		CDN_PRIVATE_KEY: cdnPrivateKey,
+		KEY_PAIR_ID: contentCdnPublicKey.id,
+		CDN_URL: contentCdn.url,
 	},
 	permissions: [
 		{

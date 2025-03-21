@@ -38,9 +38,15 @@ export const getInfiniteMomentMessagesDto = createInfiniteDataDto({
 		}),
 	);
 
-export const createMomentMessageDto = momentMessageSchema.omit({
-	senderId: true,
-});
+export const createMomentMessageDto = momentMessageSchema
+	.omit({
+		senderId: true,
+	})
+	.and(
+		z.object({
+			timestamp: z.string().datetime().optional(),
+		}),
+	);
 
 export const getMomentUploadUrlDto = getUploadUrlDto;
 

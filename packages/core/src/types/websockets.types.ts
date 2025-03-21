@@ -9,6 +9,8 @@ export enum WebSocketToken {
 
 export enum WebSocketSubTopic {
 	RELATIONSHIP = 'relationship',
+	HEARTBEAT = 'heartbeat',
+	MOMENT_CHAT = 'moment_chat',
 }
 
 export type WebSocketHeartbeat = {
@@ -43,6 +45,12 @@ export type WebSocketMessageMap = {
 	disconnect: WebSocketMessage<'disconnect', { userId: string; username: string }>;
 	presence: WebSocketMessage<'presence', { userId: string; username: string; status: User['status'] }>;
 	heartbeat: WebSocketMessage<'heartbeat', { userId: string; username: string; relationshipId: string }>;
+	momentChat: WebSocketMessage<
+		'momentChat',
+		{ senderId: string; message: string; timestamp: string; momentId: string }
+	>;
+	momentTypingStart: WebSocketMessage<'momentTypingStart', { senderId: string; timestamp: string }>;
+	momentTypingEnd: WebSocketMessage<'momentTypingEnd', { senderId: string; timestamp: string }>;
 
 	// Specific user notifications
 	notification: WebSocketMessage<
@@ -64,6 +72,9 @@ export const events = [
 	'presence',
 	'heartbeat',
 	'notification',
+	'momentChat',
+	'momentTypingStart',
+	'momentTypingEnd',
 ] as (keyof WebSocketMessageMap)[];
 
 export type Event = (typeof events)[number];

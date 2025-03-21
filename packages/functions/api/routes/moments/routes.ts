@@ -49,7 +49,7 @@ export const momentsRouter = router({
 			),
 		)
 		.query(({ input: { userId, ...input }, ctx: { user, relationship } }) => {
-			if (!user) return getMomentsForRelationship(relationship.id, input);
+			if (!userId) return getMomentsForRelationship(relationship.id, input);
 			else {
 				const partnerId = extractPartnerIdFromRelationship(user.id, relationship);
 				if (userId !== partnerId && userId !== user.id)
@@ -104,24 +104,24 @@ export const momentsRouter = router({
 		.mutation(async ({ input, ctx: { user, relationship } }) => {
 			const moment = await getMomentDetailsById(input.momentId);
 
-			if (moment.relationshipId !== relationship.id || moment.userId !== user.id)
+			if (moment.relationshipId !== relationship.id)
 				throw new TRPCError({
 					code: 'UNAUTHORIZED',
 					message: 'You are not authorized to send a message for this moment!',
 				});
 
-			return createMomentMessage(moment.id, input);
+			return createMomentMessage(user.id, input);
 		}),
 
 	getMessagesForMoment: relationshipProcedure
 		.input(getInfiniteMomentMessagesDto)
-		.query(async ({ input, ctx: { user, relationship } }) => {
+		.query(async ({ input, ctx: { relationship } }) => {
 			const moment = await getMomentDetailsById(input.momentId);
 
-			if (moment.relationshipId !== relationship.id || moment.userId !== user.id)
+			if (moment.relationshipId !== relationship.id)
 				throw new TRPCError({
 					code: 'UNAUTHORIZED',
-					message: 'You are not authorized to send a message for this moment!',
+					message: 'You are not authorized to get messages for this moment!',
 				});
 
 			return getMessagesForMoment(input);

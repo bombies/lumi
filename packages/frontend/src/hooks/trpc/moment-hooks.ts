@@ -41,6 +41,7 @@ export const GetMessagesForMoment = (momentId: string) =>
 			momentId,
 		},
 		{
+			staleTime: Infinity,
 			getNextPageParam: lastPage => lastPage.cursor,
 		},
 	);

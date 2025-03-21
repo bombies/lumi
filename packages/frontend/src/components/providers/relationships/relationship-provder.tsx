@@ -10,11 +10,13 @@ import { logger } from '@/lib/logger';
 
 type RelationshipProviderData = {
 	relationship: Relationship;
+	self: User;
 	partner: User;
 };
 
 type RelationshipProviderProps = PropsWithChildren<{
 	relationship: Relationship;
+	self: User;
 	partner: User;
 }>;
 
@@ -26,7 +28,7 @@ export const useRelationship = () => {
 	return context;
 };
 
-const RelationshipProvider: FC<RelationshipProviderProps> = ({ children, relationship, partner }) => {
+const RelationshipProvider: FC<RelationshipProviderProps> = ({ children, relationship, self, partner }) => {
 	const { addEventHandler, removeEventHandler } = useWebSocket();
 	const [userState, setUserState] = useState<User>(partner);
 
@@ -45,7 +47,7 @@ const RelationshipProvider: FC<RelationshipProviderProps> = ({ children, relatio
 		};
 	}, [addEventHandler, partner.id, removeEventHandler]);
 
-	const memoizedValue = useMemo(() => ({ relationship, partner: userState }), [relationship, userState]);
+	const memoizedValue = useMemo(() => ({ relationship, partner: userState, self }), [relationship, self, userState]);
 	return <RelationshipContext.Provider value={memoizedValue}>{children}</RelationshipContext.Provider>;
 };
 

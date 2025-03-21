@@ -178,7 +178,7 @@ export const deleteMomentDetails = async (id: string): Promise<void> => {
 
 export const createMomentMessage = async (userId: string, dto: CreateMomentMessageDto) => {
 	const id = getUUID();
-	const timestamp = new Date().toISOString();
+	const timestamp = dto.timestamp ?? new Date().toISOString();
 	const message: MomentMessage = {
 		id,
 		timestamp,
@@ -191,7 +191,7 @@ export const createMomentMessage = async (userId: string, dto: CreateMomentMessa
 		Item: {
 			pk: `${KeyPrefix.MOMENT_MESSAGE}${id}`,
 			sk: `${KeyPrefix.MOMENT_MESSAGE}${id}`,
-			gsi1pk: `${KeyPrefix.MOMENT_MESSAGE}${id}`,
+			gsi1pk: `${KeyPrefix.MOMENT_MESSAGE}${dto.momentId}`,
 			gsi1sk: `${KeyPrefix.MOMENT_MESSAGE}${timestamp}`,
 			...message,
 			entityType: EntityType.MOMENT_MESSAGE,

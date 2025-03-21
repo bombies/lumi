@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Cookie } from 'next/font/google';
 import localFont from 'next/font/local';
 
@@ -116,6 +116,10 @@ const cookie = Cookie({
 export const metadata: Metadata = {
 	title: 'Lumi',
 	description: 'A space for you an your partner.',
+};
+
+export const viewport: Viewport = {
+	interactiveWidget: 'resizes-content',
 };
 
 export default async function RootLayout({

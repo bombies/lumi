@@ -15,6 +15,7 @@ type Props<T extends FieldValues> = {
 	className?: string;
 	children: ReactElement<any> | (ReactElement<any> | undefined)[];
 	showRequiredAsterisk?: boolean;
+	clearOnSubmit?: boolean;
 	initialValues?: DefaultValues<T>;
 };
 
@@ -27,6 +28,7 @@ export default function EasyForm<T extends FieldValues>({
 	disabled,
 	className,
 	showRequiredAsterisk = false,
+	clearOnSubmit,
 	initialValues,
 }: Readonly<Props<T>>) {
 	const form = useForm<T>({
@@ -53,7 +55,19 @@ export default function EasyForm<T extends FieldValues>({
 
 	return (
 		<ShadForm {...form}>
-			<form onSubmit={onSubmit && form.handleSubmit(onSubmit)} className={className}>
+			<form
+				onSubmit={
+					onSubmit &&
+					form.handleSubmit(async (args, e) => {
+						const res = onSubmit(args, e);
+						if (res instanceof Promise) await res;
+						if (clearOnSubmit) {
+							form.reset(initialValues);
+						}
+					})
+				}
+				className={className}
+			>
 				<EasyFormProvider
 					form={form}
 					submitting={submitting}

@@ -1,5 +1,6 @@
 import { accountId } from './constants';
 import { db } from './db';
+import { redisHost, redisPassword, redisPort, redisUser } from './secrets';
 
 export const notificationsTopic = `${$app.name}/${$app.stage}/notifications`;
 
@@ -36,6 +37,32 @@ export const heartbeatSubscriber = realtimeServer.subscribe(
 		},
 	},
 	{
-		filter: notificationsTopic + '/#',
+		filter: notificationsTopic + '/relationship/+/heartbeat',
+	},
+);
+
+export const momentMessageSubscriber = realtimeServer.subscribe(
+	{
+		handler: 'packages/functions/websocket/moment-message.subscriber',
+		link: [db, redisHost, redisPort, redisUser, redisPassword],
+		environment: {
+			TABLE_NAME: db.name,
+		},
+	},
+	{
+		filter: notificationsTopic + '/relationship/+/moment_chat/#',
+	},
+);
+
+export const presenceSubscriber = realtimeServer.subscribe(
+	{
+		handler: 'packages/functions/websocket/presence.subscriber',
+		link: [db],
+		environment: {
+			TABLE_NAME: db.name,
+		},
+	},
+	{
+		filter: notificationsTopic + '/relationship/#',
 	},
 );

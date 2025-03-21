@@ -7,6 +7,7 @@ import MediaThemeInstaplay from 'player.style/instaplay/react';
 
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { AsyncParams } from '@/lib/types';
+import MomentDetailsContainer from './components/moment-details-container';
 
 type Props = AsyncParams<{ id: string }>;
 
@@ -16,12 +17,21 @@ const MomentViewerPage: FC<Props> = async ({ params }) => {
 	const user = await getUserById((await supabase.auth.getUser()).data.user!.id);
 	const moment = await getMomentDetailsById(id, { safeReturn: true });
 	if (!user || !moment || moment.relationshipId !== user.relationshipId) notFound();
+	const uploader = await getUserById(moment.userId);
 
 	return (
 		<>
 			<div className="w-screen flex justify-center">
-				<div className="h-[calc(100vh-60px-70.4px)] max-w-[496px] aspect-[9/16] mx-auto phone-big:mx-0 shrink-0">
-					<Player src={moment.videoUrl} className="aspect-[9/16]" autoPlay theme={MediaThemeInstaplay} loop />
+				<div className="h-[calc(100vh-60px-70.4px)] max-w-screen phone-big:max-w-[496px] aspect-[9/16] mx-auto phone-big:mx-0 shrink-0 relative">
+					<Player
+						src={moment.videoUrl}
+						className="aspect-[9/16] h-[calc(100vh-60px-70.4px)]"
+						autoPlay
+						theme={MediaThemeInstaplay}
+						autoFocus={false}
+						loop
+					/>
+					<MomentDetailsContainer moment={moment} uploader={uploader} currentUser={user} />
 				</div>
 			</div>
 		</>

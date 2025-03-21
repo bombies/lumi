@@ -20,3 +20,5 @@ export const UploadUserAvatar = () => {
 	const { mutateAsync: fetchAvatarUploadUrl } = GetUserAvatarUploadUrl();
 	return useSingleMediaUploader(fetchAvatarUploadUrl);
 };
+
+export const GetUserByIdSafe = (userId: string) => trpc.users.getUserByIdSafe.useQuery(userId);

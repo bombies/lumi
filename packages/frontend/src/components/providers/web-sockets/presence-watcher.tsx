@@ -6,8 +6,8 @@ import { User } from '@lumi/core/types/user.types';
 import { InferredWebSocketMessage, WebSocketEventHandler } from '@lumi/core/types/websockets.types';
 
 import { useWebSocket } from '@/components/providers/web-sockets/web-socket-provider';
-import { UpdateUser } from '@/hooks/trpc/user-hooks';
 import { logger } from '@/lib/logger';
+import { WebsocketTopic } from './topics';
 
 const IDLE_TIMEOUT = 5 * 60 * 1000; // 5 minutes
 const HEART_BEAT_INTERVAL = 60 * 1000; // 1 minute
@@ -15,8 +15,7 @@ const HEART_BEAT_INTERVAL = 60 * 1000; // 1 minute
 type PresenceState = InferredWebSocketMessage<'presence'>['payload']['status'];
 
 export const usePresenceWatcher = (user: User, relationship: Relationship) => {
-	const { emitEvent, addEventHandler, removeEventHandler } = useWebSocket();
-	const { mutateAsync: updateUser } = UpdateUser();
+	const { emitEvent, addEventHandler, removeEventHandler, subscribeToTopic } = useWebSocket();
 	const [presence, setPresence] = useState<PresenceState>('offline');
 	const timerRef = useRef<number | null>(null);
 	const heartbeatIntervalRef = useRef<number | null>(null);
@@ -28,6 +27,7 @@ export const usePresenceWatcher = (user: User, relationship: Relationship) => {
 		presenceRef.current = presence;
 	}, [presence]);
 
+	// useEffect(() => {}, []);
 	const clearTimer = useCallback(() => {
 		if (timerRef.current) {
 			clearTimeout(timerRef.current);
@@ -36,27 +36,30 @@ export const usePresenceWatcher = (user: User, relationship: Relationship) => {
 	}, []);
 
 	const startTimer = useCallback(async () => {
-		if (messageRef.current?.status === 'idle') await updateUser({ status: 'online' });
-
 		clearTimer();
 		timerRef.current = window.setTimeout(async () => {
 			if (messageRef.current) {
 				await emitEvent('presence', { ...messageRef.current, status: 'idle' });
-				await updateUser({ status: 'idle' });
 				setPresence('idle');
 			}
 		}, IDLE_TIMEOUT);
 		logger.debug('Started a new idle timer');
-	}, [clearTimer, emitEvent, updateUser]);
+	}, [clearTimer, emitEvent]);
 
 	const startHeartbeatTimeout = useCallback(() => {
 		if (heartbeatIntervalRef.current) return;
 		heartbeatIntervalRef.current = window.setInterval(async () => {
-			await emitEvent('heartbeat', {
-				userId: user.id,
-				username: user.username,
-				relationshipId: relationship.id,
-			});
+			await emitEvent(
+				'heartbeat',
+				{
+					userId: user.id,
+					username: user.username,
+					relationshipId: relationship.id,
+				},
+				{
+					topic: WebsocketTopic.heartbeatTopic(relationship.id),
+				},
+			);
 		}, HEART_BEAT_INTERVAL);
 		logger.debug('Started client websocket heartbeat interval');
 
@@ -95,11 +98,10 @@ export const usePresenceWatcher = (user: User, relationship: Relationship) => {
 			handleUserActivity();
 		} else if (messageRef.current) {
 			await emitEvent('presence', { ...messageRef.current, status: 'idle' });
-			await updateUser({ status: 'idle' });
 			setPresence('idle');
 			clearTimer();
 		}
-	}, [clearTimer, emitEvent, handleUserActivity, updateUser]);
+	}, [clearTimer, emitEvent, handleUserActivity]);
 
 	useEffect(() => {
 		const handlePresence: WebSocketEventHandler<'presence'> = async payload => {
@@ -143,7 +145,6 @@ export const usePresenceWatcher = (user: User, relationship: Relationship) => {
 		removeEventHandler,
 		startHeartbeatTimeout,
 		startTimer,
-		updateUser,
 		user.id,
 	]);
 

@@ -10,7 +10,6 @@ import {
 	InferredWebSocketMessagePayload,
 	WebSocketHeartbeat,
 	WebSocketMessage,
-	WebSocketMessageMap,
 } from '../types/websockets.types';
 import { dynamo } from '../utils/dynamo/dynamo.service';
 

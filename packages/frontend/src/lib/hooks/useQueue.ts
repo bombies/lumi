@@ -5,12 +5,13 @@ import { useCallback, useEffect, useState } from 'react';
 type UseQueueArgs<T> = {
 	initialValue?: T[];
 	process?: ((element: T) => void) | ((element: T) => Promise<void>);
+	lazyProcess?: boolean;
 };
 
-export function useQueue<T>({ initialValue = [], process }: UseQueueArgs<T>) {
+export function useQueue<T>({ initialValue = [], process, lazyProcess }: UseQueueArgs<T>) {
 	const [queue, setQueue] = useState(initialValue);
 	const [isProcessing, setIsProcessing] = useState(false);
-
+	const [allowedToProcess, setAllowedToProcess] = useState(lazyProcess ? false : true);
 	const enqueue = useCallback((element: T) => {
 		setQueue(q => [...q, element]);
 	}, []);
@@ -30,9 +31,11 @@ export function useQueue<T>({ initialValue = [], process }: UseQueueArgs<T>) {
 		setQueue([]);
 	}, []);
 
+	const startProcessing = useCallback(() => setAllowedToProcess(true), []);
+
 	// Process effects
 	useEffect(() => {
-		if (isProcessing) return;
+		if (isProcessing || !allowedToProcess) return;
 
 		if (process instanceof Promise) {
 			(async () => {
@@ -49,7 +52,7 @@ export function useQueue<T>({ initialValue = [], process }: UseQueueArgs<T>) {
 		}
 
 		setIsProcessing(false);
-	}, [queue, process, dequeue, isProcessing]);
+	}, [queue, process, dequeue, isProcessing, allowedToProcess]);
 
 	return {
 		enqueue,
@@ -59,5 +62,6 @@ export function useQueue<T>({ initialValue = [], process }: UseQueueArgs<T>) {
 		last: queue[queue.length - 1],
 		size: queue.length,
 		queue,
+		startProcessing,
 	};
 }
