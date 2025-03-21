@@ -4,6 +4,7 @@ export * from './db';
 export * from './realtime';
 export * from './api';
 export * from './frontend';
+export * from './router';
 export * from './constants';
 export * from './cron';
 export * from './emails';

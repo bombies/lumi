@@ -37,6 +37,9 @@ declare module "sst" {
     }
     "Frontend": {
       "type": "sst.aws.Nextjs"
+    }
+    "LumiRouter": {
+      "type": "sst.aws.Router"
       "url": string
     }
     "MailerHost": {

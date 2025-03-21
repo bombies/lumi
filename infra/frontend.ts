@@ -25,6 +25,7 @@ export const frontend = new sst.aws.Nextjs('Frontend', {
 	dev: {
 		command: 'bun run dev',
 	},
+	cdn: false,
 	openNextVersion: '3.5.1',
 	link: [
 		trpc,
@@ -41,7 +42,7 @@ export const frontend = new sst.aws.Nextjs('Frontend', {
 		realtimeServer,
 		authSecret,
 	],
-	domain: !$dev ? webDNS : undefined,
+	// domain: !$dev ? webDNS : undefined,
 	environment: {
 		APP_STAGE: $app.stage,
 		AUTH_SECRET: authSecret.value,
