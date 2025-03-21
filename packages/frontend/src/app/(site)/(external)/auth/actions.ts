@@ -45,7 +45,10 @@ export const register = async ({ password, ...dto }: RegisterUserDto) => {
 		},
 	});
 
-	if (error) redirect(`/auth/register?error=${encodeURIComponent(error.message)}`);
+	if (error) {
+		console.error(error);
+		redirect(`/auth/register?error=${encodeURIComponent(error.message)}`);
+	}
 
 	if (!signUpResponse.user) throw new Error('User null');
 

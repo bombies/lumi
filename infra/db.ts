@@ -41,7 +41,7 @@ db.subscribe(
 	'RelationshipStreamHandler',
 	{
 		handler: 'packages/functions/db/stream.handler',
-		link: [db],
+		link: [db, redisHost, redisPort, redisUser, redisPassword],
 	},
 	{
 		filters: [

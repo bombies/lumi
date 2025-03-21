@@ -1,6 +1,9 @@
 import { cookies } from 'next/headers';
 import { SupabaseUser } from '@lumi/core/types/auth.types';
 import { createServerClient } from '@supabase/ssr';
+import { AuthSessionMissingError } from '@supabase/supabase-js';
+
+import { logger } from '../logger';
 
 export const createSupabaseServerClient = async () => {
 	const cookieStore = await cookies();
@@ -28,6 +31,6 @@ export const getServerSession = async () => {
 		data: { user },
 		error,
 	} = await supabase.auth.getUser();
-	if (error) console.error(error);
+	if (error && !(error instanceof AuthSessionMissingError)) logger.warn('Supbase auth error: ', error);
 	return user as SupabaseUser;
 };

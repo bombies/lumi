@@ -30,6 +30,7 @@ const MomentViewerPage: FC<Props> = async ({ params }) => {
 						theme={MediaThemeInstaplay}
 						autoFocus={false}
 						loop
+						playsInline
 					/>
 					<MomentDetailsContainer moment={moment} uploader={uploader} currentUser={user} />
 				</div>

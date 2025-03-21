@@ -105,6 +105,7 @@ const MomentUploadContent: FC = () => {
 					autoPlay
 					theme={MediaThemeInstaplay}
 					loop
+					playsInline
 				/>
 			</div>
 			<div className="w-full phone-big:w-[35rem] space-y-6">

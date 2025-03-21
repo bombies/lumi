@@ -15,7 +15,7 @@ const HEART_BEAT_INTERVAL = 60 * 1000; // 1 minute
 type PresenceState = InferredWebSocketMessage<'presence'>['payload']['status'];
 
 export const usePresenceWatcher = (user: User, relationship: Relationship) => {
-	const { emitEvent, addEventHandler, removeEventHandler, subscribeToTopic } = useWebSocket();
+	const { emitEvent, addEventHandler, removeEventHandler } = useWebSocket();
 	const [presence, setPresence] = useState<PresenceState>('offline');
 	const timerRef = useRef<number | null>(null);
 	const heartbeatIntervalRef = useRef<number | null>(null);

@@ -7,6 +7,8 @@ import { HydrateClient } from '@/lib/trpc/server';
 
 import './globals.css';
 
+import Script from 'next/script';
+
 import SessionProvider from '@/components/providers/session-provider';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 
@@ -115,11 +117,27 @@ const cookie = Cookie({
 
 export const metadata: Metadata = {
 	title: 'Lumi',
-	description: 'A space for you an your partner.',
+	description: 'A space for you and your partner.',
+	appleWebApp: {
+		capable: true,
+		statusBarStyle: 'black-translucent',
+	},
 };
 
 export const viewport: Viewport = {
+	maximumScale: 1,
+	userScalable: false,
 	interactiveWidget: 'resizes-content',
+	themeColor: [
+		{
+			media: '(prefers-color-scheme: dark)',
+			color: '#10130d',
+		},
+		{
+			media: '(prefers-color-scheme: light)',
+			color: '#f8fff1',
+		},
+	],
 };
 
 export default async function RootLayout({
@@ -138,6 +156,17 @@ export default async function RootLayout({
 						<HydrateClient>{children}</HydrateClient>
 					</Providers>
 				</SessionProvider>
+				<Script
+					strategy="beforeInteractive"
+					type="text/javascript"
+					src="https://cdn.jsdelivr.net/npm/ios-pwa-splash@1.0.0/cdn.min.js"
+				/>
+				<Script
+					id="load-ios-splash"
+					dangerouslySetInnerHTML={{
+						__html: `iosPWASplash('/web-app-manifest-512x512.png', '#76A34E');`,
+					}}
+				/>
 			</body>
 		</html>
 	);

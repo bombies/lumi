@@ -13,11 +13,16 @@ const Footer: FC = () => {
 	const pathName = usePathname();
 	const docked = useMemo(() => DOCKED_MATHCERS.some(matcher => matcher.test(pathName)), [pathName]);
 	return (
-		<footer className={cn('fixed bottom-5 w-full flex justify-center', docked && 'block static w-screen')}>
+		<footer
+			className={cn(
+				'fixed bottom-8 laptop:bottom-5 w-full flex justify-center',
+				docked && 'block static w-screen',
+			)}
+		>
 			<nav
 				className={cn(
 					'w-[95%] phone-big:w-fit border border-foreground/15 bg-background/50 backdrop-blur-lg rounded-3xl p-2 flex gap-2 justify-between',
-					docked && 'w-full phone-big:w-full phone-big:justify-center rounded-none',
+					docked && 'w-full phone-big:w-full phone-big:justify-center rounded-none border-x-0 border-b-0',
 				)}
 			>
 				<FooterItem label="Home" href="/home" icon={HomeIcon} />
