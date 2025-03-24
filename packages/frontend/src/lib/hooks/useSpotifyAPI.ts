@@ -5,6 +5,7 @@ import { SpotifyApi } from '@spotify/web-api-ts-sdk';
 import { UserIdentity } from '@supabase/supabase-js';
 
 import { spotifyApiScopes } from '@/app/(site)/(internal)/settings/relationship/components/music-sharing/spotify-link-button';
+import { logger } from '../logger';
 import { useSupabaseBrowserClient } from '../supabase/client';
 import { useLocalStorage } from './useLocalStorage';
 
@@ -50,14 +51,13 @@ export const useSpotifyAPI = (args?: UseSpotifyAPIArgs) => {
 
 			const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
 			if (sessionError) {
-				console.error('There was an error fetching the session!', sessionError);
+				logger.error('There was an error fetching the session!', sessionError);
 				setLoading(false);
 				return;
 			}
 
-			console.log(sessionData.session);
-			const spotifyProviderToken = storage.getItem<string>('oauth_provider_token');
-			const spotifyRefreshToken = storage.getItem<string>('oauth_provider_refresh_token');
+			let spotifyProviderToken = storage.getItem<string>('oauth_provider_token');
+			let spotifyRefreshToken = storage.getItem<string>('oauth_provider_refresh_token');
 			if (!spotifyProviderToken) {
 				const response = await supabase.auth.signInWithOAuth({
 					provider: 'spotify',
@@ -68,16 +68,25 @@ export const useSpotifyAPI = (args?: UseSpotifyAPIArgs) => {
 				});
 
 				if (response.error) {
-					console.error('Failed to get the Spotify tokens!');
+					logger.error('Failed to get the Spotify tokens!');
 					setLoading(false);
 					return;
+				} else {
+					spotifyProviderToken = storage.getItem<string>('oauth_provider_token');
+					spotifyRefreshToken = storage.getItem<string>('oauth_provider_refresh_token');
 				}
+			}
+
+			if (!spotifyProviderToken || !spotifyRefreshToken) {
+				logger.error('Failed to set the Sptoify tokens!');
+				setLoading(false);
+				return;
 			}
 
 			setSpotifyAPI(
 				SpotifyApi.withAccessToken(process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_ID!, {
 					access_token: spotifyProviderToken,
-					refresh_token: spotifyRefreshToken!,
+					refresh_token: spotifyRefreshToken,
 					token_type: sessionData.session!.token_type,
 					expires_in: sessionData.session!.expires_in,
 				}),

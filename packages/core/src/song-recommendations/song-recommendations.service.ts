@@ -62,7 +62,6 @@ export const createSongRecommendation = async (
 };
 
 export const getSongRecommendations = async (
-	userId: string,
 	partnerId: string,
 	relationshipId: string,
 	{ limit, cursor, order, ...dto }: GetSongRecommendationsDto,
@@ -77,7 +76,7 @@ export const getSongRecommendations = async (
 		},
 		ExpressionAttributeValues: {
 			':pk': `${KeyPrefix.SONG_RECOMMENDATION}${relationshipId}`,
-			':sk': `${KeyPrefix.SONG_RECOMMENDATION}${userId}${dto.filter ? `#${dto.filter}` : ''}`,
+			':sk': `${KeyPrefix.SONG_RECOMMENDATION}${partnerId}${dto.filter ? `#${dto.filter}` : ''}`,
 		},
 		Limit: limit,
 		ExclusiveStartKey: cursor,
