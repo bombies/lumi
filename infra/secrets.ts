@@ -22,3 +22,6 @@ export const vapidPrivateKey = new sst.Secret('VapidPrivateKey');
 export const websocketToken = new sst.Secret('WebSocketToken');
 
 export let cdnPrivateKey = fs.readFileSync(`${process.cwd()}/cdn-keys/private_key.pem`, 'utf8');
+
+export const spotifyClientId = new sst.Secret('SpotifyClientId');
+export const spotifyClientSecret = new sst.Secret('SpotifyClientSecret');

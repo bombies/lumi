@@ -13,6 +13,7 @@ import {
 	redisPassword,
 	redisPort,
 	redisUser,
+	spotifyClientId,
 	supabaseKey,
 	supabaseUrl,
 	vapidPrivateKey,
@@ -60,6 +61,7 @@ export const frontend = new sst.aws.Nextjs('Frontend', {
 		CDN_PRIVATE_KEY: cdnPrivateKey,
 		KEY_PAIR_ID: contentCdnPublicKey.id,
 		CDN_URL: contentCdn.url,
+		NEXT_PUBLIC_SPOTIFY_CLIENT_ID: spotifyClientId.value,
 	},
 	permissions: [
 		{

@@ -4,7 +4,7 @@ import { createContext, FC, PropsWithChildren, useCallback, useContext, useState
 import { SupabaseUser, SupabaseUserMetaData } from '@lumi/core/types/auth.types';
 import { UserResponse } from '@supabase/supabase-js';
 
-import { createSupabaseBrowserClient } from '@/lib/supabase/client';
+import { useSupabaseBrowserClient } from '@/lib/supabase/client';
 
 type SessionProviderData = {
 	data: { user: SupabaseUser | null };
@@ -23,7 +23,7 @@ export const useSession = () => {
 
 const SessionProvider: FC<PropsWithChildren & { userResponse: UserResponse }> = ({ children, userResponse }) => {
 	const [response, setResponse] = useState<UserResponse>(userResponse);
-	const supabase = createSupabaseBrowserClient();
+	const supabase = useSupabaseBrowserClient();
 	const update = useCallback(
 		async (data: Partial<SupabaseUserMetaData>) => {
 			if (!userResponse.data.user) return;

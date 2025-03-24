@@ -7,7 +7,7 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { httpBatchLink } from '@trpc/client';
 import { createTRPCReact } from '@trpc/react-query';
 
-import { createSupabaseBrowserClient } from '../supabase/client';
+import { useSupabaseBrowserClient } from '../supabase/client';
 import { makeQueryClient } from './query-client';
 
 export const trpc = createTRPCReact<AppRouter>();
@@ -32,7 +32,7 @@ export function TRPCProvider(
 	//       have a suspense boundary between this and the code that may
 	//       suspend because React will throw away the client on the initial
 	//       render if it suspends and there is no boundary
-	const supabase = createSupabaseBrowserClient();
+	const supabase = useSupabaseBrowserClient();
 	const queryClient = getQueryClient();
 	const trpcClient = useMemo(
 		() =>

@@ -14,9 +14,19 @@ type Props = {
 	loading?: boolean;
 	hideStatus?: boolean;
 	containerClassName?: string;
+	statusClassName?: string;
 } & AvatarProps;
 
-const UserAvatar: FC<Props> = ({ user, srcOverride, loading, className, containerClassName, hideStatus, ...args }) => {
+const UserAvatar: FC<Props> = ({
+	user,
+	srcOverride,
+	loading,
+	className,
+	containerClassName,
+	statusClassName,
+	hideStatus,
+	...args
+}) => {
 	return loading ? (
 		<Skeleton className={cn('size-32 rounded-full', className)} />
 	) : (
@@ -30,7 +40,10 @@ const UserAvatar: FC<Props> = ({ user, srcOverride, loading, className, containe
 					<Tooltip>
 						<TooltipTrigger asChild>
 							<Badge
-								className="absolute bottom-[10%] right-0 rounded-full size-4 p-2 uppercase border-2 border-white"
+								className={cn(
+									'absolute bottom-[10%] right-0 rounded-full size-4 p-2 uppercase border-2 border-white',
+									statusClassName,
+								)}
 								variant={
 									user?.status === 'online'
 										? 'primary'

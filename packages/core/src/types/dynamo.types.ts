@@ -14,6 +14,8 @@ export enum KeyPrefix {
 	MOMENT_DETAILS = 'moment::details#',
 	MOMENT_MESSAGE = 'moment::message#',
 
+	SONG_RECOMMENDATION = 'songrec#',
+
 	NOTIFICATION_SUBSCRIBER = 'notification::subscriber#',
 
 	WEBSOCKET_HEARTBEAT = 'ws::heartbeat#',

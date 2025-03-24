@@ -58,6 +58,9 @@ export async function updateSession(request: NextRequest) {
 		return NextResponse.redirect(url);
 	}
 
+	// const searchParams = request.nextUrl.searchParams;
+	// const code = searchParams.get('code');
+
 	// IMPORTANT: You *must* return the supabaseResponse object as it is.
 	// If you're creating a new response object with NextResponse.next() make sure to:
 	// 1. Pass the request in it, like so:

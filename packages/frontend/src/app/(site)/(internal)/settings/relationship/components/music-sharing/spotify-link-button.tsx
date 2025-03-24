@@ -5,10 +5,12 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
+import { useIsIOS } from '@/lib/hooks/useIsIOS';
+import { useIsStandalone } from '@/lib/hooks/useIsStandalone';
 import { logger } from '@/lib/logger';
-import { createSupabaseBrowserClient } from '@/lib/supabase/client';
+import { useSupabaseBrowserClient } from '@/lib/supabase/client';
 
-const spotifyApiScopes = [
+export const spotifyApiScopes = [
 	'playlist-read-private',
 	'playlist-read-collaborative',
 	'playlist-modify-private',
@@ -21,17 +23,29 @@ const spotifyApiScopes = [
 	'user-library-modify',
 ];
 
-const SpotifyLinkButton: FC = () => {
-	const supabase = createSupabaseBrowserClient();
+type Props = {
+	next?: string;
+};
+
+const SpotifyLinkButton: FC<Props> = ({ next }) => {
+	const supabase = useSupabaseBrowserClient();
+	const isIOS = useIsIOS();
+	const isStandalone = useIsStandalone();
 	const router = useRouter();
 	return (
 		<Button
 			className="bg-foreground dark:bg-background hover:bg-foreground/80 hover:dark:bg-background/80 text-background dark:text-foreground"
 			onClick={async () => {
+				if (isIOS && isStandalone)
+					return toast.info(
+						"You can't link your Spotify account in standalone mode on iOS! You must visit the website in Safari and link your account there.",
+					);
+
 				const response = await supabase.auth.linkIdentity({
 					provider: 'spotify',
 					options: {
 						scopes: spotifyApiScopes.join(' '),
+						redirectTo: `${process.env.NEXT_PUBLIC_CANONICAL_URL}/auth/callback${next ? `?next=${encodeURIComponent(next)}` : ''}`,
 					},
 				});
 

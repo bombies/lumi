@@ -1,4 +1,5 @@
 import { EntityType } from './dynamo.types';
+import { User } from './user.types';
 
 export type RelationshipRequest = {
 	id: string;
@@ -40,7 +41,12 @@ export type Relationship = {
 	partner1: string;
 	partner2: string;
 	createdAt: string;
-};
+} & RelationshipExtras;
+
+export type RelationshipExtras = Partial<{
+	partner: User;
+	self: User;
+}>;
 
 export type DatabaseRelationship = Relationship & {
 	/**

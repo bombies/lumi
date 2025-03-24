@@ -4,6 +4,7 @@ import { SiSpotify } from '@icons-pack/react-simple-icons';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import SpotifyLinkButton from './spotify-link-button';
+import SpotifyUnlinkButton from './spotify-unlink-button';
 
 const MusicSharingSettingsContent: FC = async () => {
 	const supabase = await createSupabaseServerClient();
@@ -21,13 +22,14 @@ const MusicSharingSettingsContent: FC = async () => {
 			</CardHeader>
 			<CardContent>
 				{spotifyIdentity ? (
-					<p className="text-sm text-text-secondary">
-						Connected as <span className="font-medium">{spotifyIdentity.user_id}</span>
-					</p>
+					<div className="space-y-4">
+						<p className="text-sm text-text-secondary">Your spotify account is linked.</p>{' '}
+						<SpotifyUnlinkButton spotifyIdentity={spotifyIdentity} />
+					</div>
 				) : (
 					<div className="space-y-4">
-						<p className="text-sm text-text-secondary">Not connected</p>
-						<SpotifyLinkButton />
+						<p className="text-sm text-text-secondary">You have not linked your spotify account.</p>
+						<SpotifyLinkButton next="/settings/relationship" />
 					</div>
 				)}
 			</CardContent>

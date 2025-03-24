@@ -26,9 +26,9 @@ const UserProfileSettings: FC = () => {
 	return (
 		<Card>
 			<CardHeader>
-				<CardTitle className="text-2xl">Your Profile</CardTitle>
+				<CardTitle className="text-2xl">Your Account</CardTitle>
 			</CardHeader>
-			<CardContent className="flex gap-4 items-center">
+			<CardContent className="flex flex-col tablet:flex-row gap-4 items-center">
 				<FileUpload
 					type="single"
 					disabled={userLoading || isUpdatingUser}
@@ -91,10 +91,10 @@ const UserProfileSettings: FC = () => {
 						</>
 					) : (
 						<>
-							<h3 className="text-xl font-medium">
+							<h3 className="text-xl font-medium text-center tablet:text-left">
 								{user!.firstName} {user!.lastName}
 							</h3>
-							<p>{user!.email}</p>
+							<p className="text-center tablet:text-left">{user!.email}</p>
 						</>
 					)}
 				</div>

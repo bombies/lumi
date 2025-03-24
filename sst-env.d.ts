@@ -37,7 +37,6 @@ declare module "sst" {
     }
     "Frontend": {
       "type": "sst.aws.Nextjs"
-      "url": string
     }
     "MailerHost": {
       "type": "sst.sst.Secret"
@@ -73,6 +72,14 @@ declare module "sst" {
       "value": string
     }
     "RedisUser": {
+      "type": "sst.sst.Secret"
+      "value": string
+    }
+    "SpotifyClientId": {
+      "type": "sst.sst.Secret"
+      "value": string
+    }
+    "SpotifyClientSecret": {
       "type": "sst.sst.Secret"
       "value": string
     }

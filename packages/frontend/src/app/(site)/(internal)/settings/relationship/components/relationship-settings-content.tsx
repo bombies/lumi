@@ -13,13 +13,13 @@ const RelationshipSettingsContent: FC = () => {
 			<CardHeader>
 				<CardTitle className="text-2xl">Your Partner</CardTitle>
 			</CardHeader>
-			<CardContent className="flex gap-4 items-center">
+			<CardContent className="flex flex-col tablet:flex-row gap-4 items-center">
 				<UserAvatar user={partner} />
 				<div className="space-y-1">
-					<h3 className="text-xl font-medium">
+					<h3 className="text-xl font-medium text-center tablet:text-left">
 						{partner.firstName} {partner.lastName}
 					</h3>
-					<p>{partner.email}</p>
+					<p className="text-center tablet:text-left">{partner.email}</p>
 				</div>
 			</CardContent>
 		</Card>

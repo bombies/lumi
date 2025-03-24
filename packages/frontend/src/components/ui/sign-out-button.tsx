@@ -7,7 +7,7 @@ import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
 import { sendSignOutNotification } from '@/lib/actions/relationship-actions';
-import { createSupabaseBrowserClient } from '@/lib/supabase/client';
+import { useSupabaseBrowserClient } from '@/lib/supabase/client';
 import { useSession } from '../providers/session-provider';
 
 type Props = {
@@ -20,7 +20,7 @@ type Props = {
 const SignOutButton: FC<Props> = ({ iconOnly, className, disableNotification, variant }) => {
 	const { data: session } = useSession();
 	const router = useRouter();
-	const supabase = createSupabaseBrowserClient();
+	const supabase = useSupabaseBrowserClient();
 
 	return (
 		<Button

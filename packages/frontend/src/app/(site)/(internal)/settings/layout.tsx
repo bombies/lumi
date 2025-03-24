@@ -12,8 +12,9 @@ const SettingsLayout: FC<PropsWithChildren> = ({ children }) => {
 				<p className="p-5 text-xs flex gap-1 text-secondary items-center">
 					<SettingsIcon size={10} /> Settings
 				</p>
-				<div className="p-6 flex">
-					<SidebarTrigger /> <main className="pl-6 w-full">{children}</main>
+				<div className="px-2 laptop:p-6 flex">
+					<SidebarTrigger />{' '}
+					<main className="p-0 pb-24 laptop:pl-6 laptop:max-w-[35rem] w-full space-y-6">{children}</main>
 				</div>
 			</SidebarInset>
 		</SidebarProvider>
