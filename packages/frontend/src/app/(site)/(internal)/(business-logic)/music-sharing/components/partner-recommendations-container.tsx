@@ -1,35 +1,47 @@
 'use client';
 
 import { FC, useMemo } from 'react';
+import { RefreshCwIcon } from 'lucide-react';
 
+import { Button } from '@/components/ui/button';
 import InfiniteLoader from '@/components/ui/infinite-loader';
 import { Separator } from '@/components/ui/separator';
 import { GetSongRecommendations } from '@/hooks/trpc/music-sharing-hooks';
-import RecommendSongButton from './recommend-song-button';
 import RecommendedTrack from './recommended-track';
 import TrackSearchResultSkeleton from './track-search-result-skeleton';
 
-const SelfRecommendationsContainer: FC = () => {
+const PartnerRecommendationsContainer: FC = () => {
 	const {
 		data: songRecs,
 		isLoading: songRecsLoading,
-		hasNextPage,
+		isRefetching: songRecsRefetching,
+		refetch: refetchSongRecs,
 		fetchNextPage,
+		hasNextPage,
 		isFetchingNextPage,
-	} = GetSongRecommendations({ self: true, order: 'desc' });
+	} = GetSongRecommendations({ order: 'desc' });
 
 	const recElems = useMemo(
 		() =>
 			songRecs?.pages
 				.flatMap(page => page.data)
-				.map(track => <RecommendedTrack key={`rec_track_${track.id}`} track={track} type="sender" />),
+				.map(track => <RecommendedTrack key={`rec_track_${track.id}`} track={track} type="receiver" />),
 		[songRecs?.pages],
 	);
 
 	return (
 		<div className="space-y-6">
-			<RecommendSongButton />
 			<Separator />
+			<div className="flex">
+				<Button
+					size="icon"
+					loading={songRecsRefetching}
+					disabled={songRecsLoading}
+					onClick={() => refetchSongRecs()}
+				>
+					<RefreshCwIcon size={18} />
+				</Button>
+			</div>
 			{songRecsLoading ? (
 				<div>
 					<div className="space-y-3">
@@ -46,10 +58,10 @@ const SelfRecommendationsContainer: FC = () => {
 					<InfiniteLoader hasMore={hasNextPage} fetchMore={fetchNextPage} loading={isFetchingNextPage} />
 				</div>
 			) : (
-				<p className="text-lg">You have not recommended any songs...</p>
+				<p className="text-lg">You have not received any song recommendations...</p>
 			)}
 		</div>
 	);
 };
 
-export default SelfRecommendationsContainer;
+export default PartnerRecommendationsContainer;

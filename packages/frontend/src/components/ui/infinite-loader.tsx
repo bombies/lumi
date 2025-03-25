@@ -11,7 +11,7 @@ type Props = {
 	fetchMore: () => void;
 };
 
-const InfinteLoader: FC<Props> = ({ loading, hasMore, fetchMore }) => {
+const InfiniteLoader: FC<Props> = ({ loading, hasMore, fetchMore }) => {
 	const loaderRef = useInfiniteLoader({
 		loading,
 		hasMoreData: hasMore,
@@ -27,4 +27,4 @@ const InfinteLoader: FC<Props> = ({ loading, hasMore, fetchMore }) => {
 	);
 };
 
-export default InfinteLoader;
+export default InfiniteLoader;

@@ -2,7 +2,12 @@ import type { NextConfig } from 'next';
 import { RemotePattern } from 'next/dist/shared/lib/image-config';
 import { withNextVideo } from 'next-video/process';
 
-const remotePatterns: RemotePattern[] = [];
+const remotePatterns: RemotePattern[] = [
+	{
+		protocol: 'https',
+		hostname: 'i.scdn.co',
+	},
+];
 if (process.env.CDN_URL) {
 	remotePatterns.push({
 		protocol: 'https',

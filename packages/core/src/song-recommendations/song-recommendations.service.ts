@@ -42,6 +42,14 @@ export const createSongRecommendation = async (
 
 	const recId = getUUID();
 	const createdAt = new Date().toISOString();
+	const songRec: SongRecommendation = {
+		id: recId,
+		listened: false,
+		relationshipId,
+		recommenderId,
+		track: dto,
+		createdAt,
+	};
 	const res = await dynamo.put({
 		TableName: process.env.TABLE_NAME,
 		Item: {
@@ -51,14 +59,17 @@ export const createSongRecommendation = async (
 			gsi1sk: `${KeyPrefix.SONG_RECOMMENDATION}${recommenderId}#unlistened#${createdAt}`,
 			gsi2pk: `${KeyPrefix.SONG_RECOMMENDATION}${recommenderId}`,
 			gsi2sk: `${KeyPrefix.SONG_RECOMMENDATION}${dto.id}`,
-			id: recId,
-			listened: false,
-			relationshipId,
-			recommenderId,
-			track: dto,
-			createdAt,
+			...songRec,
 		} satisfies DatabaseSongRecommendation,
 	});
+
+	if (res.$metadata.httpStatusCode !== 200)
+		throw new TRPCError({
+			code: 'INTERNAL_SERVER_ERROR',
+			message: 'Could not create song recommendation!',
+		});
+
+	return songRec;
 };
 
 export const getSongRecommendations = async (

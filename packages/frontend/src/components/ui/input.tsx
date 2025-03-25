@@ -47,7 +47,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
 					'flex items-center h-10 w-full bg-input text-foreground rounded-lg border border-primary/10 overflow-hidden',
 					startContent && 'pl-0',
 					endContent && 'pr-0',
-					isFocused ? 'outline-hidden ring-2 ring-primary ring-offset-2' : 'ring-offset-white',
+					isFocused && 'focus-visible:!outline-0 ring-2 ring-primary',
 					className,
 				)}
 				onFocus={() => setIsFocused(true)}
@@ -57,7 +57,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
 				<input
 					type={type}
 					className={cn(
-						'self-center w-full h-full px-3 text-sm text-foreground rounded-xl !ring-0 !outline-hidden file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-foreground/20 disabled:cursor-not-allowed disabled:opacity-50',
+						'self-center w-full h-full px-3 text-sm text-foreground rounded-xl !ring-0 focus-visible:!outline-0 file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-foreground/20 disabled:cursor-not-allowed disabled:opacity-50',
 						startContent && 'pl-0 pr-3',
 						endContent && 'pr-0 pl-3',
 						startContent && endContent && 'pr-0 pl-0',

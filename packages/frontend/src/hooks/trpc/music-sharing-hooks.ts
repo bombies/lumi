@@ -1,8 +1,16 @@
 'use client';
 
+import { useRouteInvalidation } from '@/lib/hooks/useRouteInvalidation';
 import { trpc } from '@/lib/trpc/client';
 
-export const CreateSongRecommendation = () => trpc.musicSharing.createSongRecommendation.useMutation();
+export const CreateSongRecommendation = () => {
+	const invalidateRoutes = useRouteInvalidation([trpc.musicSharing.createSongRecommendation]);
+	return trpc.musicSharing.createSongRecommendation.useMutation({
+		onSuccess() {
+			invalidateRoutes();
+		},
+	});
+};
 export const GetSongRecommendations = ({
 	order,
 	filter,

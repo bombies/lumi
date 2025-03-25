@@ -5,15 +5,16 @@ import { FC, useEffect } from 'react';
 import { useRelationship } from '@/components/providers/relationships/relationship-provder';
 import { Card, CardContent, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import useSpotifyQuery from '@/lib/hooks/spotify/useSpotifyQuery';
+import { GetSongRecommendations } from '@/hooks/trpc/music-sharing-hooks';
+import PartnerRecommendationsContainer from './partner-recommendations-container';
 import SelfRecommendationsContainer from './self-recommendations.container';
 
 const ShareMusicContainer: FC = () => {
 	const { partner } = useRelationship();
-	const { data } = useSpotifyQuery('recently-played-tracks', api => api.player.getRecentlyPlayedTracks(1));
+	const { data: songRecs } = GetSongRecommendations({ order: 'desc', limit: 1 });
 
 	useEffect(() => {
-		const latestSong = data?.items[0].track.album.images[0].url;
+		const latestSong = songRecs?.pages.at(0)?.data.at(0)?.track.albumImage;
 		if (!latestSong) return;
 
 		const bodyElement = document.querySelector('body');
@@ -26,7 +27,13 @@ const ShareMusicContainer: FC = () => {
 		bodyElement.style.backgroundPosition = 'center';
 		bodyElement.style.width = '100vw';
 		bodyElement.style.height = '100vh';
-	}, [data?.items]);
+
+		return () => {
+			bodyElement.style.backgroundImage = '';
+			bodyElement.style.width = '';
+			bodyElement.style.height = '';
+		};
+	}, [songRecs?.pages]);
 
 	return (
 		<Card className="tablet:w-[45rem]" glass>
@@ -38,7 +45,9 @@ const ShareMusicContainer: FC = () => {
 						<TabsTrigger value="partner-recs">{partner.firstName}&apos;s</TabsTrigger>
 						<TabsTrigger value="self-recs">Yours</TabsTrigger>
 					</TabsList>
-					<TabsContent value="partner-recs"></TabsContent>
+					<TabsContent value="partner-recs">
+						<PartnerRecommendationsContainer />
+					</TabsContent>
 					<TabsContent value="self-recs">
 						<SelfRecommendationsContainer />
 					</TabsContent>

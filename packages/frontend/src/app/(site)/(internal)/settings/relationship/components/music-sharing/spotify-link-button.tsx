@@ -34,7 +34,7 @@ const SpotifyLinkButton: FC<Props> = ({ next }) => {
 	const router = useRouter();
 	return (
 		<Button
-			className="bg-foreground dark:bg-background hover:bg-foreground/80 hover:dark:bg-background/80 text-background dark:text-foreground"
+			className="bg-foreground hover:bg-foreground/80 text-background"
 			onClick={async () => {
 				if (isIOS && isStandalone)
 					return toast.info(
