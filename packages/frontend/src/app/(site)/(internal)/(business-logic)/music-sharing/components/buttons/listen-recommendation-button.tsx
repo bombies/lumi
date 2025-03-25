@@ -24,14 +24,11 @@ const ListenRecommendationButton: FC<Props> = ({ track }) => {
 					<PlayIcon className="size-[18px]" />
 				</Button>
 			</DialogTrigger>
-			<DialogContent
-				className="p-2 gap-2 max-h-screen overflow-y-auto bg-background/50 backdrop-blur-lg"
-				hideCloseButton
-			>
+			<DialogContent className="p-2 flex bg-background/50 tablet:!max-w-fit backdrop-blur-lg" hideCloseButton>
 				<DialogTitle hidden>
 					Listen to {track.track.name} by {track.track.artistName}
 				</DialogTitle>
-				<div className="flex flex-col tablet:flex-row gap-4 tablet:gap-8">
+				<div className="flex flex-col tablet:flex-row tablet:w-[45rem] gap-4 tablet:gap-8">
 					<Image
 						src={track.track.albumImage}
 						alt={`${track.track.name} by ${track.track.artistName} album art`}
