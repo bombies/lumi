@@ -1,19 +1,20 @@
 'use client';
 
 import { FC } from 'react';
-import { ClockIcon, TrashIcon } from '@heroicons/react/24/solid';
+import { ClockIcon } from '@heroicons/react/24/solid';
 import { SongRecommendation } from '@lumi/core/types/song-recommendation.types';
 import moment from 'moment';
 
-import { Button } from '@/components/ui/button';
 import Image from '@/components/ui/image';
+import DeleteRecommendationButton from '../buttons/delete-recommendation-button';
+import ListenRecommendationButton from '../buttons/listen-recommendation-button';
 
 type Props = {
 	track: SongRecommendation;
-	type: 'receiver' | 'sender';
+	type: 'receiver' | 'sender' | 'listened';
 };
 
-const RecommendedTrack: FC<Props> = ({ track: { track: trackDetails }, type }) => {
+const RecommendedTrack: FC<Props> = ({ track: { track: trackDetails, ...track }, type }) => {
 	return (
 		<div className="flex w-full justify-between gap-x-3 items-center hover:bg-white/20 p-2 rounded-md">
 			<div className="flex gap-x-3 items-center">
@@ -39,9 +40,11 @@ const RecommendedTrack: FC<Props> = ({ track: { track: trackDetails }, type }) =
 			<div className="flex gap-2">
 				{type === 'sender' ? (
 					<>
-						<Button size="icon" variant="destructive">
-							<TrashIcon className="size-[18px]" />
-						</Button>
+						<DeleteRecommendationButton track={{ ...track, track: trackDetails }} />
+					</>
+				) : type === 'receiver' ? (
+					<>
+						<ListenRecommendationButton track={{ ...track, track: trackDetails }} />
 					</>
 				) : (
 					<></>

@@ -22,6 +22,8 @@ export const getSongRecommendationsDto = createInfiniteDataDto({ defaultLimit: 1
 export const updateSongRecommendationDto = z
 	.object({
 		listened: z.boolean(),
+		rating: z.number().min(0).max(10),
+		comments: z.string(),
 	})
 	.partial();
 

@@ -1,6 +1,8 @@
 export type SongRecommendation = {
 	id: string;
 	listened: boolean;
+	rating?: number;
+	comments?: string;
 	recommenderId: string;
 	relationshipId: string;
 	createdAt: string;

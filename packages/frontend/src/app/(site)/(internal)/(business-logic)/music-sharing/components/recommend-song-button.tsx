@@ -12,8 +12,8 @@ import { Separator } from '@/components/ui/separator';
 import { CreateSongRecommendation } from '@/hooks/trpc/music-sharing-hooks';
 import useSpotifyQuery from '@/lib/hooks/spotify/useSpotifyQuery';
 import { getErrorMessage } from '@/lib/trpc/utils';
-import TrackSearchResult from './track-search-result';
-import TrackSearchResultSkeleton from './track-search-result-skeleton';
+import TrackSearchResult from './tracks/track-search-result';
+import TrackSearchResultSkeleton from './tracks/track-search-result-skeleton';
 
 const RecommendSongButton: FC = () => {
 	const { mutateAsync: recommendSong, isPending: isRecommending } = CreateSongRecommendation();

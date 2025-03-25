@@ -5,9 +5,9 @@ import { FC, useMemo } from 'react';
 import InfiniteLoader from '@/components/ui/infinite-loader';
 import { Separator } from '@/components/ui/separator';
 import { GetSongRecommendations } from '@/hooks/trpc/music-sharing-hooks';
-import RecommendSongButton from './recommend-song-button';
-import RecommendedTrack from './recommended-track';
-import TrackSearchResultSkeleton from './track-search-result-skeleton';
+import RecommendSongButton from '../recommend-song-button';
+import RecommendedTrack from '../tracks/recommended-track';
+import TrackSearchResultSkeleton from '../tracks/track-search-result-skeleton';
 
 const SelfRecommendationsContainer: FC = () => {
 	const {

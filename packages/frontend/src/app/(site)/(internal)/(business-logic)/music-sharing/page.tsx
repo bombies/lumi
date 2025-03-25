@@ -2,7 +2,7 @@ import { FC } from 'react';
 
 import { Card, CardHeader, CardTitle } from '@/components/ui/card';
 import Title from '@/components/ui/title';
-import MusicSharingContent from './components/music-sharing-content';
+import MusicSharingContent from './components/containers/music-sharing-content';
 
 const MusicSharingPage: FC = () => {
 	return (

@@ -7,8 +7,8 @@ import { Button } from '@/components/ui/button';
 import InfiniteLoader from '@/components/ui/infinite-loader';
 import { Separator } from '@/components/ui/separator';
 import { GetSongRecommendations } from '@/hooks/trpc/music-sharing-hooks';
-import RecommendedTrack from './recommended-track';
-import TrackSearchResultSkeleton from './track-search-result-skeleton';
+import RecommendedTrack from '../tracks/recommended-track';
+import TrackSearchResultSkeleton from '../tracks/track-search-result-skeleton';
 
 const PartnerRecommendationsContainer: FC = () => {
 	const {

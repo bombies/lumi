@@ -1,7 +1,10 @@
 'use client';
 
+import { toast } from 'sonner';
+
 import { useRouteInvalidation } from '@/lib/hooks/useRouteInvalidation';
 import { trpc } from '@/lib/trpc/client';
+import { handleTrpcError } from '@/lib/trpc/utils';
 
 export const CreateSongRecommendation = () => {
 	const invalidateRoutes = useRouteInvalidation([trpc.musicSharing.createSongRecommendation]);
@@ -11,6 +14,7 @@ export const CreateSongRecommendation = () => {
 		},
 	});
 };
+
 export const GetSongRecommendations = ({
 	order,
 	filter,
@@ -28,5 +32,25 @@ export const GetSongRecommendations = ({
 			getNextPageParam: lastPage => lastPage.cursor,
 		},
 	);
-export const UpdateSongRecommendation = () => trpc.musicSharing.updateSongRecommendation.useMutation();
-export const DeleteSongRecommendation = () => trpc.musicSharing.deleteSongRecommendation.useMutation();
+
+export const UpdateSongRecommendation = () => {
+	const invalidateRoutes = useRouteInvalidation([trpc.musicSharing.createSongRecommendation]);
+	return trpc.musicSharing.updateSongRecommendation.useMutation({
+		onSuccess() {
+			toast.success('You have rated that recommendation!');
+			invalidateRoutes();
+		},
+		onError(e) {
+			handleTrpcError(e);
+		},
+	});
+};
+
+export const DeleteSongRecommendation = () => {
+	const invalidateRoutes = useRouteInvalidation([trpc.musicSharing.createSongRecommendation]);
+	return trpc.musicSharing.deleteSongRecommendation.useMutation({
+		onSuccess() {
+			invalidateRoutes();
+		},
+	});
+};

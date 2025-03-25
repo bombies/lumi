@@ -60,10 +60,10 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
 		return (
 			<div
 				className={cn(
-					'flex items-center h-10 w-full bg-input text-foreground rounded-lg border border-primary/10 overflow-hidden',
+					'flex items-center h-10 w-full bg-input p-2 text-foreground rounded-lg border border-primary/10 overflow-hidden',
 					startContent && 'pl-0',
 					endContent && 'pr-0',
-					isFocused ? 'outline-hidden ring-2 ring-primary ring-offset-2' : 'ring-offset-white',
+					isFocused && 'focus-visible:!outline-0 ring-2 ring-primary',
 					className,
 				)}
 				onFocus={() => setIsFocused(true)}
