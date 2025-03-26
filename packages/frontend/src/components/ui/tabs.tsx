@@ -86,7 +86,7 @@ function TabsTrigger({ className, children, ...props }: React.ComponentProps<typ
 					}}
 				></motion.div>
 			)}
-			<span className="relative z-10">{children}</span>
+			<span className="relative z-10 inline-flex gap-2 items-center">{children}</span>
 		</TabsPrimitive.Trigger>
 	);
 }

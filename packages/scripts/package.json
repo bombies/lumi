@@ -5,12 +5,5 @@
 	"dependencies": {
 		"@lumi/core": "*",
 		"sst": "^3.10.8"
-	},
-	"scripts": {
-		"shell": "sst shell tsx"
-	},
-	"devDependencies": {
-		"@types/node": "^22",
-		"tsx": "^4"
 	}
 }

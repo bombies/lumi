@@ -26,7 +26,8 @@ const useSpotifyQuery = <T>(path: string, queryCb?: (api: SpotifyApi) => Promise
 									provider: 'spotify',
 									options: {
 										scopes: spotifyApiScopes.join(' '),
-										redirectTo: `${process.env.NEXT_PUBLIC_CANONICAL_URL}/auth/callback?next=${encodeURIComponent('/music-sharing')}`,
+										redirectTo: `https://${window.location.hostname}/auth/callback?next=${encodeURIComponent('/music-sharing')}`,
+										skipBrowserRedirect: true,
 									},
 								});
 
@@ -34,7 +35,7 @@ const useSpotifyQuery = <T>(path: string, queryCb?: (api: SpotifyApi) => Promise
 									logger.error('Failed to get the Spotify tokens!');
 									return;
 								} else {
-									return queryCb(spotifyAPI);
+									window.location.href = response.data.url;
 								}
 							}
 						}),

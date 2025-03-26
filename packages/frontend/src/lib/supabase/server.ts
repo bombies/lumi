@@ -1,5 +1,7 @@
+'use server';
+
 import { cookies } from 'next/headers';
-import { SupabaseUser } from '@lumi/core/types/auth.types';
+import { SupabaseUser, SupabaseUserMetaData } from '@lumi/core/types/auth.types';
 import { createServerClient } from '@supabase/ssr';
 import { AuthSessionMissingError } from '@supabase/supabase-js';
 
@@ -31,6 +33,28 @@ export const getServerSession = async () => {
 		data: { user },
 		error,
 	} = await supabase.auth.getUser();
-	if (error && !(error instanceof AuthSessionMissingError)) logger.warn('Supbase auth error: ', error);
+	if (error && !(error instanceof AuthSessionMissingError)) {
+		logger.warn('Supbase auth error: ', error);
+		return undefined;
+	}
+
+	const ignoredKeys = new Set<string>(['username', 'email'] satisfies (keyof SupabaseUserMetaData)[]);
+	if (
+		user &&
+		Object.keys(user.user_metadata).length &&
+		Object.keys(user.user_metadata).some(key => !ignoredKeys.has(key))
+	) {
+		await supabase.auth.updateUser({
+			data: Object.keys(user.user_metadata).reduce(
+				(acc, cur) => {
+					if (ignoredKeys.has(cur)) acc[cur] = user.user_metadata[cur];
+					else acc[cur] = null;
+					return acc;
+				},
+				{} as Record<string, any>,
+			),
+		});
+	}
+
 	return user as SupabaseUser;
 };

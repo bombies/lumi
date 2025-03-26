@@ -7,7 +7,6 @@ import { User } from '@lumi/core/types/user.types';
 import { CheckIcon, XIcon } from 'lucide-react';
 import { toast } from 'sonner';
 
-import { useSession } from '@/components/providers/session-provider';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -25,14 +24,9 @@ const FetchReceivedRequests = () =>
 
 const AcceptRelationshipRequest = () => {
 	const invalidateRoute = useRouteInvalidation([trpc.relationships.getReceivedRelationshipRequests]);
-	const { update: updateSession } = useSession();
 	const router = useRouter();
 	return trpc.relationships.acceptRelationshipRequest.useMutation({
-		async onSuccess(relationship) {
-			await updateSession({
-				relationshipId: relationship.id,
-			});
-
+		onSuccess() {
 			invalidateRoute();
 			router.push('/home');
 		},

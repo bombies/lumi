@@ -8,24 +8,12 @@ import ReceivedRelationshipRequestsContent from '@/app/(site)/(external)/join/co
 import SendRelationshipRequestContent from '@/app/(site)/(external)/join/components/send-relationship-request-content';
 import SignOutButton from '@/components/ui/sign-out-button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { createSupabaseServerClient, getServerSession } from '@/lib/supabase/server';
+import { getServerSession } from '@/lib/supabase/server';
 
 const JoinPage: FC = async () => {
 	const session = (await getServerSession())!;
-
 	const relationship = await getRelationshipForUser(session.id);
-	if (relationship) {
-		if (!session.user_metadata.relationshipId) {
-			const supabase = await createSupabaseServerClient();
-			await supabase.auth.updateUser({
-				data: {
-					...session.user_metadata,
-					relationshipId: relationship.id,
-				},
-			});
-		}
-		redirect('/home');
-	}
+	if (relationship) redirect('/home');
 
 	return (
 		<main className="p-12 space-y-6">

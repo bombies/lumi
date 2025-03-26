@@ -10,13 +10,13 @@
 	},
 	"devDependencies": {
 		"@trivago/prettier-plugin-sort-imports": "^4.3.0",
-		"@tsconfig/node22": "^22.0.0",
-		"supabase": "^2.19.7",
+		"@tsconfig/node22": "^22.0.1",
+		"supabase": "^2.20.3",
 		"typescript": "^5.8.2"
 	},
 	"dependencies": {
-		"@aws-sdk/credential-provider-node": "^3.758.0",
-		"@aws-sdk/credential-providers": "^3.758.0",
-		"sst": "^3.10.8"
+		"@aws-sdk/credential-provider-node": "^3.775.0",
+		"@aws-sdk/credential-providers": "^3.775.0",
+		"sst": "^3.10.12"
 	}
 }

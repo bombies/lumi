@@ -29,7 +29,7 @@ const SignOutButton: FC<Props> = ({ iconOnly, className, disableNotification, va
 			variant={variant || 'destructive'}
 			onClick={async () => {
 				if (!session) return;
-				const user = session.user!;
+				const user = session!;
 				if (!disableNotification) await sendSignOutNotification(user.id, user.user_metadata.username);
 
 				toast.promise(supabase.auth.signOut(), {

@@ -19,12 +19,8 @@ export type SupabaseAccessToken = Pick<
 
 export type SupabaseUserMetaData = {
 	email: string;
-	email_verified: boolean;
-	phone_verified: boolean;
-	sub: string;
-} & AdditionalSupabaseUserMetaData;
+} & CustomSuperbaseUserMetaData;
 
-export type AdditionalSupabaseUserMetaData = {
+export type CustomSuperbaseUserMetaData = {
 	username: string;
-	relationshipId?: string;
 };

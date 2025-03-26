@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { RegisterUserDto } from '@lumi/core/auth/auth.dto';
-import { AdditionalSupabaseUserMetaData } from '@lumi/core/types/auth.types';
+import { CustomSuperbaseUserMetaData } from '@lumi/core/types/auth.types';
 import { createUser, getUserByUsername } from '@lumi/core/users/users.service';
 
 import { createSupabaseServerClient } from '@/lib/supabase/server';
@@ -27,8 +27,8 @@ export const login = async (usernameOrEmail: string, password: string) => {
 
 	if (error) throw error;
 
-	revalidatePath('/', 'layout');
-	redirect('/');
+	revalidatePath('/home', 'layout');
+	redirect('/home');
 };
 
 export const register = async ({ password, ...dto }: RegisterUserDto) => {
@@ -41,7 +41,7 @@ export const register = async ({ password, ...dto }: RegisterUserDto) => {
 		email: dto.email,
 		password,
 		options: {
-			data: { username: dto.username } satisfies AdditionalSupabaseUserMetaData,
+			data: { username: dto.username } satisfies CustomSuperbaseUserMetaData,
 		},
 	});
 

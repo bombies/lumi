@@ -47,7 +47,7 @@ const WebSocketTest: FC = () => {
 				<Button
 					className="flex gap-2"
 					onClick={async () => {
-						await emitEvent('test', { sender: session.user!.user_metadata.username, message: inputValue });
+						await emitEvent('test', { sender: session!.id, message: inputValue });
 					}}
 				>
 					send message

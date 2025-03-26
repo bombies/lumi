@@ -26,7 +26,8 @@ export const frontend = new sst.aws.Nextjs('Frontend', {
 	dev: {
 		command: 'bun run dev',
 	},
-	openNextVersion: '3.5.1',
+	cachePolicy: $app.stage !== 'staging' ? '5ec0f852-6fd4-45c7-80fe-d6cd77ed35a4' : undefined,
+	openNextVersion: '3.5.3',
 	link: [
 		trpc,
 		contentBucket,

@@ -10,7 +10,7 @@ import './globals.css';
 import Script from 'next/script';
 
 import SessionProvider from '@/components/providers/session-provider';
-import { createSupabaseServerClient } from '@/lib/supabase/server';
+import { getServerSession } from '@/lib/supabase/server';
 
 const sfProDisplay = localFont({
 	src: [
@@ -145,8 +145,7 @@ export default async function RootLayout({
 }: Readonly<{
 	children: React.ReactNode;
 }>) {
-	const supabaseSession = await createSupabaseServerClient();
-	const supabaseUser = await supabaseSession.auth.getUser();
+	const supabaseUser = await getServerSession();
 
 	return (
 		<html lang="en" className={`${sfProDisplay.variable} ${cookie.variable}`}>
