@@ -12,10 +12,7 @@ const AUTH_WALLED_MATHCERS: string[] = [
 ];
 
 export async function updateSession(request: NextRequest) {
-	const sessionCookie = getSessionCookie(request, {
-		useSecureCookies: true,
-	});
-
+	const sessionCookie = getSessionCookie(request);
 	const pathName = request.nextUrl.pathname;
 	if (!sessionCookie && AUTH_WALLED_MATHCERS.some(matcher => new RegExp(matcher).test(`^${pathName}`))) {
 		// no user, potentially respond by redirecting the user to the login page

@@ -6,8 +6,8 @@ import { auth } from '@/auth';
 import { getServerSession } from '../better-auth/auth-actions';
 
 export const requireSpotifyLink = async () => {
+	const session = await getServerSession();
 	try {
-		const session = await getServerSession();
 		const identityData = await auth.api.listUserAccounts({
 			headers: {
 				Authorization: `Bearer ${session?.session.token}`,
