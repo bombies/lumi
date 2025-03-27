@@ -2,13 +2,20 @@
 
 import { redirect } from 'next/navigation';
 
-import { createSupabaseServerClient } from '../supabase/server';
+import { auth } from '@/auth';
+import { getServerSession } from '../better-auth/auth-actions';
 
 export const requireSpotifyLink = async () => {
-	const supabase = await createSupabaseServerClient();
-	const { data: identityData, error } = await supabase.auth.getUserIdentities();
-
-	if (error) redirect(`/home?error=${encodeURIComponent('Could not fetch user identities!')}`);
-
-	return identityData.identities.find(identity => identity.provider === 'spotify');
+	try {
+		const session = await getServerSession();
+		const identityData = await auth.api.listUserAccounts({
+			headers: {
+				Authorization: `Bearer ${session?.session.token}`,
+			},
+		});
+		return identityData.find(identity => identity.provider === 'spotify');
+	} catch (e) {
+		console.error(e);
+		redirect(`/home?error=${encodeURIComponent('Could not fetch user identities!')}`);
+	}
 };

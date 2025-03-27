@@ -1,10 +1,11 @@
 'use client';
 
 import { createContext, FC, PropsWithChildren, useContext } from 'react';
-import { SupabaseUser } from '@lumi/core/types/auth.types';
+
+import { Session } from '@/lib/better-auth/auth-actions';
 
 type SessionProviderData = {
-	data: SupabaseUser | undefined | null;
+	data: Session | undefined | null;
 };
 
 const SessionContext = createContext<SessionProviderData | undefined>(undefined);
@@ -16,11 +17,8 @@ export const useSession = () => {
 	return session;
 };
 
-const SessionProvider: FC<PropsWithChildren & { userResponse: SupabaseUser | undefined }> = ({
-	children,
-	userResponse,
-}) => {
-	return <SessionContext.Provider value={{ data: userResponse }}>{children}</SessionContext.Provider>;
+const SessionProvider: FC<PropsWithChildren & { session: Session | undefined }> = ({ children, session }) => {
+	return <SessionContext.Provider value={{ data: session }}>{children}</SessionContext.Provider>;
 };
 
 export default SessionProvider;

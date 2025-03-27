@@ -12,6 +12,7 @@ import EasyForm from '@/components/ui/form-extras/easy-form';
 import EasyFormField from '@/components/ui/form-extras/easy-form-field';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
+import { auth } from '@/lib/better-auth/auth-client';
 import { register } from '../actions';
 
 const registerSchema = registerUserDto.and(
@@ -27,7 +28,21 @@ const RegisterForm: FC = () => {
 	const onSubmit = useCallback<SubmitHandler<RegisterSchema>>(async ({ confirmPassword, ...data }) => {
 		setIsAuthenticating(true);
 		if (data.password !== confirmPassword) return toast.error('Passwords do not match');
-		await register(data);
+
+		const { data: _data, error } = await auth.signUp.email({
+			email: data.email,
+			password: data.password,
+			username: data.username,
+			name: `${data.firstName} ${data.lastName}`,
+			callbackURL: '/join',
+		});
+
+		if (error) {
+			toast.error(error.message);
+		} else {
+			await register(_data.user, data);
+		}
+
 		setIsAuthenticating(false);
 
 		return () => {

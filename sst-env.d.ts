@@ -13,6 +13,20 @@ declare module "sst" {
       "type": "sst.aws.Queue"
       "url": string
     }
+    "AuroraVPC": {
+      "type": "sst.aws.Vpc"
+    }
+    "AuthDB": {
+      "clusterArn": string
+      "database": string
+      "host": string
+      "password": string
+      "port": number
+      "reader": string
+      "secretArn": string
+      "type": "sst.aws.Aurora"
+      "username": string
+    }
     "AuthSecret": {
       "type": "sst.sst.Secret"
       "value": string
@@ -30,14 +44,8 @@ declare module "sst" {
       "name": string
       "type": "sst.aws.Dynamo"
     }
-    "EmailSender": {
-      "name": string
-      "type": "sst.aws.Function"
-      "url": string
-    }
     "Frontend": {
       "type": "sst.aws.Nextjs"
-      "url": string
     }
     "MailerHost": {
       "type": "sst.sst.Secret"
@@ -52,6 +60,22 @@ declare module "sst" {
       "value": string
     }
     "MailerUser": {
+      "type": "sst.sst.Secret"
+      "value": string
+    }
+    "PostgresDatabase": {
+      "type": "sst.sst.Secret"
+      "value": string
+    }
+    "PostgresPassword": {
+      "type": "sst.sst.Secret"
+      "value": string
+    }
+    "PostgresPort": {
+      "type": "sst.sst.Secret"
+      "value": string
+    }
+    "PostgresUsername": {
       "type": "sst.sst.Secret"
       "value": string
     }
@@ -81,18 +105,6 @@ declare module "sst" {
       "value": string
     }
     "SpotifyClientSecret": {
-      "type": "sst.sst.Secret"
-      "value": string
-    }
-    "SupabaseKey": {
-      "type": "sst.sst.Secret"
-      "value": string
-    }
-    "SupabaseSendEmailHookSecret": {
-      "type": "sst.sst.Secret"
-      "value": string
-    }
-    "SupabaseUrl": {
       "type": "sst.sst.Secret"
       "value": string
     }

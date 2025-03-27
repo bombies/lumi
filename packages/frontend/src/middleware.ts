@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 
-import { updateSession } from './lib/supabase/middleware';
+import { updateSession } from './lib/better-auth/middleware';
 
 type Middleware = (
 	/**

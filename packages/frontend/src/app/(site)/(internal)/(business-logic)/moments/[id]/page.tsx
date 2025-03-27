@@ -5,7 +5,7 @@ import { getUserById } from '@lumi/core/users/users.service';
 import Player from 'next-video/player';
 import MediaThemeInstaplay from 'player.style/instaplay/react';
 
-import { createSupabaseServerClient } from '@/lib/supabase/server';
+import { getServerSession } from '@/lib/better-auth/auth-actions';
 import { AsyncParams } from '@/lib/types';
 import MomentDetailsContainer from './components/moment-details-container';
 
@@ -13,8 +13,8 @@ type Props = AsyncParams<{ id: string }>;
 
 const MomentViewerPage: FC<Props> = async ({ params }) => {
 	const { id } = await params;
-	const supabase = await createSupabaseServerClient();
-	const user = await getUserById((await supabase.auth.getUser()).data.user!.id);
+	const session = (await getServerSession())!;
+	const user = await getUserById(session.user.id);
 	const moment = await getMomentDetailsById(id, { safeReturn: true });
 	if (!user || !moment || moment.relationshipId !== user.relationshipId) notFound();
 	const uploader = await getUserById(moment.userId);

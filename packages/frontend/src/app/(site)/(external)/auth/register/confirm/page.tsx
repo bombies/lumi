@@ -1,11 +1,11 @@
 import { FC } from 'react';
 import { redirect } from 'next/navigation';
 
-import { getServerSession } from '@/lib/supabase/server';
+import { getServerSession } from '@/lib/better-auth/auth-actions';
 
 const RegisterConfirmPage: FC = async () => {
 	const session = await getServerSession();
-	if (session) redirect('/');
+	if (session?.user.emailVerified) redirect('/');
 
 	return (
 		<>

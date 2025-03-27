@@ -2,9 +2,10 @@ import * as fs from 'fs';
 
 export const authSecret = new sst.Secret('AuthSecret');
 
-export const supabaseUrl = new sst.Secret('SupabaseUrl');
-export const supabaseKey = new sst.Secret('SupabaseKey');
-export const supabaseSendEmailHookSecret = new sst.Secret('SupabaseSendEmailHookSecret');
+export const postgresDatabase = $dev ? new sst.Secret('PostgresDatabase') : undefined;
+export const postgresUsername = $dev ? new sst.Secret('PostgresUsername') : undefined;
+export const postgresPassword = $dev ? new sst.Secret('PostgresPassword') : undefined;
+export const postgresPort = $dev ? new sst.Secret('PostgresPort') : undefined;
 
 export const mailerHostSecret = new sst.Secret('MailerHost');
 export const mailerPortSecret = new sst.Secret('MailerPort');

@@ -7,8 +7,9 @@ import { Toaster } from 'sonner';
 import InstallPrompt from '@/components/notifications/install-prompt';
 import NotificationsProvider from '@/components/notifications/notifications-provider';
 import ColorSchemeProvider from '@/components/providers/color-scheme-provider';
-import { buttonVariants } from '@/components/ui/button';
+import { PullRefresh } from '@/components/pull-refresh';
 import { TRPCProvider } from '@/lib/trpc/client';
+import { buttonVariants } from '../ui/button';
 
 type ProvidersProps = PropsWithChildren;
 
@@ -18,6 +19,7 @@ const Providers: FC<ProvidersProps> = ({ children }) => {
 			<ColorSchemeProvider>
 				<NotificationsProvider>
 					<ProgressProvider height="4px" color="#76A34E" options={{ showSpinner: true }} shallowRouting>
+						<PullRefresh />
 						{children}
 						<Toaster
 							position="top-right"

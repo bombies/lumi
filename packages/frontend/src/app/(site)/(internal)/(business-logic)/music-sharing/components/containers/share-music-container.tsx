@@ -7,11 +7,11 @@ import { Card, CardContent, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { GetSongRecommendations } from '@/hooks/trpc/music-sharing-hooks';
 import PartnerRecommendationsContainer from './partner-recommendations-container';
-import SelfRecommendationsContainer from './self-recommendations.container';
+import SelfRecommendationsContainer from './self-recommendations-container';
 
 const ShareMusicContainer: FC = () => {
 	const { partner } = useRelationship();
-	const { data: songRecs } = GetSongRecommendations({ order: 'desc', limit: 1 });
+	const { data: songRecs } = GetSongRecommendations({ order: 'desc', limit: 1, filter: 'unlistened' });
 
 	useEffect(() => {
 		const latestSong = songRecs?.pages.at(0)?.data.at(0)?.track.albumImage;

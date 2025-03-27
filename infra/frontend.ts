@@ -1,5 +1,5 @@
 import { trpc } from './api';
-import { db } from './db';
+import { aurora, auroraVpc, db } from './db';
 import { apiDNS, webDNS } from './dns';
 import { notificationsTopic, realtimeServer } from './realtime';
 import {
@@ -14,8 +14,7 @@ import {
 	redisPort,
 	redisUser,
 	spotifyClientId,
-	supabaseKey,
-	supabaseUrl,
+	spotifyClientSecret,
 	vapidPrivateKey,
 	vapidPublicKey,
 } from './secrets';
@@ -42,14 +41,21 @@ export const frontend = new sst.aws.Nextjs('Frontend', {
 		redisPassword,
 		realtimeServer,
 		authSecret,
+		aurora,
+		spotifyClientId,
+		spotifyClientSecret,
 	],
 	domain: !$dev ? webDNS : undefined,
+	vpc: auroraVpc,
 	environment: {
-		APP_STAGE: $app.stage,
+		BETTER_AUTH_SECRET: authSecret.value,
+		BETTER_AUTH_URL: !$dev ? `https://${webDNS}` : 'https://localhost:3000',
+
 		AUTH_SECRET: authSecret.value,
-		NEXT_PUBLIC_SUPABASE_URL: supabaseUrl.value,
-		NEXT_PUBLIC_SUPABASE_ANON_KEY: supabaseKey.value,
+		// @ts-ignore
 		AUTH_TRUST_HOST: !$dev ? 'true' : undefined,
+
+		APP_STAGE: $app.stage,
 		NEXT_PUBLIC_TRPC_URL: !$dev ? `https://${apiDNS}` : trpc.url,
 		NEXT_PUBLIC_CANONICAL_URL: !$dev ? `https://${webDNS}` : 'https://localhost:3000',
 		TABLE_NAME: db.name,
@@ -63,6 +69,7 @@ export const frontend = new sst.aws.Nextjs('Frontend', {
 		KEY_PAIR_ID: contentCdnPublicKey.id,
 		CDN_URL: contentCdn.url,
 		NEXT_PUBLIC_SPOTIFY_CLIENT_ID: spotifyClientId.value,
+		SPOTIFY_CLIENT_SECRET: spotifyClientSecret.value,
 	},
 	permissions: [
 		{

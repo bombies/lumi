@@ -1,18 +1,20 @@
-import { FC } from 'react';
+'use client';
+
+import { FC, useMemo } from 'react';
 import { SiSpotify } from '@icons-pack/react-simple-icons';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { createSupabaseServerClient } from '@/lib/supabase/server';
+import { GetUserAccounts } from '@/lib/better-auth/auth-hooks';
 import SpotifyLinkButton from './spotify-link-button';
 import SpotifyUnlinkButton from './spotify-unlink-button';
 
-const MusicSharingSettingsContent: FC = async () => {
-	const supabase = await createSupabaseServerClient();
-	const { data, error } = await supabase.auth.getUserIdentities();
+const MusicSharingSettingsContent: FC = () => {
+	const { data: accounts } = GetUserAccounts();
 
-	if (error) throw error;
-
-	const spotifyIdentity = data.identities.find(identity => identity.provider === 'spotify');
+	const spotifyIdentity = useMemo(
+		() => accounts?.data?.find(account => account.provider === 'spotify'),
+		[accounts?.data],
+	);
 	return (
 		<Card className="bg-accent border border-border">
 			<CardHeader>

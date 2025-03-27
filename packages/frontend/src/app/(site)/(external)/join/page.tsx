@@ -8,11 +8,11 @@ import ReceivedRelationshipRequestsContent from '@/app/(site)/(external)/join/co
 import SendRelationshipRequestContent from '@/app/(site)/(external)/join/components/send-relationship-request-content';
 import SignOutButton from '@/components/ui/sign-out-button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { getServerSession } from '@/lib/supabase/server';
+import { getServerSession } from '@/lib/better-auth/auth-actions';
 
 const JoinPage: FC = async () => {
 	const session = (await getServerSession())!;
-	const relationship = await getRelationshipForUser(session.id);
+	const relationship = await getRelationshipForUser(session.user.id);
 	if (relationship) redirect('/home');
 
 	return (

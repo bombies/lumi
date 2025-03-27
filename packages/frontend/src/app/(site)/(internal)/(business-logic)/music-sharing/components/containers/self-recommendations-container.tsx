@@ -16,7 +16,7 @@ const SelfRecommendationsContainer: FC = () => {
 		hasNextPage,
 		fetchNextPage,
 		isFetchingNextPage,
-	} = GetSongRecommendations({ self: true, order: 'desc' });
+	} = GetSongRecommendations({ self: true, order: 'desc', filter: 'unlistened' });
 
 	const recElems = useMemo(
 		() =>
@@ -46,7 +46,7 @@ const SelfRecommendationsContainer: FC = () => {
 					<InfiniteLoader hasMore={hasNextPage} fetchMore={fetchNextPage} loading={isFetchingNextPage} />
 				</div>
 			) : (
-				<p className="text-lg">You have not recommended any songs...</p>
+				<p className="text-lg">You have not recommended new any songs...</p>
 			)}
 		</div>
 	);

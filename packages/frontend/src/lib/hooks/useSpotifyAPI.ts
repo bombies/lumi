@@ -2,100 +2,47 @@
 
 import { useEffect, useState } from 'react';
 import { SpotifyApi } from '@spotify/web-api-ts-sdk';
-import { UserIdentity } from '@supabase/supabase-js';
 
-import { spotifyApiScopes } from '@/app/(site)/(internal)/settings/relationship/components/music-sharing/spotify-link-button';
+import { auth } from '../better-auth/auth-client';
 import { logger } from '../logger';
-import { useSupabaseBrowserClient } from '../supabase/client';
-import { useLocalStorage } from './useLocalStorage';
 
-export type UseSpotifyAPIArgs = {
-	spotifyIdentity?: UserIdentity;
-	loadOnMissingIdentity?: boolean;
-};
-
-export const useSpotifyAPI = (args?: UseSpotifyAPIArgs) => {
-	const supabase = useSupabaseBrowserClient();
-	const storage = useLocalStorage();
+export const useSpotifyAPI = () => {
+	const { data: session } = auth.useSession();
 	const [spotifyAPI, setSpotifyAPI] = useState<SpotifyApi>();
 	const [isLinked, setIsLinked] = useState<boolean>(false);
 	const [loading, setLoading] = useState<boolean>(true);
+	const [tokens, setTokens] = useState<{ accessToken: string; refreshToken: string; accessTokenExpiresAt: Date }>();
 	useEffect(() => {
+		if (!session) return;
+
 		(async () => {
-			if (!storage) {
+			console.log('session tokens', session.tokens);
+			const spotifyProviderToken = tokens?.accessToken ?? session.tokens.spotify?.accessToken;
+			const spotifyRefreshToken = tokens?.refreshToken ?? session.tokens.spotify?.refreshToken;
+
+			if (!spotifyProviderToken || !spotifyRefreshToken) {
+				logger.error('Failed to set the Spotify tokens!');
+				setLoading(false);
 				return;
-			}
-
-			if (!args?.spotifyIdentity || args.spotifyIdentity.provider !== 'spotify') {
-				if (args?.loadOnMissingIdentity === false) {
-					setLoading(false);
-					return;
-				}
-
-				const userIdenities = await supabase.auth.getUserIdentities();
-
-				if (userIdenities.error) {
-					console.error('There was an error fetching user identities!', userIdenities.error);
-					setLoading(false);
-					return;
-				}
-
-				const spotifyIdentity = userIdenities.data.identities.find(identity => identity.provider === 'spotify');
-				if (!spotifyIdentity) {
-					setLoading(false);
-					return;
-				}
 			}
 
 			setIsLinked(true);
-
-			const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
-			if (sessionError) {
-				logger.error('There was an error fetching the session!', sessionError);
-				setLoading(false);
-				return;
-			}
-
-			let spotifyProviderToken = storage.getItem<string>('oauth_provider_token');
-			let spotifyRefreshToken = storage.getItem<string>('oauth_provider_refresh_token');
-			if (!spotifyProviderToken) {
-				const response = await supabase.auth.signInWithOAuth({
-					provider: 'spotify',
-					options: {
-						scopes: spotifyApiScopes.join(' '),
-						redirectTo: `${process.env.NEXT_PUBLIC_CANONICAL_URL}/auth/callback?next=${encodeURIComponent('/music-sharing')}`,
-					},
-				});
-
-				if (response.error) {
-					logger.error('Failed to get the Spotify tokens!');
-					setLoading(false);
-					return;
-				} else {
-					spotifyProviderToken = storage.getItem<string>('oauth_provider_token');
-					spotifyRefreshToken = storage.getItem<string>('oauth_provider_refresh_token');
-				}
-			}
-
-			if (!spotifyProviderToken || !spotifyRefreshToken) {
-				logger.error('Failed to set the Sptoify tokens!');
-				setLoading(false);
-				return;
-			}
 
 			setSpotifyAPI(
 				SpotifyApi.withAccessToken(process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_ID!, {
 					access_token: spotifyProviderToken,
 					refresh_token: spotifyRefreshToken,
-					token_type: sessionData.session!.token_type,
-					expires_in: sessionData.session!.expires_in,
+					token_type: 'Bearer',
+					expires_in: (
+						tokens?.accessTokenExpiresAt ?? session.tokens.spotify!.accessTokenExpiresAt
+					).getTime(),
 				}),
 			);
 			setLoading(false);
 		})();
-	}, [args?.loadOnMissingIdentity, args?.spotifyIdentity, storage, supabase.auth]);
+	}, [session, tokens?.accessToken, tokens?.accessTokenExpiresAt, tokens?.refreshToken]);
 
-	return { spotifyAPI, isLinked, loading };
+	return { spotifyAPI, isLinked, loading, setTokens };
 };
 
 export type UseSpotifyAPIReturnType = ReturnType<typeof useSpotifyAPI>;

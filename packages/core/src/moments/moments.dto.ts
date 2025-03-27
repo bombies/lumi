@@ -11,7 +11,7 @@ export const momentSchema = z.object({
 });
 
 export const momentMessageSchema = z.object({
-	senderId: z.string().uuid(),
+	senderId: z.string(),
 	momentId: z.string().uuid(),
 	content: z.string().min(0).max(1024),
 	repliedTo: z.string().uuid().optional(),

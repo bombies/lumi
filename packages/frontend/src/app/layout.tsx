@@ -3,14 +3,14 @@ import { Cookie } from 'next/font/google';
 import localFont from 'next/font/local';
 
 import Providers from '@/components/providers/providers';
-import { HydrateClient } from '@/lib/trpc/server';
+import { getHydrationHelpers } from '@/lib/trpc/server';
 
 import './globals.css';
 
 import Script from 'next/script';
 
 import SessionProvider from '@/components/providers/session-provider';
-import { getServerSession } from '@/lib/supabase/server';
+import { getServerSession } from '@/lib/better-auth/auth-actions';
 
 const sfProDisplay = localFont({
 	src: [
@@ -145,12 +145,13 @@ export default async function RootLayout({
 }: Readonly<{
 	children: React.ReactNode;
 }>) {
-	const supabaseUser = await getServerSession();
+	const session = await getServerSession();
+	const { HydrateClient } = await getHydrationHelpers();
 
 	return (
 		<html lang="en" className={`${sfProDisplay.variable} ${cookie.variable}`}>
 			<body className={`antialiased`}>
-				<SessionProvider userResponse={supabaseUser}>
+				<SessionProvider session={session}>
 					<Providers>
 						<HydrateClient>{children}</HydrateClient>
 					</Providers>

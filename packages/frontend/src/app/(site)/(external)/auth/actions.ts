@@ -3,58 +3,13 @@
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { RegisterUserDto } from '@lumi/core/auth/auth.dto';
-import { CustomSuperbaseUserMetaData } from '@lumi/core/types/auth.types';
-import { createUser, getUserByUsername } from '@lumi/core/users/users.service';
+import { createUser } from '@lumi/core/users/users.service';
+import { User as BetterAuthUser } from 'better-auth';
 
-import { createSupabaseServerClient } from '@/lib/supabase/server';
-
-export const login = async (usernameOrEmail: string, password: string) => {
-	const supabase = await createSupabaseServerClient();
-
-	let email = usernameOrEmail.includes('@') ? usernameOrEmail : null;
-	if (!email) {
-		// Try fetching the user by username
-		const user = await getUserByUsername(usernameOrEmail);
-		if (!user) throw new Error('User not found!');
-
-		email = user.email;
-	}
-
-	const { error } = await supabase.auth.signInWithPassword({
-		email,
-		password,
-	});
-
-	if (error) throw error;
-
-	revalidatePath('/home', 'layout');
-	redirect('/home');
-};
-
-export const register = async ({ password, ...dto }: RegisterUserDto) => {
-	const supabase = await createSupabaseServerClient();
-
-	const existingUser = await getUserByUsername(dto.username);
-	if (existingUser) redirect('/auth/register?error=UsernameAlreadyExists');
-
-	const { data: signUpResponse, error } = await supabase.auth.signUp({
-		email: dto.email,
-		password,
-		options: {
-			data: { username: dto.username } satisfies CustomSuperbaseUserMetaData,
-		},
-	});
-
-	if (error) {
-		console.error(error);
-		redirect(`/auth/register?error=${encodeURIComponent(error.message)}`);
-	}
-
-	if (!signUpResponse.user) throw new Error('User null');
-
+export const register = async (user: BetterAuthUser, dto: RegisterUserDto) => {
 	try {
 		await createUser({
-			id: signUpResponse.user.id,
+			id: user.id,
 			...dto,
 		});
 	} catch (e) {

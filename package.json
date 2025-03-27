@@ -6,12 +6,11 @@
 	],
 	"scripts": {
 		"dev": "sst dev",
-		"sync-secrets": "sst shell node packages/scripts/src/sync_secrets.mjs"
+		"migrate-auth": "bunx sst shell  -- bunx @better-auth/cli generate --config packages/frontend/src/auth.ts && @better-auth/cli migrate"
 	},
 	"devDependencies": {
 		"@trivago/prettier-plugin-sort-imports": "^4.3.0",
 		"@tsconfig/node22": "^22.0.1",
-		"supabase": "^2.20.3",
 		"typescript": "^5.8.2"
 	},
 	"dependencies": {

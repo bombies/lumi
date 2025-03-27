@@ -2,10 +2,10 @@
 
 import { getUserById } from '@lumi/core/users/users.service';
 
-import { getServerSession } from './supabase/server';
+import { getServerSession } from './better-auth/auth-actions';
 
 export const getUserBySession = async () => {
 	const session = await getServerSession();
 	if (!session) return undefined;
-	return getUserById(session.id);
+	return getUserById(session.user.id);
 };

@@ -7,7 +7,7 @@ export const affirmationSchema = z.object({
 	affirmation: z.string().min(1).max(150),
 	selectedCount: z.number().positive(),
 	relationshipId: z.string().uuid(),
-	ownerId: z.string().uuid(),
+	ownerId: z.string(),
 });
 
 export const receivedAffirmationSchema = z.object({
@@ -17,7 +17,7 @@ export const receivedAffirmationSchema = z.object({
 
 export const createAffirmationDto = z.object({
 	relationshipId: z.string().uuid(),
-	ownerId: z.string().uuid(),
+	ownerId: z.string(),
 	affirmation: z.string().min(1).max(150),
 });
 

@@ -5,7 +5,7 @@ import { getRelationshipForUser } from '@lumi/core/relationships/relationship.se
 import { Relationship } from '@lumi/core/types/relationship.types';
 import { getUserById } from '@lumi/core/users/users.service';
 
-import { getServerSession } from '../supabase/server';
+import { getServerSession } from '../better-auth/auth-actions';
 
 type RequireRelationshipArgs = {
 	withPartner?: boolean;
@@ -16,16 +16,16 @@ export const requireRelationship = async (args?: RequireRelationshipArgs): Promi
 	const session = await getServerSession();
 	if (!session) redirect('/auth/login');
 
-	const relationship = await getRelationshipForUser(session.id);
+	const relationship = await getRelationshipForUser(session.user.id);
 	if (!relationship) redirect('/join');
 
 	if (args?.withPartner) {
-		const partnerId = relationship.partner1 === session.id ? relationship.partner2 : relationship.partner1;
+		const partnerId = relationship.partner1 === session.user.id ? relationship.partner2 : relationship.partner1;
 		const partner = await getUserById(partnerId);
 		relationship.partner = partner;
 	}
 
-	if (args?.withSelf) relationship.self = await getUserById(session.id);
+	if (args?.withSelf) relationship.self = await getUserById(session.user.id);
 
 	return relationship;
 };

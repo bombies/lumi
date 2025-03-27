@@ -1,8 +1,8 @@
 import { TRPCError } from '@trpc/server';
-import { SignJWT, jwtVerify } from 'jose';
+import type { User as BetterAuthUser } from 'better-auth';
+import { JWTPayload, SignJWT, createRemoteJWKSet, jwtVerify } from 'jose';
 import { JWTExpired } from 'jose/errors';
 
-import { SupabaseAccessToken } from '../types/auth.types';
 import { createUser, getUserByEmail } from '../users/users.service';
 import { RegisterUserDto } from './auth.dto';
 
@@ -90,11 +90,13 @@ export const decodeBearerToken = async (token: string) => {
 	if (type !== 'Bearer') throw new Error('Invalid token type');
 	if (!value) return null;
 
-	let decodedJwt: SupabaseAccessToken | undefined = undefined;
-
 	try {
-		decodedJwt = await verify<SupabaseAccessToken>(value, process.env.AUTH_SECRET!);
-		return decodedJwt;
+		const JWKS = createRemoteJWKSet(new URL(`${process.env.FRONTEND_URL}/api/auth/jwks`));
+		const { payload } = await jwtVerify<JWTPayload & BetterAuthUser>(value, JWKS, {
+			issuer: process.env.FRONTEND_URL,
+			audience: process.env.FRONTEND_URL,
+		});
+		return payload;
 	} catch (e) {
 		if (e instanceof JWTExpired) {
 			throw new TRPCError({

@@ -4,54 +4,27 @@ import { FC } from 'react';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
-// import { useIsIOS } from '@/lib/hooks/useIsIOS';
-// import { useIsStan
+import { auth } from '@/lib/better-auth/auth-client';
 import { logger } from '@/lib/logger';
-import { useSupabaseBrowserClient } from '@/lib/supabase/client';
-
-export const spotifyApiScopes = [
-	'playlist-read-private',
-	'playlist-read-collaborative',
-	'playlist-modify-private',
-	'playlist-modify-public',
-	'user-read-currently-playing',
-	'user-read-recently-played',
-	'user-read-playback-position',
-	'user-top-read',
-	'user-library-read',
-	'user-library-modify',
-];
 
 type Props = {
 	next?: string;
 };
 
 const SpotifyLinkButton: FC<Props> = ({ next }) => {
-	const supabase = useSupabaseBrowserClient();
-	// const isIOS = useIsIOS();
-	// const isStandalone = useIsStandalone();
 	return (
 		<Button
 			className="bg-foreground hover:bg-foreground/80 text-background"
 			onClick={async () => {
-				// if (isIOS && isStandalone)
-				// 	return toast.info(
-				// 		"You can't link your Spotify account in standalone mode on iOS! You must visit the website in Safari and link your account there.",
-				// 	);
-				//
-				const redirectUrl = `https://${window.location.hostname}${window.location.port ? `:${window.location.port}` : ''}/auth/callback${next ? `?next=${encodeURIComponent(next)}` : ''}`;
+				const redirectUrl = `https://${window.location.hostname}${window.location.port ? `:${window.location.port}` : ''}${next || ''}`;
 				console.log(redirectUrl);
 
-				const response = await supabase.auth.linkIdentity({
+				const response = await auth.linkSocial({
 					provider: 'spotify',
-					options: {
-						scopes: spotifyApiScopes.join(' '),
-						redirectTo: redirectUrl,
-						skipBrowserRedirect: true,
-					},
+					callbackURL: redirectUrl,
 				});
 
-				if (response.data.url) {
+				if (response.data) {
 					window.location.href = response.data.url;
 				} else {
 					logger.error('Failed to link Spotify account', response.error);

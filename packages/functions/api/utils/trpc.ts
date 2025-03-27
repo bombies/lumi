@@ -17,7 +17,7 @@ export async function createContext({ event, context, info }: CreateAWSLambdaCon
 		return {
 			headers,
 			user: {
-				id: decodedToken.sub,
+				id: decodedToken.id,
 			},
 		};
 	} catch (e) {

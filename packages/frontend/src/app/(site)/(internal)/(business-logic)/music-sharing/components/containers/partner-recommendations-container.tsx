@@ -19,7 +19,7 @@ const PartnerRecommendationsContainer: FC = () => {
 		fetchNextPage,
 		hasNextPage,
 		isFetchingNextPage,
-	} = GetSongRecommendations({ order: 'desc' });
+	} = GetSongRecommendations({ order: 'desc', filter: 'unlistened' });
 
 	const recElems = useMemo(
 		() =>
@@ -58,7 +58,7 @@ const PartnerRecommendationsContainer: FC = () => {
 					<InfiniteLoader hasMore={hasNextPage} fetchMore={fetchNextPage} loading={isFetchingNextPage} />
 				</div>
 			) : (
-				<p className="text-lg">You have not received any song recommendations...</p>
+				<p className="text-lg">You have not received any new song recommendations...</p>
 			)}
 		</div>
 	);

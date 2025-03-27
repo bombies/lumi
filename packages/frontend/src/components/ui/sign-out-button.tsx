@@ -7,7 +7,7 @@ import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
 import { sendSignOutNotification } from '@/lib/actions/relationship-actions';
-import { useSupabaseBrowserClient } from '@/lib/supabase/client';
+import { auth } from '@/lib/better-auth/auth-client';
 import { useSession } from '../providers/session-provider';
 
 type Props = {
@@ -20,7 +20,6 @@ type Props = {
 const SignOutButton: FC<Props> = ({ iconOnly, className, disableNotification, variant }) => {
 	const { data: session } = useSession();
 	const router = useRouter();
-	const supabase = useSupabaseBrowserClient();
 
 	return (
 		<Button
@@ -29,10 +28,10 @@ const SignOutButton: FC<Props> = ({ iconOnly, className, disableNotification, va
 			variant={variant || 'destructive'}
 			onClick={async () => {
 				if (!session) return;
-				const user = session!;
-				if (!disableNotification) await sendSignOutNotification(user.id, user.user_metadata.username);
+				const user = session.user;
+				if (!disableNotification) await sendSignOutNotification(user.id, user.name);
 
-				toast.promise(supabase.auth.signOut(), {
+				toast.promise(auth.signOut(), {
 					loading: 'Signing out...',
 					async success() {
 						router.push('/auth/login');

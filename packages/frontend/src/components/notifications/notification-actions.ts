@@ -8,7 +8,7 @@ import {
 import { NotificationSubscriber } from '@lumi/core/types/notification.types';
 import webpush from 'web-push';
 
-import { getServerSession } from '@/lib/supabase/server';
+import { getServerSession } from '@/lib/better-auth/auth-actions';
 
 webpush.setVapidDetails(
 	'mailto:contact@ajani.me',
@@ -36,8 +36,8 @@ export async function subscribeUser(sub: PushSubscription) {
 	const session = await getServerSession();
 	if (!session) return { success: false, error: 'Unauthorized' };
 
-	await createNotificationSubscription(session.id, sub);
-	fetchSubscriptionsForUser(session.id);
+	await createNotificationSubscription(session.user.id, sub);
+	fetchSubscriptionsForUser(session.user.id);
 	return { success: true };
 }
 
@@ -45,8 +45,8 @@ export async function unsubscribeUser(endpoint: string) {
 	const session = await getServerSession();
 	if (!session) return { success: false, error: 'Unauthorized' };
 
-	deleteNotificationSubscription(session.id, endpoint);
-	subscriptions[session.id] = subscriptions[session.id]?.filter(sub => sub?.endpoint !== endpoint);
+	deleteNotificationSubscription(session.user.id, endpoint);
+	subscriptions[session.user.id] = subscriptions[session.user.id]?.filter(sub => sub?.endpoint !== endpoint);
 	return { success: true };
 }
 
@@ -60,7 +60,7 @@ export async function sendUserNotification({ message, title, icon = '/favicon-96
 	const session = await getServerSession();
 	if (!session) return { success: false, error: 'Unauthorized' };
 
-	const subs = subscriptions[session.id];
+	const subs = subscriptions[session.user.id];
 	if (!subs) return { success: false, error: 'No subscriptions found' };
 
 	for (const sub of subs) {

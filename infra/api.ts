@@ -45,6 +45,9 @@ export const trpc = new sst.aws.Function('Trpc', {
 		CDN_PRIVATE_KEY: cdnPrivateKey,
 		KEY_PAIR_ID: contentCdnPublicKey.id,
 		CDN_URL: contentCdn.url,
+		FRONTEND_URL: !$dev ? `https://${webDNS}` : 'https://localhost:3000',
+		// @ts-ignore
+		NODE_TLS_REJECT_UNAUTHORIZED: $dev ? '0' : undefined,
 	},
 	handler: 'packages/functions/api/index.handler',
 });

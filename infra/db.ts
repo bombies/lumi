@@ -1,5 +1,29 @@
-import { cdnPrivateKey, redisHost, redisPassword, redisPort, redisUser } from './secrets';
+import { spawnSync } from 'child_process';
+
+import {
+	cdnPrivateKey,
+	postgresDatabase,
+	postgresPassword,
+	postgresPort,
+	postgresUsername,
+	redisHost,
+	redisPassword,
+	redisPort,
+	redisUser,
+} from './secrets';
 import { contentBucket, contentCdn, contentCdnPublicKey } from './storage';
+
+export const auroraVpc = new sst.aws.Vpc('AuroraVPC');
+export const aurora = new sst.aws.Aurora('AuthDB', {
+	engine: 'postgres',
+	vpc: auroraVpc,
+	dev: {
+		username: postgresUsername?.value,
+		password: postgresPassword?.value,
+		database: postgresDatabase?.value,
+		port: postgresPort?.value.apply(val => parseInt(val)),
+	},
+});
 
 export const db = new sst.aws.Dynamo('Database', {
 	fields: {

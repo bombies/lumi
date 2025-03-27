@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation';
 import { ArrowRight } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
-import { getServerSession } from '@/lib/supabase/server';
+import { getServerSession } from '@/lib/better-auth/auth-actions';
 
 export default async function Home() {
 	const session = await getServerSession();
