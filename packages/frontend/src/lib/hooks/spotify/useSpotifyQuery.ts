@@ -1,6 +1,5 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
 import { SpotifyApi } from '@spotify/web-api-ts-sdk';
 import { skipToken, useQuery } from '@tanstack/react-query';
 
@@ -13,7 +12,6 @@ const useSpotifyQuery = <T>(path: string, queryCb?: (api: SpotifyApi) => Promise
 		api: { spotifyAPI, setTokens },
 		identity,
 	} = useSpotifyData();
-	const router = useRouter();
 	return useQuery({
 		queryKey: ['spotifyQueries', path],
 		queryFn:
