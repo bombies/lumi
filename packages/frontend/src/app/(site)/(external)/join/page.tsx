@@ -12,6 +12,8 @@ import { getServerSession } from '@/lib/better-auth/auth-actions';
 
 const JoinPage: FC = async () => {
 	const session = (await getServerSession())!;
+	if (!session.user.emailVerified) redirect('/auth/register/confirm');
+
 	const relationship = await getRelationshipForUser(session.user.id);
 	if (relationship) redirect('/home');
 

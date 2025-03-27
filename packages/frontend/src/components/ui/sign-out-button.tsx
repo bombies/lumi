@@ -8,7 +8,6 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { sendSignOutNotification } from '@/lib/actions/relationship-actions';
 import { auth } from '@/lib/better-auth/auth-client';
-import { useSession } from '../providers/session-provider';
 
 type Props = {
 	iconOnly?: boolean;
@@ -18,7 +17,7 @@ type Props = {
 };
 
 const SignOutButton: FC<Props> = ({ iconOnly, className, disableNotification, variant }) => {
-	const { data: session } = useSession();
+	const { data: session } = auth.useSession();
 	const router = useRouter();
 
 	return (

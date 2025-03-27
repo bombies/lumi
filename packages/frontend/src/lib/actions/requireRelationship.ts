@@ -16,6 +16,8 @@ export const requireRelationship = async (args?: RequireRelationshipArgs): Promi
 	const session = await getServerSession();
 	if (!session) redirect('/auth/login');
 
+	if (!session.user.emailVerified) redirect('/auth/register/confirm');
+
 	const relationship = await getRelationshipForUser(session.user.id);
 	if (!relationship) redirect('/join');
 

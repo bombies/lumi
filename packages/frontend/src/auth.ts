@@ -55,9 +55,9 @@ export const auth = betterAuth({
 	},
 	emailAndPassword: {
 		enabled: true,
-		requireEmailVerification: true,
+		requireEmailVerification: false,
 		minPasswordLength: 8,
-		autoSignIn: false,
+		autoSignIn: true,
 	},
 	emailVerification: {
 		sendVerificationEmail: async data => {
@@ -71,7 +71,7 @@ export const auth = betterAuth({
 		},
 		sendOnSignUp: true,
 		autoSignInAfterVerification: true,
-		expiresIn: 10 * 60,
+		expiresIn: 60 * 60,
 	},
 	socialProviders: {
 		spotify: {

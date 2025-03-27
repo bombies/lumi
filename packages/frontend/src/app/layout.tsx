@@ -9,7 +9,6 @@ import './globals.css';
 
 import Script from 'next/script';
 
-import SessionProvider from '@/components/providers/session-provider';
 import { getServerSession } from '@/lib/better-auth/auth-actions';
 
 const sfProDisplay = localFont({
@@ -145,17 +144,15 @@ export default async function RootLayout({
 }: Readonly<{
 	children: React.ReactNode;
 }>) {
-	const session = await getServerSession();
+	await getServerSession();
 	const { HydrateClient } = await getHydrationHelpers();
 
 	return (
 		<html lang="en" className={`${sfProDisplay.variable} ${cookie.variable}`}>
 			<body className={`antialiased`}>
-				<SessionProvider session={session}>
-					<Providers>
-						<HydrateClient>{children}</HydrateClient>
-					</Providers>
-				</SessionProvider>
+				<Providers>
+					<HydrateClient>{children}</HydrateClient>
+				</Providers>
 				<Script
 					strategy="beforeInteractive"
 					type="text/javascript"

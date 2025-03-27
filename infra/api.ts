@@ -14,7 +14,7 @@ import {
 	redisUser,
 	websocketToken,
 } from './secrets';
-import { contentBucket, contentCdn, contentCdnKeyGroup, contentCdnPublicKey } from './storage';
+import { contentBucket, contentCdn, contentCdnPublicKey } from './storage';
 
 export const trpc = new sst.aws.Function('Trpc', {
 	url: $dev

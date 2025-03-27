@@ -1,7 +1,6 @@
 'use client';
 
 import { FC } from 'react';
-import { useRouter } from 'next/navigation';
 import { ProviderAccount } from '@lumi/core/types/better-auth.types';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -16,7 +15,6 @@ type Props = {
 
 const SpotifyUnlinkButton: FC<Props> = ({ spotifyIdentity }) => {
 	const queryClient = useQueryClient();
-	const router = useRouter();
 	return (
 		<Button
 			className="bg-foreground dark:bg-background hover:bg-foreground/80 hover:dark:bg-background/80 text-background dark:text-foreground"
@@ -33,7 +31,7 @@ const SpotifyUnlinkButton: FC<Props> = ({ spotifyIdentity }) => {
 								queryClient.invalidateQueries({
 									queryKey: ['user-accounts'],
 								});
-								router.refresh();
+								window.location.reload();
 								return 'Successfully disconnected your Spotify account!';
 							} else {
 								logger.error('Failed to unlink Spotify account', response.error);
