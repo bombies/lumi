@@ -22,7 +22,7 @@ const MomentViewerPage: FC<Props> = async ({ params }) => {
 	return (
 		<>
 			<div className="w-screen flex justify-center">
-				<div className="h-[calc(100vh-60px-70.4px)] max-w-screen phone-big:max-w-[496px] aspect-[9/16] mx-auto phone-big:mx-0 shrink-0 relative">
+				<div className="h-[calc(100vh-60px-70.4px)] mt-[61px] laptop:mt-0 max-w-screen phone-big:max-w-[496px] aspect-[9/16] mx-auto phone-big:mx-0 shrink-0 relative">
 					<Player
 						src={moment.videoUrl}
 						className="aspect-[9/16] h-[calc(100vh-60px-70.4px)]"

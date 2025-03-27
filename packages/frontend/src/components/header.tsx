@@ -12,7 +12,7 @@ const Header: FC<Props> = ({ className }) => {
 	return (
 		<header
 			className={cn(
-				'flex justify-between w-full px-6 py-3 border-b border-border bg-background/50 backdrop-blur-lg',
+				'fixed top-0 z-20 laptop:static flex justify-between w-full px-6 py-3 border-b border-border bg-background/50 backdrop-blur-lg',
 				className,
 			)}
 		>

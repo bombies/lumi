@@ -15,7 +15,10 @@ const ContentContainer: FC<PropsWithChildren> = ({ children }) => {
 	);
 	return (
 		<main
-			className={cn('pb-[112px] laptop:pb-[100px] px-6 space-y-12 mt-18', isMomentView && 'm-0 p-0 laptop:p-0')}
+			className={cn(
+				'pb-[112px] laptop:pb-[100px] px-6 space-y-12 mt-32 laptop:mt-18',
+				isMomentView && 'm-0 laptop:m-0 p-0 laptop:p-0',
+			)}
 		>
 			{children}
 		</main>
