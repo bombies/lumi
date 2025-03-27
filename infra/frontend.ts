@@ -1,5 +1,5 @@
 import { trpc } from './api';
-import { aurora, auroraVpc, db } from './db';
+import { db } from './db';
 import { apiDNS, webDNS } from './dns';
 import { notificationsTopic, realtimeServer } from './realtime';
 import {
@@ -9,6 +9,12 @@ import {
 	mailerPasswordSecret,
 	mailerPortSecret,
 	mailerUserSecret,
+	postgresConnectionString,
+	postgresDatabase,
+	postgresHost,
+	postgresPassword,
+	postgresPort,
+	postgresUsername,
 	redisHost,
 	redisPassword,
 	redisPort,
@@ -41,12 +47,17 @@ export const frontend = new sst.aws.Nextjs('Frontend', {
 		redisPassword,
 		realtimeServer,
 		authSecret,
-		aurora,
 		spotifyClientId,
 		spotifyClientSecret,
+
+		postgresConnectionString,
+		postgresHost,
+		postgresUsername,
+		postgresPort,
+		postgresDatabase,
+		postgresPassword,
 	],
 	domain: !$dev ? webDNS : undefined,
-	vpc: auroraVpc,
 	environment: {
 		BETTER_AUTH_SECRET: authSecret.value,
 		BETTER_AUTH_URL: !$dev ? `https://${webDNS}` : 'https://localhost:3000',

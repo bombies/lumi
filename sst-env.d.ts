@@ -13,20 +13,6 @@ declare module "sst" {
       "type": "sst.aws.Queue"
       "url": string
     }
-    "AuroraVPC": {
-      "type": "sst.aws.Vpc"
-    }
-    "AuthDB": {
-      "clusterArn": string
-      "database": string
-      "host": string
-      "password": string
-      "port": number
-      "reader": string
-      "secretArn": string
-      "type": "sst.aws.Aurora"
-      "username": string
-    }
     "AuthSecret": {
       "type": "sst.sst.Secret"
       "value": string
@@ -46,6 +32,7 @@ declare module "sst" {
     }
     "Frontend": {
       "type": "sst.aws.Nextjs"
+      "url": string
     }
     "MailerHost": {
       "type": "sst.sst.Secret"
@@ -63,7 +50,15 @@ declare module "sst" {
       "type": "sst.sst.Secret"
       "value": string
     }
+    "PostgresConnectionString": {
+      "type": "sst.sst.Secret"
+      "value": string
+    }
     "PostgresDatabase": {
+      "type": "sst.sst.Secret"
+      "value": string
+    }
+    "PostgresHost": {
       "type": "sst.sst.Secret"
       "value": string
     }

@@ -10,13 +10,19 @@ import { Resource } from 'sst';
 
 import { logger } from './lib/logger';
 
-const db = new Pool({
-	user: Resource.AuthDB.username,
-	password: Resource.AuthDB.password,
-	database: Resource.AuthDB.database,
-	host: Resource.AuthDB.host,
-	port: Resource.AuthDB.port,
-});
+const db = new Pool(
+	Resource.PostgresConnectionString.value.length
+		? {
+				connectionString: Resource.PostgresConnectionString.value,
+			}
+		: {
+				user: Resource.PostgresUsername.value,
+				password: Resource.PostgresPassword.value,
+				database: Resource.PostgresDatabase.value,
+				host: Resource.PostgresHost.value,
+				port: parseInt(Resource.PostgresPort.value),
+			},
+);
 
 export const auth = betterAuth({
 	database: db,

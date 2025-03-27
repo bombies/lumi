@@ -2,10 +2,12 @@ import * as fs from 'fs';
 
 export const authSecret = new sst.Secret('AuthSecret');
 
-export const postgresDatabase = $dev ? new sst.Secret('PostgresDatabase') : undefined;
-export const postgresUsername = $dev ? new sst.Secret('PostgresUsername') : undefined;
-export const postgresPassword = $dev ? new sst.Secret('PostgresPassword') : undefined;
-export const postgresPort = $dev ? new sst.Secret('PostgresPort') : undefined;
+export const postgresHost = new sst.Secret('PostgresHost');
+export const postgresDatabase = new sst.Secret('PostgresDatabase');
+export const postgresUsername = new sst.Secret('PostgresUsername');
+export const postgresPassword = new sst.Secret('PostgresPassword');
+export const postgresPort = new sst.Secret('PostgresPort');
+export const postgresConnectionString = new sst.Secret('PostgresConnectionString');
 
 export const mailerHostSecret = new sst.Secret('MailerHost');
 export const mailerPortSecret = new sst.Secret('MailerPort');
