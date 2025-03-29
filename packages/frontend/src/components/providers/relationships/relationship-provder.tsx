@@ -1,17 +1,19 @@
 'use client';
 
-import { createContext, FC, PropsWithChildren, useContext, useEffect, useMemo, useState } from 'react';
+import { createContext, FC, PropsWithChildren, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { Relationship } from '@lumi/core/types/relationship.types';
 import { User } from '@lumi/core/types/user.types';
 import { WebSocketEventHandler } from '@lumi/core/types/websockets.types';
 
 import { useWebSocket } from '@/components/providers/web-sockets/web-socket-provider';
 import { logger } from '@/lib/logger';
+import { WebsocketTopic } from '../web-sockets/topics';
 
 type RelationshipProviderData = {
 	relationship: Relationship;
 	self: User;
 	partner: User;
+	sendNotificationToPartner: (message: { title: string; content: string }) => Promise<void>;
 };
 
 type RelationshipProviderProps = PropsWithChildren<{
@@ -29,7 +31,7 @@ export const useRelationship = () => {
 };
 
 const RelationshipProvider: FC<RelationshipProviderProps> = ({ children, relationship, self, partner }) => {
-	const { addEventHandler, removeEventHandler } = useWebSocket();
+	const { addEventHandler, removeEventHandler, emitEvent } = useWebSocket();
 	const [userState, setUserState] = useState<User>(partner);
 
 	useEffect(() => {
@@ -47,7 +49,27 @@ const RelationshipProvider: FC<RelationshipProviderProps> = ({ children, relatio
 		};
 	}, [addEventHandler, partner.id, removeEventHandler]);
 
-	const memoizedValue = useMemo(() => ({ relationship, partner: userState, self }), [relationship, self, userState]);
+	const sendNotificationToPartner = useCallback(
+		({ title, content }: { title: string; content: string }) => {
+			return emitEvent(
+				'notification',
+				{
+					receiverId: partner.id,
+					from: { type: 'user' },
+					message: { title, content },
+				},
+				{
+					topic: WebsocketTopic.userNotificationsTopic(partner.id),
+				},
+			);
+		},
+		[emitEvent, partner.id],
+	);
+
+	const memoizedValue = useMemo(
+		() => ({ relationship, partner: userState, self, sendNotificationToPartner }),
+		[relationship, self, sendNotificationToPartner, userState],
+	);
 	return <RelationshipContext.Provider value={memoizedValue}>{children}</RelationshipContext.Provider>;
 };
 

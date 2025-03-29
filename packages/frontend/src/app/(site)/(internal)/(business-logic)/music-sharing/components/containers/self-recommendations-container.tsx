@@ -5,7 +5,6 @@ import { FC, useMemo } from 'react';
 import InfiniteLoader from '@/components/ui/infinite-loader';
 import { Separator } from '@/components/ui/separator';
 import { GetSongRecommendations } from '@/hooks/trpc/music-sharing-hooks';
-import RecommendSongButton from '../recommend-song-button';
 import RecommendedTrack from '../tracks/recommended-track';
 import TrackSearchResultSkeleton from '../tracks/track-search-result-skeleton';
 
@@ -28,7 +27,6 @@ const SelfRecommendationsContainer: FC = () => {
 
 	return (
 		<div className="space-y-6">
-			<RecommendSongButton />
 			<Separator />
 			{songRecsLoading ? (
 				<div>

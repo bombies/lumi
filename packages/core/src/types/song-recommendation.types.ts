@@ -26,4 +26,6 @@ export type DatabaseSongRecommendation = SongRecommendation & {
 	gsi1sk: string;
 	gsi2pk: string;
 	gsi2sk: string;
+	gsi3pk: string;
+	gsi3sk: string;
 };

@@ -1,6 +1,7 @@
 import { accountId } from './constants';
 import { db } from './db';
-import { redisHost, redisPassword, redisPort, redisUser } from './secrets';
+import { redisHost, redisPassword, redisPort, redisUser, vapidPrivateKey, vapidPublicKey } from './secrets';
+import { appify } from './utils';
 
 export const notificationsTopic = `${$app.name}/${$app.stage}/notifications`;
 
@@ -30,6 +31,7 @@ export const socketCleanupScheduler = new sst.aws.Cron('SocketCleanupScheduler',
 
 export const heartbeatSubscriber = realtimeServer.subscribe(
 	{
+		name: appify('HeartbeatHandler'),
 		handler: 'packages/functions/websocket/heartbeat.subscriber',
 		link: [db],
 		environment: {
@@ -43,6 +45,7 @@ export const heartbeatSubscriber = realtimeServer.subscribe(
 
 export const momentMessageSubscriber = realtimeServer.subscribe(
 	{
+		name: appify('MomentMessageHandler'),
 		handler: 'packages/functions/websocket/moment-message.subscriber',
 		link: [db, redisHost, redisPort, redisUser, redisPassword],
 		environment: {
@@ -56,6 +59,7 @@ export const momentMessageSubscriber = realtimeServer.subscribe(
 
 export const presenceSubscriber = realtimeServer.subscribe(
 	{
+		name: appify('PresenceHandler'),
 		handler: 'packages/functions/websocket/presence.subscriber',
 		link: [db],
 		environment: {
@@ -64,5 +68,19 @@ export const presenceSubscriber = realtimeServer.subscribe(
 	},
 	{
 		filter: notificationsTopic + '/relationship/#',
+	},
+);
+
+export const notificationSubscriber = realtimeServer.subscribe(
+	{
+		name: appify('UserNotificationsHandler'),
+		handler: 'packages/functions/websocket/notifications.subscriber',
+		link: [db, vapidPublicKey, vapidPrivateKey, realtimeServer],
+		environment: {
+			TABLE_NAME: db.name,
+		},
+	},
+	{
+		filter: notificationsTopic + '/+/notifications',
 	},
 );

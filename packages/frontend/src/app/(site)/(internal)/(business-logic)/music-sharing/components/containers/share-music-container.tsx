@@ -6,6 +6,7 @@ import { useRelationship } from '@/components/providers/relationships/relationsh
 import { Card, CardContent, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { GetSongRecommendations } from '@/hooks/trpc/music-sharing-hooks';
+import RecommendSongButton from '../recommend-song-button';
 import PartnerRecommendationsContainer from './partner-recommendations-container';
 import RecommendationHistoryContainer from './recommendation-history-container';
 import SelfRecommendationsContainer from './self-recommendations-container';
@@ -41,6 +42,7 @@ const ShareMusicContainer: FC = () => {
 			<CardTitle hidden>Share Music</CardTitle>
 			<CardContent className="space-y-6">
 				<h3 className="font-bold text-xl">Song Recommendations</h3>
+				<RecommendSongButton />
 				<Tabs defaultValue="partner-recs">
 					<TabsList className="grid w-full grid-cols-2 tablet:grid-cols-3">
 						<TabsTrigger value="partner-recs">{partner.firstName}&apos;s</TabsTrigger>

@@ -59,6 +59,8 @@ export const createSongRecommendation = async (
 			gsi1sk: `${KeyPrefix.SONG_RECOMMENDATION}${recommenderId}#unlistened#${createdAt}`,
 			gsi2pk: `${KeyPrefix.SONG_RECOMMENDATION}${recommenderId}`,
 			gsi2sk: `${KeyPrefix.SONG_RECOMMENDATION}${dto.id}`,
+			gsi3pk: `${KeyPrefix.SONG_RECOMMENDATION}${relationshipId}`,
+			gsi3sk: `${KeyPrefix.SONG_RECOMMENDATION}${relationshipId}#${createdAt}`,
 			...songRec,
 		} satisfies DatabaseSongRecommendation,
 	});
@@ -103,13 +105,15 @@ export const getSongRecommendationsByRelationshipId = async (
 ) => {
 	const res = await dynamo.query({
 		TableName: process.env.TABLE_NAME,
-		IndexName: 'GSI1',
-		KeyConditionExpression: '#pk = :pk',
+		IndexName: 'GSI3',
+		KeyConditionExpression: '#pk = :pk and begins_with(#sk, :sk)',
 		ExpressionAttributeNames: {
-			'#pk': 'gsi1pk',
+			'#pk': 'gsi3pk',
+			'#sk': 'gsi3sk',
 		},
 		ExpressionAttributeValues: {
 			':pk': `${KeyPrefix.SONG_RECOMMENDATION}${relationshipId}`,
+			':sk': `${KeyPrefix.SONG_RECOMMENDATION}${relationshipId}`,
 		},
 		Limit: limit,
 		ExclusiveStartKey: cursor,
@@ -146,6 +150,8 @@ export const updateSongRecommendation = async (recId: string, dto: UpdateSongRec
 				dto.listened !== undefined
 					? `${KeyPrefix.SONG_RECOMMENDATION}${existingRec.recommenderId}#${dto.listened ? 'listened' : 'unlistened'}#${updateTime}`
 					: undefined,
+			gsi3pk: `${KeyPrefix.SONG_RECOMMENDATION}${existingRec.relationshipId}`,
+			gsi3sk: `${KeyPrefix.SONG_RECOMMENDATION}${existingRec.relationshipId}#${updateTime}`,
 			updatedAt: updateTime,
 		});
 

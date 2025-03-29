@@ -6,6 +6,7 @@ import { SongRecommendation } from '@lumi/core/types/song-recommendation.types';
 import { SubmitHandler } from 'react-hook-form';
 import { z } from 'zod';
 
+import { useRelationship } from '@/components/providers/relationships/relationship-provder';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import EasyForm from '@/components/ui/form-extras/easy-form';
@@ -27,6 +28,7 @@ const formSchema = z.object({
 type FormSchema = z.infer<typeof formSchema>;
 
 const RateRecommendationButton: FC<Props> = ({ track, onRate }) => {
+	const { self, sendNotificationToPartner } = useRelationship();
 	const { mutateAsync: updateSongRec, isPending: isUpdatingSongRec } = UpdateSongRecommendation();
 	const [dialogOpen, setDialogOpen] = useState(false);
 
@@ -41,9 +43,14 @@ const RateRecommendationButton: FC<Props> = ({ track, onRate }) => {
 				});
 				setDialogOpen(false);
 				onRate?.();
+
+				await sendNotificationToPartner({
+					title: 'Song Recommendation Rated',
+					content: `${self.firstName} has given "${track.track.name}" a ${data.rating}/10 rating.`,
+				});
 			} catch {}
 		},
-		[onRate, track.id, updateSongRec],
+		[onRate, self.firstName, sendNotificationToPartner, track.id, track.track.name, updateSongRec],
 	);
 
 	return (

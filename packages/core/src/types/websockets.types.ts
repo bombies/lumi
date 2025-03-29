@@ -56,6 +56,7 @@ export type WebSocketMessageMap = {
 	notification: WebSocketMessage<
 		'notification',
 		{
+			receiverId: string;
 			from: { type: 'user' | 'system'; id?: string };
 			message: {
 				title: string;

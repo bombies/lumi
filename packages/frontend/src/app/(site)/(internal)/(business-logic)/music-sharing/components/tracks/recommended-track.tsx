@@ -142,7 +142,7 @@ const RecommendedTrack: FC<Props> = ({ track: { track: trackDetails, ...track },
 								</DialogHeader>
 								<h3 className="text-2xl text-primary font-bold">Comments from {receiver.firstName}</h3>
 								<Separator />
-								<p className="whitespace-pre-wrap">{track.comments}</p>
+								<p className="whitespace-pre-wrap break-words">{track.comments}</p>
 							</DialogContent>
 						</Dialog>
 					</>

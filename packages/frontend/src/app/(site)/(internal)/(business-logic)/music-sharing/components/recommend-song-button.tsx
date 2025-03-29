@@ -5,6 +5,7 @@ import { MusicalNoteIcon } from '@heroicons/react/24/solid';
 import { SearchIcon } from 'lucide-react';
 import { toast } from 'sonner';
 
+import { useRelationship } from '@/components/providers/relationships/relationship-provder';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
@@ -16,6 +17,7 @@ import TrackSearchResult from './tracks/track-search-result';
 import TrackSearchResultSkeleton from './tracks/track-search-result-skeleton';
 
 const RecommendSongButton: FC = () => {
+	const { sendNotificationToPartner } = useRelationship();
 	const { mutateAsync: recommendSong, isPending: isRecommending } = CreateSongRecommendation();
 	const [query, setQuery] = useState<string>();
 	const { data: trackData, isLoading: tracksLoading } = useSpotifyQuery(
@@ -42,7 +44,13 @@ const RecommendSongButton: FC = () => {
 					}),
 					{
 						loading: `Recommending ${track.name} by ${track.artists[0].name}`,
-						success: `You have recommended ${track.name} by ${track.artists[0].name}`,
+						async success() {
+							await sendNotificationToPartner({
+								title: 'New Song Recommendation',
+								content: `You have received a new song recommendation: ${track.name} by ${track.artists[0].name}`,
+							});
+							return `You have recommended ${track.name} by ${track.artists[0].name}`;
+						},
 						error(e) {
 							return getErrorMessage(e, {
 								defaultMessage: 'Could not recommend that track!',

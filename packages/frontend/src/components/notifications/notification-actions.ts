@@ -6,7 +6,7 @@ import {
 	getNotificationSubscriptions,
 } from '@lumi/core/notifications/notifications.service';
 import { NotificationSubscriber } from '@lumi/core/types/notification.types';
-import webpush from 'web-push';
+import webpush, { PushSubscription as WebPushSubscription } from 'web-push';
 
 import { getServerSession } from '@/lib/better-auth/auth-actions';
 
@@ -36,7 +36,7 @@ export async function subscribeUser(sub: PushSubscription) {
 	const session = await getServerSession();
 	if (!session) return { success: false, error: 'Unauthorized' };
 
-	await createNotificationSubscription(session.user.id, sub);
+	await createNotificationSubscription(session.user.id, sub as unknown as WebPushSubscription);
 	fetchSubscriptionsForUser(session.user.id);
 	return { success: true };
 }

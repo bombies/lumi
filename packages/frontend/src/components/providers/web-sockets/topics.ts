@@ -14,7 +14,7 @@ export class WebsocketTopic {
 	}
 
 	static userNotificationsTopic(userId: string) {
-		return `${this.prefix}/${userId}`;
+		return `${this.prefix}/${userId}/notifications`;
 	}
 
 	static momentChatTopic(relationshipId: string, momentId: string) {
