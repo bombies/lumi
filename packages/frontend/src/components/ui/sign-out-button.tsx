@@ -33,6 +33,7 @@ const SignOutButton: FC<Props> = ({ iconOnly, className, disableNotification, va
 				toast.promise(auth.signOut(), {
 					loading: 'Signing out...',
 					async success() {
+						localStorage.removeItem('auth-jwt');
 						router.push('/auth/login');
 						return 'Signed out successfully.';
 					},

@@ -21,8 +21,7 @@ export async function createContext({ event, context, info }: CreateAWSLambdaCon
 			},
 		};
 	} catch (e) {
-		console.error(e);
-		return { headers };
+		throw e;
 	}
 }
 
