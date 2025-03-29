@@ -41,6 +41,22 @@ const ColorSchemeProvider: FC<PropsWithChildren> = ({ children }) => {
 		);
 	}, [currentColorScheme, localStorage]);
 
+	useEffect(() => {
+		const mediaList = window.matchMedia('(prefers-color-scheme: dark)');
+		const changeHandler = (e: MediaQueryListEvent) => {
+			document.documentElement.classList.toggle(
+				'dark',
+				currentColorScheme === 'dark' || (!localStorage?.hasKey('colorScheme') && e.matches),
+			);
+		};
+
+		mediaList.addEventListener('change', changeHandler);
+
+		return () => {
+			mediaList.removeEventListener('change', changeHandler);
+		};
+	}, [currentColorScheme, localStorage]);
+
 	return (
 		<ColorSchemeContext.Provider
 			value={{
