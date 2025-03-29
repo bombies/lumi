@@ -4,11 +4,11 @@ import { createContext, FC, PropsWithChildren, useContext, useEffect, useState }
 
 import { useLocalStorage } from '@/lib/hooks/useLocalStorage';
 
-export type ColorScheme = 'light' | 'dark' | 'system';
+export type ColorScheme = 'light' | 'dark';
 
 type ColorSchemeData = {
 	currentColorScheme?: ColorScheme;
-	setCurrentColorScheme: (colorScheme: ColorScheme) => void;
+	setCurrentColorScheme: (colorScheme: ColorScheme | undefined) => void;
 };
 
 const ColorSchemeContext = createContext<ColorSchemeData | undefined>(undefined);
@@ -21,14 +21,13 @@ export const useColorScheme = () => {
 
 const ColorSchemeProvider: FC<PropsWithChildren> = ({ children }) => {
 	const localStorage = useLocalStorage();
-	const [currentColorScheme, setCurrentColorScheme] = useState<ColorScheme>();
+	const [currentColorScheme, setCurrentColorScheme] = useState<ColorScheme | undefined>();
 
 	useEffect(() => {
 		if (!localStorage) return;
 
 		if (!currentColorScheme) {
-			const storedColorScheme = localStorage.getItem<ColorScheme>('colorScheme');
-			setCurrentColorScheme(storedColorScheme || 'system');
+			localStorage.removeItem('colorScheme');
 		} else {
 			localStorage.setItem('colorScheme', currentColorScheme);
 		}
@@ -38,9 +37,9 @@ const ColorSchemeProvider: FC<PropsWithChildren> = ({ children }) => {
 		document.documentElement.classList.toggle(
 			'dark',
 			currentColorScheme === 'dark' ||
-				(currentColorScheme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches),
+				(!localStorage?.hasKey('colorScheme') && window.matchMedia('(prefers-color-scheme: dark)').matches),
 		);
-	}, [currentColorScheme]);
+	}, [currentColorScheme, localStorage]);
 
 	return (
 		<ColorSchemeContext.Provider

@@ -120,7 +120,11 @@ export const metadata: Metadata = {
 	description: 'A space for you and your partner.',
 	appleWebApp: {
 		capable: true,
-		statusBarStyle: 'black-translucent',
+		statusBarStyle: 'default',
+		title: 'Lumi',
+	},
+	other: {
+		'apple-mobile-web-app-capable': 'yes',
 	},
 };
 
@@ -161,8 +165,11 @@ export default async function RootLayout({
 				/>
 				<Script
 					id="load-ios-splash"
+					strategy="beforeInteractive"
+					type="text/javascript"
 					dangerouslySetInnerHTML={{
-						__html: `iosPWASplash('/web-app-manifest-512x512.png', '#76A34E');`,
+						__html: `console.debug('Setting PWA splash screen...');
+						try { iosPWASplash('/web-app-manifest-512x512.png', '#76A34E'); console.debug('Successfully set the splash screen!');} catch (e) { console.error('Something went wrong setting the splash screen!', e);}`,
 					}}
 				/>
 			</body>

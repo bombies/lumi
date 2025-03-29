@@ -30,6 +30,10 @@ export class ClientLocalStorage {
 	removeItem(key: string) {
 		this.storage.removeItem(key);
 	}
+
+	hasKey(key: string) {
+		return key in this.storage;
+	}
 }
 
 export const useLocalStorage = () => {

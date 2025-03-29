@@ -54,9 +54,9 @@ const ColorSchemeToggle: FC<PropsWithChildren> = ({ children }) => {
 					<MoonIcon /> Dark
 				</DropdownMenuCheckboxItem>
 				<DropdownMenuCheckboxItem
-					checked={currentColorScheme === 'system'}
+					checked={currentColorScheme === undefined}
 					onCheckedChange={checked => {
-						if (checked) setCurrentColorScheme('system');
+						if (checked) setCurrentColorScheme(undefined);
 					}}
 				>
 					<SunMoonIcon /> System
