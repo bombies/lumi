@@ -46,8 +46,9 @@ const RecommendSongButton: FC = () => {
 						loading: `Recommending ${track.name} by ${track.artists[0].name}`,
 						async success() {
 							await sendNotificationToPartner({
-								title: 'New Song Recommendation',
-								content: `You have received a new song recommendation: ${track.name} by ${track.artists[0].name}`,
+								title: '🎵 Song Recommendation',
+								content: `${track.name} by ${track.artists[0].name}`,
+								openUrl: '/music-sharing',
 							});
 							return `You have recommended ${track.name} by ${track.artists[0].name}`;
 						},

@@ -32,7 +32,9 @@ export type DatabaseWebSocketHeartbeat = WebSocketHeartbeat & {
 
 export type WebSocketMessage<E extends keyof WebSocketMessageMap, T = InferredWebSocketMessagePayload<E>> = {
 	type: E;
-	payload: T;
+	payload: T & {
+		openUrl?: string;
+	};
 	timestamp: number;
 	id?: string;
 	source?: 'server' | 'client';

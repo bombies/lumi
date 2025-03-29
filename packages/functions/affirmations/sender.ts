@@ -42,6 +42,7 @@ export const handler: Handler<SQSEvent> = async event => {
 				payload: {
 					title: `${(user.id === partner1?.id ? partner1.firstName : partner2?.firstName) ?? 'Your partner'} says`,
 					body: affirmation.affirmation,
+					openUrl: '/affirmations',
 				},
 				opts: {
 					offlineWebSocketMessage: {

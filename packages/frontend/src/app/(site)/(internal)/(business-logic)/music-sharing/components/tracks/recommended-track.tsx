@@ -50,7 +50,7 @@ const RecommendedTrack: FC<Props> = ({ track: { track: trackDetails, ...track },
 						<UserAvatar
 							user={recommender}
 							hideStatus
-							className="size-8 border-1 border-border aspect-square rounded-sm shrink-0"
+							className="size-8 border-1 border-border aspect-square shrink-0"
 						/>
 						<p className="text-xs/3">{recommender.firstName}</p>
 					</div>

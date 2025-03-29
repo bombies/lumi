@@ -3,7 +3,7 @@
 import { createContext, FC, PropsWithChildren, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { Relationship } from '@lumi/core/types/relationship.types';
 import { User } from '@lumi/core/types/user.types';
-import { WebSocketEventHandler } from '@lumi/core/types/websockets.types';
+import { InferredWebSocketMessagePayload, WebSocketEventHandler } from '@lumi/core/types/websockets.types';
 
 import { useWebSocket } from '@/components/providers/web-sockets/web-socket-provider';
 import { logger } from '@/lib/logger';
@@ -13,7 +13,11 @@ type RelationshipProviderData = {
 	relationship: Relationship;
 	self: User;
 	partner: User;
-	sendNotificationToPartner: (message: { title: string; content: string }) => Promise<void>;
+	sendNotificationToPartner: (
+		message: InferredWebSocketMessagePayload<'notification'>['message'] & {
+			openUrl?: string;
+		},
+	) => Promise<void>;
 };
 
 type RelationshipProviderProps = PropsWithChildren<{
@@ -50,13 +54,20 @@ const RelationshipProvider: FC<RelationshipProviderProps> = ({ children, relatio
 	}, [addEventHandler, partner.id, removeEventHandler]);
 
 	const sendNotificationToPartner = useCallback(
-		({ title, content }: { title: string; content: string }) => {
+		({
+			title,
+			content,
+			openUrl,
+		}: InferredWebSocketMessagePayload<'notification'>['message'] & {
+			openUrl?: string;
+		}) => {
 			return emitEvent(
 				'notification',
 				{
 					receiverId: partner.id,
 					from: { type: 'user' },
 					message: { title, content },
+					openUrl,
 				},
 				{
 					topic: WebsocketTopic.userNotificationsTopic(partner.id),

@@ -1,9 +1,7 @@
 import { sendNotification } from '@lumi/core/notifications/notifications.service';
 import { Event, InferredWebSocketMessage, WebSocketToken } from '@lumi/core/types/websockets.types';
 import { getUserById } from '@lumi/core/users/users.service';
-import { createAsyncWebsocketConnection } from '@lumi/core/websockets/websockets.service';
 import { Handler } from 'aws-lambda';
-import { Resource } from 'sst';
 
 export const subscriber: Handler<InferredWebSocketMessage<Event>> = async event => {
 	if (event.source !== 'client') return;
@@ -24,6 +22,7 @@ export const subscriber: Handler<InferredWebSocketMessage<Event>> = async event 
 				payload: {
 					title: payload.message.title,
 					body: payload.message.content,
+					openUrl: payload.openUrl,
 				},
 			});
 

@@ -83,10 +83,10 @@ export const sendNotification = async ({
 	opts,
 }: {
 	user: User;
-
 	payload: {
 		title: string;
 		body: string;
+		openUrl?: string;
 	};
 	opts?: {
 		offlineWebSocketMessage?: {
@@ -100,21 +100,39 @@ export const sendNotification = async ({
 		if (user.status === 'offline' || user.status === 'idle') {
 			console.log(`${user.username} is offline or idle... Sending notification through webpush`);
 			const notificationSubs = await getNotificationSubscriptions(user.id);
+			webpush.setVapidDetails(
+				'mailto:contact@ajani.me',
+				Resource.VapidPublicKey.value,
+				Resource.VapidPrivateKey.value,
+			);
 			for (const sub of notificationSubs) {
-				webpush.setVapidDetails(
-					'mailto:contact@ajani.me',
-					Resource.VapidPublicKey.value,
-					Resource.VapidPrivateKey.value,
-				);
+				try {
+					await webpush.sendNotification(
+						sub,
+						JSON.stringify({
+							title: payload.title.slice(0, Math.min(30, payload.title.length)),
+							body: payload.body.slice(0, Math.min(150, payload.body.length)),
+							icon: '/favicon-96x96.png',
+							openUrl: payload.openUrl,
+						}),
+					);
 
-				await webpush.sendNotification(
-					sub,
-					JSON.stringify({
-						title: payload.title.slice(0, Math.min(29, payload.title.length - 1)),
-						body: payload.body.slice(0, Math.min(149, payload.body.length - 1)),
-						icon: '/favicon-96x96.png',
-					}),
-				);
+					let subService: string;
+					const endpoint = sub.endpoint;
+					if (endpoint.includes('mozilla')) {
+						subService = 'Mozilla';
+					} else if (endpoint.includes('fcm')) {
+						subService = 'Firebase Cloud Messaging';
+					} else if (endpoint.includes('apple')) {
+						subService = 'Apple';
+					} else {
+						subService = 'Unknown';
+					}
+
+					console.log(`Successfully sent the notification to the ${subService} subscriber!`);
+				} catch (e) {
+					console.error('Could not send the notifcation to a subscriber!', e);
+				}
 			}
 		} else {
 			if (!opts?.offlineWebSocketMessage)
