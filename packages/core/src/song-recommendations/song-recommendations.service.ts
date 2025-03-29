@@ -97,6 +97,28 @@ export const getSongRecommendations = async (
 	return getInfiniteData<SongRecommendation>(res);
 };
 
+export const getSongRecommendationsByRelationshipId = async (
+	relationshipId: string,
+	{ limit, cursor, order, ...dto }: GetSongRecommendationsDto,
+) => {
+	const res = await dynamo.query({
+		TableName: process.env.TABLE_NAME,
+		IndexName: 'GSI1',
+		KeyConditionExpression: '#pk = :pk',
+		ExpressionAttributeNames: {
+			'#pk': 'gsi1pk',
+		},
+		ExpressionAttributeValues: {
+			':pk': `${KeyPrefix.SONG_RECOMMENDATION}${relationshipId}`,
+		},
+		Limit: limit,
+		ExclusiveStartKey: cursor,
+		ScanIndexForward: order === 'asc',
+	});
+
+	return getInfiniteData<SongRecommendation>(res);
+};
+
 export const getSongRecommendationById = async (recId: string) => {
 	const res = await dynamo.get({
 		TableName: process.env.TABLE_NAME,
@@ -116,13 +138,16 @@ export const updateSongRecommendation = async (recId: string, dto: UpdateSongRec
 			message: 'Song recommendation not found!',
 		});
 
-	const { updateStatements, expressionAttributeNames, expressionAttributeValues } = getDynamicUpdateStatements({
-		...dto,
-		gsi1sk:
-			dto.listened !== undefined
-				? `${KeyPrefix.SONG_RECOMMENDATION}${existingRec.recommenderId}#${dto.listened ? 'listened' : 'unlistened'}#${existingRec.createdAt}`
-				: undefined,
-	});
+	const updateTime = new Date().toISOString();
+	const { updateStatements, expressionAttributeNames, expressionAttributeValues } =
+		getDynamicUpdateStatements<DatabaseSongRecommendation>({
+			...dto,
+			gsi1sk:
+				dto.listened !== undefined
+					? `${KeyPrefix.SONG_RECOMMENDATION}${existingRec.recommenderId}#${dto.listened ? 'listened' : 'unlistened'}#${updateTime}`
+					: undefined,
+			updatedAt: updateTime,
+		});
 
 	const res = await dynamo.update({
 		TableName: process.env.TABLE_NAME,

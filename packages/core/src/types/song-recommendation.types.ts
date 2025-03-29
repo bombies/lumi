@@ -6,6 +6,7 @@ export type SongRecommendation = {
 	recommenderId: string;
 	relationshipId: string;
 	createdAt: string;
+	updatedAt?: string;
 	track: RecommendationSpotifyTrack;
 };
 

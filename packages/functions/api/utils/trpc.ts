@@ -41,7 +41,7 @@ export const publicProcedure = t.procedure.use(async function procedure(opts) {
 
 export const protectedProcedure = publicProcedure.use(async function isAuthenticated(opts) {
 	const { ctx } = opts;
-	if (!ctx.user) throw new TRPCError({ code: 'UNAUTHORIZED' });
+	if (!ctx.user) throw new TRPCError({ code: 'UNAUTHORIZED', message: 'You are not authenticated!' });
 	return opts.next({
 		ctx: {
 			user: ctx.user,

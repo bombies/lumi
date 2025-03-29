@@ -19,14 +19,19 @@ export const GetSongRecommendations = ({
 	order,
 	filter,
 	limit,
-	self,
+	fetchType,
 }: {
 	order: 'asc' | 'desc';
 	filter?: 'listened' | 'unlistened';
 	limit?: number;
-	self?: boolean;
+	fetchType?: 'self' | 'partner' | 'relationship';
 }) =>
-	(!self ? trpc.musicSharing.getSongRecommendations : trpc.musicSharing.getSelfSongRecommendations).useInfiniteQuery(
+	(!fetchType || fetchType === 'partner'
+		? trpc.musicSharing.getSongRecommendations
+		: fetchType === 'self'
+			? trpc.musicSharing.getSelfSongRecommendations
+			: trpc.musicSharing.getSongRecommendationsForRelationship
+	).useInfiniteQuery(
 		{ order, filter, limit },
 		{
 			getNextPageParam: lastPage => lastPage.cursor,

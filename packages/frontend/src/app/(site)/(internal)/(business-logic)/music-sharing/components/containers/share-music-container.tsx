@@ -7,6 +7,7 @@ import { Card, CardContent, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { GetSongRecommendations } from '@/hooks/trpc/music-sharing-hooks';
 import PartnerRecommendationsContainer from './partner-recommendations-container';
+import RecommendationHistoryContainer from './recommendation-history-container';
 import SelfRecommendationsContainer from './self-recommendations-container';
 
 const ShareMusicContainer: FC = () => {
@@ -41,15 +42,21 @@ const ShareMusicContainer: FC = () => {
 			<CardContent className="space-y-6">
 				<h3 className="font-bold text-xl">Song Recommendations</h3>
 				<Tabs defaultValue="partner-recs">
-					<TabsList className="grid w-full grid-cols-2">
+					<TabsList className="grid w-full grid-cols-2 tablet:grid-cols-3">
 						<TabsTrigger value="partner-recs">{partner.firstName}&apos;s</TabsTrigger>
 						<TabsTrigger value="self-recs">Yours</TabsTrigger>
+						<TabsTrigger value="history" className="col-span-2 tablet:col-span-1">
+							Recommendation History
+						</TabsTrigger>
 					</TabsList>
 					<TabsContent value="partner-recs">
 						<PartnerRecommendationsContainer />
 					</TabsContent>
 					<TabsContent value="self-recs">
 						<SelfRecommendationsContainer />
+					</TabsContent>
+					<TabsContent value="history">
+						<RecommendationHistoryContainer />
 					</TabsContent>
 				</Tabs>
 			</CardContent>

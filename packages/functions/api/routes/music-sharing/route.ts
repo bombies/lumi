@@ -8,6 +8,7 @@ import {
 	deleteSongRecommendation,
 	getSongRecommendationById,
 	getSongRecommendations,
+	getSongRecommendationsByRelationshipId,
 	updateSongRecommendation,
 } from '@lumi/core/song-recommendations/song-recommendations.service';
 import { extractPartnerIdFromRelationship } from '@lumi/core/utils/global-utils';
@@ -32,6 +33,10 @@ export const musicSharingRouter = router({
 	getSelfSongRecommendations: relationshipProcedure
 		.input(getSongRecommendationsDto)
 		.query(({ input, ctx: { user, relationship } }) => getSongRecommendations(user.id, relationship.id, input)),
+
+	getSongRecommendationsForRelationship: relationshipProcedure
+		.input(getSongRecommendationsDto)
+		.query(({ input, ctx: { relationship } }) => getSongRecommendationsByRelationshipId(relationship.id, input)),
 
 	updateSongRecommendation: relationshipProcedure
 		.input(

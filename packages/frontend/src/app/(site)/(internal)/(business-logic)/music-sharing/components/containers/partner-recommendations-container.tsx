@@ -7,6 +7,8 @@ import { Button } from '@/components/ui/button';
 import InfiniteLoader from '@/components/ui/infinite-loader';
 import { Separator } from '@/components/ui/separator';
 import { GetSongRecommendations } from '@/hooks/trpc/music-sharing-hooks';
+import { useRouteInvalidation } from '@/lib/hooks/useRouteInvalidation';
+import { trpc } from '@/lib/trpc/client';
 import RecommendedTrack from '../tracks/recommended-track';
 import TrackSearchResultSkeleton from '../tracks/track-search-result-skeleton';
 
@@ -15,11 +17,11 @@ const PartnerRecommendationsContainer: FC = () => {
 		data: songRecs,
 		isLoading: songRecsLoading,
 		isRefetching: songRecsRefetching,
-		refetch: refetchSongRecs,
 		fetchNextPage,
 		hasNextPage,
 		isFetchingNextPage,
 	} = GetSongRecommendations({ order: 'desc', filter: 'unlistened' });
+	const invalidateSongRecs = useRouteInvalidation([trpc.musicSharing.getSongRecommendations]);
 
 	const recElems = useMemo(
 		() =>
@@ -37,7 +39,7 @@ const PartnerRecommendationsContainer: FC = () => {
 					size="icon"
 					loading={songRecsRefetching}
 					disabled={songRecsLoading}
-					onClick={() => refetchSongRecs()}
+					onClick={() => invalidateSongRecs()}
 				>
 					<RefreshCwIcon size={18} />
 				</Button>
