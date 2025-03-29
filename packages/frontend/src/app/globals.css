@@ -6,7 +6,7 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme {
-	--text-sm: 16px;
+	--text-sm: 1rem;
 	--font-sans: var(--font-sf-pro-display);
 	--font-cursive: var(--font-cookie);
 
@@ -177,7 +177,6 @@
 	}
 	body {
 		@apply bg-background text-foreground;
-		font-size: 16px;
 		-webkit-tap-highlight-color: transparent;
 	}
 }
