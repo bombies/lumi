@@ -59,8 +59,6 @@ export const createSongRecommendation = async (
 			gsi1sk: `${KeyPrefix.SONG_RECOMMENDATION}${recommenderId}#unlistened#${createdAt}`,
 			gsi2pk: `${KeyPrefix.SONG_RECOMMENDATION}${recommenderId}`,
 			gsi2sk: `${KeyPrefix.SONG_RECOMMENDATION}${dto.id}`,
-			gsi3pk: `${KeyPrefix.SONG_RECOMMENDATION}${relationshipId}`,
-			gsi3sk: `${KeyPrefix.SONG_RECOMMENDATION}${relationshipId}#${createdAt}`,
 			...songRec,
 		} satisfies DatabaseSongRecommendation,
 	});

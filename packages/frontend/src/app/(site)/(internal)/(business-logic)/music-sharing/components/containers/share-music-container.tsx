@@ -25,7 +25,7 @@ const ShareMusicContainer: FC = () => {
 		bodyElement.style.backgroundImage = `url(${latestSong})`;
 		bodyElement.style.backgroundSize = 'cover';
 		bodyElement.style.backgroundRepeat = 'no-repeat';
-		bodyElement.style.backgroundAttachment = 'fixed';
+		bodyElement.style.backgroundAttachment = 'scroll';
 		bodyElement.style.backgroundPosition = 'center';
 		bodyElement.style.width = '100vw';
 		bodyElement.style.height = '100vh';

@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import type { AppRouter } from '@lumi/functions/types';
 import type { QueryClient } from '@tanstack/react-query';
 import { QueryClientProvider } from '@tanstack/react-query';
@@ -8,6 +8,7 @@ import { httpBatchLink, TRPCClientError } from '@trpc/client';
 import { createTRPCReact } from '@trpc/react-query';
 
 import { auth } from '../better-auth/auth-client';
+import { useLocalStorage } from '../hooks/useLocalStorage';
 import { logger } from '../logger';
 import { makeQueryClient } from './query-client';
 
@@ -29,14 +30,28 @@ export function TRPCProvider(
 		children: React.ReactNode;
 	}>,
 ) {
+	const localStorage = useLocalStorage();
+	const storageRef = useRef(localStorage);
 	// NOTE: Avoid useState when initializing the query client if you don't
 	//       have a suspense boundary between this and the code that may
 	//       suspend because React will throw away the client on the initial
 	//       render if it suspends and there is no boundary
 
+	useEffect(() => {
+		storageRef.current = localStorage;
+	}, [localStorage]);
+
 	const setAccessToken = useCallback(async () => {
-		logger.info('setting a new access token!');
+		if (!localStorage) return;
+
+		logger.debug('Setting a new access token...');
 		const session = await auth.getSession();
+
+		if (session.error || !session.data) {
+			logger.debug('User is not authenticated! Could not set an access token.');
+			return;
+		}
+
 		const response = await fetch('/api/auth/token', {
 			headers: {
 				Authorization: `Bearer ${session.data?.session.token}`,
@@ -44,17 +59,19 @@ export function TRPCProvider(
 		});
 
 		const token = (await response.json()).token;
-		if (token) localStorage.setItem('auth-jwt', token);
+		if (token) localStorage.setItemRaw('auth-jwt', token);
 		return token as string | undefined;
-	}, []);
+	}, [localStorage]);
 
 	useEffect(() => {
+		if (!localStorage) return;
+
 		(async () => {
-			const existingToken = localStorage.getItem('auth-jwt');
+			const existingToken = localStorage.getItemRaw('auth-jwt');
 			if (existingToken) return;
 			await setAccessToken();
 		})();
-	}, [setAccessToken]);
+	}, [localStorage, setAccessToken]);
 
 	const queryClient = getQueryClient();
 	const trpcClient = useMemo(
@@ -65,7 +82,7 @@ export function TRPCProvider(
 						// transformer: superjson, <-- if you use a data transformer
 						url: getUrl(),
 						headers: async () => {
-							const accessToken = localStorage.getItem('auth-jwt');
+							const accessToken = storageRef.current?.getItemRaw('auth-jwt');
 
 							return {
 								authorization: accessToken ? `Bearer ${accessToken}` : '',
@@ -75,8 +92,9 @@ export function TRPCProvider(
 							const response = await fetch(url, options);
 							if (response.status === 401) {
 								const error = (await response.json()) as { error: TRPCClientError<AppRouter> }[];
-								logger.error('TRPC fetch error', error[0]);
-								if (error[0].error.message.includes('expired')) {
+								const errMsg = error[0].error.message;
+								logger.debug('TRPC fetch error', errMsg);
+								if (errMsg.includes('expired')) {
 									const newToken = await setAccessToken();
 									if (!newToken) logger.error('Was not able to fetch a new access token!');
 									return await fetch(url, {
@@ -86,6 +104,44 @@ export function TRPCProvider(
 											Authorization: `Bearer ${newToken}`,
 										},
 									});
+								} else if (errMsg.includes('not authenticated')) {
+									// Try again
+									logger.debug(
+										'Request failed authentication, hoping the client has been hydrated and trying again.',
+									);
+
+									let storage = storageRef.current;
+									while (!storage) {
+										storage = storageRef.current;
+										logger.debug('Waiting for localStorage to be available...');
+									}
+									logger.debug('localStorage is available!');
+
+									let accessToken = storage.getItemRaw('auth-jwt');
+									logger.debug(`Retrying request with token: ${accessToken}`);
+
+									if (!accessToken) {
+										logger.debug(
+											"The access token doesn't exist... Attempting to create a new one",
+										);
+										accessToken = (await setAccessToken()) ?? null;
+
+										if (!accessToken) {
+											logger.debug('Could not create a new access token!');
+										} else {
+											logger.debug(
+												`New access token created: ${accessToken}. Using it in the retried request.`,
+											);
+										}
+									}
+
+									return await fetch(url, {
+										...options,
+										headers: {
+											...options?.headers,
+											Authorization: accessToken ? `Bearer ${accessToken}` : '',
+										},
+									});
 								}
 							}
 							return response;
@@ -93,7 +149,7 @@ export function TRPCProvider(
 					}),
 				],
 			}),
-		[],
+		[setAccessToken],
 	);
 
 	return (

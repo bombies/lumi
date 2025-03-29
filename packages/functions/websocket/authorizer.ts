@@ -53,6 +53,8 @@ export const handler = realtime.authorizer(async token => {
 			};
 	}
 
+	console.log(`Authorizing ${token}`);
+
 	// Return the topics to subscribe and publish
 	return {
 		...allowedPaths,

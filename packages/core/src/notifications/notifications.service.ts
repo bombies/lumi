@@ -12,7 +12,7 @@ export const createNotificationSubscription = async (userId: string, subscriptio
 	const sub: NotificationSubscriber = {
 		subscriberId: userId,
 		endpoint: subscription.endpoint,
-		expirationTime: subscription.expirationTime,
+		expirationTime: subscription.expirationTime ?? null,
 		keys: subscription.keys,
 	};
 
