@@ -26,8 +26,8 @@ export const createAffirmation = async (dto: CreateAffirmationDto) => {
 	const res = await dynamo.put({
 		TableName: process.env.TABLE_NAME,
 		Item: {
-			pk: `${KeyPrefix.AFFIRMATION}${dto.relationshipId}`,
-			sk: `${KeyPrefix.AFFIRMATION}${dto.ownerId}#${affirmationId}`,
+			pk: KeyPrefix.affirmation.pk(dto.relationshipId),
+			sk: KeyPrefix.affirmation.sk(dto.ownerId, affirmationId),
 			...affirmation,
 			entityType: EntityType.AFFIRMATION,
 		} satisfies DatabaseAffirmation,
@@ -46,8 +46,8 @@ export const getAffirmationById = async (ownerId: string, relationshipId: string
 	const res = await dynamo.get({
 		TableName: process.env.TABLE_NAME,
 		Key: {
-			pk: `${KeyPrefix.AFFIRMATION}${relationshipId}`,
-			sk: `${KeyPrefix.AFFIRMATION}${ownerId}#${affirmationId}`,
+			pk: KeyPrefix.affirmation.pk(relationshipId),
+			sk: KeyPrefix.affirmation.sk(ownerId, affirmationId),
 		},
 	});
 	if (res.$metadata.httpStatusCode !== 200)
@@ -106,8 +106,8 @@ export const getOwnedAffirmationsForUser = async (userId: string, rship?: Relati
 			'#sk': 'sk',
 		},
 		ExpressionAttributeValues: {
-			':pk': `${KeyPrefix.AFFIRMATION}${relationship.id}`,
-			':sk': `${KeyPrefix.AFFIRMATION}${userId}`,
+			':pk': KeyPrefix.affirmation.pk(relationship.id),
+			':sk': KeyPrefix.affirmation.buildKey(userId),
 		},
 	});
 
@@ -145,8 +145,8 @@ export const updateAffirmation = async (
 	const res = await dynamo.update({
 		TableName: process.env.TABLE_NAME,
 		Key: {
-			pk: `${KeyPrefix.AFFIRMATION}${relationshipId}`,
-			sk: `${KeyPrefix.AFFIRMATION}${ownerId}#${affirmationId}`,
+			pk: KeyPrefix.affirmation.pk(relationshipId),
+			sk: KeyPrefix.affirmation.sk(ownerId, affirmationId),
 		},
 		UpdateExpression: updateStatements,
 		ExpressionAttributeValues: expressionAttributeValues,
@@ -176,8 +176,8 @@ export const deleteAffirmation = async (ownerId: string, relationshipId: string,
 	const res = await dynamo.delete({
 		TableName: process.env.TABLE_NAME,
 		Key: {
-			pk: `${KeyPrefix.AFFIRMATION}${relationshipId}`,
-			sk: `${KeyPrefix.AFFIRMATION}${ownerId}#${affirmationId}`,
+			pk: KeyPrefix.affirmation.pk(relationshipId),
+			sk: KeyPrefix.affirmation.sk(ownerId, affirmationId),
 		},
 	});
 
@@ -195,7 +195,7 @@ export const deleteAffirmationsForRelationship = async (relationshipId: string) 
 	const res = await dynamo.delete({
 		TableName: process.env.TABLE_NAME,
 		Key: {
-			pk: `${KeyPrefix.AFFIRMATION}${relationshipId}`,
+			pk: KeyPrefix.affirmation.pk(relationshipId),
 		},
 	});
 };
@@ -210,8 +210,8 @@ export const createReceivedAffirmation = async (receiver: string, relationshipId
 	const res = await dynamo.put({
 		TableName: process.env.TABLE_NAME,
 		Item: {
-			pk: `${KeyPrefix.RECEIVED_AFFIRMATION}${relationshipId}`,
-			sk: `${KeyPrefix.RECEIVED_AFFIRMATION}${receiver}#${timestamp}`,
+			pk: KeyPrefix.receivedAffirmation.pk(relationshipId),
+			sk: KeyPrefix.receivedAffirmation.sk(receiver, timestamp),
 			...receivedAffirmation,
 			entityType: EntityType.RECEIVED_AFFIRMATION,
 		} satisfies DatabaseReceivedAffirmation,
@@ -239,8 +239,8 @@ export const getReceivedAffirmations = async (
 			'#sk': 'sk',
 		},
 		ExpressionAttributeValues: {
-			':pk': `${KeyPrefix.RECEIVED_AFFIRMATION}${relationshipId}`,
-			':sk': `${KeyPrefix.RECEIVED_AFFIRMATION}${userId}#`,
+			':pk': KeyPrefix.receivedAffirmation.pk(relationshipId),
+			':sk': KeyPrefix.receivedAffirmation.buildKey(userId),
 		},
 		ScanIndexForward: order === 'asc',
 		Limit: limit,

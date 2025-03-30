@@ -3,10 +3,17 @@ import { Resource } from 'sst';
 import webpush, { PushSubscription } from 'web-push';
 
 import { EntityType, KeyPrefix } from '../types/dynamo.types';
-import { DatabaseNotificationSubscriber, NotificationSubscriber } from '../types/notification.types';
+import {
+	DatabaseNotificationSubscriber,
+	DatabaseStoredNotification,
+	NotificationSubscriber,
+	StoredNotification,
+} from '../types/notification.types';
 import { User } from '../types/user.types';
-import { dynamo } from '../utils/dynamo/dynamo.service';
+import { deleteItem, dynamo, getItems, putItem } from '../utils/dynamo/dynamo.service';
+import { getUUID } from '../utils/utils';
 import { MqttClientType, emitAsyncWebsocketEvent } from '../websockets/websockets.service';
+import { CreateNotificationDto, GetFilteredNotificationsDto, GetNotificationsDto } from './notification.dto';
 
 export const createNotificationSubscription = async (userId: string, subscription: PushSubscription) => {
 	const sub: NotificationSubscriber = {
@@ -164,4 +171,61 @@ export const sendNotification = async ({
 	} catch (e) {
 		console.error(`Could not send notification to ${user.username}`, e);
 	}
+};
+
+export const storeNotification = async (userId: string, dto: CreateNotificationDto) => {
+	const id = getUUID();
+	const notification: StoredNotification = {
+		id,
+		userId,
+		...dto,
+		read: false,
+		createdAt: new Date().toISOString(),
+	};
+
+	return putItem<StoredNotification, DatabaseStoredNotification>({
+		pk: KeyPrefix.notifications.pk(id),
+		sk: KeyPrefix.notifications.sk(id),
+		gsi1pk: KeyPrefix.notifications.gsi1pk(userId),
+		gsi1sk: KeyPrefix.notifications.gsi1sk(notification.createdAt),
+		gsi2pk: KeyPrefix.notifications.gsi2pk(userId),
+		gsi2sk: KeyPrefix.notifications.gsi2sk(false, notification.createdAt),
+		...notification,
+		entityType: EntityType.NOTIFICATION,
+	});
+};
+
+export const getStoredNotifications = async (userId: string, dto: GetNotificationsDto) => {
+	return getItems<StoredNotification>({
+		index: 'GSI1',
+		queryExpression: {
+			expression: '#gsi1pk = :gsi1pk',
+			variables: {
+				':gsi1pk': KeyPrefix.notifications.gsi1pk(userId),
+			},
+		},
+		order: 'desc',
+		cursor: dto.cursor,
+		limit: dto.limit,
+	});
+};
+
+export const getFilteredStoredNotifications = async (userId: string, dto: GetFilteredNotificationsDto) => {
+	return getItems<StoredNotification>({
+		index: 'GSI2',
+		queryExpression: {
+			expression: '#gsi2pk = :gsi2pk and begins_with(#gsi2sk, :gsi2sk)',
+			variables: {
+				':gsi1sk': KeyPrefix.notifications.gsi1pk(userId),
+				':gsi2sk': KeyPrefix.notifications.buildKey(dto.filter),
+			},
+		},
+		order: 'desc',
+		cursor: dto.cursor,
+		limit: dto.limit,
+	});
+};
+
+export const deleteNotification = async (notificationId: string) => {
+	return deleteItem(KeyPrefix.notifications.pk(notificationId), KeyPrefix.notifications.sk(notificationId));
 };

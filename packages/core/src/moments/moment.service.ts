@@ -6,7 +6,7 @@ import { Resource } from 'sst';
 import { EntityType, KeyPrefix } from '../types/dynamo.types';
 import { InfiniteData, getInfiniteData } from '../types/infinite-data.dto';
 import { DatabaseMoment, DatabaseMomentMessage, Moment, MomentMessage } from '../types/moment.types';
-import { dynamo, getDynamicUpdateStatements } from '../utils/dynamo/dynamo.service';
+import { deleteManyItems, dynamo, getDynamicUpdateStatements, getItems } from '../utils/dynamo/dynamo.service';
 import { ContentPaths, StorageClient } from '../utils/s3/s3.service';
 import { chunkArray, getUUID } from '../utils/utils';
 import { attachUrlsToMoment } from './moment.helpers';
@@ -285,40 +285,31 @@ export const deleteMomentMessage = async (id: string): Promise<void> => {
 };
 
 export const deleteMomentDetailsForRelationship = async (relationshipId: string) => {
-	let res: QueryCommandOutput | undefined;
+	let cursor: Record<string, any> | undefined;
 
 	const momentDetails: Moment[] = [];
 	do {
-		res = await dynamo.query({
-			TableName: process.env.TABLE_NAME,
-			IndexName: 'GSI1',
-			KeyConditionExpression: '#pk = :pk',
-			ExpressionAttributeNames: {
-				'#pk': 'gsi1pk',
+		const res = await getItems<Moment>({
+			index: 'GSI1',
+			queryExpression: {
+				expression: '#pk = :pk',
+				variables: {
+					':pk': `${KeyPrefix.MOMENT_DETAILS}${relationshipId}`,
+				},
 			},
-			ExpressionAttributeValues: {
-				':pk': `${KeyPrefix.MOMENT_DETAILS}${relationshipId}`,
-			},
-			ExclusiveStartKey: res?.LastEvaluatedKey,
+			cursor,
 		});
+		cursor = res.nextCursor;
 
-		if (res.Items) momentDetails.push(...res.Items.map(item => item as Moment));
-	} while (res?.LastEvaluatedKey);
+		if (res.data) momentDetails.push(...res.data);
+	} while (cursor);
 
-	chunkArray(momentDetails, 25).forEach(async chunk => {
-		await dynamo.batchWrite({
-			RequestItems: {
-				[process.env.TABLE_NAME!]: chunk.map(record => ({
-					DeleteRequest: {
-						Key: {
-							pk: `${KeyPrefix.MOMENT_DETAILS}${record.id}`,
-							sk: `${KeyPrefix.MOMENT_MESSAGE}${record.id}`,
-						},
-					},
-				})),
-			},
-		});
-	});
+	return deleteManyItems(
+		momentDetails.map(moment => ({
+			pk: `${KeyPrefix.MOMENT_DETAILS}${moment.id}`,
+			sk: `${KeyPrefix.MOMENT_MESSAGE}${moment.id}`,
+		})),
+	);
 };
 
 export const getMomentUploadUrl = async (
