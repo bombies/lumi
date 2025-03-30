@@ -1,7 +1,7 @@
 'use client';
 
 import { Input } from '../input';
-import { useEasyTableGlobals } from './managed-table-provider';
+import { useManagedTableGlobals } from './managed-table-provider';
 
 type Props<T> = {
 	filterKey: keyof T;
@@ -9,7 +9,7 @@ type Props<T> = {
 };
 
 export default function ManagedTableFilterInput<T>({ placeholder, filterKey }: Props<T>) {
-	const { table } = useEasyTableGlobals<T>();
+	const { table } = useManagedTableGlobals<T>();
 	return (
 		<Input
 			placeholder={placeholder}

@@ -1,7 +1,7 @@
 import { FC } from 'react';
 import Link from 'next/link';
 
-import NotificationButton from '@/components/notification-button';
+import NotificationButton from '@/components/notifications/notification-button';
 import { cn } from '@/lib/utils';
 
 type Props = {

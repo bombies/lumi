@@ -1,5 +1,5 @@
-import { DynamoDBClient, DynamoDBClientConfig } from '@aws-sdk/client-dynamodb';
-import { DynamoDBDocument, QueryCommandInput } from '@aws-sdk/lib-dynamodb';
+import { DynamoDBClient, DynamoDBClientConfig, TransactWriteItemsInput, Update } from '@aws-sdk/client-dynamodb';
+import { DynamoDBDocument, QueryCommandInput, UpdateCommandInput } from '@aws-sdk/lib-dynamodb';
 import { TRPCError } from '@trpc/server';
 
 import { Nullable } from '../../types/util.types';
@@ -56,7 +56,7 @@ export function getDynamicUpdateStatements<T extends object = any>(attributes: P
 	};
 }
 
-export async function queryWithPagination<T>(params: QueryCommandInput) {
+export async function queryWithPaginationExhaustion<T>(params: QueryCommandInput) {
 	const results: T[] = [];
 
 	let res = await dynamo.query(params);
@@ -110,6 +110,22 @@ export async function putItem<T extends Record<string, any>, DbType extends T = 
 	return item as T;
 }
 
+export async function getItem<T extends Record<string, any>>(pk: string, sk: string) {
+	const res = await dynamo.get({
+		TableName: process.env.TABLE_NAME,
+		Key: { pk, sk },
+	});
+
+	if (res.$metadata.httpStatusCode !== 200)
+		throw new TRPCError({
+			code: 'INTERNAL_SERVER_ERROR',
+			message: 'Failed to fetch item',
+		});
+
+	if (!res.Item) return null;
+	return res.Item as T;
+}
+
 type GetItemsParams<T> = {
 	index?: 'GSI1' | 'GSI2' | 'GSI3' | 'GSI4';
 	order?: 'asc' | 'desc';
@@ -133,6 +149,11 @@ type GetItemsParams<T> = {
 			variables: Record<string, any>;
 		};
 	};
+	/**
+	 * This determines whether the function should keep fetching until the LastEvaluatedKey
+	 * ends up being undefined.
+	 */
+	exhaustive?: boolean;
 };
 
 export async function getItems<T extends Record<string, any>>({
@@ -142,12 +163,12 @@ export async function getItems<T extends Record<string, any>>({
 	limit,
 	queryExpression,
 	projectedAttributes,
+	exhaustive,
 }: GetItemsParams<T>) {
 	const keyNames = queryExpression.expression.match(/#(\w+)/g)?.map(key => key.slice(1));
 	const filterKeyNames = queryExpression.filter?.expression.match(/#(\w+)/g)?.map(key => key.slice(1));
 	const { projectionExpression, projectionExpressionNames } = useProjection(projectedAttributes ?? []);
-
-	const res = await dynamo.query({
+	const params: QueryCommandInput = {
 		TableName: process.env.TABLE_NAME,
 		IndexName: index,
 		KeyConditionExpression: queryExpression.expression,
@@ -162,36 +183,47 @@ export async function getItems<T extends Record<string, any>>({
 		ExclusiveStartKey: cursor,
 		Limit: limit,
 		ScanIndexForward: order === 'asc',
-	});
+	};
 
-	if (res.$metadata.httpStatusCode !== 200)
-		throw new TRPCError({
-			code: 'INTERNAL_SERVER_ERROR',
-			message: 'Failed to fetch items',
-		});
+	if (exhaustive) {
+		const data = await queryWithPaginationExhaustion<T>(params);
+		return { data, nextCursor: undefined };
+	} else {
+		const res = await dynamo.query(params);
 
-	return { data: res.Items as T[] | undefined, nextCursor: res.LastEvaluatedKey };
+		if (res.$metadata.httpStatusCode !== 200)
+			throw new TRPCError({
+				code: 'INTERNAL_SERVER_ERROR',
+				message: 'Failed to fetch items',
+			});
+
+		return { data: (res.Items ?? []) as T[], nextCursor: res.LastEvaluatedKey };
+	}
 }
 
 type UpdateItemParams<T> = {
 	pk: string;
-	sk?: string;
+	sk: string;
 	update: Partial<T>;
 };
 
-export async function updateItem<T extends Record<string, any>>({ pk, sk, update }: UpdateItemParams<T>) {
+function getUpdateParams<T extends Record<string, any>>({ pk, sk, update }: UpdateItemParams<T>): UpdateCommandInput {
 	const { updateStatements, expressionAttributeValues, expressionAttributeNames } =
 		getDynamicUpdateStatements<T>(update);
 
-	const res = await dynamo.update({
+	return {
 		TableName: process.env.TABLE_NAME,
 		Key: { pk, sk },
 		UpdateExpression: updateStatements,
 		ExpressionAttributeValues: expressionAttributeValues,
 		ExpressionAttributeNames: expressionAttributeNames,
 		ReturnValues: 'ALL_NEW',
-	});
+	};
+}
 
+export async function updateItem<T extends Record<string, any>>({ pk, sk, update }: UpdateItemParams<T>) {
+	const updateParams = getUpdateParams({ pk, sk, update });
+	const res = await dynamo.update(updateParams);
 	if (res.$metadata.httpStatusCode !== 200)
 		throw new TRPCError({
 			code: 'INTERNAL_SERVER_ERROR',
@@ -199,6 +231,23 @@ export async function updateItem<T extends Record<string, any>>({ pk, sk, update
 		});
 
 	return res.Attributes as T;
+}
+
+export async function updateMany<T extends Record<string, any>>(items: UpdateItemParams<T>[]) {
+	const requestParams = items.map<NonNullable<TransactWriteItemsInput['TransactItems']>[0]>(item => {
+		const params = getUpdateParams(item);
+		return { Update: params as Update };
+	});
+
+	return Promise.all(
+		// `TransactWriteItems` can group up to 100 action requests, but we're setting a soft limit of 75
+		// to prevent any case where the aggregate size of the requests exceeds the 4MB limit.
+		chunkArray(requestParams, 75).map(chunk =>
+			dynamo.transactWrite({
+				TransactItems: chunk,
+			}),
+		),
+	);
 }
 
 export async function deleteItem(pk: string, sk: string) {

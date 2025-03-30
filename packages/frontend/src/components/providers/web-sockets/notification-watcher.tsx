@@ -4,19 +4,31 @@ import { FC, useEffect } from 'react';
 import { InferredWebSocketMessagePayload } from '@lumi/core/types/websockets.types';
 import { toast } from 'sonner';
 
+import { StoreNotification } from '@/hooks/trpc/notification-hooks';
 import { GetSelfUserOnDemand } from '@/hooks/trpc/user-hooks';
 import { useWebSocket } from './web-socket-provider';
 
 const NotificationWatcher: FC = () => {
 	const { addEventHandler, removeEventHandler } = useWebSocket();
 	const { mutateAsync: getSelf } = GetSelfUserOnDemand();
+	const { mutateAsync: storeNotification } = StoreNotification();
 
 	useEffect(() => {
 		const handleNotification = async (payload: InferredWebSocketMessagePayload<'notification'>) => {
 			const self = await getSelf();
 			if (!self) return;
 
-			if (self.status === 'online') toast.info(payload.message.content);
+			if (self.status === 'online') {
+				toast.info(payload.message.title, {
+					description: payload.message.content,
+				});
+				await storeNotification({
+					title: payload.message.title,
+					content: payload.message.content,
+					read: true,
+					openUrl: payload.openUrl,
+				});
+			}
 		};
 
 		addEventHandler('notification', handleNotification);
@@ -24,7 +36,7 @@ const NotificationWatcher: FC = () => {
 		return () => {
 			removeEventHandler('notification', handleNotification);
 		};
-	}, [addEventHandler, getSelf, removeEventHandler]);
+	}, [addEventHandler, getSelf, removeEventHandler, storeNotification]);
 
 	return <></>;
 };

@@ -26,12 +26,13 @@ const Providers: FC<ProvidersProps> = ({ children }) => {
 							toastOptions={{
 								unstyled: true,
 								classNames: {
-									toast: 'rounded-lg border border-b bg-primary/10 backdrop-blur-md antialiased p-4 flex gap-4 items-center',
-									title: '',
+									toast: 'rounded-lg border border-b bg-primary/10 backdrop-blur-md antialiased p-4 flex gap-2 items-center',
+									title: 'font-bold',
 									description: 'text-foreground',
 									actionButton: buttonVariants({ variant: 'default' }),
 									cancelButton: buttonVariants({ variant: 'destructive' }),
 									closeButton: '',
+									icon: 'size-[18px] text-accent relative flex self-start',
 								},
 							}}
 						/>

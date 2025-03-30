@@ -32,7 +32,6 @@ declare module "sst" {
     }
     "Frontend": {
       "type": "sst.aws.Nextjs"
-      "url": string
     }
     "MailerHost": {
       "type": "sst.sst.Secret"

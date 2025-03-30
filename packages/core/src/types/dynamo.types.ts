@@ -64,6 +64,20 @@ class NotificationDbKeys extends AbstractDbKeys {
 	}
 }
 
+class UnreadNotificationDbKeys extends AbstractDbKeys {
+	constructor(prefix: string) {
+		super(prefix);
+	}
+
+	pk(userId: string) {
+		return this.buildKey(userId);
+	}
+
+	sk(userId: string) {
+		return this.buildKey(userId);
+	}
+}
+
 export class KeyPrefix {
 	static USER = 'user#' as const;
 	static USER_NAME = 'user#username' as const;
@@ -80,12 +94,14 @@ export class KeyPrefix {
 	static NOTIFICATION_SUBSCRIBER = 'notification::subscriber#' as const;
 	static WEBSOCKET_HEARTBEAT = 'ws::heartbeat#' as const;
 	static NOTIFICATION = 'notification#' as const;
+	static UNREAD_NOTIFICATION_COUNT = 'unread::notification::count#' as const;
 
 	private constructor() {}
 
 	static affirmation = new AffirmationDbKeys(this.AFFIRMATION);
 	static receivedAffirmation = new ReceivedAffirmationDbKeys(this.RECEIVED_AFFIRMATION);
 	static notifications = new NotificationDbKeys(this.NOTIFICATION);
+	static unreadNotificationCount = new UnreadNotificationDbKeys(this.UNREAD_NOTIFICATION_COUNT);
 }
 
 export enum EntityType {
@@ -99,4 +115,5 @@ export enum EntityType {
 	NOTIFICATION_SUBSCRIBER = 'NOTIFICATION_SUBSCRIBER',
 	WEBSOCKET_HEARTBEAT = 'WEBSOCKET_HEARTBEAT',
 	NOTIFICATION = 'NOTIFICATION',
+	UNREAD_NOTIFICATION_COUNT = 'UNREAD_NOTIFICATION_COUNT',
 }

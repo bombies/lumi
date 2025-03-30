@@ -1,7 +1,8 @@
 self.addEventListener('push', function (event) {
 	if (event.data) {
 		const data = event.data.json();
-		const { openUrl, ...body } = data.body;
+		console.log('Received push data', data);
+		const { openUrl, body } = data;
 		const options = {
 			body,
 			icon: data.icon || 'favicon-96x96.png',

@@ -1,7 +1,7 @@
 import { PushSubscription } from 'web-push';
 import { z } from 'zod';
 
-import { notificationSchema } from '../notifications/notification.dto';
+import { notificationSchema, unreadNotificationCountSchema } from '../notifications/notification.dto';
 import { EntityType } from './dynamo.types';
 
 export type NotificationSubscriber = {
@@ -25,4 +25,12 @@ export type DatabaseStoredNotification = StoredNotification & {
 	gsi2pk: string;
 	gsi2sk: string;
 	entityType: EntityType.NOTIFICATION;
+};
+
+export type UnreadNotificationCount = z.infer<typeof unreadNotificationCountSchema>;
+
+export type DatabaseUnreadNotificationCount = UnreadNotificationCount & {
+	pk: string;
+	sk: string;
+	entityType: EntityType.UNREAD_NOTIFICATION_COUNT;
 };
