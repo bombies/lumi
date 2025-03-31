@@ -102,6 +102,7 @@ export const sendNotification = async ({
 		title: string;
 		body: string;
 		openUrl?: string;
+		metadata?: Record<string, any>;
 	};
 	opts?: {
 		offlineWebSocketMessage?: {
@@ -158,6 +159,12 @@ export const sendNotification = async ({
 					console.error('Could not send the notifcation to a subscriber!', e);
 				}
 			}
+
+			await storeNotification(user.id, {
+				title: payload.title,
+				content: payload.body,
+				openUrl: payload.openUrl,
+			});
 		} else {
 			if (!opts?.offlineWebSocketMessage)
 				return console.log(`User ${user.username} is online... Skipping websocket notification`);
@@ -178,6 +185,7 @@ export const sendNotification = async ({
 						title: payload.title,
 						content: payload.body,
 					},
+					metadata: payload.metadata,
 				},
 				source: 'server',
 			});

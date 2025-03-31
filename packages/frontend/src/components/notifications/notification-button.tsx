@@ -17,7 +17,7 @@ const NotificationButton: FC = () => {
 		data: notificationPages,
 		isLoading: pagesLoading,
 		hasNextPage: hasMoreNotifications,
-	} = GetNotifications({ limit: 10 });
+	} = GetNotifications({ limit: 10, filter: 'unread' });
 	const { data: unreadNotificationCount } = GetUnreadNotificationCount();
 
 	const notificationPreviews = useMemo(
@@ -48,33 +48,31 @@ const NotificationButton: FC = () => {
 			<PopoverContent className="w-96 max-h-[50vh] laptop:max-h-[35rem] flex flex-col gap-y-2">
 				<h1 className="font-bold text-xl">Notifications</h1>
 				<Separator />
-				{pagesLoading ? (
-					<>
-						<NotificationPreviewSkeleton />
-						<NotificationPreviewSkeleton />
-						<NotificationPreviewSkeleton />
-						<NotificationPreviewSkeleton />
-						<NotificationPreviewSkeleton />
-						<NotificationPreviewSkeleton />
-						<NotificationPreviewSkeleton />
-						<NotificationPreviewSkeleton />
-						<NotificationPreviewSkeleton />
-						<NotificationPreviewSkeleton />
-					</>
-				) : notificationPreviews?.length ? (
-					<div className="overflow-y-auto space-y-2">
-						<div>{notificationPreviews}</div>
-						{hasMoreNotifications && (
-							<Link href="/notifications">
-								<Button className="w-full h-10" variant="default:flat">
-									<InboxIcon /> View More Notifications
-								</Button>
-							</Link>
-						)}
-					</div>
-				) : (
-					<p>You have no notifications.</p>
-				)}
+				<div className="overflow-y-auto space-y-2">
+					{pagesLoading ? (
+						<>
+							<NotificationPreviewSkeleton />
+							<NotificationPreviewSkeleton />
+							<NotificationPreviewSkeleton />
+							<NotificationPreviewSkeleton />
+							<NotificationPreviewSkeleton />
+							<NotificationPreviewSkeleton />
+							<NotificationPreviewSkeleton />
+							<NotificationPreviewSkeleton />
+							<NotificationPreviewSkeleton />
+							<NotificationPreviewSkeleton />
+						</>
+					) : notificationPreviews?.length ? (
+						notificationPreviews
+					) : (
+						<p>You have no new notifications.</p>
+					)}
+					<Link href="/notifications">
+						<Button className="w-full h-10" variant="default:flat">
+							<InboxIcon /> View All Notifications
+						</Button>
+					</Link>
+				</div>
 			</PopoverContent>
 		</Popover>
 	);

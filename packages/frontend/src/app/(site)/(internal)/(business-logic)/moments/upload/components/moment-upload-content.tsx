@@ -8,6 +8,7 @@ import MediaThemeInstaplay from 'player.style/instaplay/react';
 import { SubmitHandler } from 'react-hook-form';
 import { z } from 'zod';
 
+import { useRelationship } from '@/components/providers/relationships/relationship-provder';
 import { Button } from '@/components/ui/button';
 import { MegaBytes } from '@/components/ui/file-upload/file-size';
 import FileUpload from '@/components/ui/file-upload/file-upload';
@@ -28,6 +29,7 @@ const momentFormDetailsSchema = z.object({
 type MomentFormDetailsSchema = z.infer<typeof momentFormDetailsSchema>;
 
 const MomentUploadContent: FC = () => {
+	const { self, sendNotificationToPartner } = useRelationship();
 	const [momentFile, setMomentFile] = useState<File>();
 	const [isUploading, setIsUploading] = useState(false);
 	const {
@@ -61,6 +63,12 @@ const MomentUploadContent: FC = () => {
 					objectKey: fileName,
 				});
 
+				await sendNotificationToPartner({
+					title: '📽️ New Moment Shared',
+					content: `${self?.firstName} has shared a new moment with you titled: ${momentDetails.title}`,
+					openUrl: `/moments/${momentDetails.id}`,
+				});
+
 				// Handle success
 				router.push(`/moments/${momentDetails.id}`);
 			} catch (e) {
@@ -71,7 +79,7 @@ const MomentUploadContent: FC = () => {
 				setIsUploading(false);
 			}
 		},
-		[createMomentDetails, momentFile, router, uploadMoment],
+		[createMomentDetails, momentFile, router, self?.firstName, sendNotificationToPartner, uploadMoment],
 	);
 
 	return !momentFile ? (

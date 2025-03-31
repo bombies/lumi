@@ -64,6 +64,7 @@ export type WebSocketMessageMap = {
 				title: string;
 				content: string;
 			};
+			metadata?: Record<string, any>;
 		}
 	>;
 };
