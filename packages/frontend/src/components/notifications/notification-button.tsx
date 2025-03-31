@@ -13,11 +13,7 @@ import NotificationPreview from './notification-preview';
 import NotificationPreviewSkeleton from './notification-preview-skeleton';
 
 const NotificationButton: FC = () => {
-	const {
-		data: notificationPages,
-		isLoading: pagesLoading,
-		hasNextPage: hasMoreNotifications,
-	} = GetNotifications({ limit: 10, filter: 'unread' });
+	const { data: notificationPages, isLoading: pagesLoading } = GetNotifications({ limit: 10, filter: 'unread' });
 	const { data: unreadNotificationCount } = GetUnreadNotificationCount();
 
 	const notificationPreviews = useMemo(
