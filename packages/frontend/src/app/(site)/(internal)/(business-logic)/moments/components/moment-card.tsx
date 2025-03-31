@@ -23,7 +23,7 @@ const MomentCard: FC<Props> = ({ moment, className }) => {
 					<CardTitle hidden>{moment.title}</CardTitle>
 					<Image src={moment.thumbnailUrl} alt={moment.title} className="h-full" fill objectFit="cover" />
 					<div className="absolute bottom-0 w-full max-h-[45%] p-4 bg-foreground/50 backdrop-blur-md text-background space-y-2">
-						<h6 className="text-xl font-bold line-clamp-1">{moment.title}</h6>
+						<h6 className="text-xl font-bold line-clamp-2">{moment.title}</h6>
 						{moment.description && <p className="line-clamp-2">{moment.description}</p>}
 
 						<div className="flex gap-2">

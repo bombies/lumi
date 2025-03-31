@@ -13,9 +13,9 @@ export const CreateMomentDetails = () =>
 		},
 	});
 export const GetMomentDetails = (momentId: string) => trpc.moments.getMomentDetails.useQuery(momentId);
-export const GetMoments = (userId?: string) =>
+export const GetMoments = (userId?: string, args?: { limit?: number }) =>
 	trpc.moments.getMoments.useInfiniteQuery(
-		{ userId },
+		{ userId, limit: args?.limit },
 		{
 			getNextPageParam: lastPage => lastPage.cursor,
 		},

@@ -4,6 +4,7 @@ import { getUserById } from '@lumi/core/users/users.service';
 
 import { requireRelationship } from '@/lib/actions/requireRelationship';
 import { getUserBySession } from '@/lib/server-utils';
+import MomentsWidget from './moments-widget';
 
 const HomePage: FC = async () => {
 	const relationship = await requireRelationship();
@@ -16,13 +17,17 @@ const HomePage: FC = async () => {
 
 	return (
 		<>
-			<div>
-				<h1 className="font-bold text-5xl">
-					hey <span className="text-primary">{user.firstName}</span>
-				</h1>
-				<h3 className="text-2xl font-light max-w-[60vw] tablet:max-w-xs">
-					welcome back to your space with <span className="text-primary font-bold">{partner?.firstName}</span>
-				</h3>
+			<div className="space-y-6">
+				<div>
+					<h1 className="font-bold text-5xl">
+						hey <span className="text-primary">{user.firstName}</span>
+					</h1>
+					<h3 className="text-2xl font-light max-w-[60vw] tablet:max-w-xs">
+						welcome back to your space with{' '}
+						<span className="text-primary font-bold">{partner?.firstName}</span>
+					</h3>
+				</div>
+				<MomentsWidget />
 			</div>
 		</>
 	);
