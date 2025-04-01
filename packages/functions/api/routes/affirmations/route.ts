@@ -9,6 +9,7 @@ import {
 	getAffirmationById,
 	getOwnedAffirmationsForUser,
 	getReceivedAffirmations,
+	getTodaysReceivedAffirmations,
 	updateAffirmation,
 } from '@lumi/core/affirmations/affirmations.service';
 import { z } from 'zod';
@@ -50,4 +51,8 @@ export const affirmationsRouter = router({
 	getReceivedAffirmations: relationshipProcedure
 		.input(getReceivedAffirmationsDto)
 		.query(({ input, ctx: { user, relationship } }) => getReceivedAffirmations(user.id, relationship.id, input)),
+
+	getTodaysReceivedAffirmations: relationshipProcedure.query(({ ctx: { user, relationship } }) =>
+		getTodaysReceivedAffirmations(user.id, relationship.id),
+	),
 });

@@ -16,7 +16,7 @@ import {
 	AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
-import { DeleteAffirmation } from '../../hooks';
+import { DeleteAffirmation } from '@/hooks/trpc/affirmation-hooks';
 
 type Props = {
 	affirmation: Affirmation;

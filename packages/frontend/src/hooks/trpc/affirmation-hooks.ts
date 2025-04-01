@@ -8,11 +8,13 @@ export const GetReceivedAffirmations = () =>
 	trpc.affirmations.getReceivedAffirmations.useInfiniteQuery(
 		{},
 		{
-			getNextPageParam: lastPage => lastPage.cursor,
+			getNextPageParam: lastPage => lastPage.nextCursor,
 		},
 	);
 
 export const GetOwnedAffirmations = () => trpc.affirmations.getAffirmations.useQuery();
+
+export const GetTodaysAffirmations = () => trpc.affirmations.getTodaysReceivedAffirmations.useQuery();
 
 export const CreateAffirmation = () => {
 	const invalidateRoutes = useRouteInvalidation([trpc.affirmations.getAffirmations]);

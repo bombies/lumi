@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import EasyForm from '@/components/ui/form-extras/easy-form';
 import EasyFormField from '@/components/ui/form-extras/easy-form-field';
 import { Textarea } from '@/components/ui/textarea';
-import { CreateAffirmation } from '../../hooks';
+import { CreateAffirmation } from '@/hooks/trpc/affirmation-hooks';
 
 const affirmationFormSchema = z.object({
 	affirmation: z.string().min(1).max(150),

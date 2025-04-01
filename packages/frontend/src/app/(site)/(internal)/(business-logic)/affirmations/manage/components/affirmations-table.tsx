@@ -5,7 +5,7 @@ import { Affirmation } from '@lumi/core/types/affirmations.types';
 
 import ManagedTable from '@/components/ui/table/managed-table';
 import ManagedTableHeader from '@/components/ui/table/managed-table-header';
-import { GetOwnedAffirmations } from '../../hooks';
+import { GetOwnedAffirmations } from '@/hooks/trpc/affirmation-hooks';
 import AddAffirmationButton from './add-affirmation-button';
 import DeleteAffirmationButton from './delete-affirmation-button';
 import EditAffirmationButton from './edit-affirmation-button';
@@ -16,7 +16,7 @@ export const AffirmationsTable: FC = () => {
 	return (
 		<ManagedTable
 			loading={affirmationsLoading}
-			items={affirmations ?? []}
+			items={affirmations?.data ?? []}
 			className="tablet:max-w-[45rem]"
 			header={<AddAffirmationButton />}
 			columns={[

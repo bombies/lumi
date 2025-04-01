@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import EasyForm from '@/components/ui/form-extras/easy-form';
 import EasyFormField from '@/components/ui/form-extras/easy-form-field';
 import { Textarea } from '@/components/ui/textarea';
-import { UpdateAffirmation } from '../../hooks';
+import { UpdateAffirmation } from '@/hooks/trpc/affirmation-hooks';
 
 type Props = {
 	affirmation: Affirmation;

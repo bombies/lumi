@@ -4,7 +4,8 @@ import { getUserById } from '@lumi/core/users/users.service';
 
 import { requireRelationship } from '@/lib/actions/requireRelationship';
 import { getUserBySession } from '@/lib/server-utils';
-import MomentsWidget from './moments-widget';
+import AffirmationWidget from './widgets/affirmation-widget';
+import MomentsWidget from './widgets/moments-widget';
 
 const HomePage: FC = async () => {
 	const relationship = await requireRelationship();
@@ -27,6 +28,7 @@ const HomePage: FC = async () => {
 						<span className="text-primary font-bold">{partner?.firstName}</span>
 					</h3>
 				</div>
+				<AffirmationWidget />
 				<MomentsWidget />
 			</div>
 		</>

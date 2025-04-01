@@ -6,8 +6,8 @@ import { VideoCameraIcon } from '@heroicons/react/24/solid';
 
 import { Button } from '@/components/ui/button';
 import { GetMoments } from '@/hooks/trpc/moment-hooks';
-import MomentCard from '../moments/components/moment-card';
-import MomentCardSkeleton from '../moments/components/moment-card-skeleton';
+import MomentCard from '../../moments/components/moment-card';
+import MomentCardSkeleton from '../../moments/components/moment-card-skeleton';
 
 const MomentsWidget: FC = () => {
 	const {
