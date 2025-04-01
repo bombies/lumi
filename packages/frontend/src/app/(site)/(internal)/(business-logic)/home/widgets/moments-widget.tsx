@@ -6,6 +6,7 @@ import { VideoCameraIcon } from '@heroicons/react/24/solid';
 
 import { Button } from '@/components/ui/button';
 import { GetMoments } from '@/hooks/trpc/moment-hooks';
+import { cn } from '@/lib/utils';
 import MomentCard from '../../moments/components/moment-card';
 import MomentCardSkeleton from '../../moments/components/moment-card-skeleton';
 
@@ -21,7 +22,15 @@ const MomentsWidget: FC = () => {
 	const moments = useMemo(
 		() =>
 			momentPages?.pages.flatMap(page =>
-				page.data.map(moment => <MomentCard key={moment.id} moment={moment} className="h-80" />),
+				page.data.map((moment, idx, data) => (
+					<MomentCard
+						key={moment.id}
+						moment={moment}
+						linkClassName={cn((idx + 1) % 2 !== 0 && !data[idx + 1] && 'col-span-2')}
+						className={cn('h-80')}
+						compactUploaderDisplay
+					/>
+				)),
 			),
 		[momentPages?.pages],
 	);

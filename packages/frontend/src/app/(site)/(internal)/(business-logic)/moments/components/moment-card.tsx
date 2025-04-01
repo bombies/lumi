@@ -11,15 +11,22 @@ import { cn } from '@/lib/utils';
 
 type Props = {
 	moment: Moment;
+	linkClassName?: string;
 	className?: string;
+	compactUploaderDisplay?: boolean;
 };
 
-const MomentCard: FC<Props> = ({ moment, className }) => {
+const MomentCard: FC<Props> = ({ moment, linkClassName, className, compactUploaderDisplay }) => {
 	const { data: uploader, isLoading: uploaderLoading } = GetUserByIdSafe(moment.userId);
 	return (
-		<Link href={`/moments/${moment.id}`}>
-			<Card className={cn('p-0 m-0 rounded-md border border-border overflow-hidden cursor-pointer', className)}>
-				<CardContent className="p-0 m-0 h-96 phone-big:h-[36rem] relative">
+		<Link className={linkClassName} href={`/moments/${moment.id}`}>
+			<Card
+				className={cn(
+					'p-0 m-0 h-96 phone-big:h-[36rem] relative rounded-md border border-border overflow-hidden cursor-pointer',
+					className,
+				)}
+			>
+				<CardContent className="p-0 m-0 h-full w-full">
 					<CardTitle hidden>{moment.title}</CardTitle>
 					<Image src={moment.thumbnailUrl} alt={moment.title} className="h-full" fill objectFit="cover" />
 					<div className="absolute bottom-0 w-full max-h-[45%] p-4 bg-foreground/50 backdrop-blur-md text-background space-y-2">
@@ -27,12 +34,14 @@ const MomentCard: FC<Props> = ({ moment, className }) => {
 						{moment.description && <p className="line-clamp-2">{moment.description}</p>}
 
 						<div className="flex gap-2">
-							<UserAvatar
-								user={uploader}
-								loading={uploaderLoading}
-								hideStatus
-								className="size-8 border-2 border-background"
-							/>
+							{!compactUploaderDisplay ? (
+								<UserAvatar
+									user={uploader}
+									loading={uploaderLoading}
+									hideStatus
+									className="size-8 border-2 border-background"
+								/>
+							) : undefined}
 							{uploaderLoading ? (
 								<Skeleton className="w-20 h-4" />
 							) : (
