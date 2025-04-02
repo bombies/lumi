@@ -13,13 +13,33 @@ export const CreateMomentDetails = () =>
 		},
 	});
 export const GetMomentDetails = (momentId: string) => trpc.moments.getMomentDetails.useQuery(momentId);
-export const GetMoments = (userId?: string, args?: { limit?: number }) =>
-	trpc.moments.getMoments.useInfiniteQuery(
-		{ userId, limit: args?.limit },
+
+export const SearchMoments = (
+	title: string,
+	args?: {
+		limit?: number;
+		order?: 'asc' | 'desc';
+	},
+) =>
+	trpc.moments.searchMoments.useInfiniteQuery(
 		{
-			getNextPageParam: lastPage => lastPage.cursor,
+			title,
+			...args,
+		},
+		{
+			getNextPageParam: lastPage => lastPage.nextCursor,
 		},
 	);
+
+export const GetMoments = (userId?: string, args?: { limit?: number; order?: 'asc' | 'desc'; search?: string }) =>
+	args?.search
+		? SearchMoments(args.search, { limit: args.limit, order: args.order })
+		: trpc.moments.getMoments.useInfiniteQuery(
+				{ userId, limit: args?.limit },
+				{
+					getNextPageParam: lastPage => lastPage.cursor,
+				},
+			);
 
 export const UpdateMomentDetails = () => {
 	const invalidateRoutes = useRouteInvalidation([trpc.moments.getMomentDetails]);

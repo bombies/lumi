@@ -9,6 +9,7 @@ import {
 	getMomentUploadUrl,
 	getMomentsForRelationship,
 	getMomentsForUser,
+	searchMomentsByTitle,
 	updateMomentDetails,
 } from '@lumi/core/moments/moment.service';
 import {
@@ -17,6 +18,7 @@ import {
 	getInfiniteMomentMessagesDto,
 	getInfiniteMomentsDto,
 	getMomentUploadUrlDto,
+	searchMomentsByTitleDto,
 	updateMomentDetailsDto,
 } from '@lumi/core/moments/moments.dto';
 import { extractPartnerIdFromRelationship } from '@lumi/core/utils/global-utils';
@@ -60,6 +62,10 @@ export const momentsRouter = router({
 				return getMomentsForUser(userId, input);
 			}
 		}),
+
+	searchMoments: relationshipProcedure
+		.input(searchMomentsByTitleDto)
+		.query(async ({ input, ctx: { relationship } }) => searchMomentsByTitle(relationship.id, input)),
 
 	updateMomentDetails: relationshipProcedure
 		.input(

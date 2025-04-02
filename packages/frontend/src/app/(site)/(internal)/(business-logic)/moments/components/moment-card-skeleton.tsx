@@ -11,11 +11,11 @@ const MomentCardSkeleton: FC<Props> = ({ className }) => {
 	return (
 		<div
 			className={cn(
-				'rounded-md border border-border bg-neutral-300 h-96 phone-big:h-[36rem] overflow-hidden relative',
+				'rounded-md border border-border bg-neutral-300 dark:bg-neutral-700 h-96 phone-big:h-[36rem] overflow-hidden relative',
 				className,
 			)}
 		>
-			<div className="absolute bottom-0 w-full max-h-[45%] p-4 bg-neutral-500/50 backdrop-blur-md space-y-2">
+			<div className="absolute bottom-0 w-full max-h-[45%] p-4 bg-neutral-500/50 dark:bg-neutral-800 backdrop-blur-md space-y-2">
 				<Skeleton className="w-1/2 h-4 bg-neutral-200" />
 				<Skeleton className="w-3/4 h-2 bg-neutral-200" />
 				<div className="flex gap-2 items-center">

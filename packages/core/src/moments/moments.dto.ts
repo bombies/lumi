@@ -5,6 +5,7 @@ import { getUploadUrlDto } from '../types/upload.dto';
 
 export const momentSchema = z.object({
 	title: z.string().min(0).max(90),
+	normalizedTitle: z.string(),
 	description: z.string().min(0).max(1024).optional(),
 	objectKey: z.string(),
 	thumbnailObjectKey: z.string().optional(),
@@ -17,7 +18,7 @@ export const momentMessageSchema = z.object({
 	repliedTo: z.string().uuid().optional(),
 });
 
-export const createMomentDetailsDto = momentSchema;
+export const createMomentDetailsDto = momentSchema.omit({ normalizedTitle: true });
 export const updateMomentDetailsDto = momentSchema
 	.omit({
 		objectKey: true,
@@ -50,9 +51,16 @@ export const createMomentMessageDto = momentMessageSchema
 
 export const getMomentUploadUrlDto = getUploadUrlDto;
 
+export const searchMomentsByTitleDto = getInfiniteMomentsDto.and(
+	z.object({
+		title: z.string(),
+	}),
+);
+
 export type CreateMomentDetailsDto = z.infer<typeof createMomentDetailsDto>;
 export type GetInfiniteMomentsDto = z.infer<typeof getInfiniteMomentsDto>;
 export type UpdateMomentDetailsDto = z.infer<typeof updateMomentDetailsDto>;
 export type CreateMomentMessageDto = z.infer<typeof createMomentMessageDto>;
 export type GetInfiniteMomentMessagesDto = z.infer<typeof getInfiniteMomentMessagesDto>;
 export type GetMomentUploadUrlDto = z.infer<typeof getMomentUploadUrlDto>;
+export type SearchMomentsByTitleDto = z.infer<typeof searchMomentsByTitleDto>;

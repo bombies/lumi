@@ -78,6 +78,36 @@ class UnreadNotificationDbKeys extends AbstractDbKeys {
 	}
 }
 
+class MomentDbKeys extends AbstractDbKeys {
+	constructor(prefix: string) {
+		super(prefix);
+	}
+
+	pk(momentId: string) {
+		return this.buildKey(momentId);
+	}
+
+	sk(momentId: string) {
+		return this.buildKey(momentId);
+	}
+
+	gsi1pk(relationshipId: string) {
+		return this.buildKey(relationshipId);
+	}
+
+	gsi1sk(timestamp: string) {
+		return this.buildKey(timestamp);
+	}
+
+	gsi2pk(userId: string) {
+		return this.buildKey(userId);
+	}
+
+	gsi2sk(timestamp: string) {
+		return this.buildKey(timestamp);
+	}
+}
+
 export class KeyPrefix {
 	static USER = 'user#' as const;
 	static USER_NAME = 'user#username' as const;
@@ -102,6 +132,7 @@ export class KeyPrefix {
 	static receivedAffirmation = new ReceivedAffirmationDbKeys(this.RECEIVED_AFFIRMATION);
 	static notifications = new NotificationDbKeys(this.NOTIFICATION);
 	static unreadNotificationCount = new UnreadNotificationDbKeys(this.UNREAD_NOTIFICATION_COUNT);
+	static moments = new MomentDbKeys(this.MOMENT_DETAILS);
 }
 
 export enum EntityType {

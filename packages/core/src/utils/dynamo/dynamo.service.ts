@@ -154,6 +154,7 @@ type GetItemsParams<T> = {
 	 * ends up being undefined.
 	 */
 	exhaustive?: boolean;
+	mapper?: (item: T) => T | Promise<T>;
 };
 
 export async function getItems<T extends Record<string, any>>({
@@ -164,6 +165,7 @@ export async function getItems<T extends Record<string, any>>({
 	queryExpression,
 	projectedAttributes,
 	exhaustive,
+	mapper,
 }: GetItemsParams<T>) {
 	const keyNames = queryExpression.expression.match(/#(\w+)/g)?.map(key => key.slice(1));
 	const filterKeyNames = queryExpression.filter?.expression.match(/#(\w+)/g)?.map(key => key.slice(1));
@@ -186,7 +188,8 @@ export async function getItems<T extends Record<string, any>>({
 	};
 
 	if (exhaustive) {
-		const data = await queryWithPaginationExhaustion<T>(params);
+		let data = await queryWithPaginationExhaustion<T>(params);
+		if (mapper) data = await Promise.all(data.map(mapper));
 		return { data, nextCursor: undefined };
 	} else {
 		const res = await dynamo.query(params);
@@ -197,7 +200,9 @@ export async function getItems<T extends Record<string, any>>({
 				message: 'Failed to fetch items',
 			});
 
-		return { data: (res.Items ?? []) as T[], nextCursor: res.LastEvaluatedKey };
+		let data = (res.Items ?? []) as T[];
+		if (mapper) data = await Promise.all(data.map(mapper));
+		return { data, nextCursor: res.LastEvaluatedKey };
 	}
 }
 

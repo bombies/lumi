@@ -91,7 +91,7 @@ const MomentUploadContent: FC = () => {
 				disabled={momentUploading}
 				onLocalUploadSuccess={file => setMomentFile(file)}
 				maxFileSize={MegaBytes.from(250)}
-				maxVideoDuration={20}
+				maxVideoDuration={60}
 			>
 				{ref => (
 					<button

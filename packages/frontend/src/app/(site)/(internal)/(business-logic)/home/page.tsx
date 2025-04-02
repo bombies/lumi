@@ -2,7 +2,7 @@ import { FC } from 'react';
 import { redirect } from 'next/navigation';
 import { getUserById } from '@lumi/core/users/users.service';
 
-import Image from '@/components/ui/image';
+import { Separator } from '@/components/ui/separator';
 import { requireRelationship } from '@/lib/actions/requireRelationship';
 import { getUserBySession } from '@/lib/server-utils';
 import AffirmationWidget from './widgets/affirmation-widget';
@@ -20,18 +20,20 @@ const HomePage: FC = async () => {
 
 	return (
 		<>
-			<div className="space-y-6">
+			<div className="space-y-6 laptop:space-y-12 max-w-[45rem]">
 				<div>
 					<h1 className="font-bold text-5xl">
 						hey <span className="text-primary">{user.firstName}</span>
 					</h1>
-					<h3 className="text-2xl font-light max-w-[60vw] tablet:max-w-xs">
+					<h3 className="text-2xl font-light tablet:max-w-xs">
 						welcome back to your space with{' '}
 						<span className="text-primary font-bold">{partner?.firstName}</span>
 					</h3>
 				</div>
 				<AffirmationWidget />
+				<Separator />
 				<MomentsWidget />
+				<Separator />
 				<MusicWidget />
 			</div>
 		</>

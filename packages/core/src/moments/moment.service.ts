@@ -1,4 +1,3 @@
-import { QueryCommandInput, QueryCommandOutput } from '@aws-sdk/lib-dynamodb';
 import { TRPCError } from '@trpc/server';
 import mime from 'mime';
 import { Resource } from 'sst';
@@ -6,9 +5,9 @@ import { Resource } from 'sst';
 import { EntityType, KeyPrefix } from '../types/dynamo.types';
 import { InfiniteData, getInfiniteData } from '../types/infinite-data.dto';
 import { DatabaseMoment, DatabaseMomentMessage, Moment, MomentMessage } from '../types/moment.types';
-import { deleteManyItems, dynamo, getDynamicUpdateStatements, getItems } from '../utils/dynamo/dynamo.service';
+import { deleteManyItems, dynamo, getItems, updateItem } from '../utils/dynamo/dynamo.service';
 import { ContentPaths, StorageClient } from '../utils/s3/s3.service';
-import { chunkArray, getUUID } from '../utils/utils';
+import { getUUID } from '../utils/utils';
 import { attachUrlsToMoment } from './moment.helpers';
 import {
 	CreateMomentDetailsDto,
@@ -16,8 +15,27 @@ import {
 	GetInfiniteMomentMessagesDto,
 	GetInfiniteMomentsDto,
 	GetMomentUploadUrlDto,
+	SearchMomentsByTitleDto,
 	UpdateMomentDetailsDto,
 } from './moments.dto';
+
+const cleanMomentTitle = (title: string) => {
+	return title.replace(/\s{2,}/g, ' ');
+};
+
+const normalizeMomentTitle = (title: string) => {
+	return (
+		title
+			// Convert to lowercase for case-insensitive matching
+			.toLowerCase()
+			// Replace all special characters, punctuation with spaces
+			.replace(/[^\w\s]/g, ' ')
+			// Replace multiple spaces with a single space
+			.replace(/\s+/g, ' ')
+			// Trim leading and trailing spaces
+			.trim()
+	);
+};
 
 export const createMomentDetails = async (userId: string, relationshipId: string, dto: CreateMomentDetailsDto) => {
 	const id = getUUID();
@@ -27,18 +45,20 @@ export const createMomentDetails = async (userId: string, relationshipId: string
 		relationshipId,
 		userId,
 		...dto,
+		title: cleanMomentTitle(dto.title),
+		normalizedTitle: normalizeMomentTitle(dto.title),
 		createdAt: timestamp,
 	};
 
 	const res = await dynamo.put({
 		TableName: process.env.TABLE_NAME,
 		Item: {
-			pk: `${KeyPrefix.MOMENT_DETAILS}${id}`,
-			sk: `${KeyPrefix.MOMENT_DETAILS}${id}`,
-			gsi1pk: `${KeyPrefix.MOMENT_DETAILS}${relationshipId}`,
-			gsi1sk: `${KeyPrefix.MOMENT_DETAILS}${timestamp}`,
-			gsi2pk: `${KeyPrefix.MOMENT_DETAILS}${userId}`,
-			gsi2sk: `${KeyPrefix.MOMENT_DETAILS}${timestamp}`,
+			pk: KeyPrefix.moments.pk(id),
+			sk: KeyPrefix.moments.sk(id),
+			gsi1pk: KeyPrefix.moments.gsi1pk(relationshipId),
+			gsi1sk: KeyPrefix.moments.gsi1sk(timestamp),
+			gsi2pk: KeyPrefix.moments.gsi2pk(userId),
+			gsi2sk: KeyPrefix.moments.gsi2sk(timestamp),
 			...moment,
 			entityType: EntityType.MOMENT_DETAILS,
 		} satisfies DatabaseMoment,
@@ -136,28 +156,42 @@ export const getMomentsForUser = async (
 	return getInfiniteData<Moment>(res, moment => attachUrlsToMoment(moment));
 };
 
-export const updateMomentDetails = async (id: string, data: UpdateMomentDetailsDto): Promise<Moment> => {
-	const { updateStatements, expressionAttributeNames, expressionAttributeValues } =
-		getDynamicUpdateStatements<Moment>(data);
-	const res = await dynamo.update({
-		TableName: process.env.TABLE_NAME,
-		Key: {
-			pk: `${KeyPrefix.MOMENT_DETAILS}${id}`,
-			sk: `${KeyPrefix.MOMENT_DETAILS}${id}`,
+export const searchMomentsByTitle = async (
+	relationshipId: string,
+	{ title, limit, cursor, order }: SearchMomentsByTitleDto,
+) => {
+	return getItems<Moment>({
+		index: 'GSI1',
+		queryExpression: {
+			expression: '#gsi1pk = :gsi1pk',
+			variables: {
+				':gsi1pk': KeyPrefix.moments.gsi1pk(relationshipId),
+			},
+			filter: {
+				expression: 'contains(#normalizedTitle, :normalizedTitle)',
+				variables: {
+					':normalizedTitle': normalizeMomentTitle(title),
+				},
+			},
 		},
-		UpdateExpression: updateStatements,
-		ExpressionAttributeNames: expressionAttributeNames,
-		ExpressionAttributeValues: expressionAttributeValues,
-		ReturnValues: 'ALL_NEW',
+		limit,
+		cursor,
+		order,
+		mapper: attachUrlsToMoment,
+	});
+};
+
+export const updateMomentDetails = async (id: string, data: UpdateMomentDetailsDto): Promise<Moment> => {
+	const updatedMoment = await updateItem<Moment>({
+		pk: KeyPrefix.moments.pk(id),
+		sk: KeyPrefix.moments.sk(id),
+		update: {
+			...data,
+			...(data.title ? { normalizedTitle: normalizeMomentTitle(data.title) } : {}),
+		},
 	});
 
-	if (res.$metadata.httpStatusCode !== 200)
-		throw new TRPCError({
-			code: 'INTERNAL_SERVER_ERROR',
-			message: 'Failed to update moment details',
-		});
-
-	return attachUrlsToMoment(res.Attributes as Moment);
+	return attachUrlsToMoment(updatedMoment);
 };
 
 export const deleteMomentDetails = async (id: string): Promise<void> => {

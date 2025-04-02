@@ -45,15 +45,15 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
 			<div
 				className={cn(
 					'flex items-center h-10 w-full bg-input text-foreground rounded-lg border border-primary/10 overflow-hidden',
-					startContent && 'pl-0',
-					endContent && 'pr-0',
+					startContent && 'pl-3',
+					endContent && 'pr-3',
 					isFocused && 'focus-visible:!outline-0 ring-2 ring-primary',
 					className,
 				)}
 				onFocus={() => setIsFocused(true)}
 				onBlur={() => setIsFocused(false)}
 			>
-				{startContent && <div className="shrink-0 self-center pr-3">{startContent}</div>}
+				{startContent && <div className="shrink-0 self-center pr-3 text-foreground/20">{startContent}</div>}
 				<input
 					type={type}
 					className={cn(
@@ -71,7 +71,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
 					}}
 					{...props}
 				/>
-				{endContent && <div className="shrink-0 self-center pl-3">{endContent}</div>}
+				{endContent && <div className="shrink-0 self-center pl-3 text-foreground/20">{endContent}</div>}
 			</div>
 		);
 	},
