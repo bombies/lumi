@@ -28,7 +28,14 @@ const MomentCard: FC<Props> = ({ moment, linkClassName, className, compactUpload
 			>
 				<CardContent className="p-0 m-0 h-full w-full">
 					<CardTitle hidden>{moment.title}</CardTitle>
-					<Image src={moment.thumbnailUrl} alt={moment.title} className="h-full" fill objectFit="cover" />
+					<Image
+						src={moment.thumbnailUrl}
+						fallbackSrc="/fallback/thumbnail.png"
+						alt={moment.title}
+						className="h-full"
+						fill
+						objectFit="cover"
+					/>
 					<div className="absolute bottom-0 w-full max-h-[45%] p-4 bg-background/50 backdrop-blur-md text-foreground space-y-2">
 						<h6 className="text-xl font-bold line-clamp-2">{moment.title}</h6>
 						{moment.description && <p className="line-clamp-2">{moment.description}</p>}

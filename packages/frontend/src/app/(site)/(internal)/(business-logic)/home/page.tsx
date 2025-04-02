@@ -2,6 +2,7 @@ import { FC } from 'react';
 import { redirect } from 'next/navigation';
 import { getUserById } from '@lumi/core/users/users.service';
 
+import Image from '@/components/ui/image';
 import { requireRelationship } from '@/lib/actions/requireRelationship';
 import { getUserBySession } from '@/lib/server-utils';
 import AffirmationWidget from './widgets/affirmation-widget';

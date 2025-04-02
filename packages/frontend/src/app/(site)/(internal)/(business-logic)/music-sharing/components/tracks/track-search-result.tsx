@@ -34,6 +34,7 @@ const TrackSearchResult: FC<Props> = ({ track, onClick }) => {
 			<div className="flex gap-x-3 items-center">
 				<Image
 					src={trackDetails.image}
+					fallbackSrc="/fallback/music.png"
 					alt={`${track.name} Album Art`}
 					className="size-10 aspect-square rounded-sm shrink-0"
 					fill

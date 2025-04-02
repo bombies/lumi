@@ -29,7 +29,7 @@ const Image: FC<Props> = ({
 	width,
 	height,
 	objectFit,
-	fallbackSrc = '/images/no-img.jpg',
+	fallbackSrc = '/fallback/image.png',
 	src,
 	...props
 }) => {

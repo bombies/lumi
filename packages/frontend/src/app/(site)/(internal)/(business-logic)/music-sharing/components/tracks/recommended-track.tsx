@@ -57,6 +57,7 @@ const RecommendedTrack: FC<Props> = ({ track: { track: trackDetails, ...track },
 				)}
 				<Image
 					src={trackDetails.albumImage}
+					fallbackSrc="/fallback/music.png"
 					alt={`${trackDetails.name} Album Art`}
 					className="size-10 tablet:size-16 aspect-square rounded-sm shrink-0 border border-border"
 					fill
