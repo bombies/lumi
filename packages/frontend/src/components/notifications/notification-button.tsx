@@ -2,12 +2,17 @@
 
 import { FC, useMemo } from 'react';
 import Link from 'next/link';
-import { InboxIcon } from '@heroicons/react/24/solid';
+import { CheckIcon, InboxIcon } from '@heroicons/react/24/solid';
 import { BellIcon } from 'lucide-react';
+import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { GetNotifications, GetUnreadNotificationCount } from '@/hooks/trpc/notification-hooks';
+import {
+	GetNotifications,
+	GetUnreadNotificationCount,
+	MarkAllNotificationsAsRead,
+} from '@/hooks/trpc/notification-hooks';
 import { Separator } from '../ui/separator';
 import NotificationPreview from './notification-preview';
 import NotificationPreviewSkeleton from './notification-preview-skeleton';
@@ -15,6 +20,7 @@ import NotificationPreviewSkeleton from './notification-preview-skeleton';
 const NotificationButton: FC = () => {
 	const { data: notificationPages, isLoading: pagesLoading } = GetNotifications({ limit: 10, filter: 'unread' });
 	const { data: unreadNotificationCount } = GetUnreadNotificationCount();
+	const { mutateAsync: markAllNotifsAsRead, isPending: isMarkingAllAsRead } = MarkAllNotificationsAsRead();
 
 	const notificationPreviews = useMemo(
 		() =>
@@ -59,12 +65,28 @@ const NotificationButton: FC = () => {
 							<NotificationPreviewSkeleton />
 						</>
 					) : notificationPreviews?.length ? (
-						notificationPreviews
+						<>
+							{notificationPreviews}
+							<Button
+								className="w-full h-10"
+								variant="default:flat"
+								loading={isMarkingAllAsRead}
+								onClick={() => {
+									toast.promise(markAllNotifsAsRead(), {
+										loading: 'Marking all notifications as read...',
+										success: 'Successfully marked all notifications as read!',
+										error: 'Could not mark all notifications as read.',
+									});
+								}}
+							>
+								<CheckIcon /> Mark All as Read
+							</Button>
+						</>
 					) : (
 						<p>You have no new notifications.</p>
 					)}
 					<Link href="/notifications">
-						<Button className="w-full h-10" variant="default:flat">
+						<Button className="w-full h-10" variant="default:flat" disabled={isMarkingAllAsRead}>
 							<InboxIcon /> View All Notifications
 						</Button>
 					</Link>
