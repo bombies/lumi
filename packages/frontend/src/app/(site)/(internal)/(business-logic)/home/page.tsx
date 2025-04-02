@@ -6,6 +6,7 @@ import { requireRelationship } from '@/lib/actions/requireRelationship';
 import { getUserBySession } from '@/lib/server-utils';
 import AffirmationWidget from './widgets/affirmation-widget';
 import MomentsWidget from './widgets/moments-widget';
+import MusicWidget from './widgets/music-widget';
 
 const HomePage: FC = async () => {
 	const relationship = await requireRelationship();
@@ -30,6 +31,7 @@ const HomePage: FC = async () => {
 				</div>
 				<AffirmationWidget />
 				<MomentsWidget />
+				<MusicWidget />
 			</div>
 		</>
 	);

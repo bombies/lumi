@@ -79,7 +79,7 @@ const RateRecommendationButton: FC<Props> = ({ track, onRate }) => {
 							<div className="flex gap-2 items-center">
 								<Input
 									className="min-w-10 max-w-16 rounded-sm"
-									inputMode="numeric"
+									inputMode="decimal"
 									min={0}
 									max={10}
 									{...field}
