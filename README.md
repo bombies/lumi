@@ -84,6 +84,7 @@ Ensure the following are set up on your machine before proceeding:
     openssl rsa -in ./cdn-keys/<stage>.private_key.pem -out ./cdn-keys/<stage>.public_key.pem -outform PEM -pubout
     ```
 3. **Configure AWS CloudFront**
+
     - Navigate to **AWS Management Console > CloudFront**.
     - Create a **Public Key** with the generated public key.
     - Create a **Key Group** and link it to the public key.
@@ -91,9 +92,29 @@ Ensure the following are set up on your machine before proceeding:
         - **Public Key**: `lumi-<stage>-cdn-public-key`
         - **Key Group**: `lumi-<stage>-cdn-key-group`
     - Retrieve the IDs for these resources and update `infra/storage.ts`:
+
         ```ts
-        contentCdnPublicKey = 'YOUR_PUBLIC_KEY_ID';
-        contentCdnKeyGroup = 'YOUR_KEY_GROUP_ID';
+        export const contentCdnPublicKey = aws.cloudfront.PublicKey.get(
+        	customCdnKeyStages.has($app.stage)
+        		? `${appify('cdn-public-key')}`
+        		: `${$app.name}-${DEFAULT_KEY_NAME}-cdn-public-key`,
+        	$app.stage === 'production'
+        		? 'PRODUCTION_KEY_ID'
+        		: $app.stage === 'staging'
+        			? 'STAGING_KEY_ID'
+        			: 'DEFAULT_KEY_ID',
+        );
+
+        export const contentCdnKeyGroup = aws.cloudfront.KeyGroup.get(
+        	customCdnKeyStages.has($app.stage)
+        		? `${appify('cdn-key-group')}`
+        		: `${$app.name}-${DEFAULT_KEY_GROUP_NAME}-cdn-key-group`,
+        	$app.stage === 'production'
+        		? 'PRODUCTION_KEY_GROUP_ID'
+        		: $app.stage === 'staging'
+        			? 'STAGING_KEY_GROUP_ID'
+        			: 'DEFAULT_KEY_GROUP_ID',
+        );
         ```
 
 ### 🚀 Running Lumi Locally
