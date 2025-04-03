@@ -1,6 +1,6 @@
 import { db } from './db';
 import { apiDNS, webDNS } from './dns';
-import { notificationsTopic } from './realtime';
+import { notificationsTopic, realtimeServer } from './realtime';
 import {
 	authSecret,
 	cdnPrivateKey,
@@ -35,6 +35,7 @@ export const trpc = new sst.aws.Function('Trpc', {
 		redisPort,
 		redisUser,
 		redisPassword,
+		realtimeServer,
 	],
 	environment: {
 		APP_STAGE: $app.stage,

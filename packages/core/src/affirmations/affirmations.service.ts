@@ -1,6 +1,8 @@
 import { TRPCError } from '@trpc/server';
+import { Resource } from 'sst';
 
-import { getRelationshipForUser } from '../relationships/relationship.service';
+import { sendNotification } from '../notifications/notifications.service';
+import { getPartnerForUser, getRelationshipForUser } from '../relationships/relationship.service';
 import {
 	Affirmation,
 	DatabaseAffirmation,
@@ -9,6 +11,8 @@ import {
 } from '../types/affirmations.types';
 import { EntityType, KeyPrefix } from '../types/dynamo.types';
 import { Relationship } from '../types/relationship.types';
+import { User } from '../types/user.types';
+import { WebSocketToken } from '../types/websockets.types';
 import {
 	bactchWrite,
 	deleteItem,
@@ -20,7 +24,13 @@ import {
 } from '../utils/dynamo/dynamo.service';
 import { extractPartnerIdFromRelationship } from '../utils/global-utils';
 import { chunkArray, getUUID } from '../utils/utils';
-import { CreateAffirmationDto, GetReceivedAffirmationsDto, UpdateAffirmationDto } from './affirmations.dto';
+import { MqttClientType, createAsyncWebsocketConnection } from '../websockets/websockets.service';
+import {
+	CreateAffirmationDto,
+	GetReceivedAffirmationsDto,
+	SendCustomAffirmationDto,
+	UpdateAffirmationDto,
+} from './affirmations.dto';
 
 export const createAffirmation = async (dto: CreateAffirmationDto) => {
 	const affirmationId = getUUID();
@@ -204,6 +214,44 @@ export const getTodaysReceivedAffirmations = async (userId: string, relationship
 			variables: {
 				':pk': KeyPrefix.receivedAffirmation.pk(relationshipId),
 				':sk': KeyPrefix.receivedAffirmation.buildKey(userId, today),
+			},
+		},
+	});
+};
+
+export const sendAffirmationToUser = async (
+	user: User,
+	dto: SendCustomAffirmationDto & { mqttClient?: MqttClientType; partner?: User },
+) => {
+	const partner = dto.partner ?? (await getPartnerForUser(user.id));
+	if (!partner || !user.relationshipId)
+		throw new TRPCError({
+			code: 'UNAUTHORIZED',
+			message: 'You are not in a relationship!',
+		});
+
+	const mqttConnection =
+		dto.mqttClient ??
+		(await createAsyncWebsocketConnection({
+			endpoint: Resource.RealtimeServer.endpoint,
+			authorizer: Resource.RealtimeServer.authorizer,
+			token: WebSocketToken.GLOBAL,
+		}));
+
+	await sendNotification({
+		user,
+		payload: {
+			title: `${partner.firstName} says`,
+			body: dto.affirmation,
+			openUrl: '/affirmations',
+		},
+		opts: {
+			offlineWebSocketMessage: {
+				mqttConnection,
+				topic: `${process.env.NOTIFICATIONS_TOPIC}/${user.id}/notifications`,
+			},
+			async onSuccess() {
+				await createReceivedAffirmation(user.id, user.relationshipId!, dto.affirmation);
 			},
 		},
 	});

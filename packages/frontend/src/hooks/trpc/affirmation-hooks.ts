@@ -57,3 +57,17 @@ export const DeleteAffirmation = () => {
 		},
 	});
 };
+
+export const SendCustomAffirmation = () => {
+	const invalidateRoutes = useRouteInvalidation([trpc.affirmations.getAffirmations]);
+
+	return trpc.affirmations.sendCustomAffirmation.useMutation({
+		onSuccess() {
+			toast.success('Affirmation sent successfully');
+			invalidateRoutes();
+		},
+		onError(e) {
+			handleTrpcError(e);
+		},
+	});
+};

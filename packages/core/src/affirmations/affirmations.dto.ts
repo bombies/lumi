@@ -31,6 +31,11 @@ export const getReceivedAffirmationsDto = createInfiniteDataDto({
 	defaultLimit: 50,
 }).and(infiniteDataOrderDto.partial());
 
+export const sendCustomAffirmationDto = z.object({
+	affirmation: z.string().min(1).max(150),
+});
+
 export type CreateAffirmationDto = z.infer<typeof createAffirmationDto>;
 export type UpdateAffirmationDto = z.infer<typeof updateAffirmationDto>;
 export type GetReceivedAffirmationsDto = z.infer<typeof getReceivedAffirmationsDto>;
+export type SendCustomAffirmationDto = z.infer<typeof sendCustomAffirmationDto>;

@@ -1,4 +1,8 @@
-import { createReceivedAffirmation, selectAffirmation } from '@lumi/core/affirmations/affirmations.service';
+import {
+	createReceivedAffirmation,
+	selectAffirmation,
+	sendAffirmationToUser,
+} from '@lumi/core/affirmations/affirmations.service';
 import { sendNotification } from '@lumi/core/notifications/notifications.service';
 import { getRelationshipById } from '@lumi/core/relationships/relationship.service';
 import { User } from '@lumi/core/types/user.types';
@@ -11,7 +15,6 @@ import { Resource } from 'sst';
 export const handler: Handler<SQSEvent> = async event => {
 	console.log('Processing affirmation notification event...');
 
-	const receipt = event.Records[0].receiptHandle;
 	const relationshipId = JSON.parse(event.Records[0].body) as string;
 	const relationship = await getRelationshipById(relationshipId);
 	if (!relationship) throw new Error(`Relationship ${relationshipId} not found`);
@@ -26,7 +29,6 @@ export const handler: Handler<SQSEvent> = async event => {
 
 		console.log('Connected to websocket! Now sending out notifications');
 
-		const topicPrefix = `${process.env.NOTIFICATIONS_TOPIC}/`;
 		const partner1 = await getUserById(relationship.partner1);
 		const partner2 = await getUserById(relationship.partner2);
 
@@ -37,22 +39,10 @@ export const handler: Handler<SQSEvent> = async event => {
 				return;
 			}
 
-			await sendNotification({
-				user,
-				payload: {
-					title: `${(user.id === partner1?.id ? partner1.firstName : partner2?.firstName) ?? 'Your partner'} says`,
-					body: affirmation.affirmation,
-					openUrl: '/affirmations',
-				},
-				opts: {
-					offlineWebSocketMessage: {
-						mqttConnection,
-						topic: `${topicPrefix}${user.id}/notifications`,
-					},
-					async onSuccess() {
-						await createReceivedAffirmation(user.id, relationship.id, affirmation.affirmation);
-					},
-				},
+			await sendAffirmationToUser(user, {
+				affirmation: affirmation.affirmation,
+				mqttClient: mqttConnection,
+				partner: user.id === partner1?.id ? partner2 : partner1,
 			});
 		};
 
