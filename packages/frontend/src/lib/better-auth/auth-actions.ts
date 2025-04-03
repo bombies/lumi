@@ -11,3 +11,22 @@ export const getServerSession = async () => {
 		headers: await headers(),
 	});
 };
+
+export const revokeCurrentSession = async () => {
+	const session = await getServerSession();
+	if (!session) return;
+	return auth.api.revokeSession({
+		headers: await headers(),
+		body: {
+			token: session.session.token,
+		},
+	});
+};
+
+export const signOut = async () => {
+	const session = await getServerSession();
+	if (!session) return;
+	return auth.api.signOut({
+		headers: await headers(),
+	});
+};
