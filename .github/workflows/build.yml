@@ -15,7 +15,7 @@ on:
 
 jobs:
     build:
-        runs-on: carter-box
+        runs-on: self-hosted
         strategy:
             matrix:
                 node-version: [20.x]

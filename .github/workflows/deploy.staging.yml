@@ -7,7 +7,7 @@ on:
 
 jobs:
     build:
-        runs-on: carter-box
+        runs-on: self-hosted
         environment: Staging
         strategy:
             matrix:
