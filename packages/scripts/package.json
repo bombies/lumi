@@ -4,6 +4,6 @@
 	"type": "module",
 	"dependencies": {
 		"@lumi/core": "*",
-		"sst": "^3.10.8"
+		"sst": "^3.12.3"
 	}
 }

@@ -32,6 +32,7 @@ declare module "sst" {
     }
     "Frontend": {
       "type": "sst.aws.Nextjs"
+      "url": string
     }
     "MailerHost": {
       "type": "sst.sst.Secret"
@@ -91,6 +92,10 @@ declare module "sst" {
       "value": string
     }
     "RedisUser": {
+      "type": "sst.sst.Secret"
+      "value": string
+    }
+    "SentryAuthToken": {
       "type": "sst.sst.Secret"
       "value": string
     }

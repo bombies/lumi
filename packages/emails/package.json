@@ -19,7 +19,7 @@
 		"clsx": "^2.1.1",
 		"react": "19.0.0",
 		"react-dom": "19.0.0",
-		"sst": "^3.10.8",
+		"sst": "^3.12.3",
 		"tailwind-merge": "^3.0.2"
 	},
 	"devDependencies": {

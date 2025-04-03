@@ -19,6 +19,7 @@ import {
 	redisPassword,
 	redisPort,
 	redisUser,
+	sentryAuthToken,
 	spotifyClientId,
 	spotifyClientSecret,
 	vapidPrivateKey,
@@ -35,7 +36,7 @@ export const frontend = new sst.aws.Nextjs('Frontend', {
 		install: ['sharp'],
 	},
 	cachePolicy: $app.stage !== 'staging' ? '5ec0f852-6fd4-45c7-80fe-d6cd77ed35a4' : undefined,
-	openNextVersion: '3.5.3',
+	openNextVersion: '3.5.4',
 	link: [
 		trpc,
 		contentBucket,
@@ -84,6 +85,8 @@ export const frontend = new sst.aws.Nextjs('Frontend', {
 		CDN_URL: contentCdn.url,
 		NEXT_PUBLIC_SPOTIFY_CLIENT_ID: spotifyClientId.value,
 		SPOTIFY_CLIENT_SECRET: spotifyClientSecret.value,
+
+		SENTRY_AUTH_TOKEN: sentryAuthToken.value,
 	},
 	permissions: [
 		{

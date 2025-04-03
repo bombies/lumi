@@ -28,3 +28,5 @@ export let cdnPrivateKey = fs.readFileSync(`${process.cwd()}/cdn-keys/private_ke
 
 export const spotifyClientId = new sst.Secret('SpotifyClientId');
 export const spotifyClientSecret = new sst.Secret('SpotifyClientSecret');
+
+export const sentryAuthToken = new sst.Secret('SentryAuthToken');
