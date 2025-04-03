@@ -8,6 +8,7 @@ on:
 jobs:
     build:
         runs-on: ubuntu-latest
+        environment: Production
         strategy:
             matrix:
                 node-version: [20.x]
@@ -24,6 +25,11 @@ jobs:
                   bun-version: latest
             - name: Install Dependencies
               run: bun i
+            - name: Create CDN Key Files
+              run: |
+                  mkdir -p ./cdn-keys
+                  echo "${{ secrets.CDN_PUBLIC_KEY }}" > ./cdn-keys/production.public_key.pem
+                  echo "${{ secrets.CDN_PRIVATE_KEY }}" > ./cdn-keys/production.private_key.pem
             - name: Building & Deploy Project
               run: |
                   bunx sst deploy --stage=production

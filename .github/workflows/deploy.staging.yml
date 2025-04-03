@@ -36,5 +36,5 @@ jobs:
             - name: Run Db Migrations
               run: |
                   cd packages/frontend
-                  bun run auth:db:generate -- --stage ajani
-                  bun run auth:db:migrate -- --stage ajani
+                  bun run auth:db:generate -- --stage staging
+                  bun run auth:db:migrate -- --stage staging
