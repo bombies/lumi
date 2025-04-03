@@ -2,11 +2,11 @@
 
 import { FC, Fragment, ReactElement, RefObject, useCallback, useRef, useState } from 'react';
 import { AnimatePresence } from 'framer-motion';
+import getBlobDuration from 'get-blob-duration';
 import { CheckIcon, XIcon } from 'lucide-react';
 import Cropper, { Area, CropperProps, Point } from 'react-easy-crop';
 import { toast } from 'sonner';
 
-import { useMediaInfo } from '@/lib/hooks/useMediaInfo';
 import { Button } from '../button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../dialog';
 import { Popover, PopoverContent, PopoverTrigger } from '../popover';
@@ -14,9 +14,7 @@ import { Progress } from '../progress';
 import { Separator } from '../separator';
 import { FileSize } from './file-size';
 import getCroppedImg, {
-	calculateTotalDuration,
 	clearInput,
-	getMediaInfo,
 	handleFileRemoval,
 	handleLocalUpload,
 	handleUpload,
@@ -100,7 +98,6 @@ const FileUpload: FC<FileUploadProps> = ({
 	}, [cropArgs]);
 
 	const inputRef = useRef<HTMLInputElement>(null);
-	const { mediaInfo, makeReadChunk } = useMediaInfo('object');
 
 	const uploadFilesToServer = useCallback(
 		async (file: File[]) => {
@@ -132,18 +129,10 @@ const FileUpload: FC<FileUploadProps> = ({
 			if (!isVideoFile(file)) return true;
 			if (!maxVideoDuration) return true;
 
-			const mediaInfoResult = await getMediaInfo(file, {
-				mediaInfo,
-				makeReadChunk,
-			});
-
-			if (typeof mediaInfoResult === 'string' || !mediaInfoResult?.media?.track?.length) return false;
-
-			const totalDuration = calculateTotalDuration(mediaInfoResult.media.track);
-
+			const totalDuration = await getBlobDuration(file);
 			return totalDuration <= maxVideoDuration;
 		},
-		[maxVideoDuration, mediaInfo, makeReadChunk],
+		[maxVideoDuration],
 	);
 
 	const handleFileActions = useCallback(

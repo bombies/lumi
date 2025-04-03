@@ -21,13 +21,6 @@ const nextConfig: NextConfig = {
 		remotePatterns: remotePatterns,
 	},
 	transpilePackages: ['@lumi/core', '@lumi/emails'],
-	webpack: config => {
-		config.experiments = {
-			...config.experiments,
-			asyncWebAssembly: true,
-		};
-		return config;
-	},
 	async headers() {
 		return [
 			{

@@ -76,7 +76,8 @@ export function TRPCProvider(
 	const queryClient = getQueryClient();
 	const trpcClient = useMemo(
 		() =>
-			trpc.createClient({
+			// @ts-expect-error Trpc being weird with types
+			trpc.createClient<AppRouter>({
 				links: [
 					httpBatchLink({
 						// transformer: superjson, <-- if you use a data transformer
