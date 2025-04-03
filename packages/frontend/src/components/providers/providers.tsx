@@ -18,7 +18,7 @@ const Providers: FC<ProvidersProps> = ({ children }) => {
 		<TRPCProvider>
 			<ColorSchemeProvider>
 				<NotificationsProvider>
-					<ProgressProvider height="4px" color="#76A34E" options={{ showSpinner: true }} shallowRouting>
+					<ProgressProvider height="4px" color="#76A34E" options={{ showSpinner: false }} shallowRouting>
 						<PullRefresh />
 						{children}
 						<Toaster
