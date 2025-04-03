@@ -8,6 +8,7 @@ on:
             - 'patch/*'
             - 'hotfix/*'
             - 'chore/*'
+            - 'dev'
     pull_request:
         branches:
             - '*'
