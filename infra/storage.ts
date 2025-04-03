@@ -27,7 +27,7 @@ export const contentCdnPublicKey = new aws.cloudfront.PublicKey('ContentCdnPubli
 	name: `${appify('cdn-public-key')}`,
 	encodedKey: std
 		.file({
-			input: `${process.cwd()}/cdn-keys/public_key.pem`,
+			input: `${process.cwd()}/cdn-keys/${$app.stage}.public_key.pem`,
 		})
 		.then(invoke => invoke.result),
 });

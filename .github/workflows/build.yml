@@ -3,7 +3,11 @@ name: Build
 on:
     push:
         branches:
-            - '*'
+            - 'features/*'
+            - 'feature/*'
+            - 'patch/*'
+            - 'hotfix/*'
+            - 'chore/*'
     pull_request:
         branches:
             - '*'
