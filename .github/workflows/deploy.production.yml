@@ -30,11 +30,19 @@ jobs:
                   mkdir -p ./cdn-keys
                   echo "${{ secrets.CDN_PUBLIC_KEY }}" > ./cdn-keys/production.public_key.pem
                   echo "${{ secrets.CDN_PRIVATE_KEY }}" > ./cdn-keys/production.private_key.pem
-            - name: Building & Deploy Project
+            - name: 'Setup Build Cache'
+              uses: actions/cache@v3
+              with:
+                  path: |
+                      ${{ github.workspace }}/packages/frontend/.next/cache
+                  key: ${{ runner.os }}-nextjs-${{ hashFiles('**/bun.lock') }}-${{ hashFiles('**/*.[jt]s', '**/*.[jt]sx') }}
+                  restore-keys: |
+                      ${{ runner.os }}-nextjs-${{ hashFiles('**/bun.lock') }}-
+            - name: Build & Deploy Project
               run: |
                   bunx sst deploy --stage=production
             - name: Run Db Migrations
               run: |
                   cd packages/frontend
-                  bun run auth:db:generate -- --stage production
-                  bun run auth:db:migrate -- --stage production
+                  bunx sst shell --stage production -- bunx @better-auth/cli generate --y
+                  bunx sst shell --stage production -- bunx @better-auth/cli migrate --y

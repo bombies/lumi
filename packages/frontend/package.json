@@ -9,9 +9,7 @@
 		"lint": "eslint \"src/**/*.+(ts|tsx)\"",
 		"lint:fix": "eslint \"src/**/*.+(ts|tsx)\" --fix",
 		"format": "prettier . --write",
-		"format:check": "prettier . --check",
-		"auth:db:generate": "sst shell bunx @better-auth/cli generate --y",
-		"auth:db:migrate": "sst shell bunx @better-auth/cli migrate --y"
+		"format:check": "prettier . --check"
 	},
 	"dependencies": {
 		"@auth/dynamodb-adapter": "^2.8.0",
