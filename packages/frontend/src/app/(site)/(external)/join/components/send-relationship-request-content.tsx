@@ -2,7 +2,6 @@
 
 import { FC, useCallback, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { skipToken } from '@tanstack/react-query';
 import { TRPCClientError } from '@trpc/client';
 import { AnimatePresence, motion } from 'motion/react';
 import { toast } from 'sonner';
@@ -10,15 +9,8 @@ import { toast } from 'sonner';
 import { Card, CardContent, CardDescription, CardHeader } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
+import { FetchUsersByUsername } from '@/hooks/trpc/user-hooks';
 import { trpc } from '@/lib/trpc/client';
-
-const FetchUsersByUsername = ({ searchQuery }: { searchQuery: string }) =>
-	trpc.users.getUsersByUsername.useInfiniteQuery(
-		searchQuery.length > 0 ? { username: searchQuery, projections: ['id', 'username'] } : skipToken,
-		{
-			getNextPageParam: lastPage => lastPage.cursor,
-		},
-	);
 
 const SendUserRelationshipRequest = () => trpc.relationships.sendRelationshipRequest.useMutation();
 

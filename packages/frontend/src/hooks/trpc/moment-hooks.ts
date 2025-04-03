@@ -37,7 +37,7 @@ export const GetMoments = (userId?: string, args?: { limit?: number; order?: 'as
 		: trpc.moments.getMoments.useInfiniteQuery(
 				{ userId, limit: args?.limit },
 				{
-					getNextPageParam: lastPage => lastPage.cursor,
+					getNextPageParam: lastPage => lastPage.nextCursor,
 				},
 			);
 
@@ -62,7 +62,7 @@ export const GetMessagesForMoment = (momentId: string) =>
 		},
 		{
 			staleTime: Infinity,
-			getNextPageParam: lastPage => lastPage.cursor,
+			getNextPageParam: lastPage => lastPage.nextCursor,
 		},
 	);
 

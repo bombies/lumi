@@ -9,6 +9,7 @@ import SendRelationshipRequestContent from '@/app/(site)/(external)/join/compone
 import SignOutButton from '@/components/ui/sign-out-button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { getServerSession } from '@/lib/better-auth/auth-actions';
+import SentRelationshipRequestsContainer from './components/sent-relationship-requests.container';
 
 const JoinPage: FC = async () => {
 	const session = (await getServerSession())!;
@@ -49,7 +50,9 @@ const JoinPage: FC = async () => {
 					<TabsContent value="received">
 						<ReceivedRelationshipRequestsContent />
 					</TabsContent>
-					<TabsContent value="sent">3:</TabsContent>
+					<TabsContent value="sent">
+						<SentRelationshipRequestsContainer />
+					</TabsContent>
 				</Tabs>
 			</section>
 			<SignOutButton variant="destructive:flat" disableNotification />

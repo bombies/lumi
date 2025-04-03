@@ -1,8 +1,14 @@
 import { DynamoDBClient, DynamoDBClientConfig, TransactWriteItemsInput, Update } from '@aws-sdk/client-dynamodb';
-import { DynamoDBDocument, QueryCommandInput, UpdateCommandInput } from '@aws-sdk/lib-dynamodb';
+import {
+	BatchWriteCommandInput,
+	DynamoDBDocument,
+	QueryCommandInput,
+	TransactWriteCommandInput,
+	UpdateCommandInput,
+} from '@aws-sdk/lib-dynamodb';
 import { TRPCError } from '@trpc/server';
 
-import { Nullable } from '../../types/util.types';
+import { Nullable, ValueType } from '../../types/util.types';
 import { chunkArray } from '../utils';
 
 const client = new DynamoDBClient();
@@ -110,10 +116,15 @@ export async function putItem<T extends Record<string, any>, DbType extends T = 
 	return item as T;
 }
 
-export async function getItem<T extends Record<string, any>>(pk: string, sk: string) {
+type GetItemArgs<T> = {
+	projectedAttributes?: (keyof T)[];
+};
+
+export async function getItem<T extends Record<string, any>>(pk: string, sk: string, args?: GetItemArgs<T>) {
 	const res = await dynamo.get({
 		TableName: process.env.TABLE_NAME,
 		Key: { pk, sk },
+		ProjectionExpression: args?.projectedAttributes?.join(','),
 	});
 
 	if (res.$metadata.httpStatusCode !== 200)
@@ -127,6 +138,7 @@ export async function getItem<T extends Record<string, any>>(pk: string, sk: str
 }
 
 type GetItemsParams<T> = {
+	table?: string;
 	index?: 'GSI1' | 'GSI2' | 'GSI3' | 'GSI4';
 	order?: 'asc' | 'desc';
 	cursor?: Record<string, any>;
@@ -158,6 +170,7 @@ type GetItemsParams<T> = {
 };
 
 export async function getItems<T extends Record<string, any>>({
+	table,
 	index,
 	order,
 	cursor,
@@ -171,7 +184,7 @@ export async function getItems<T extends Record<string, any>>({
 	const filterKeyNames = queryExpression.filter?.expression.match(/#(\w+)/g)?.map(key => key.slice(1));
 	const { projectionExpression, projectionExpressionNames } = useProjection(projectedAttributes ?? []);
 	const params: QueryCommandInput = {
-		TableName: process.env.TABLE_NAME,
+		TableName: table ?? process.env.TABLE_NAME,
 		IndexName: index,
 		KeyConditionExpression: queryExpression.expression,
 		FilterExpression: queryExpression.filter?.expression,
@@ -287,4 +300,139 @@ export async function deleteManyItems(items: { pk: string; sk: string }[]) {
 			});
 		}),
 	);
+}
+
+type TransactionParams = { table?: string } & (
+	| {
+			put: {
+				item: Record<string, any>;
+			};
+	  }
+	| {
+			deleteItem: {
+				pk: string;
+				sk: string;
+			};
+	  }
+	| {
+			update: {
+				pk: string;
+				sk: string;
+				update: Partial<Record<string, any>>;
+			};
+	  }
+);
+
+export async function writeTransaction(...params: TransactionParams[]) {
+	const res = await dynamo.transactWrite({
+		TransactItems: params.reduce(
+			(acc, param) => {
+				const tableName = param.table ?? process.env.TABLE_NAME;
+
+				if ('put' in param) {
+					acc.push({
+						Put: {
+							TableName: tableName,
+							Item: param.put.item,
+						},
+					});
+				} else if ('deleteItem' in param) {
+					acc.push({
+						Delete: {
+							TableName: tableName,
+							Key: {
+								pk: param.deleteItem.pk,
+								sk: param.deleteItem.sk,
+							},
+						},
+					});
+				} else if ('update' in param) {
+					const { updateStatements, expressionAttributeValues, expressionAttributeNames } =
+						getDynamicUpdateStatements(param.update.update);
+
+					acc.push({
+						Update: {
+							TableName: tableName,
+							Key: {
+								pk: param.update.pk,
+								sk: param.update.sk,
+							},
+							UpdateExpression: updateStatements,
+							ExpressionAttributeValues: expressionAttributeValues,
+							ExpressionAttributeNames: expressionAttributeNames,
+						},
+					});
+				}
+
+				return acc;
+			},
+			[] as NonNullable<TransactWriteCommandInput['TransactItems']>,
+		),
+	});
+
+	if (res.$metadata.httpStatusCode !== 200) {
+		throw new TRPCError({
+			code: 'INTERNAL_SERVER_ERROR',
+			message: 'Failed to conduct write transaction!',
+		});
+	}
+
+	return res;
+}
+
+type BatchWriteParams = {
+	table?: string;
+} & (
+	| {
+			deleteItem: {
+				pk: string;
+				sk: string;
+			};
+	  }
+	| {
+			put: {
+				item: Record<string, any>;
+			};
+	  }
+);
+
+export async function bactchWrite(...params: BatchWriteParams[]) {
+	const groupedParams = Object.groupBy(params, param => param.table ?? process.env.TABLE_NAME!);
+	const res = await dynamo.batchWrite({
+		RequestItems: Object.entries(groupedParams).reduce(
+			(acc, [table, params]) => {
+				if (params)
+					acc[table] = params.reduce(
+						(acc, param) => {
+							if ('deleteItem' in param) {
+								acc.push({
+									DeleteRequest: {
+										Key: param.deleteItem,
+									},
+								});
+							} else if ('put' in param) {
+								acc.push({
+									PutRequest: {
+										Item: param.put.item,
+									},
+								});
+							}
+							return acc;
+						},
+						[] as NonNullable<ValueType<BatchWriteCommandInput['RequestItems']>>,
+					);
+				return acc;
+			},
+			{} as NonNullable<BatchWriteCommandInput['RequestItems']>,
+		),
+	});
+
+	if (res.$metadata.httpStatusCode !== 200) {
+		throw new TRPCError({
+			code: 'INTERNAL_SERVER_ERROR',
+			message: 'Failed to conduct batch write!',
+		});
+	}
+
+	return res;
 }

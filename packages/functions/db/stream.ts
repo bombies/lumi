@@ -1,6 +1,7 @@
 import { deleteAffirmationsForRelationship } from '@lumi/core/affirmations/affirmations.service';
 import { deleteMomentDetailsForRelationship } from '@lumi/core/moments/moment.service';
-import { Relationship } from '@lumi/core/types/relationship.types';
+import { deleteNotificationsForUser } from '@lumi/core/notifications/notifications.service';
+import { deleteSongRecommendationsByRelationshipId } from '@lumi/core/song-recommendations/song-recommendations.service';
 import { DynamoDBStreamEvent, Handler } from 'aws-lambda';
 
 export const handler: Handler<DynamoDBStreamEvent> = async event => {
@@ -23,6 +24,9 @@ export const handler: Handler<DynamoDBStreamEvent> = async event => {
 
 					await deleteAffirmationsForRelationship(oldImage.id.S!);
 					await deleteMomentDetailsForRelationship(oldImage.id.S!);
+					await deleteSongRecommendationsByRelationshipId(oldImage.id.S!);
+					await deleteNotificationsForUser(oldImage.partner1.S!);
+					await deleteNotificationsForUser(oldImage.partner2.S!);
 					break;
 			}
 		} catch (e) {

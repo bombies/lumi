@@ -12,8 +12,17 @@ import {
 	UnreadNotificationCount,
 } from '../types/notification.types';
 import { User } from '../types/user.types';
-import { deleteItem, dynamo, getItem, getItems, putItem, updateItem, updateMany } from '../utils/dynamo/dynamo.service';
-import { getUUID } from '../utils/utils';
+import {
+	bactchWrite,
+	deleteItem,
+	dynamo,
+	getItem,
+	getItems,
+	putItem,
+	updateItem,
+	updateMany,
+} from '../utils/dynamo/dynamo.service';
+import { chunkArray, getUUID } from '../utils/utils';
 import { MqttClientType, emitAsyncWebsocketEvent } from '../websockets/websockets.service';
 import {
 	CreateNotificationDto,
@@ -31,65 +40,34 @@ export const createNotificationSubscription = async (userId: string, subscriptio
 		keys: subscription.keys,
 	};
 
-	const res = await dynamo.put({
-		TableName: process.env.TABLE_NAME,
-		Item: {
-			pk: `${KeyPrefix.NOTIFICATION_SUBSCRIBER}${userId}`,
-			sk: `${KeyPrefix.NOTIFICATION_SUBSCRIBER}${subscription.endpoint}`,
-			entityType: EntityType.NOTIFICATION_SUBSCRIBER,
-			...sub,
-		} satisfies DatabaseNotificationSubscriber,
+	return putItem<NotificationSubscriber, DatabaseNotificationSubscriber>({
+		pk: KeyPrefix.notificationSubscriber.pk(userId),
+		sk: KeyPrefix.notificationSubscriber.sk(subscription.endpoint),
+		entityType: EntityType.NOTIFICATION_SUBSCRIBER,
+		...sub,
 	});
-
-	if (res.$metadata.httpStatusCode !== 200)
-		throw new TRPCError({
-			code: 'INTERNAL_SERVER_ERROR',
-			message: 'Failed to store subscription',
-		});
-
-	return sub;
 };
 
 export const deleteNotificationSubscription = async (userId: string, endpoint: string) => {
-	const res = await dynamo.delete({
-		TableName: process.env.TABLE_NAME,
-		Key: {
-			pk: `${KeyPrefix.NOTIFICATION_SUBSCRIBER}${userId}`,
-			sk: `${KeyPrefix.NOTIFICATION_SUBSCRIBER}${endpoint}`,
-		},
-	});
-
-	if (res.$metadata.httpStatusCode !== 200)
-		throw new TRPCError({
-			code: 'INTERNAL_SERVER_ERROR',
-			message: 'Failed to delete subscription',
-		});
+	return deleteItem(KeyPrefix.notificationSubscriber.pk(userId), KeyPrefix.notificationSubscriber.sk(endpoint));
 };
 
 export const getNotificationSubscription = async (userId: string, endpoint: string) => {
-	const res = await dynamo.get({
-		TableName: process.env.TABLE_NAME,
-		Key: {
-			pk: `${KeyPrefix.NOTIFICATION_SUBSCRIBER}${userId}`,
-			sk: `${KeyPrefix.NOTIFICATION_SUBSCRIBER}${endpoint}`,
-		},
-	});
-
-	if (!res.Item) return null;
-
-	return res.Item as DatabaseNotificationSubscriber;
+	return getItem<NotificationSubscriber>(
+		KeyPrefix.notificationSubscriber.pk(userId),
+		KeyPrefix.notificationSubscriber.sk(endpoint),
+	);
 };
 
 export const getNotificationSubscriptions = async (userId: string) => {
-	const res = await dynamo.query({
-		TableName: process.env.TABLE_NAME,
-		KeyConditionExpression: 'pk = :pk',
-		ExpressionAttributeValues: {
-			':pk': `${KeyPrefix.NOTIFICATION_SUBSCRIBER}${userId}`,
+	return getItems<NotificationSubscriber>({
+		queryExpression: {
+			expression: '#pk = :pk',
+			variables: {
+				':pk': KeyPrefix.notificationSubscriber.pk(userId),
+			},
 		},
 	});
-
-	return res.Items as NotificationSubscriber[];
 };
 
 export const sendNotification = async ({
@@ -130,7 +108,7 @@ export const sendNotification = async ({
 					openUrl: payload.openUrl,
 				}),
 			);
-			for (const sub of notificationSubs) {
+			for (const sub of notificationSubs.data) {
 				try {
 					await webpush.sendNotification(
 						sub,
@@ -326,6 +304,34 @@ export const markBulkNotificationsAsRead = async (
 // export const deleteNotification = async (notificationId: string) => {
 // 	return deleteItem(KeyPrefix.notifications.pk(notificationId), KeyPrefix.notifications.sk(notificationId));
 // };
+
+export const deleteNotificationsForUser = async (userId: string) => {
+	const notifications = (
+		await getItems<DatabaseStoredNotification>({
+			index: 'GSI1',
+			queryExpression: {
+				expression: `#gsi1pk = :gsi1sk`,
+				variables: {
+					':gsi1sk': KeyPrefix.notifications.gsi1pk(userId),
+				},
+			},
+			exhaustive: true,
+		})
+	).data;
+
+	return Promise.all(
+		chunkArray(notifications, 25).map(chunk =>
+			bactchWrite(
+				...chunk.map(chunkItem => ({
+					deleteItem: {
+						pk: chunkItem.pk,
+						sk: chunkItem.sk,
+					},
+				})),
+			),
+		),
+	);
+};
 
 export const getUnreadNotificationCount = async (userId: string) => {
 	return getItem<UnreadNotificationCount>(

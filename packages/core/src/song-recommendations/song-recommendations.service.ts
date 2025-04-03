@@ -1,31 +1,37 @@
 import { TRPCError } from '@trpc/server';
 
-import { KeyPrefix } from '../types/dynamo.types';
-import { getInfiniteData } from '../types/infinite-data.dto';
+import { EntityType, KeyPrefix } from '../types/dynamo.types';
 import { DatabaseSongRecommendation, SongRecommendation } from '../types/song-recommendation.types';
-import { dynamo, getDynamicUpdateStatements } from '../utils/dynamo/dynamo.service';
-import { getUUID } from '../utils/utils';
+import {
+	bactchWrite,
+	deleteItem,
+	dynamo,
+	getItem,
+	getItems,
+	putItem,
+	updateItem,
+} from '../utils/dynamo/dynamo.service';
+import { chunkArray, getUUID } from '../utils/utils';
 import {
 	CreateSongRecommendationDto,
 	GetSongRecommendationsDto,
 	UpdateSongRecommendationDto,
 } from './song-recommendations.dto';
 
-export const getSongRecommendationByTrackIdForUser = async (userId: string, trackId: string) => {
-	const res = await dynamo.query({
-		TableName: process.env.TABLE_NAME,
-		IndexName: 'GSI2',
-		KeyConditionExpression: '#pk = :pk and #sk = :sk',
-		ExpressionAttributeNames: {
-			'#pk': 'gsi2pk',
-			'#sk': 'gsi2sk',
+export const getSongRecommendationByTrackIdForUser = async (
+	userId: string,
+	trackId: string,
+): Promise<SongRecommendation | undefined> => {
+	return getItems<SongRecommendation>({
+		index: 'GSI2',
+		queryExpression: {
+			expression: '#gsi2pk = :gsi2pk and #gsi2sk = :gsi2sk',
+			variables: {
+				':gsi2pk': KeyPrefix.songRecommendation.gsi2pk(userId),
+				':gsi2sk': KeyPrefix.songRecommendation.gsi2sk(trackId),
+			},
 		},
-		ExpressionAttributeValues: {
-			':pk': `${KeyPrefix.SONG_RECOMMENDATION}${userId}`,
-			':sk': `${KeyPrefix.SONG_RECOMMENDATION}${trackId}`,
-		},
-	});
-	return res.Items?.[0] as DatabaseSongRecommendation | undefined;
+	}).then(res => res.data[0]);
 };
 
 export const createSongRecommendation = async (
@@ -50,24 +56,17 @@ export const createSongRecommendation = async (
 		track: dto,
 		createdAt,
 	};
-	const res = await dynamo.put({
-		TableName: process.env.TABLE_NAME,
-		Item: {
-			pk: `${KeyPrefix.SONG_RECOMMENDATION}${recId}`,
-			sk: `${KeyPrefix.SONG_RECOMMENDATION}${recId}`,
-			gsi1pk: `${KeyPrefix.SONG_RECOMMENDATION}${relationshipId}`,
-			gsi1sk: `${KeyPrefix.SONG_RECOMMENDATION}${recommenderId}#unlistened#${createdAt}`,
-			gsi2pk: `${KeyPrefix.SONG_RECOMMENDATION}${recommenderId}`,
-			gsi2sk: `${KeyPrefix.SONG_RECOMMENDATION}${dto.id}`,
-			...songRec,
-		} satisfies DatabaseSongRecommendation,
-	});
 
-	if (res.$metadata.httpStatusCode !== 200)
-		throw new TRPCError({
-			code: 'INTERNAL_SERVER_ERROR',
-			message: 'Could not create song recommendation!',
-		});
+	await putItem<DatabaseSongRecommendation>({
+		pk: KeyPrefix.songRecommendation.pk(recId),
+		sk: KeyPrefix.songRecommendation.sk(recId),
+		gsi1pk: KeyPrefix.songRecommendation.gsi1pk(relationshipId),
+		gsi1sk: KeyPrefix.songRecommendation.gsi1sk(recommenderId, false, createdAt),
+		gsi2pk: KeyPrefix.songRecommendation.gsi2pk(recommenderId),
+		gsi2sk: KeyPrefix.songRecommendation.gsi2sk(dto.id),
+		...songRec,
+		entityType: EntityType.SONG_RECOMMENDATION,
+	});
 
 	return songRec;
 };
@@ -77,59 +76,42 @@ export const getSongRecommendations = async (
 	relationshipId: string,
 	{ limit, cursor, order, ...dto }: GetSongRecommendationsDto,
 ) => {
-	const res = await dynamo.query({
-		TableName: process.env.TABLE_NAME,
-		IndexName: 'GSI1',
-		KeyConditionExpression: '#pk = :pk and begins_with(#sk, :sk)',
-		ExpressionAttributeNames: {
-			'#pk': 'gsi1pk',
-			'#sk': 'gsi1sk',
+	return getItems<SongRecommendation>({
+		index: 'GSI1',
+		queryExpression: {
+			expression: '#gsi1pk = :gsi1pk and begins_with(#gsi1sk, :gsi1sk)',
+			variables: {
+				':gsi1pk': KeyPrefix.songRecommendation.gsi1pk(relationshipId),
+				':gsi1sk': KeyPrefix.songRecommendation.buildKey(partnerId, dto.filter ?? ''),
+			},
 		},
-		ExpressionAttributeValues: {
-			':pk': `${KeyPrefix.SONG_RECOMMENDATION}${relationshipId}`,
-			':sk': `${KeyPrefix.SONG_RECOMMENDATION}${partnerId}${dto.filter ? `#${dto.filter}` : ''}`,
-		},
-		Limit: limit,
-		ExclusiveStartKey: cursor,
-		ScanIndexForward: order === 'asc',
+		limit,
+		cursor,
+		order,
 	});
-
-	return getInfiniteData<SongRecommendation>(res);
 };
 
 export const getSongRecommendationsByRelationshipId = async (
 	relationshipId: string,
 	{ limit, cursor, order, ...dto }: GetSongRecommendationsDto,
 ) => {
-	const res = await dynamo.query({
-		TableName: process.env.TABLE_NAME,
-		IndexName: 'GSI3',
-		KeyConditionExpression: '#pk = :pk and begins_with(#sk, :sk)',
-		ExpressionAttributeNames: {
-			'#pk': 'gsi3pk',
-			'#sk': 'gsi3sk',
+	return getItems<SongRecommendation>({
+		index: 'GSI3',
+		queryExpression: {
+			expression: '#gsi3pk = :gsi3pk and begins_with(#gsi3sk, :gsi3sk)',
+			variables: {
+				':gsi3pk': KeyPrefix.songRecommendation.gsi3pk(relationshipId),
+				':gsi3sk': KeyPrefix.songRecommendation.buildKey(relationshipId),
+			},
 		},
-		ExpressionAttributeValues: {
-			':pk': `${KeyPrefix.SONG_RECOMMENDATION}${relationshipId}`,
-			':sk': `${KeyPrefix.SONG_RECOMMENDATION}${relationshipId}`,
-		},
-		Limit: limit,
-		ExclusiveStartKey: cursor,
-		ScanIndexForward: order === 'asc',
+		limit,
+		cursor,
+		order,
 	});
-
-	return getInfiniteData<SongRecommendation>(res);
 };
 
 export const getSongRecommendationById = async (recId: string) => {
-	const res = await dynamo.get({
-		TableName: process.env.TABLE_NAME,
-		Key: {
-			pk: `${KeyPrefix.SONG_RECOMMENDATION}${recId}`,
-			sk: `${KeyPrefix.SONG_RECOMMENDATION}${recId}`,
-		},
-	});
-	return res.Item as SongRecommendation | undefined;
+	return getItem<SongRecommendation>(KeyPrefix.songRecommendation.pk(recId), KeyPrefix.songRecommendation.sk(recId));
 };
 
 export const updateSongRecommendation = async (recId: string, dto: UpdateSongRecommendationDto) => {
@@ -141,31 +123,24 @@ export const updateSongRecommendation = async (recId: string, dto: UpdateSongRec
 		});
 
 	const updateTime = new Date().toISOString();
-	const { updateStatements, expressionAttributeNames, expressionAttributeValues } =
-		getDynamicUpdateStatements<DatabaseSongRecommendation>({
+	return updateItem<DatabaseSongRecommendation>({
+		pk: KeyPrefix.songRecommendation.pk(recId),
+		sk: KeyPrefix.songRecommendation.sk(recId),
+		update: {
 			...dto,
 			gsi1sk:
 				dto.listened !== undefined
-					? `${KeyPrefix.SONG_RECOMMENDATION}${existingRec.recommenderId}#${dto.listened ? 'listened' : 'unlistened'}#${updateTime}`
+					? KeyPrefix.songRecommendation.gsi1sk(
+							existingRec.recommenderId,
+							dto.listened,
+							existingRec.createdAt,
+						)
 					: undefined,
-			gsi3pk: `${KeyPrefix.SONG_RECOMMENDATION}${existingRec.relationshipId}`,
-			gsi3sk: `${KeyPrefix.SONG_RECOMMENDATION}${existingRec.relationshipId}#${updateTime}`,
+			gsi3pk: KeyPrefix.songRecommendation.gsi3pk(existingRec.relationshipId),
+			gsi3sk: KeyPrefix.songRecommendation.gsi3sk(existingRec.relationshipId, updateTime),
 			updatedAt: updateTime,
-		});
-
-	const res = await dynamo.update({
-		TableName: process.env.TABLE_NAME,
-		Key: {
-			pk: `${KeyPrefix.SONG_RECOMMENDATION}${recId}`,
-			sk: `${KeyPrefix.SONG_RECOMMENDATION}${recId}`,
 		},
-		UpdateExpression: updateStatements,
-		ExpressionAttributeNames: expressionAttributeNames,
-		ExpressionAttributeValues: expressionAttributeValues,
-		ReturnValues: 'ALL_NEW',
 	});
-
-	return res.Attributes as SongRecommendation;
 };
 
 export const deleteSongRecommendation = async (recId: string) => {
@@ -176,13 +151,32 @@ export const deleteSongRecommendation = async (recId: string) => {
 			message: 'Song recommendation not found!',
 		});
 
-	await dynamo.delete({
-		TableName: process.env.TABLE_NAME,
-		Key: {
-			pk: `${KeyPrefix.SONG_RECOMMENDATION}${recId}`,
-			sk: `${KeyPrefix.SONG_RECOMMENDATION}${recId}`,
+	await deleteItem(KeyPrefix.songRecommendation.pk(recId), KeyPrefix.songRecommendation.sk(recId));
+	return existingRec;
+};
+
+export const deleteSongRecommendationsByRelationshipId = async (relationshipId: string) => {
+	const songRecs = await getItems<SongRecommendation>({
+		index: 'GSI1',
+		queryExpression: {
+			expression: '#gsi1pk = :gsi1pk',
+			variables: {
+				':gsi1pk': KeyPrefix.songRecommendation.gsi1pk(relationshipId),
+			},
 		},
+		exhaustive: true,
 	});
 
-	return existingRec;
+	return Promise.all(
+		chunkArray(songRecs.data, 25).map(async chunk =>
+			bactchWrite(
+				...chunk.map(chunkItem => ({
+					deleteItem: {
+						pk: KeyPrefix.songRecommendation.pk(chunkItem.id),
+						sk: KeyPrefix.songRecommendation.sk(chunkItem.id),
+					},
+				})),
+			),
+		),
+	);
 };

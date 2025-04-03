@@ -22,7 +22,7 @@ const subscriptions: Record<
 > = {};
 
 const fetchSubscriptionsForUser = async (userId: string) => {
-	const subs = await getNotificationSubscriptions(userId);
+	const subs = (await getNotificationSubscriptions(userId)).data;
 	if (!subs.length) return;
 
 	subscriptions[userId] = subs.map(sub => ({

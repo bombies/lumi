@@ -34,7 +34,7 @@ export const GetSongRecommendations = ({
 	).useInfiniteQuery(
 		{ order, filter, limit },
 		{
-			getNextPageParam: lastPage => lastPage.cursor,
+			getNextPageParam: lastPage => lastPage.nextCursor,
 		},
 	);
 

@@ -18,7 +18,7 @@ export const handler: Handler = async () => {
 			'#pk': 'pk',
 		},
 		ExpressionAttributeValues: {
-			':pk': KeyPrefix.AFFIRMATION,
+			':pk': KeyPrefix.affirmation.prefix,
 		},
 	};
 

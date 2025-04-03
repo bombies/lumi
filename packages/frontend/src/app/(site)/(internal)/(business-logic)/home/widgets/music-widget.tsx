@@ -36,7 +36,7 @@ const MusicWidget: FC = () => {
 			className={cn('max-w-[45rem] rounded-md border border-border p-6 space-y-4 bg-cover bg-no-repeat')}
 			style={{
 				backgroundImage:
-					songRecs?.pages[0].data[0].track.albumImage &&
+					songRecs?.pages[0].data[0]?.track.albumImage &&
 					`url('${songRecs.pages[0].data[0].track.albumImage}')`,
 			}}
 		>

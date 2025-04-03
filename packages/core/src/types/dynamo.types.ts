@@ -1,8 +1,85 @@
 abstract class AbstractDbKeys {
-	constructor(protected readonly prefix: string) {}
+	constructor(readonly prefix: string) {}
 
 	buildKey(...suffix: string[]) {
 		return `${this.prefix}${suffix.join('#')}`;
+	}
+}
+
+class UserDbKeys extends AbstractDbKeys {
+	constructor(prefix: string) {
+		super(prefix);
+	}
+
+	pk(userId: string) {
+		return this.buildKey(userId);
+	}
+
+	sk(userId: string) {
+		return this.buildKey(userId);
+	}
+
+	gsi1pk() {
+		return this.buildKey('username');
+	}
+
+	gsi1sk(username: string) {
+		return this.buildKey(username);
+	}
+
+	gsi2pk() {
+		return this.buildKey('email');
+	}
+
+	gsi2sk(email: string) {
+		return this.buildKey(email);
+	}
+}
+
+class RelationshipRequestDbKeys extends AbstractDbKeys {
+	private static senderPrefix = 'rship::sender' as const;
+	private static receiverPrefix = 'rship::receiver' as const;
+
+	constructor(prefix: string) {
+		super(prefix);
+	}
+
+	pk(id: string) {
+		return this.buildKey(id);
+	}
+
+	sk(id: string) {
+		return this.buildKey(id);
+	}
+
+	gsi1pk() {
+		return RelationshipRequestDbKeys.senderPrefix;
+	}
+
+	gsi1sk(senderId: string) {
+		return `${RelationshipRequestDbKeys.senderPrefix}#${senderId}`;
+	}
+
+	gsi2pk() {
+		return RelationshipRequestDbKeys.receiverPrefix;
+	}
+
+	gsi2sk(receiverId: string) {
+		return `${RelationshipRequestDbKeys.receiverPrefix}#${receiverId}`;
+	}
+}
+
+class RelationshipDbKeys extends AbstractDbKeys {
+	constructor(prefix: string) {
+		super(prefix);
+	}
+
+	pk(relationshipId: string) {
+		return this.buildKey(relationshipId);
+	}
+
+	sk(relationshipId: string) {
+		return this.buildKey(relationshipId);
 	}
 }
 
@@ -31,6 +108,20 @@ class ReceivedAffirmationDbKeys extends AbstractDbKeys {
 
 	sk(receiverId: string, timestamp: string) {
 		return this.buildKey(receiverId, timestamp);
+	}
+}
+
+class NotificationSubscriberDbKeys extends AbstractDbKeys {
+	constructor(prefix: string) {
+		super(prefix);
+	}
+
+	pk(userId: string) {
+		return this.buildKey(userId);
+	}
+
+	sk(endpoint: string) {
+		return this.buildKey(endpoint);
 	}
 }
 
@@ -108,31 +199,95 @@ class MomentDbKeys extends AbstractDbKeys {
 	}
 }
 
-export class KeyPrefix {
-	static USER = 'user#' as const;
-	static USER_NAME = 'user#username' as const;
-	static USER_EMAIL = 'user#email' as const;
-	static RELATIONSHIP_REQUEST = 'rshipreq#' as const;
-	static RELATIONSHIP = 'rship#' as const;
-	static RELATIONSHIP_REQUEST_SENDER = 'rship::sender' as const;
-	static RELATIONSHIP_REQUEST_RECEIVER = 'rship::receiver' as const;
-	static AFFIRMATION = 'rship::affirmation#' as const;
-	static RECEIVED_AFFIRMATION = 'rship::received_affirmation#' as const;
-	static MOMENT_DETAILS = 'moment::details#' as const;
-	static MOMENT_MESSAGE = 'moment::message#' as const;
-	static SONG_RECOMMENDATION = 'songrec#' as const;
-	static NOTIFICATION_SUBSCRIBER = 'notification::subscriber#' as const;
-	static WEBSOCKET_HEARTBEAT = 'ws::heartbeat#' as const;
-	static NOTIFICATION = 'notification#' as const;
-	static UNREAD_NOTIFICATION_COUNT = 'unread::notification::count#' as const;
+class MomentMessageDbKeys extends AbstractDbKeys {
+	constructor(prefix: string) {
+		super(prefix);
+	}
 
+	pk(messageId: string) {
+		return this.buildKey(messageId);
+	}
+
+	sk(messageId: string) {
+		return this.buildKey(messageId);
+	}
+
+	gsi1pk(momentId: string) {
+		return this.buildKey(momentId);
+	}
+
+	gsi1sk(timestamp: string) {
+		return this.buildKey(timestamp);
+	}
+}
+
+class SongRecommendationDbKeys extends AbstractDbKeys {
+	constructor(prefix: string) {
+		super(prefix);
+	}
+
+	pk(recommendationId: string) {
+		return this.buildKey(recommendationId);
+	}
+
+	sk(recommendationId: string) {
+		return this.buildKey(recommendationId);
+	}
+
+	gsi1pk(relationshipId: string) {
+		return this.buildKey(relationshipId);
+	}
+
+	gsi1sk(recommenderId: string, listened: boolean, createdAt: string) {
+		return this.buildKey(recommenderId, listened ? 'listened' : 'unlistened', createdAt);
+	}
+
+	gsi2pk(recommenderId: string) {
+		return this.buildKey(recommenderId);
+	}
+
+	gsi2sk(trackId: string) {
+		return this.buildKey(trackId);
+	}
+
+	gsi3pk(relationshipId: string) {
+		return this.buildKey(relationshipId);
+	}
+
+	gsi3sk(relationshipId: string, updateTimestamp: string) {
+		return this.buildKey(relationshipId, updateTimestamp);
+	}
+}
+
+class WebSocketHeartbeatDbKeys extends AbstractDbKeys {
+	constructor(prefix: string) {
+		super(prefix);
+	}
+
+	pk() {
+		return this.buildKey();
+	}
+
+	sk(clientId: string) {
+		return this.buildKey(clientId);
+	}
+}
+
+export class KeyPrefix {
 	private constructor() {}
 
-	static affirmation = new AffirmationDbKeys(this.AFFIRMATION);
-	static receivedAffirmation = new ReceivedAffirmationDbKeys(this.RECEIVED_AFFIRMATION);
-	static notifications = new NotificationDbKeys(this.NOTIFICATION);
-	static unreadNotificationCount = new UnreadNotificationDbKeys(this.UNREAD_NOTIFICATION_COUNT);
-	static moments = new MomentDbKeys(this.MOMENT_DETAILS);
+	static user = new UserDbKeys('user#');
+	static relationshipRequest = new RelationshipRequestDbKeys('rshipreq#');
+	static relationship = new RelationshipDbKeys('rship#');
+	static affirmation = new AffirmationDbKeys('rship::affirmation#');
+	static receivedAffirmation = new ReceivedAffirmationDbKeys('rship::received_affirmation#');
+	static notifications = new NotificationDbKeys('notification#');
+	static unreadNotificationCount = new UnreadNotificationDbKeys('unread::notification::count#');
+	static moment = new MomentDbKeys('moment::details#');
+	static momentMessage = new MomentMessageDbKeys('moment::message#');
+	static notificationSubscriber = new NotificationSubscriberDbKeys('notification::subscriber#');
+	static songRecommendation = new SongRecommendationDbKeys('songrec#');
+	static webSocketHeartbeat = new WebSocketHeartbeatDbKeys('ws::heartbeat#');
 }
 
 export enum EntityType {
@@ -147,4 +302,5 @@ export enum EntityType {
 	WEBSOCKET_HEARTBEAT = 'WEBSOCKET_HEARTBEAT',
 	NOTIFICATION = 'NOTIFICATION',
 	UNREAD_NOTIFICATION_COUNT = 'UNREAD_NOTIFICATION_COUNT',
+	SONG_RECOMMENDATION = 'SONG_RECOMMENDATION',
 }

@@ -54,6 +54,9 @@ db.subscribe(
 	{
 		handler: 'packages/functions/db/stream.handler',
 		link: [db, redisHost, redisPort, redisUser, redisPassword],
+		environment: {
+			TABLE_NAME: db.name,
+		},
 	},
 	{
 		filters: [

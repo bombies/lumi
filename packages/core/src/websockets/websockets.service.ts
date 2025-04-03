@@ -122,8 +122,8 @@ export const storeWebsocketHeartbeat = async (
 	const res = await dynamo.put({
 		TableName: process.env.TABLE_NAME,
 		Item: {
-			pk: `${KeyPrefix.WEBSOCKET_HEARTBEAT}`,
-			sk: `${KeyPrefix.WEBSOCKET_HEARTBEAT}${clientId}`,
+			pk: KeyPrefix.webSocketHeartbeat.pk(),
+			sk: KeyPrefix.webSocketHeartbeat.sk(clientId),
 			...heartbeat,
 			entityType: EntityType.WEBSOCKET_HEARTBEAT,
 		} satisfies DatabaseWebSocketHeartbeat,

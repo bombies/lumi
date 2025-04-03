@@ -57,4 +57,5 @@ export type DatabaseRelationship = Relationship & {
 	 * rship#<id>
 	 */
 	sk: string;
+	entityType: EntityType.RELATIONSHIP;
 };

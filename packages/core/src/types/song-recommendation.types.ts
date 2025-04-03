@@ -1,3 +1,5 @@
+import { EntityType } from './dynamo.types';
+
 export type SongRecommendation = {
 	id: string;
 	listened: boolean;
@@ -28,4 +30,5 @@ export type DatabaseSongRecommendation = SongRecommendation & {
 	gsi2sk: string;
 	gsi3pk?: string;
 	gsi3sk?: string;
+	entityType: EntityType.SONG_RECOMMENDATION;
 };

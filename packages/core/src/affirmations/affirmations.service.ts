@@ -9,9 +9,17 @@ import {
 } from '../types/affirmations.types';
 import { EntityType, KeyPrefix } from '../types/dynamo.types';
 import { Relationship } from '../types/relationship.types';
-import { deleteItem, dynamo, getItem, getItems, putItem, updateItem } from '../utils/dynamo/dynamo.service';
+import {
+	bactchWrite,
+	deleteItem,
+	dynamo,
+	getItem,
+	getItems,
+	putItem,
+	updateItem,
+} from '../utils/dynamo/dynamo.service';
 import { extractPartnerIdFromRelationship } from '../utils/global-utils';
-import { getUUID } from '../utils/utils';
+import { chunkArray, getUUID } from '../utils/utils';
 import { CreateAffirmationDto, GetReceivedAffirmationsDto, UpdateAffirmationDto } from './affirmations.dto';
 
 export const createAffirmation = async (dto: CreateAffirmationDto) => {
@@ -132,13 +140,30 @@ export const deleteAffirmation = async (ownerId: string, relationshipId: string,
 };
 
 export const deleteAffirmationsForRelationship = async (relationshipId: string) => {
-	// TODO: Fix this. Need to fetch each affirmation independently and batch delete them in chunks.
-	const res = await dynamo.delete({
-		TableName: process.env.TABLE_NAME,
-		Key: {
-			pk: KeyPrefix.affirmation.pk(relationshipId),
-		},
-	});
+	const relationshipAffirmations = (
+		await getItems<DatabaseAffirmation>({
+			queryExpression: {
+				expression: '#pk = :pk',
+				variables: {
+					':pk': KeyPrefix.affirmation.pk(relationshipId),
+				},
+			},
+			exhaustive: true,
+		})
+	).data;
+
+	return Promise.all(
+		chunkArray(relationshipAffirmations, 25).map(chunk =>
+			bactchWrite(
+				...chunk.map(chunkItem => ({
+					deleteItem: {
+						pk: chunkItem.pk,
+						sk: chunkItem.sk,
+					},
+				})),
+			),
+		),
+	);
 };
 
 export const createReceivedAffirmation = async (receiver: string, relationshipId: string, affirmation: string) => {

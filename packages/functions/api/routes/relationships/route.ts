@@ -2,6 +2,7 @@ import { getRelationshipRequestsForUserDto } from '@lumi/core/relationships/rela
 import {
 	acceptRelationshipRequest,
 	deleteRelationshipRequestById,
+	deleteUserRelationship,
 	getReceivedRelationshipRequestsForUser,
 	getSentRelationshipRequestsForUser,
 	sendRelationshipRequest,
@@ -62,4 +63,6 @@ export const relationshipsRouter = router({
 		const partner = await getUserById(partnerId);
 		return partner;
 	}),
+
+	leaveRelationship: relationshipProcedure.mutation(({ ctx: { user } }) => deleteUserRelationship(user.id)),
 });
