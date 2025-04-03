@@ -22,14 +22,20 @@ export const contentBucket = new sst.aws.Bucket(`ContentBucket`, {
 	},
 });
 
+const customCdnKeyStages = new Set(['production', 'staging']);
+
 export const contentCdnPublicKey = aws.cloudfront.PublicKey.get(
-	`${appify('cdn-public-key')}`,
-	$app.stage === 'staging' ? 'KO11CBZIPW9TI' : 'K3ISC02EJNN5G',
+	customCdnKeyStages.has($app.stage) ? `${appify('cdn-public-key')}` : `${$app.name}-ajani-cdn-public-key`,
+	$app.stage === 'production' ? 'K1JK67V4KHFXMK' : $app.stage === 'staging' ? 'KO11CBZIPW9TI' : 'KH60ARKKV3FB3',
 );
 
 export const contentCdnKeyGroup = aws.cloudfront.KeyGroup.get(
-	`${appify('cdn-key-group')}`,
-	$app.stage === 'staging' ? '9ab92ced-8c35-494a-9336-75459ecd8438' : '4c6a7e48-1680-426d-9949-81cd3de6e744',
+	customCdnKeyStages.has($app.stage) ? `${appify('cdn-key-group')}` : `${$app.name}-ajani-cdn-key-group`,
+	$app.stage === 'production'
+		? 'cf56d0c1-fa84-474a-87e7-b25d754b7e8d'
+		: $app.stage === 'staging'
+			? '9ab92ced-8c35-494a-9336-75459ecd8438'
+			: 'cf56d0c1-fa84-474a-87e7-b25d754b7e8d',
 );
 
 sst.Linkable.wrap(aws.cloudfront.KeyGroup, kg => ({
