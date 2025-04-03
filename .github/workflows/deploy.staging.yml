@@ -27,6 +27,7 @@ jobs:
               run: bun i
             - name: Create CDN Key Files
               run: |
+                  mkdir -p ./cdn-keys
                   echo "${{ secrets.CDN_PUBLIC_KEY }}" > ./cdn-keys/staging.public_key.pem
                   echo "${{ secrets.CDN_PRIVATE_KEY }}" > ./cdn-keys/staging.private_key.pem
             - name: Building & Deploy Project
