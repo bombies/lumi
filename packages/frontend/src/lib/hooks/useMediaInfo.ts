@@ -9,7 +9,7 @@ export const useMediaInfo = (type: FormatType) => {
 	useEffect(() => {
 		mediaInfoFactory({
 			format: type,
-			locateFile: filename => `/${filename}`,
+			locateFile: filename => `/wasm/${filename}`,
 		})
 			.then(mi => {
 				setMediaInfo(mi);

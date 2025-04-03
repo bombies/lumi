@@ -1,7 +1,7 @@
 'use client';
 
 import { RefObject } from 'react';
-import { FormatType, GeneralTrack, MediaInfo, ReadChunkFunc, Track, VideoTrack } from 'mediainfo.js';
+import type { FormatType, GeneralTrack, MediaInfo, ReadChunkFunc, Track, VideoTrack } from 'mediainfo.js';
 import mime from 'mime';
 import { Area } from 'react-easy-crop';
 import { toast } from 'sonner';

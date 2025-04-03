@@ -1,5 +1,7 @@
 # dependencies
 node_modules
+!node_modules/mediainfo.js/
+!node_modules/mediainfo.js/**
 
 # sst
 .sst
@@ -7,7 +9,7 @@ node_modules
 # tmp files
 .#*
 
-# env 
+# env
 .env*.local
 .env
 
