@@ -5,6 +5,125 @@
 
 declare module "sst" {
   export interface Resource {
+    "AffirmationSenderDLQ": {
+      "type": "sst.aws.Queue"
+      "url": string
+    }
+    "AffirmationSenderQueue": {
+      "type": "sst.aws.Queue"
+      "url": string
+    }
+    "AuthSecret": {
+      "type": "sst.sst.Secret"
+      "value": string
+    }
+    "ContentBucket": {
+      "name": string
+      "type": "sst.aws.Bucket"
+    }
+    "Database": {
+      "name": string
+      "type": "sst.aws.Dynamo"
+    }
+    "Frontend": {
+      "type": "sst.aws.Nextjs"
+      "url": string
+    }
+    "MailerHost": {
+      "type": "sst.sst.Secret"
+      "value": string
+    }
+    "MailerPassword": {
+      "type": "sst.sst.Secret"
+      "value": string
+    }
+    "MailerPort": {
+      "type": "sst.sst.Secret"
+      "value": string
+    }
+    "MailerUser": {
+      "type": "sst.sst.Secret"
+      "value": string
+    }
+    "PostgresConnectionString": {
+      "type": "sst.sst.Secret"
+      "value": string
+    }
+    "PostgresDatabase": {
+      "type": "sst.sst.Secret"
+      "value": string
+    }
+    "PostgresHost": {
+      "type": "sst.sst.Secret"
+      "value": string
+    }
+    "PostgresPassword": {
+      "type": "sst.sst.Secret"
+      "value": string
+    }
+    "PostgresPort": {
+      "type": "sst.sst.Secret"
+      "value": string
+    }
+    "PostgresUsername": {
+      "type": "sst.sst.Secret"
+      "value": string
+    }
+    "RealtimeServer": {
+      "authorizer": string
+      "endpoint": string
+      "type": "sst.aws.Realtime"
+    }
+    "RedisHost": {
+      "type": "sst.sst.Secret"
+      "value": string
+    }
+    "RedisPassword": {
+      "type": "sst.sst.Secret"
+      "value": string
+    }
+    "RedisPort": {
+      "type": "sst.sst.Secret"
+      "value": string
+    }
+    "RedisUser": {
+      "type": "sst.sst.Secret"
+      "value": string
+    }
+    "SentryAuthToken": {
+      "type": "sst.sst.Secret"
+      "value": string
+    }
+    "SpotifyClientId": {
+      "type": "sst.sst.Secret"
+      "value": string
+    }
+    "SpotifyClientSecret": {
+      "type": "sst.sst.Secret"
+      "value": string
+    }
+    "Trpc": {
+      "name": string
+      "type": "sst.aws.Function"
+      "url": string
+    }
+    "VapidPrivateKey": {
+      "type": "sst.sst.Secret"
+      "value": string
+    }
+    "VapidPublicKey": {
+      "type": "sst.sst.Secret"
+      "value": string
+    }
+    "WebSocketToken": {
+      "type": "sst.sst.Secret"
+      "value": string
+    }
+    "lumi-staging-cdn-key-group": {
+      "id": string
+      "items": any
+      "type": "aws.cloudfront/keyGroup.KeyGroup"
+    }
   }
 }
 /// <reference path="sst-env.d.ts" />
