@@ -15,7 +15,7 @@ export const CreateMomentDetails = () =>
 export const GetMomentDetails = (momentId: string) => trpc.moments.getMomentDetails.useQuery(momentId);
 
 export const SearchMoments = (
-	title: string,
+	query: string,
 	args?: {
 		limit?: number;
 		order?: 'asc' | 'desc';
@@ -23,7 +23,7 @@ export const SearchMoments = (
 ) =>
 	trpc.moments.searchMoments.useInfiniteQuery(
 		{
-			title,
+			query,
 			...args,
 		},
 		{

@@ -137,11 +137,48 @@ export async function getItem<T extends Record<string, any>>(pk: string, sk: str
 	return res.Item as T;
 }
 
+export async function batchGetItems<T extends Record<string, any>>(keys: { pk: string; sk: string }[]) {
+	const responses = await Promise.all(
+		chunkArray(keys, 50).map(keyChunk =>
+			dynamo.batchGet({
+				RequestItems: {
+					[process.env.TABLE_NAME!]: {
+						Keys: keyChunk.map(key => ({
+							pk: key.pk,
+							sk: key.sk,
+						})),
+					},
+				},
+			}),
+		),
+	);
+
+	const results = responses.reduce((acc, res) => {
+		if (res.$metadata.httpStatusCode !== 200) return acc;
+		return [...acc, ...(res.Responses?.[process.env.TABLE_NAME!] ?? [])] as T[];
+	}, [] as T[]);
+
+	// Handle unprocessed keys for each batch
+	const incompleteResponses = responses.filter(response => response.UnprocessedKeys);
+	if (incompleteResponses.length)
+		for (const response of incompleteResponses) {
+			const unprocessedKeys = response.UnprocessedKeys;
+			if (unprocessedKeys && Object.keys(unprocessedKeys).length > 0) {
+				const unprocessedResponse = await dynamo.batchGet({
+					RequestItems: unprocessedKeys,
+				});
+				results.push(...((unprocessedResponse.Responses?.[process.env.TABLE_NAME!] ?? []) as T[]));
+			}
+		}
+
+	return results;
+}
+
 type GetItemsParams<T> = {
 	table?: string;
 	index?: 'GSI1' | 'GSI2' | 'GSI3' | 'GSI4';
 	order?: 'asc' | 'desc';
-	cursor?: Record<string, any>;
+	cursor?: Record<string, any> | null;
 	limit?: number;
 	projectedAttributes?: (keyof T)[];
 	queryExpression: {
@@ -195,7 +232,7 @@ export async function getItems<T extends Record<string, any>>({
 			...projectionExpressionNames,
 		},
 		ExpressionAttributeValues: { ...queryExpression.variables, ...queryExpression.filter?.variables },
-		ExclusiveStartKey: cursor,
+		ExclusiveStartKey: cursor ?? undefined,
 		Limit: limit,
 		ScanIndexForward: order === 'asc',
 	};

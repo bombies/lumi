@@ -51,11 +51,32 @@ export const createMomentMessageDto = momentMessageSchema
 
 export const getMomentUploadUrlDto = getUploadUrlDto;
 
-export const searchMomentsByTitleDto = getInfiniteMomentsDto.and(
-	z.object({
-		title: z.string(),
-	}),
-);
+export const searchMomentsDto = createInfiniteDataDto({
+	defaultLimit: 10,
+})
+	.omit({
+		cursor: true,
+	})
+	.and(infiniteDataOrderDtoWithDefault('desc'))
+	.and(
+		z.object({
+			query: z.string(),
+			cursor: z.array(z.record(z.any()).or(z.null()), z.record(z.any()).or(z.null())),
+		}),
+	);
+
+export const createMomentTagDto = z.object({
+	momentId: z.string().uuid(),
+	tag: z.string().min(1).max(50),
+});
+
+export const getMomentsByTagDto = createInfiniteDataDto({ defaultLimit: 10 })
+	.and(infiniteDataOrderDtoWithDefault('desc'))
+	.and(
+		z.object({
+			tagQuery: z.string(),
+		}),
+	);
 
 export type CreateMomentDetailsDto = z.infer<typeof createMomentDetailsDto>;
 export type GetInfiniteMomentsDto = z.infer<typeof getInfiniteMomentsDto>;
@@ -63,4 +84,6 @@ export type UpdateMomentDetailsDto = z.infer<typeof updateMomentDetailsDto>;
 export type CreateMomentMessageDto = z.infer<typeof createMomentMessageDto>;
 export type GetInfiniteMomentMessagesDto = z.infer<typeof getInfiniteMomentMessagesDto>;
 export type GetMomentUploadUrlDto = z.infer<typeof getMomentUploadUrlDto>;
-export type SearchMomentsByTitleDto = z.infer<typeof searchMomentsByTitleDto>;
+export type SearchMomentsDto = z.infer<typeof searchMomentsDto>;
+export type CreateMomentTagDto = z.infer<typeof createMomentTagDto>;
+export type GetMomentsByTagDto = z.infer<typeof getMomentsByTagDto>;

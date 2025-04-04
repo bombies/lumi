@@ -25,6 +25,22 @@ export type DatabaseMoment = Moment & {
 	entityType: EntityType.MOMENT_DETAILS;
 };
 
+export type MomentTag = {
+	tag: string;
+	momentId: string;
+	relationshipId: string;
+	taggerId: string;
+	createdAt: string;
+};
+
+export type DatabaseMomentTag = MomentTag & {
+	pk: string;
+	sk: string;
+	gsi1pk: string;
+	gsi1sk: string;
+	entityType: EntityType.MOMENT_TAG;
+};
+
 export type MomentMessage = z.infer<typeof momentMessageSchema> & {
 	id: string;
 	timestamp: string;

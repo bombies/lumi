@@ -273,20 +273,49 @@ class WebSocketHeartbeatDbKeys extends AbstractDbKeys {
 	}
 }
 
+class MomentTagDbKeys extends AbstractDbKeys {
+	constructor(prefix: string) {
+		super(prefix);
+	}
+
+	pk(relationshipId: string) {
+		return this.buildKey(relationshipId);
+	}
+
+	sk(momentId: string, tag: string) {
+		return this.buildKey(momentId, tag);
+	}
+
+	gsi1pk(relationshipId: string) {
+		return this.buildKey(relationshipId);
+	}
+
+	gsi1sk(tag: string, timestamp: string) {
+		return `${tag}#${timestamp}`;
+	}
+}
+
 export class KeyPrefix {
 	private constructor() {}
 
 	static user = new UserDbKeys('user#');
+
 	static relationshipRequest = new RelationshipRequestDbKeys('rshipreq#');
 	static relationship = new RelationshipDbKeys('rship#');
+
 	static affirmation = new AffirmationDbKeys('rship::affirmation#');
 	static receivedAffirmation = new ReceivedAffirmationDbKeys('rship::received_affirmation#');
+
 	static notifications = new NotificationDbKeys('notification#');
 	static unreadNotificationCount = new UnreadNotificationDbKeys('unread::notification::count#');
+	static notificationSubscriber = new NotificationSubscriberDbKeys('notification::subscriber#');
+
 	static moment = new MomentDbKeys('moment::details#');
 	static momentMessage = new MomentMessageDbKeys('moment::message#');
-	static notificationSubscriber = new NotificationSubscriberDbKeys('notification::subscriber#');
+	static momentTag = new MomentTagDbKeys('moment::tag#');
+
 	static songRecommendation = new SongRecommendationDbKeys('songrec#');
+
 	static webSocketHeartbeat = new WebSocketHeartbeatDbKeys('ws::heartbeat#');
 }
 
@@ -294,13 +323,19 @@ export enum EntityType {
 	USER = 'USER',
 	RELATIONSHIP_REQUEST = 'RELATIONSHIP_REQUEST',
 	RELATIONSHIP = 'RELATIONSHIP',
+
 	AFFIRMATION = 'AFFIRMATION',
 	RECEIVED_AFFIRMATION = 'RECEIVED_AFFIRMATION',
+
 	MOMENT_DETAILS = 'MOMENT_DETAILS',
 	MOMENT_MESSAGE = 'MOMENT_MESSAGE',
+	MOMENT_TAG = 'MOMENT_TAG',
+
 	NOTIFICATION_SUBSCRIBER = 'NOTIFICATION_SUBSCRIBER',
-	WEBSOCKET_HEARTBEAT = 'WEBSOCKET_HEARTBEAT',
 	NOTIFICATION = 'NOTIFICATION',
 	UNREAD_NOTIFICATION_COUNT = 'UNREAD_NOTIFICATION_COUNT',
+
+	WEBSOCKET_HEARTBEAT = 'WEBSOCKET_HEARTBEAT',
+
 	SONG_RECOMMENDATION = 'SONG_RECOMMENDATION',
 }

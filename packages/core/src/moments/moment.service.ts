@@ -3,9 +3,17 @@ import mime from 'mime';
 import { Resource } from 'sst';
 
 import { EntityType, KeyPrefix } from '../types/dynamo.types';
-import { InfiniteData, getInfiniteData } from '../types/infinite-data.dto';
-import { DatabaseMoment, DatabaseMomentMessage, Moment, MomentMessage } from '../types/moment.types';
+import { InfiniteData, buildInfiniteData, getInfiniteData } from '../types/infinite-data.dto';
 import {
+	DatabaseMoment,
+	DatabaseMomentMessage,
+	DatabaseMomentTag,
+	Moment,
+	MomentMessage,
+	MomentTag,
+} from '../types/moment.types';
+import {
+	batchGetItems,
 	deleteItem,
 	deleteManyItems,
 	dynamo,
@@ -20,10 +28,12 @@ import { attachUrlsToMoment } from './moment.helpers';
 import {
 	CreateMomentDetailsDto,
 	CreateMomentMessageDto,
+	CreateMomentTagDto,
 	GetInfiniteMomentMessagesDto,
 	GetInfiniteMomentsDto,
 	GetMomentUploadUrlDto,
-	SearchMomentsByTitleDto,
+	GetMomentsByTagDto,
+	SearchMomentsDto,
 	UpdateMomentDetailsDto,
 } from './moments.dto';
 
@@ -43,6 +53,11 @@ const normalizeMomentTitle = (title: string) => {
 			// Trim leading and trailing spaces
 			.trim()
 	);
+};
+
+const normalizeMomentTag = (tag: string) => {
+	const normalizedTag = normalizeMomentTitle(tag);
+	return normalizedTag.replaceAll(/\s/g, '');
 };
 
 export const createMomentDetails = async (userId: string, relationshipId: string, dto: CreateMomentDetailsDto) => {
@@ -140,11 +155,8 @@ export const getMomentsForUser = async (userId: string, { limit, cursor, order }
 	});
 };
 
-export const searchMomentsByTitle = async (
-	relationshipId: string,
-	{ title, limit, cursor, order }: SearchMomentsByTitleDto,
-) => {
-	return getItems<Moment>({
+export const searchMoments = async (relationshipId: string, { query, limit, cursor, order }: SearchMomentsDto) => {
+	const moments = await getItems<Moment>({
 		index: 'GSI1',
 		queryExpression: {
 			expression: '#gsi1pk = :gsi1pk',
@@ -154,15 +166,49 @@ export const searchMomentsByTitle = async (
 			filter: {
 				expression: 'contains(#normalizedTitle, :normalizedTitle)',
 				variables: {
-					':normalizedTitle': normalizeMomentTitle(title),
+					':normalizedTitle': normalizeMomentTitle(query),
 				},
 			},
 		},
 		limit,
-		cursor,
+		cursor: cursor[0],
 		order,
 		mapper: attachUrlsToMoment,
 	});
+
+	const tagMoments = await getMomentsByTag(relationshipId, {
+		tagQuery: query,
+		limit,
+		order,
+		cursor: cursor[1],
+	});
+
+	// De-duplicate moments
+	const momentMap = new Map<string, Moment>();
+	moments.data.forEach(moment => {
+		if (!momentMap.has(moment.id)) {
+			momentMap.set(moment.id, moment);
+			data.push(moment);
+		}
+	});
+
+	tagMoments.data.forEach(moment => {
+		if (!momentMap.has(moment.id)) {
+			momentMap.set(moment.id, moment);
+			data.push(moment);
+		}
+	});
+
+	const data = [...momentMap.values()].sort((a, b) => {
+		const createdAtA = new Date(a.createdAt).getTime();
+		const createdAtB = new Date(b.createdAt).getTime();
+		return order === 'asc' ? createdAtA - createdAtB : createdAtB - createdAtA;
+	});
+
+	return {
+		data,
+		nextCursor: [moments.nextCursor, tagMoments.cursor],
+	};
 };
 
 export const updateMomentDetails = async (id: string, data: UpdateMomentDetailsDto): Promise<Moment> => {
@@ -242,6 +288,48 @@ export const deleteMomentDetailsForRelationship = async (relationshipId: string)
 			pk: KeyPrefix.moment.pk(moment.id),
 			sk: KeyPrefix.moment.sk(moment.id),
 		})),
+	);
+};
+
+export const createMomentTag = async (userId: string, relationshipId: string, dto: CreateMomentTagDto) => {
+	const createdAt = new Date().toISOString();
+	return putItem<DatabaseMomentTag>({
+		pk: KeyPrefix.momentTag.pk(relationshipId),
+		sk: KeyPrefix.momentTag.sk(dto.momentId, normalizeMomentTag(dto.tag)),
+		gsi1pk: KeyPrefix.momentTag.gsi1pk(relationshipId),
+		gsi1sk: KeyPrefix.momentTag.gsi1sk(normalizeMomentTag(dto.tag), createdAt),
+		entityType: EntityType.MOMENT_TAG,
+		momentId: dto.momentId,
+		tag: normalizeMomentTag(dto.tag),
+		taggerId: userId,
+		relationshipId,
+		createdAt,
+	});
+};
+
+export const getMomentsByTag = async (relationshipId: string, dto: GetMomentsByTagDto) => {
+	const tagResults = await getItems<MomentTag>({
+		index: 'GSI1',
+		queryExpression: {
+			expression: '#gsi1pk = :gsi1pk AND contains(#gsi1sk, :gsi1sk)',
+			variables: {
+				':gsi1pk': KeyPrefix.momentTag.gsi1pk(relationshipId),
+				':gsi1sk': normalizeMomentTag(dto.tagQuery),
+			},
+		},
+		cursor: dto.cursor,
+		order: dto.order,
+		limit: dto.limit,
+	});
+
+	return buildInfiniteData(
+		await batchGetItems<Moment>(
+			tagResults.data.map(tag => ({
+				pk: KeyPrefix.moment.pk(tag.momentId),
+				sk: KeyPrefix.moment.sk(tag.momentId),
+			})),
+		),
+		tagResults.nextCursor,
 	);
 };
 

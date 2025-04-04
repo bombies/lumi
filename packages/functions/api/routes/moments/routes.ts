@@ -1,6 +1,7 @@
 import {
 	createMomentDetails,
 	createMomentMessage,
+	createMomentTag,
 	deleteMomentDetails,
 	deleteMomentMessage,
 	getMessagesForMoment,
@@ -9,16 +10,17 @@ import {
 	getMomentUploadUrl,
 	getMomentsForRelationship,
 	getMomentsForUser,
-	searchMomentsByTitle,
+	searchMoments,
 	updateMomentDetails,
 } from '@lumi/core/moments/moment.service';
 import {
 	createMomentDetailsDto,
 	createMomentMessageDto,
+	createMomentTagDto,
 	getInfiniteMomentMessagesDto,
 	getInfiniteMomentsDto,
 	getMomentUploadUrlDto,
-	searchMomentsByTitleDto,
+	searchMomentsDto,
 	updateMomentDetailsDto,
 } from '@lumi/core/moments/moments.dto';
 import { extractPartnerIdFromRelationship } from '@lumi/core/utils/global-utils';
@@ -64,8 +66,8 @@ export const momentsRouter = router({
 		}),
 
 	searchMoments: relationshipProcedure
-		.input(searchMomentsByTitleDto)
-		.query(async ({ input, ctx: { relationship } }) => searchMomentsByTitle(relationship.id, input)),
+		.input(searchMomentsDto)
+		.query(async ({ input, ctx: { relationship } }) => searchMoments(relationship.id, input)),
 
 	updateMomentDetails: relationshipProcedure
 		.input(
@@ -150,6 +152,20 @@ export const momentsRouter = router({
 
 		return deleteMomentMessage(input);
 	}),
+
+	createTagForMoment: relationshipProcedure
+		.input(createMomentTagDto)
+		.mutation(async ({ input, ctx: { user, relationship } }) => {
+			const moment = await getMomentDetailsById(input.momentId);
+
+			if (moment.relationshipId !== relationship.id)
+				throw new TRPCError({
+					code: 'UNAUTHORIZED',
+					message: 'You are not authorized to tag this moment!',
+				});
+
+			return createMomentTag(user.id, relationship.id, input);
+		}),
 
 	getMomentUploadUrl: relationshipProcedure
 		.input(getMomentUploadUrlDto)

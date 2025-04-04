@@ -35,7 +35,7 @@ export const createInfiniteDataDto = ({
 	return z
 		.object({
 			limit,
-			cursor: z.record(z.string()),
+			cursor: z.record(z.string()).or(z.null()),
 		})
 		.partial();
 };
