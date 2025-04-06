@@ -4,7 +4,8 @@
 	"private": true,
 	"scripts": {
 		"dev": "next dev --turbopack --experimental-https",
-		"build": "bunx sst shell next build",
+		"build:wrapped": "bunx sst shell next build",
+		"build": "next build",
 		"start": "next start",
 		"lint": "eslint \"src/**/*.+(ts|tsx)\"",
 		"lint:fix": "eslint \"src/**/*.+(ts|tsx)\" --fix",

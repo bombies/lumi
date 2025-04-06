@@ -6,7 +6,7 @@
 	],
 	"scripts": {
 		"dev": "sst dev",
-		"build": "turbo build --filter=@lumi/frontend -- --stage $STAGE",
+		"build": "turbo build:wrapped --filter=@lumi/frontend -- --stage $STAGE",
 		"deploy": "sst deploy",
 		"migrate-auth": "bunx sst shell  -- bunx @better-auth/cli generate --config packages/frontend/src/auth.ts && @better-auth/cli migrate"
 	},
