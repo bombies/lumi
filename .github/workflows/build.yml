@@ -23,6 +23,8 @@ jobs:
             AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY }}
             AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}
             TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+            TURBO_TEAM: ${{ vars.TURBO_TEAM }}
+            TURBO_REMOTE_ONLY: true
             STAGE: ajani
         steps:
             - name: Configure AWS Credentials
@@ -32,7 +34,14 @@ jobs:
                   aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
                   aws-region: us-east-1
             - name: Clone Repository
-              uses: actions/checkout@v3
+              uses: actions/checkout@v4
+            - name: Cache turbo build setup
+              uses: actions/cache@v4
+              with:
+                  path: .turbo
+                  key: ${{ runner.os }}-turbo-${{ github.sha }}
+                  restore-keys: |
+                      ${{ runner.os }}-turbo-
             - name: Setup Node.js ${{ matrix.node-version }}
               uses: actions/setup-node@v2
             - uses: oven-sh/setup-bun@v2
@@ -42,11 +51,6 @@ jobs:
               run: |
                   echo "Installing node dependencies..."
                   bun i
-            - name: Login to Turborepo
-              run: |
-                  echo "Logging in to Turborepo..."
-                  bunx turbo login --token ${{ secrets.TURBO_TOKEN }}
-                  bunx turbo link
             - name: Build Project
               run: |
                   bun run build
