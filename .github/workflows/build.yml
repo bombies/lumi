@@ -36,14 +36,10 @@ jobs:
               run: |
                   echo "Installing node dependencies..."
                   bun i
-            - name: 'Setup Build Cache'
-              uses: actions/cache@v3
-              with:
-                  path: |
-                      ${{ github.workspace }}/packages/frontend/.next/cache
-                  key: ${{ runner.os }}-nextjs-${{ hashFiles('**/bun.lock') }}-${{ hashFiles('**/*.[jt]s', '**/*.[jt]sx') }}
-                  restore-keys: |
-                      ${{ runner.os }}-nextjs-${{ hashFiles('**/bun.lock') }}-
+            - name: Login to Turborepo
+              run: |
+                  echo "Logging in to Turborepo..."
+                  bunx turbo login --token ${{ secrets.TURBO_TOKEN }}
             - name: Build Project
               run: |
                   bun run build
