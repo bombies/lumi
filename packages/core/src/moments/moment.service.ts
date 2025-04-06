@@ -2,26 +2,27 @@ import { TRPCError } from '@trpc/server';
 import mime from 'mime';
 import { Resource } from 'sst';
 
-import { EntityType, KeyPrefix } from '../types/dynamo.types';
-import { InfiniteData, buildInfiniteData, getInfiniteData } from '../types/infinite-data.dto';
+import { buildInfiniteData } from '../types/infinite-data.dto';
 import {
 	DatabaseMoment,
 	DatabaseMomentMessage,
 	DatabaseMomentTag,
+	DatabaseRelationshipMomentTag,
 	Moment,
 	MomentMessage,
 	MomentTag,
+	RelationshipMomentTag,
 } from '../types/moment.types';
 import {
 	batchGetItems,
 	deleteItem,
 	deleteManyItems,
-	dynamo,
 	getItem,
 	getItems,
 	putItem,
 	updateItem,
 } from '../utils/dynamo/dynamo.service';
+import { DynamoKey, EntityType } from '../utils/dynamo/dynamo.types';
 import { ContentPaths, StorageClient } from '../utils/s3/s3.service';
 import { getUUID } from '../utils/utils';
 import { attachUrlsToMoment } from './moment.helpers';
@@ -29,10 +30,13 @@ import {
 	CreateMomentDetailsDto,
 	CreateMomentMessageDto,
 	CreateMomentTagDto,
+	CreateRelationshipMomentTagDto,
+	DeleteMomentTagDto,
 	GetInfiniteMomentMessagesDto,
 	GetInfiniteMomentsDto,
 	GetMomentUploadUrlDto,
 	GetMomentsByTagDto,
+	GetRelationshipMomentTagsDto,
 	SearchMomentsDto,
 	UpdateMomentDetailsDto,
 } from './moments.dto';
@@ -60,7 +64,11 @@ const normalizeMomentTag = (tag: string) => {
 	return normalizedTag.replaceAll(/\s/g, '');
 };
 
-export const createMomentDetails = async (userId: string, relationshipId: string, dto: CreateMomentDetailsDto) => {
+export const createMomentDetails = async (
+	userId: string,
+	relationshipId: string,
+	{ tags, ...dto }: CreateMomentDetailsDto,
+) => {
 	const id = getUUID();
 	const timestamp = new Date().toISOString();
 	const moment: Moment = {
@@ -74,15 +82,17 @@ export const createMomentDetails = async (userId: string, relationshipId: string
 	};
 
 	await putItem<Moment, DatabaseMoment>({
-		pk: KeyPrefix.moment.pk(id),
-		sk: KeyPrefix.moment.sk(id),
-		gsi1pk: KeyPrefix.moment.gsi1pk(relationshipId),
-		gsi1sk: KeyPrefix.moment.gsi1sk(timestamp),
-		gsi2pk: KeyPrefix.moment.gsi2pk(userId),
-		gsi2sk: KeyPrefix.moment.gsi2sk(timestamp),
+		pk: DynamoKey.moment.pk(id),
+		sk: DynamoKey.moment.sk(id),
+		gsi1pk: DynamoKey.moment.gsi1pk(relationshipId),
+		gsi1sk: DynamoKey.moment.gsi1sk(timestamp),
+		gsi2pk: DynamoKey.moment.gsi2pk(userId),
+		gsi2sk: DynamoKey.moment.gsi2sk(timestamp),
 		...moment,
 		entityType: EntityType.MOMENT_DETAILS,
 	});
+
+	if (tags) await Promise.all(tags.map(tag => createMomentTag(userId, relationshipId, { tag, momentId: id })));
 
 	return attachUrlsToMoment(moment);
 };
@@ -107,7 +117,7 @@ export async function getMomentDetailsById(
 		safeReturn?: boolean;
 	},
 ): Promise<Moment | null> {
-	const res = await getItem<Moment>(KeyPrefix.moment.pk(id), KeyPrefix.moment.sk(id));
+	const res = await getItem<Moment>(DynamoKey.moment.pk(id), DynamoKey.moment.sk(id));
 
 	if (!res)
 		if (args?.safeReturn) return null;
@@ -129,7 +139,7 @@ export const getMomentsForRelationship = async (
 		queryExpression: {
 			expression: '#gsi1pk = :gsi1pk',
 			variables: {
-				':gsi1pk': KeyPrefix.moment.gsi1pk(relationshipId),
+				':gsi1pk': DynamoKey.moment.gsi1pk(relationshipId),
 			},
 		},
 		cursor,
@@ -145,7 +155,7 @@ export const getMomentsForUser = async (userId: string, { limit, cursor, order }
 		queryExpression: {
 			expression: '#gsi2pk = :gsi2pk',
 			variables: {
-				':gsi2pk': KeyPrefix.moment.gsi2pk(userId),
+				':gsi2pk': DynamoKey.moment.gsi2pk(userId),
 			},
 		},
 		cursor,
@@ -161,7 +171,7 @@ export const searchMoments = async (relationshipId: string, { query, limit, curs
 		queryExpression: {
 			expression: '#gsi1pk = :gsi1pk',
 			variables: {
-				':gsi1pk': KeyPrefix.moment.gsi1pk(relationshipId),
+				':gsi1pk': DynamoKey.moment.gsi1pk(relationshipId),
 			},
 			filter: {
 				expression: 'contains(#normalizedTitle, :normalizedTitle)',
@@ -171,7 +181,7 @@ export const searchMoments = async (relationshipId: string, { query, limit, curs
 			},
 		},
 		limit,
-		cursor: cursor[0],
+		cursor: cursor?.[0],
 		order,
 		mapper: attachUrlsToMoment,
 	});
@@ -180,7 +190,7 @@ export const searchMoments = async (relationshipId: string, { query, limit, curs
 		tagQuery: query,
 		limit,
 		order,
-		cursor: cursor[1],
+		cursor: cursor?.[1],
 	});
 
 	// De-duplicate moments
@@ -188,18 +198,16 @@ export const searchMoments = async (relationshipId: string, { query, limit, curs
 	moments.data.forEach(moment => {
 		if (!momentMap.has(moment.id)) {
 			momentMap.set(moment.id, moment);
-			data.push(moment);
 		}
 	});
 
 	tagMoments.data.forEach(moment => {
 		if (!momentMap.has(moment.id)) {
 			momentMap.set(moment.id, moment);
-			data.push(moment);
 		}
 	});
 
-	const data = [...momentMap.values()].sort((a, b) => {
+	const data = (await Promise.all([...momentMap.values()].map(moment => attachUrlsToMoment(moment)))).sort((a, b) => {
 		const createdAtA = new Date(a.createdAt).getTime();
 		const createdAtB = new Date(b.createdAt).getTime();
 		return order === 'asc' ? createdAtA - createdAtB : createdAtB - createdAtA;
@@ -213,8 +221,8 @@ export const searchMoments = async (relationshipId: string, { query, limit, curs
 
 export const updateMomentDetails = async (id: string, data: UpdateMomentDetailsDto): Promise<Moment> => {
 	const updatedMoment = await updateItem<Moment>({
-		pk: KeyPrefix.moment.pk(id),
-		sk: KeyPrefix.moment.sk(id),
+		pk: DynamoKey.moment.pk(id),
+		sk: DynamoKey.moment.sk(id),
 		update: {
 			...data,
 			...(data.title ? { normalizedTitle: normalizeMomentTitle(data.title) } : {}),
@@ -225,7 +233,7 @@ export const updateMomentDetails = async (id: string, data: UpdateMomentDetailsD
 };
 
 export const deleteMomentDetails = async (id: string) => {
-	return deleteItem(KeyPrefix.moment.pk(id), KeyPrefix.moment.sk(id));
+	return deleteItem(DynamoKey.moment.pk(id), DynamoKey.moment.sk(id));
 };
 
 export const createMomentMessage = async (userId: string, dto: CreateMomentMessageDto) => {
@@ -239,17 +247,17 @@ export const createMomentMessage = async (userId: string, dto: CreateMomentMessa
 	};
 
 	return putItem<MomentMessage, DatabaseMomentMessage>({
-		pk: KeyPrefix.momentMessage.pk(id),
-		sk: KeyPrefix.momentMessage.sk(id),
-		gsi1pk: KeyPrefix.momentMessage.gsi1pk(dto.momentId),
-		gsi1sk: KeyPrefix.momentMessage.gsi1sk(timestamp),
+		pk: DynamoKey.momentMessage.pk(id),
+		sk: DynamoKey.momentMessage.sk(id),
+		gsi1pk: DynamoKey.momentMessage.gsi1pk(dto.momentId),
+		gsi1sk: DynamoKey.momentMessage.gsi1sk(timestamp),
 		...message,
 		entityType: EntityType.MOMENT_MESSAGE,
 	});
 };
 
 export const getMomentMessageById = async (id: string) => {
-	return getItem<MomentMessage>(KeyPrefix.momentMessage.pk(id), KeyPrefix.momentMessage.sk(id));
+	return getItem<MomentMessage>(DynamoKey.momentMessage.pk(id), DynamoKey.momentMessage.sk(id));
 };
 
 export const getMessagesForMoment = async ({ momentId, limit, cursor, order }: GetInfiniteMomentMessagesDto) => {
@@ -258,7 +266,7 @@ export const getMessagesForMoment = async ({ momentId, limit, cursor, order }: G
 		queryExpression: {
 			expression: '#gsi1pk = :gsi1pk',
 			variables: {
-				':gsi1pk': KeyPrefix.momentMessage.gsi1pk(momentId),
+				':gsi1pk': DynamoKey.momentMessage.gsi1pk(momentId),
 			},
 		},
 		cursor,
@@ -268,7 +276,7 @@ export const getMessagesForMoment = async ({ momentId, limit, cursor, order }: G
 };
 
 export const deleteMomentMessage = async (id: string) => {
-	return deleteItem(KeyPrefix.momentMessage.pk(id), KeyPrefix.momentMessage.sk(id));
+	return deleteItem(DynamoKey.momentMessage.pk(id), DynamoKey.momentMessage.sk(id));
 };
 
 export const deleteMomentDetailsForRelationship = async (relationshipId: string) => {
@@ -277,7 +285,7 @@ export const deleteMomentDetailsForRelationship = async (relationshipId: string)
 		queryExpression: {
 			expression: '#gsi1pk = :gsi1pk',
 			variables: {
-				':gsi1pk': KeyPrefix.moment.gsi1pk(relationshipId),
+				':gsi1pk': DynamoKey.moment.gsi1pk(relationshipId),
 			},
 		},
 		exhaustive: true,
@@ -285,22 +293,97 @@ export const deleteMomentDetailsForRelationship = async (relationshipId: string)
 
 	return deleteManyItems(
 		momentDetails.data.map(moment => ({
-			pk: KeyPrefix.moment.pk(moment.id),
-			sk: KeyPrefix.moment.sk(moment.id),
+			pk: DynamoKey.moment.pk(moment.id),
+			sk: DynamoKey.moment.sk(moment.id),
 		})),
 	);
 };
 
+export const getRelationshipMomentTag = async (relationshipId: string, tag: string) => {
+	return getItem<RelationshipMomentTag>(
+		DynamoKey.relationshipMomentTag.pk(relationshipId),
+		DynamoKey.relationshipMomentTag.sk(normalizeMomentTag(tag)),
+	);
+};
+
+export const getRelationshipMomentTags = async (
+	relationshipId: string,
+	{ cursor, limit, query }: GetRelationshipMomentTagsDto,
+) => {
+	return getItems<RelationshipMomentTag>({
+		queryExpression: {
+			expression: `#pk = :pk${query ? ' and begins_with(#sk, :sk)' : ''}`,
+			variables: {
+				':pk': DynamoKey.relationshipMomentTag.pk(relationshipId),
+				':sk': query ? DynamoKey.relationshipMomentTag.sk(normalizeMomentTag(query)) : undefined,
+			},
+		},
+		cursor,
+		limit,
+		order: 'asc',
+	});
+};
+
+const getMomentTagsForRelationshipTag = async (relationshipId: string, tag: string) => {
+	return getItems<DatabaseMomentTag>({
+		index: 'GSI1',
+		queryExpression: {
+			expression: '#gsi1pk = :gsi1pk AND #gsi1sk = :gsi1sk',
+			variables: {
+				':gsi1pk': DynamoKey.momentTag.gsi1pk(relationshipId),
+				':gsi1sk': normalizeMomentTag(tag),
+			},
+		},
+		exhaustive: true,
+	});
+};
+
+export const deleteRelationshipMomentTag = async (relationshipId: string, tag: string) => {
+	const momentTags = await getMomentTagsForRelationshipTag(relationshipId, tag);
+	await deleteManyItems(momentTags.data.map(momentTag => ({ pk: momentTag.pk, sk: momentTag.sk })));
+	return deleteItem(
+		DynamoKey.relationshipMomentTag.pk(relationshipId),
+		DynamoKey.relationshipMomentTag.sk(normalizeMomentTag(tag)),
+	);
+};
+
+export const createRelationshipMomentTag = async (
+	relationshipId: string,
+	dto: CreateRelationshipMomentTagDto,
+	opts?: {
+		withInitialCount?: boolean;
+	},
+) => {
+	const normalizedTag = normalizeMomentTag(dto.tag);
+	const existingTag = await getRelationshipMomentTag(relationshipId, normalizedTag);
+	if (existingTag)
+		throw new TRPCError({
+			code: 'BAD_REQUEST',
+			message: 'There is already a tag with that name!',
+		});
+
+	return putItem<DatabaseRelationshipMomentTag>({
+		pk: DynamoKey.relationshipMomentTag.pk(relationshipId),
+		sk: DynamoKey.relationshipMomentTag.sk(normalizedTag),
+		entityType: EntityType.RELATIONSHIP_MOMENT_TAG,
+		tag: normalizedTag,
+		associationCount: opts?.withInitialCount ? 1 : 0,
+		relationshipId,
+		createdAt: new Date().toISOString(),
+	});
+};
+
 export const createMomentTag = async (userId: string, relationshipId: string, dto: CreateMomentTagDto) => {
+	const normalizedTag = normalizeMomentTag(dto.tag);
 	const createdAt = new Date().toISOString();
 	return putItem<DatabaseMomentTag>({
-		pk: KeyPrefix.momentTag.pk(relationshipId),
-		sk: KeyPrefix.momentTag.sk(dto.momentId, normalizeMomentTag(dto.tag)),
-		gsi1pk: KeyPrefix.momentTag.gsi1pk(relationshipId),
-		gsi1sk: KeyPrefix.momentTag.gsi1sk(normalizeMomentTag(dto.tag), createdAt),
+		pk: DynamoKey.momentTag.pk(dto.momentId),
+		sk: DynamoKey.momentTag.sk(normalizedTag),
+		gsi1pk: DynamoKey.momentTag.gsi1pk(relationshipId),
+		gsi1sk: DynamoKey.momentTag.gsi1sk(normalizedTag),
 		entityType: EntityType.MOMENT_TAG,
 		momentId: dto.momentId,
-		tag: normalizeMomentTag(dto.tag),
+		tag: normalizedTag,
 		taggerId: userId,
 		relationshipId,
 		createdAt,
@@ -311,9 +394,9 @@ export const getMomentsByTag = async (relationshipId: string, dto: GetMomentsByT
 	const tagResults = await getItems<MomentTag>({
 		index: 'GSI1',
 		queryExpression: {
-			expression: '#gsi1pk = :gsi1pk AND contains(#gsi1sk, :gsi1sk)',
+			expression: '#gsi1pk = :gsi1pk AND begins_with(#gsi1sk, :gsi1sk)',
 			variables: {
-				':gsi1pk': KeyPrefix.momentTag.gsi1pk(relationshipId),
+				':gsi1pk': DynamoKey.momentTag.gsi1pk(relationshipId),
 				':gsi1sk': normalizeMomentTag(dto.tagQuery),
 			},
 		},
@@ -322,15 +405,36 @@ export const getMomentsByTag = async (relationshipId: string, dto: GetMomentsByT
 		limit: dto.limit,
 	});
 
-	return buildInfiniteData(
+	const moments = (
 		await batchGetItems<Moment>(
 			tagResults.data.map(tag => ({
-				pk: KeyPrefix.moment.pk(tag.momentId),
-				sk: KeyPrefix.moment.sk(tag.momentId),
+				pk: DynamoKey.moment.pk(tag.momentId),
+				sk: DynamoKey.moment.sk(tag.momentId),
 			})),
-		),
-		tagResults.nextCursor,
-	);
+		)
+	).map(moment => attachUrlsToMoment(moment));
+
+	return buildInfiniteData(await Promise.all(moments), tagResults.nextCursor);
+};
+
+export const getTagsForMoment = async (momentId: string) => {
+	return getItems<MomentTag>({
+		queryExpression: {
+			expression: '#pk = :pk',
+			variables: {
+				':pk': DynamoKey.momentTag.pk(momentId),
+			},
+		},
+		exhaustive: true,
+	}).then(res => res.data);
+};
+
+export const getTagForMoment = async (momentId: string, tag: string) => {
+	return getItem<MomentTag>(DynamoKey.momentTag.pk(momentId), DynamoKey.momentTag.sk(normalizeMomentTag(tag)));
+};
+
+export const deleteMomentTag = async ({ momentId, tag }: DeleteMomentTagDto) => {
+	return deleteItem(DynamoKey.momentTag.pk(momentId), DynamoKey.momentTag.sk(normalizeMomentTag(tag)));
 };
 
 export const getMomentUploadUrl = async (

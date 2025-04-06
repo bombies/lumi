@@ -1,6 +1,5 @@
 import { TRPCError } from '@trpc/server';
 
-import { EntityType, KeyPrefix } from '../types/dynamo.types';
 import { buildInfiniteData } from '../types/infinite-data.dto';
 import {
 	DatabaseRelationship,
@@ -12,11 +11,12 @@ import { User } from '../types/user.types';
 import { Nullable } from '../types/util.types';
 import { getUserById } from '../users/users.service';
 import { deleteItem, dynamo, getItem, getItems, putItem, writeTransaction } from '../utils/dynamo/dynamo.service';
+import { DynamoKey, EntityType } from '../utils/dynamo/dynamo.types';
 import { chunkArray, getUUID } from '../utils/utils';
 import { GetRelationshipRequestsForUserDto } from './relationship.dto';
 
 export const getRelationshipById = async (relationshipId: string) => {
-	return getItem<Relationship>(KeyPrefix.relationship.pk(relationshipId), KeyPrefix.relationship.sk(relationshipId));
+	return getItem<Relationship>(DynamoKey.relationship.pk(relationshipId), DynamoKey.relationship.sk(relationshipId));
 };
 
 export const userInRelationship = async (userId: string) => {
@@ -56,14 +56,14 @@ export const getRelationshipRequestBySenderAndReceiver = async (senderId: string
 		queryExpression: {
 			expression: `#gsi1pk = :gsi1pk and #gsi1sk = :gsi1sk`,
 			variables: {
-				':gsi1pk': KeyPrefix.relationshipRequest.gsi1pk(),
-				':gsi1sk': KeyPrefix.relationshipRequest.gsi1sk(senderId),
+				':gsi1pk': DynamoKey.relationshipRequest.gsi1pk(),
+				':gsi1sk': DynamoKey.relationshipRequest.gsi1sk(senderId),
 			},
 			filter: {
 				expression: `#gsi2pk = :gsi2pk and #gsi2sk = :gsi2sk`,
 				variables: {
-					':gsi2pk': KeyPrefix.relationshipRequest.gsi2pk(),
-					':gsi2sk': KeyPrefix.relationshipRequest.gsi2sk(receiverId),
+					':gsi2pk': DynamoKey.relationshipRequest.gsi2pk(),
+					':gsi2sk': DynamoKey.relationshipRequest.gsi2sk(receiverId),
 				},
 			},
 		},
@@ -111,12 +111,12 @@ export const sendRelationshipRequest = async (senderId: string, receiverId: stri
 	};
 
 	await putItem<RelationshipRequest, DatabaseRelationshipRequest>({
-		pk: KeyPrefix.relationshipRequest.pk(id),
-		sk: KeyPrefix.relationshipRequest.sk(id),
-		gsi1pk: KeyPrefix.relationshipRequest.gsi1pk(),
-		gsi1sk: KeyPrefix.relationshipRequest.gsi1sk(senderId),
-		gsi2pk: KeyPrefix.relationshipRequest.gsi2pk(),
-		gsi2sk: KeyPrefix.relationshipRequest.gsi2sk(receiverId),
+		pk: DynamoKey.relationshipRequest.pk(id),
+		sk: DynamoKey.relationshipRequest.sk(id),
+		gsi1pk: DynamoKey.relationshipRequest.gsi1pk(),
+		gsi1sk: DynamoKey.relationshipRequest.gsi1sk(senderId),
+		gsi2pk: DynamoKey.relationshipRequest.gsi2pk(),
+		gsi2sk: DynamoKey.relationshipRequest.gsi2sk(receiverId),
 		...request,
 		entityType: EntityType.RELATIONSHIP_REQUEST,
 	});
@@ -126,8 +126,8 @@ export const sendRelationshipRequest = async (senderId: string, receiverId: stri
 
 export const getRelationshipRequestById = async (requestId: string) => {
 	return getItem<RelationshipRequest>(
-		KeyPrefix.relationshipRequest.pk(requestId),
-		KeyPrefix.relationshipRequest.sk(requestId),
+		DynamoKey.relationshipRequest.pk(requestId),
+		DynamoKey.relationshipRequest.sk(requestId),
 	);
 };
 
@@ -168,10 +168,10 @@ const getRelationshipRequestsForUser = async ({
 			expression: `#${indexAttrib}pk = :${indexAttrib}pk and #${indexAttrib}sk = :${indexAttrib}sk`,
 			variables: {
 				[`:${indexAttrib}pk`]:
-					index === 'GSI1' ? KeyPrefix.relationshipRequest.gsi1pk() : KeyPrefix.relationshipRequest.gsi2pk(),
+					index === 'GSI1' ? DynamoKey.relationshipRequest.gsi1pk() : DynamoKey.relationshipRequest.gsi2pk(),
 				[`:${indexAttrib}sk`]: (index === 'GSI1'
-					? KeyPrefix.relationshipRequest.gsi1sk
-					: KeyPrefix.relationshipRequest.gsi2sk)(userId),
+					? DynamoKey.relationshipRequest.gsi1sk
+					: DynamoKey.relationshipRequest.gsi2sk)(userId),
 			},
 		},
 		limit,
@@ -195,8 +195,8 @@ const getRelationshipRequestsForUser = async ({
 					Keys: Object.keys(userIds).map(
 						id =>
 							({
-								pk: KeyPrefix.user.pk(userIds[id]),
-								sk: KeyPrefix.user.sk(userIds[id]),
+								pk: DynamoKey.user.pk(userIds[id]),
+								sk: DynamoKey.user.sk(userIds[id]),
 							}) as const,
 					),
 				},
@@ -239,7 +239,7 @@ export const deleteRelationshipRequestById = async (userId: string, requestId: s
 };
 
 const removeRelationshipRequestById = async (requestId: string) => {
-	return deleteItem(KeyPrefix.relationshipRequest.pk(requestId), KeyPrefix.relationshipRequest.sk(requestId));
+	return deleteItem(DynamoKey.relationshipRequest.pk(requestId), DynamoKey.relationshipRequest.sk(requestId));
 };
 
 export const acceptRelationshipRequest = async (userId: string, requestId: string) => {
@@ -280,8 +280,8 @@ export const acceptRelationshipRequest = async (userId: string, requestId: strin
 			{
 				put: {
 					item: {
-						pk: KeyPrefix.relationship.pk(relationshipId),
-						sk: KeyPrefix.relationship.sk(relationshipId),
+						pk: DynamoKey.relationship.pk(relationshipId),
+						sk: DynamoKey.relationship.sk(relationshipId),
 						...relationship,
 						entityType: EntityType.RELATIONSHIP,
 					} satisfies DatabaseRelationship,
@@ -289,21 +289,21 @@ export const acceptRelationshipRequest = async (userId: string, requestId: strin
 			},
 			{
 				deleteItem: {
-					pk: KeyPrefix.relationshipRequest.pk(requestId),
-					sk: KeyPrefix.relationshipRequest.sk(requestId),
+					pk: DynamoKey.relationshipRequest.pk(requestId),
+					sk: DynamoKey.relationshipRequest.sk(requestId),
 				},
 			},
 			{
 				update: {
-					pk: KeyPrefix.user.pk(sender.id),
-					sk: KeyPrefix.user.sk(sender.id),
+					pk: DynamoKey.user.pk(sender.id),
+					sk: DynamoKey.user.sk(sender.id),
 					update: { relationshipId } satisfies Partial<User>,
 				},
 			},
 			{
 				update: {
-					pk: KeyPrefix.user.pk(receiver.id),
-					sk: KeyPrefix.user.sk(receiver.id),
+					pk: DynamoKey.user.pk(receiver.id),
+					sk: DynamoKey.user.sk(receiver.id),
 					update: { relationshipId } satisfies Partial<User>,
 				},
 			},
@@ -331,22 +331,22 @@ export const deleteUserRelationship = async (userId: string) => {
 		await writeTransaction(
 			{
 				update: {
-					pk: KeyPrefix.user.pk(relationship.partner1),
-					sk: KeyPrefix.user.sk(relationship.partner1),
+					pk: DynamoKey.user.pk(relationship.partner1),
+					sk: DynamoKey.user.sk(relationship.partner1),
 					update: { relationshipId: null } satisfies Nullable<Partial<User>>,
 				},
 			},
 			{
 				update: {
-					pk: KeyPrefix.user.pk(relationship.partner2),
-					sk: KeyPrefix.user.sk(relationship.partner2),
+					pk: DynamoKey.user.pk(relationship.partner2),
+					sk: DynamoKey.user.sk(relationship.partner2),
 					update: { relationshipId: null } satisfies Nullable<Partial<User>>,
 				},
 			},
 			{
 				deleteItem: {
-					pk: KeyPrefix.relationship.pk(relationship.id),
-					sk: KeyPrefix.relationship.sk(relationship.id),
+					pk: DynamoKey.relationship.pk(relationship.id),
+					sk: DynamoKey.relationship.sk(relationship.id),
 				},
 			},
 		);

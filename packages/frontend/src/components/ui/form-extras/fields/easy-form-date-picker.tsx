@@ -7,10 +7,10 @@ import { FieldValues } from 'react-hook-form';
 import { cn } from '../../../../lib/utils';
 import { Button } from '../../button';
 import { Calendar } from '../../calendar';
-import { FormControl, FormDescription, FormItem, FormLabel, FormMessage } from '../../form';
+import { FormControl, FormDescription, FormItem, FormMessage } from '../../form';
 import { Popover, PopoverContent, PopoverTrigger } from '../../popover';
 import EasyFormField, { EasyFormFieldProps } from '../easy-form-field';
-import { useForm } from '../easy-form-provider';
+import EasyFormLabel from './easy-form-label';
 
 type Props<T extends FieldValues> = Pick<
 	EasyFormFieldProps<T>,
@@ -29,21 +29,15 @@ export default function EasyFormDatePicker<T extends FieldValues>({
 	optional,
 	disabled,
 }: Props<T>) {
-	const { requiredAsterisk } = useForm<T>();
 	return (
 		<EasyFormField
 			name={name}
 			render={({ field }) => (
 				<FormItem className={className}>
 					{label && (
-						<FormLabel className={labelClassName}>
-							{label}{' '}
-							{optional ? (
-								<span className="italic text-neutral-400 text-xs">(optional)</span>
-							) : (
-								requiredAsterisk && <span className="text-xs text-red-500">*</span>
-							)}
-						</FormLabel>
+						<EasyFormLabel className={labelClassName} optional={optional}>
+							{label}
+						</EasyFormLabel>
 					)}
 					<Popover>
 						<PopoverTrigger asChild>

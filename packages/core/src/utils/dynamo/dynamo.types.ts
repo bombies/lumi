@@ -1,10 +1,8 @@
-abstract class AbstractDbKeys {
-	constructor(readonly prefix: string) {}
-
-	buildKey(...suffix: string[]) {
-		return `${this.prefix}${suffix.join('#')}`;
-	}
-}
+import { MomentMessageDbKeys } from '../../moments/keys/moment-message.keys';
+import { MomentTagDbKeys } from '../../moments/keys/moment-tag.keys';
+import { MomentDbKeys } from '../../moments/keys/moment.keys';
+import { RelationshipMomentTagDbKeys } from '../../moments/keys/relationship-moment-tag.keys';
+import { AbstractDbKeys } from './abstract.keys';
 
 class UserDbKeys extends AbstractDbKeys {
 	constructor(prefix: string) {
@@ -169,58 +167,6 @@ class UnreadNotificationDbKeys extends AbstractDbKeys {
 	}
 }
 
-class MomentDbKeys extends AbstractDbKeys {
-	constructor(prefix: string) {
-		super(prefix);
-	}
-
-	pk(momentId: string) {
-		return this.buildKey(momentId);
-	}
-
-	sk(momentId: string) {
-		return this.buildKey(momentId);
-	}
-
-	gsi1pk(relationshipId: string) {
-		return this.buildKey(relationshipId);
-	}
-
-	gsi1sk(timestamp: string) {
-		return this.buildKey(timestamp);
-	}
-
-	gsi2pk(userId: string) {
-		return this.buildKey(userId);
-	}
-
-	gsi2sk(timestamp: string) {
-		return this.buildKey(timestamp);
-	}
-}
-
-class MomentMessageDbKeys extends AbstractDbKeys {
-	constructor(prefix: string) {
-		super(prefix);
-	}
-
-	pk(messageId: string) {
-		return this.buildKey(messageId);
-	}
-
-	sk(messageId: string) {
-		return this.buildKey(messageId);
-	}
-
-	gsi1pk(momentId: string) {
-		return this.buildKey(momentId);
-	}
-
-	gsi1sk(timestamp: string) {
-		return this.buildKey(timestamp);
-	}
-}
-
 class SongRecommendationDbKeys extends AbstractDbKeys {
 	constructor(prefix: string) {
 		super(prefix);
@@ -273,29 +219,7 @@ class WebSocketHeartbeatDbKeys extends AbstractDbKeys {
 	}
 }
 
-class MomentTagDbKeys extends AbstractDbKeys {
-	constructor(prefix: string) {
-		super(prefix);
-	}
-
-	pk(relationshipId: string) {
-		return this.buildKey(relationshipId);
-	}
-
-	sk(momentId: string, tag: string) {
-		return this.buildKey(momentId, tag);
-	}
-
-	gsi1pk(relationshipId: string) {
-		return this.buildKey(relationshipId);
-	}
-
-	gsi1sk(tag: string, timestamp: string) {
-		return `${tag}#${timestamp}`;
-	}
-}
-
-export class KeyPrefix {
+export class DynamoKey {
 	private constructor() {}
 
 	static user = new UserDbKeys('user#');
@@ -310,9 +234,10 @@ export class KeyPrefix {
 	static unreadNotificationCount = new UnreadNotificationDbKeys('unread::notification::count#');
 	static notificationSubscriber = new NotificationSubscriberDbKeys('notification::subscriber#');
 
-	static moment = new MomentDbKeys('moment::details#');
-	static momentMessage = new MomentMessageDbKeys('moment::message#');
-	static momentTag = new MomentTagDbKeys('moment::tag#');
+	static moment = new MomentDbKeys();
+	static momentMessage = new MomentMessageDbKeys();
+	static momentTag = new MomentTagDbKeys();
+	static relationshipMomentTag = new RelationshipMomentTagDbKeys();
 
 	static songRecommendation = new SongRecommendationDbKeys('songrec#');
 
@@ -329,6 +254,7 @@ export enum EntityType {
 
 	MOMENT_DETAILS = 'MOMENT_DETAILS',
 	MOMENT_MESSAGE = 'MOMENT_MESSAGE',
+	RELATIONSHIP_MOMENT_TAG = 'RELATIONSHIP_MOMENT_TAG',
 	MOMENT_TAG = 'MOMENT_TAG',
 
 	NOTIFICATION_SUBSCRIBER = 'NOTIFICATION_SUBSCRIBER',

@@ -11,9 +11,8 @@ import { cn } from '../../lib/utils';
 export type ObjectFit = 'contain' | 'cover' | 'fill' | 'none' | 'scale-down';
 
 type Props = Omit<ImageProps, 'objectFit' | 'src'> & {
-	imgWidth?: number;
-	imgHeight?: number;
 	globalClassName?: string;
+	imageClassName?: string;
 	fadeIn?: boolean;
 	objectFit?: ObjectFit;
 	fallbackSrc?: string;
@@ -22,12 +21,9 @@ type Props = Omit<ImageProps, 'objectFit' | 'src'> & {
 
 const Image: FC<Props> = ({
 	fadeIn,
-	imgWidth,
-	imgHeight,
 	className,
 	globalClassName,
-	width,
-	height,
+	imageClassName,
 	objectFit,
 	fallbackSrc = '/fallback/image.png',
 	src,
@@ -42,10 +38,6 @@ const Image: FC<Props> = ({
 			transition={fadeIn ? { duration: 0.5 } : undefined}
 			viewport={fadeIn ? { once: true } : undefined}
 			className={clsx('!relative overflow-hidden', className, globalClassName)}
-			style={{
-				width,
-				height,
-			}}
 		>
 			<NextImage
 				{...props}
@@ -53,10 +45,8 @@ const Image: FC<Props> = ({
 				onError={() => {
 					if (fallbackSrc) setCurrentSrc(fallbackSrc);
 				}}
-				className={cn(globalClassName)}
-				width={imgWidth ?? width}
-				height={imgHeight ?? height}
-				style={{ objectFit }}
+				className={cn(globalClassName, imageClassName)}
+				style={{ objectFit, ...props.style }}
 				draggable={false}
 			/>
 		</motion.div>

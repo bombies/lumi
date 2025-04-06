@@ -11,7 +11,7 @@ const MomentCardSkeleton: FC<Props> = ({ className }) => {
 	return (
 		<div
 			className={cn(
-				'rounded-md border border-border bg-neutral-300 dark:bg-neutral-700 h-96 phone-big:h-[36rem] overflow-hidden relative',
+				'rounded-md border border-border bg-neutral-300 dark:bg-neutral-700 h-96 overflow-hidden relative',
 				className,
 			)}
 		>

@@ -1,7 +1,7 @@
 import { QueryCommandOutput } from '@aws-sdk/lib-dynamodb';
-import { KeyPrefix } from '@lumi/core/types/dynamo.types';
 import { MomentMessage } from '@lumi/core/types/moment.types';
 import { dynamo, getItems } from '@lumi/core/utils/dynamo/dynamo.service';
+import { DynamoKey } from '@lumi/core/utils/dynamo/dynamo.types';
 import { ContentPaths, StorageClient } from '@lumi/core/utils/s3/s3.service';
 import { chunkArray } from '@lumi/core/utils/utils';
 import { DynamoDBStreamEvent, Handler } from 'aws-lambda';
@@ -27,7 +27,7 @@ export const handler: Handler<DynamoDBStreamEvent> = async event => {
 			queryExpression: {
 				expression: '#gsi1pk = :gsi1pk',
 				variables: {
-					':gsi1pk': KeyPrefix.moment.gsi1pk(oldImage.id.S!),
+					':gsi1pk': DynamoKey.moment.gsi1pk(oldImage.id.S!),
 				},
 			},
 			exhaustive: true,
@@ -43,8 +43,8 @@ export const handler: Handler<DynamoDBStreamEvent> = async event => {
 						[Resource.Database.name]: chunk.map(record => ({
 							DeleteRequest: {
 								Key: {
-									pk: KeyPrefix.moment.pk(record.id),
-									sk: KeyPrefix.moment.sk(record.id),
+									pk: DynamoKey.moment.pk(record.id),
+									sk: DynamoKey.moment.sk(record.id),
 								},
 							},
 						})),

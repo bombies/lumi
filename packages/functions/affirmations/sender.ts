@@ -1,9 +1,4 @@
-import {
-	createReceivedAffirmation,
-	selectAffirmation,
-	sendAffirmationToUser,
-} from '@lumi/core/affirmations/affirmations.service';
-import { sendNotification } from '@lumi/core/notifications/notifications.service';
+import { selectAffirmation, sendAffirmationToUser } from '@lumi/core/affirmations/affirmations.service';
 import { getRelationshipById } from '@lumi/core/relationships/relationship.service';
 import { User } from '@lumi/core/types/user.types';
 import { WebSocketToken } from '@lumi/core/types/websockets.types';

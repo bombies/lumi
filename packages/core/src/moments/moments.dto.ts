@@ -18,7 +18,11 @@ export const momentMessageSchema = z.object({
 	repliedTo: z.string().uuid().optional(),
 });
 
-export const createMomentDetailsDto = momentSchema.omit({ normalizedTitle: true });
+export const createMomentDetailsDto = momentSchema.omit({ normalizedTitle: true }).and(
+	z.object({
+		tags: z.array(z.string()).optional(),
+	}),
+);
 export const updateMomentDetailsDto = momentSchema
 	.omit({
 		objectKey: true,
@@ -61,9 +65,19 @@ export const searchMomentsDto = createInfiniteDataDto({
 	.and(
 		z.object({
 			query: z.string(),
-			cursor: z.array(z.record(z.any()).or(z.null()), z.record(z.any()).or(z.null())),
+			cursor: z.array(z.record(z.any()).or(z.null()), z.record(z.any()).or(z.null())).optional(),
 		}),
 	);
+
+export const getRelationshipMomentTagsDto = createInfiniteDataDto({ defaultLimit: 10 }).and(
+	z.object({
+		query: z.string().optional(),
+	}),
+);
+
+export const createRelationshipMomentTagDto = z.object({
+	tag: z.string().min(1).max(50),
+});
 
 export const createMomentTagDto = z.object({
 	momentId: z.string().uuid(),
@@ -78,6 +92,11 @@ export const getMomentsByTagDto = createInfiniteDataDto({ defaultLimit: 10 })
 		}),
 	);
 
+export const deleteMomentTagDto = z.object({
+	momentId: z.string().uuid(),
+	tag: z.string().min(1).max(50),
+});
+
 export type CreateMomentDetailsDto = z.infer<typeof createMomentDetailsDto>;
 export type GetInfiniteMomentsDto = z.infer<typeof getInfiniteMomentsDto>;
 export type UpdateMomentDetailsDto = z.infer<typeof updateMomentDetailsDto>;
@@ -85,5 +104,8 @@ export type CreateMomentMessageDto = z.infer<typeof createMomentMessageDto>;
 export type GetInfiniteMomentMessagesDto = z.infer<typeof getInfiniteMomentMessagesDto>;
 export type GetMomentUploadUrlDto = z.infer<typeof getMomentUploadUrlDto>;
 export type SearchMomentsDto = z.infer<typeof searchMomentsDto>;
+export type GetRelationshipMomentTagsDto = z.infer<typeof getRelationshipMomentTagsDto>;
+export type CreateRelationshipMomentTagDto = z.infer<typeof createRelationshipMomentTagDto>;
 export type CreateMomentTagDto = z.infer<typeof createMomentTagDto>;
 export type GetMomentsByTagDto = z.infer<typeof getMomentsByTagDto>;
+export type DeleteMomentTagDto = z.infer<typeof deleteMomentTagDto>;

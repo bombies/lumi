@@ -1,7 +1,7 @@
-import { KeyPrefix } from '@lumi/core/types/dynamo.types';
 import { User } from '@lumi/core/types/user.types';
 import { DatabaseWebSocketHeartbeat, WebSocketSubTopic, WebSocketToken } from '@lumi/core/types/websockets.types';
 import { dynamo, updateItem } from '@lumi/core/utils/dynamo/dynamo.service';
+import { DynamoKey } from '@lumi/core/utils/dynamo/dynamo.types';
 import { createAsyncWebsocketConnection, emitAsyncWebsocketEvent } from '@lumi/core/websockets/websockets.service';
 import { APIGatewayProxyEvent, Handler } from 'aws-lambda';
 import { ISubscriptionMap } from 'mqtt';
@@ -23,7 +23,7 @@ export const handler: Handler<APIGatewayProxyEvent> = async () => {
 			'#timestamp': 'timestamp',
 		},
 		ExpressionAttributeValues: {
-			':pk': KeyPrefix.webSocketHeartbeat.pk(),
+			':pk': DynamoKey.webSocketHeartbeat.pk(),
 			':timestamp': latestHealthyTime,
 		},
 	});
@@ -57,8 +57,8 @@ export const handler: Handler<APIGatewayProxyEvent> = async () => {
 		const userIds = expiredConnections.map(({ payload }) => payload.userId);
 		const updateRequests = userIds.map(userId =>
 			updateItem<User>({
-				pk: KeyPrefix.user.pk(userId),
-				sk: KeyPrefix.user.sk(userId),
+				pk: DynamoKey.user.pk(userId),
+				sk: DynamoKey.user.sk(userId),
 				update: { status: 'offline' },
 			}),
 		);

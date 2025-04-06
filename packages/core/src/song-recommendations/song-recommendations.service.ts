@@ -1,6 +1,5 @@
 import { TRPCError } from '@trpc/server';
 
-import { EntityType, KeyPrefix } from '../types/dynamo.types';
 import { DatabaseSongRecommendation, SongRecommendation } from '../types/song-recommendation.types';
 import {
 	bactchWrite,
@@ -11,6 +10,7 @@ import {
 	putItem,
 	updateItem,
 } from '../utils/dynamo/dynamo.service';
+import { DynamoKey, EntityType } from '../utils/dynamo/dynamo.types';
 import { chunkArray, getUUID } from '../utils/utils';
 import {
 	CreateSongRecommendationDto,
@@ -27,8 +27,8 @@ export const getSongRecommendationByTrackIdForUser = async (
 		queryExpression: {
 			expression: '#gsi2pk = :gsi2pk and #gsi2sk = :gsi2sk',
 			variables: {
-				':gsi2pk': KeyPrefix.songRecommendation.gsi2pk(userId),
-				':gsi2sk': KeyPrefix.songRecommendation.gsi2sk(trackId),
+				':gsi2pk': DynamoKey.songRecommendation.gsi2pk(userId),
+				':gsi2sk': DynamoKey.songRecommendation.gsi2sk(trackId),
 			},
 		},
 	}).then(res => res.data[0]);
@@ -58,12 +58,12 @@ export const createSongRecommendation = async (
 	};
 
 	await putItem<DatabaseSongRecommendation>({
-		pk: KeyPrefix.songRecommendation.pk(recId),
-		sk: KeyPrefix.songRecommendation.sk(recId),
-		gsi1pk: KeyPrefix.songRecommendation.gsi1pk(relationshipId),
-		gsi1sk: KeyPrefix.songRecommendation.gsi1sk(recommenderId, false, createdAt),
-		gsi2pk: KeyPrefix.songRecommendation.gsi2pk(recommenderId),
-		gsi2sk: KeyPrefix.songRecommendation.gsi2sk(dto.id),
+		pk: DynamoKey.songRecommendation.pk(recId),
+		sk: DynamoKey.songRecommendation.sk(recId),
+		gsi1pk: DynamoKey.songRecommendation.gsi1pk(relationshipId),
+		gsi1sk: DynamoKey.songRecommendation.gsi1sk(recommenderId, false, createdAt),
+		gsi2pk: DynamoKey.songRecommendation.gsi2pk(recommenderId),
+		gsi2sk: DynamoKey.songRecommendation.gsi2sk(dto.id),
 		...songRec,
 		entityType: EntityType.SONG_RECOMMENDATION,
 	});
@@ -81,8 +81,8 @@ export const getSongRecommendations = async (
 		queryExpression: {
 			expression: '#gsi1pk = :gsi1pk and begins_with(#gsi1sk, :gsi1sk)',
 			variables: {
-				':gsi1pk': KeyPrefix.songRecommendation.gsi1pk(relationshipId),
-				':gsi1sk': KeyPrefix.songRecommendation.buildKey(partnerId, dto.filter ?? ''),
+				':gsi1pk': DynamoKey.songRecommendation.gsi1pk(relationshipId),
+				':gsi1sk': DynamoKey.songRecommendation.buildKey(partnerId, dto.filter ?? ''),
 			},
 		},
 		limit,
@@ -100,8 +100,8 @@ export const getSongRecommendationsByRelationshipId = async (
 		queryExpression: {
 			expression: '#gsi3pk = :gsi3pk and begins_with(#gsi3sk, :gsi3sk)',
 			variables: {
-				':gsi3pk': KeyPrefix.songRecommendation.gsi3pk(relationshipId),
-				':gsi3sk': KeyPrefix.songRecommendation.buildKey(relationshipId),
+				':gsi3pk': DynamoKey.songRecommendation.gsi3pk(relationshipId),
+				':gsi3sk': DynamoKey.songRecommendation.buildKey(relationshipId),
 			},
 		},
 		limit,
@@ -111,7 +111,7 @@ export const getSongRecommendationsByRelationshipId = async (
 };
 
 export const getSongRecommendationById = async (recId: string) => {
-	return getItem<SongRecommendation>(KeyPrefix.songRecommendation.pk(recId), KeyPrefix.songRecommendation.sk(recId));
+	return getItem<SongRecommendation>(DynamoKey.songRecommendation.pk(recId), DynamoKey.songRecommendation.sk(recId));
 };
 
 export const updateSongRecommendation = async (recId: string, dto: UpdateSongRecommendationDto) => {
@@ -124,20 +124,20 @@ export const updateSongRecommendation = async (recId: string, dto: UpdateSongRec
 
 	const updateTime = new Date().toISOString();
 	return updateItem<DatabaseSongRecommendation>({
-		pk: KeyPrefix.songRecommendation.pk(recId),
-		sk: KeyPrefix.songRecommendation.sk(recId),
+		pk: DynamoKey.songRecommendation.pk(recId),
+		sk: DynamoKey.songRecommendation.sk(recId),
 		update: {
 			...dto,
 			gsi1sk:
 				dto.listened !== undefined
-					? KeyPrefix.songRecommendation.gsi1sk(
+					? DynamoKey.songRecommendation.gsi1sk(
 							existingRec.recommenderId,
 							dto.listened,
 							existingRec.createdAt,
 						)
 					: undefined,
-			gsi3pk: KeyPrefix.songRecommendation.gsi3pk(existingRec.relationshipId),
-			gsi3sk: KeyPrefix.songRecommendation.gsi3sk(existingRec.relationshipId, updateTime),
+			gsi3pk: DynamoKey.songRecommendation.gsi3pk(existingRec.relationshipId),
+			gsi3sk: DynamoKey.songRecommendation.gsi3sk(existingRec.relationshipId, updateTime),
 			updatedAt: updateTime,
 		},
 	});
@@ -151,7 +151,7 @@ export const deleteSongRecommendation = async (recId: string) => {
 			message: 'Song recommendation not found!',
 		});
 
-	await deleteItem(KeyPrefix.songRecommendation.pk(recId), KeyPrefix.songRecommendation.sk(recId));
+	await deleteItem(DynamoKey.songRecommendation.pk(recId), DynamoKey.songRecommendation.sk(recId));
 	return existingRec;
 };
 
@@ -161,7 +161,7 @@ export const deleteSongRecommendationsByRelationshipId = async (relationshipId: 
 		queryExpression: {
 			expression: '#gsi1pk = :gsi1pk',
 			variables: {
-				':gsi1pk': KeyPrefix.songRecommendation.gsi1pk(relationshipId),
+				':gsi1pk': DynamoKey.songRecommendation.gsi1pk(relationshipId),
 			},
 		},
 		exhaustive: true,
@@ -172,8 +172,8 @@ export const deleteSongRecommendationsByRelationshipId = async (relationshipId: 
 			bactchWrite(
 				...chunk.map(chunkItem => ({
 					deleteItem: {
-						pk: KeyPrefix.songRecommendation.pk(chunkItem.id),
-						sk: KeyPrefix.songRecommendation.sk(chunkItem.id),
+						pk: DynamoKey.songRecommendation.pk(chunkItem.id),
+						sk: DynamoKey.songRecommendation.sk(chunkItem.id),
 					},
 				})),
 			),

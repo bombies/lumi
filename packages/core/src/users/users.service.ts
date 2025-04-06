@@ -2,9 +2,9 @@ import { TRPCError } from '@trpc/server';
 import mime from 'mime';
 import { Resource } from 'sst';
 
-import { EntityType, KeyPrefix } from '../types/dynamo.types';
 import { DatabaseUser, User } from '../types/user.types';
 import { getItem, getItems, putItem, updateItem } from '../utils/dynamo/dynamo.service';
+import { DynamoKey, EntityType } from '../utils/dynamo/dynamo.types';
 import { ContentPaths, StorageClient } from '../utils/s3/s3.service';
 import { getUUID } from '../utils/utils';
 import {
@@ -40,12 +40,12 @@ export const createUser = async ({
 	const userId = dto.id ?? getUUID();
 	const [createdAt, updatedAt] = [new Date().toISOString(), new Date().toISOString()];
 	await putItem<DatabaseUser>({
-		pk: KeyPrefix.user.pk(userId),
-		sk: KeyPrefix.user.sk(userId),
-		gsi1pk: KeyPrefix.user.gsi1pk(),
-		gsi1sk: KeyPrefix.user.gsi1sk(dto.username),
-		gsi2pk: KeyPrefix.user.gsi2pk(),
-		gsi2sk: KeyPrefix.user.gsi2sk(dto.email),
+		pk: DynamoKey.user.pk(userId),
+		sk: DynamoKey.user.sk(userId),
+		gsi1pk: DynamoKey.user.gsi1pk(),
+		gsi1sk: DynamoKey.user.gsi1sk(dto.username),
+		gsi2pk: DynamoKey.user.gsi2pk(),
+		gsi2sk: DynamoKey.user.gsi2sk(dto.email),
 		entityType: EntityType.USER,
 		createdAt: new Date().toISOString(),
 		updatedAt: new Date().toISOString(),
@@ -78,7 +78,7 @@ type GetUserByIdArgs = {
 };
 
 export const getUserById = async (userId: string, args?: GetUserByIdArgs) => {
-	const res = await getItem<User>(KeyPrefix.user.pk(userId), KeyPrefix.user.sk(userId), {
+	const res = await getItem<User>(DynamoKey.user.pk(userId), DynamoKey.user.sk(userId), {
 		projectedAttributes: args?.projections,
 	});
 
@@ -92,8 +92,8 @@ export const getUserByUsername = async (username: string) => {
 			queryExpression: {
 				expression: '#gsi1pk = :gsi1pk AND #gsi1sk = :gsi1sk',
 				variables: {
-					':gsi1pk': KeyPrefix.user.gsi1pk(),
-					':gsi1sk': KeyPrefix.user.gsi1sk(username),
+					':gsi1pk': DynamoKey.user.gsi1pk(),
+					':gsi1sk': DynamoKey.user.gsi1sk(username),
 				},
 			},
 		})
@@ -108,8 +108,8 @@ export const getUsersByUsername = async ({ username, limit, cursor, projections 
 		queryExpression: {
 			expression: '#gsi1pk = :gsi1pk AND begins_with(#gsi1sk, :gsi1sk)',
 			variables: {
-				':gsi1pk': KeyPrefix.user.gsi1pk(),
-				':gsi1sk': KeyPrefix.user.gsi1sk(username),
+				':gsi1pk': DynamoKey.user.gsi1pk(),
+				':gsi1sk': DynamoKey.user.gsi1sk(username),
 			},
 		},
 		limit,
@@ -125,8 +125,8 @@ export const getUsersByEmail = async ({ email, limit, cursor, projections }: Get
 		queryExpression: {
 			expression: '#gsi2pk = :gsi2pk AND begins_with(#gsi2sk, :gsi2sk)',
 			variables: {
-				':gsi2pk': KeyPrefix.user.gsi2pk(),
-				':gsi2sk': KeyPrefix.user.gsi2sk(email),
+				':gsi2pk': DynamoKey.user.gsi2pk(),
+				':gsi2sk': DynamoKey.user.gsi2sk(email),
 			},
 		},
 		limit,
@@ -143,8 +143,8 @@ export const getUserByEmail = async (email: string) => {
 			queryExpression: {
 				expression: '#gsi2pk = :gsi2pk AND #gsi2sk = :gsi2sk',
 				variables: {
-					':gsi2pk': KeyPrefix.user.gsi2pk(),
-					':gsi2sk': KeyPrefix.user.gsi2sk(email),
+					':gsi2pk': DynamoKey.user.gsi2pk(),
+					':gsi2sk': DynamoKey.user.gsi2sk(email),
 				},
 			},
 		})
@@ -173,8 +173,8 @@ export const updateUser = async (userId: string, dto: UpdateUserDto) => {
 		});
 
 	return updateItem<User>({
-		pk: KeyPrefix.user.pk(userId),
-		sk: KeyPrefix.user.sk(userId),
+		pk: DynamoKey.user.pk(userId),
+		sk: DynamoKey.user.sk(userId),
 		update: {
 			...dto,
 			updatedAt: new Date().toISOString(),

@@ -27,7 +27,6 @@ const MomentsWidget: FC = () => {
 						key={moment.id}
 						moment={moment}
 						linkClassName={cn((idx + 1) % 2 !== 0 && !data[idx + 1] && 'col-span-2')}
-						className={cn('h-80')}
 						compactUploaderDisplay
 					/>
 				)),

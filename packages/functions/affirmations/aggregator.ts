@@ -1,8 +1,8 @@
 import { SQS } from '@aws-sdk/client-sqs';
 import { ScanCommandInput, ScanCommandOutput } from '@aws-sdk/lib-dynamodb';
 import { DatabaseAffirmation } from '@lumi/core/types/affirmations.types';
-import { KeyPrefix } from '@lumi/core/types/dynamo.types';
 import { dynamo } from '@lumi/core/utils/dynamo/dynamo.service';
+import { DynamoKey } from '@lumi/core/utils/dynamo/dynamo.types';
 import { Handler } from 'aws-lambda';
 import { Resource } from 'sst';
 
@@ -18,7 +18,7 @@ export const handler: Handler = async () => {
 			'#pk': 'pk',
 		},
 		ExpressionAttributeValues: {
-			':pk': KeyPrefix.affirmation.prefix,
+			':pk': DynamoKey.affirmation.prefix,
 		},
 	};
 

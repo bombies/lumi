@@ -1,5 +1,6 @@
 'use client';
 
+import { skipToken } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
 import { useRouteInvalidation } from '@/lib/hooks/useRouteInvalidation';
@@ -27,7 +28,11 @@ export const SearchMoments = (
 			...args,
 		},
 		{
-			getNextPageParam: lastPage => lastPage.nextCursor,
+			getNextPageParam: lastPage => {
+				const [titleCursor, tagCursor] = lastPage.nextCursor;
+				if (!titleCursor && !tagCursor) return undefined;
+				else return lastPage.nextCursor;
+			},
 		},
 	);
 
@@ -81,6 +86,58 @@ export const DeleteMomentMessage = () => {
 };
 
 export const GetMomentUploadUrl = () => trpc.moments.getMomentUploadUrl.useMutation();
+
+export const GetRelationshipMomentTags = (query?: string, limit?: number) =>
+	trpc.moments.getRelationshipMomentTags.useInfiniteQuery(
+		{ query, limit },
+		{
+			getNextPageParam: lastPage => lastPage.nextCursor,
+		},
+	);
+
+export const GetMomentsForRelationshipTag = (
+	tag?: string,
+	args?: {
+		limit?: number;
+		order?: 'asc' | 'desc';
+	},
+) =>
+	trpc.moments.getMomentsByTag.useInfiniteQuery(
+		tag ? { tagQuery: tag, limit: args?.limit, order: args?.order } : skipToken,
+		{
+			getNextPageParam: lastPage => lastPage.cursor,
+		},
+	);
+
+export const CreateRelationshipMomentTag = () => {
+	const invalidateRoutes = useRouteInvalidation([trpc.moments.getRelationshipMomentTags]);
+	return trpc.moments.createRelationshipMomentTag.useMutation({
+		onSuccess: () => invalidateRoutes(),
+	});
+};
+
+export const DeleteRelationshipMomentTag = () => {
+	const invalidateRoutes = useRouteInvalidation([trpc.moments.getRelationshipMomentTags]);
+	return trpc.moments.deleteRelationshipMomentTag.useMutation({
+		onSuccess: () => invalidateRoutes(),
+	});
+};
+
+export const GetMomentTags = (momentId: string) => trpc.moments.getTagsForMoment.useQuery(momentId);
+
+export const CreateMomentTag = () => {
+	const invalidateRoutes = useRouteInvalidation([trpc.moments.getTagsForMoment]);
+	return trpc.moments.createTagForMoment.useMutation({
+		onSuccess: () => invalidateRoutes(),
+	});
+};
+
+export const DeleteMomentTag = () => {
+	const invalidateRoutes = useRouteInvalidation([trpc.moments.getTagsForMoment]);
+	return trpc.moments.deleteTagForMoment.useMutation({
+		onSuccess: () => invalidateRoutes(),
+	});
+};
 
 export const UploadMoment = () => {
 	const { mutateAsync: fetchUrl } = GetMomentUploadUrl();

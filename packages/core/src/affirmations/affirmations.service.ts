@@ -9,7 +9,6 @@ import {
 	DatabaseReceivedAffirmation,
 	ReceivedAffirmation,
 } from '../types/affirmations.types';
-import { EntityType, KeyPrefix } from '../types/dynamo.types';
 import { Relationship } from '../types/relationship.types';
 import { User } from '../types/user.types';
 import { WebSocketToken } from '../types/websockets.types';
@@ -22,6 +21,7 @@ import {
 	putItem,
 	updateItem,
 } from '../utils/dynamo/dynamo.service';
+import { DynamoKey, EntityType } from '../utils/dynamo/dynamo.types';
 import { extractPartnerIdFromRelationship } from '../utils/global-utils';
 import { chunkArray, getUUID } from '../utils/utils';
 import { MqttClientType, createAsyncWebsocketConnection } from '../websockets/websockets.service';
@@ -41,8 +41,8 @@ export const createAffirmation = async (dto: CreateAffirmationDto) => {
 	};
 
 	return putItem<Affirmation, DatabaseAffirmation>({
-		pk: KeyPrefix.affirmation.pk(dto.relationshipId),
-		sk: KeyPrefix.affirmation.sk(dto.ownerId, affirmationId),
+		pk: DynamoKey.affirmation.pk(dto.relationshipId),
+		sk: DynamoKey.affirmation.sk(dto.ownerId, affirmationId),
 		...affirmation,
 		entityType: EntityType.AFFIRMATION,
 	});
@@ -50,8 +50,8 @@ export const createAffirmation = async (dto: CreateAffirmationDto) => {
 
 export const getAffirmationById = async (ownerId: string, relationshipId: string, affirmationId: string) => {
 	return getItem<Affirmation>(
-		KeyPrefix.affirmation.pk(relationshipId),
-		KeyPrefix.affirmation.sk(ownerId, affirmationId),
+		DynamoKey.affirmation.pk(relationshipId),
+		DynamoKey.affirmation.sk(ownerId, affirmationId),
 	);
 };
 
@@ -99,8 +99,8 @@ export const getOwnedAffirmationsForUser = async (userId: string, rship?: Relati
 		queryExpression: {
 			expression: '#pk = :pk and begins_with(#sk, :sk)',
 			variables: {
-				':pk': KeyPrefix.affirmation.pk(relationship.id),
-				':sk': KeyPrefix.affirmation.buildKey(userId),
+				':pk': DynamoKey.affirmation.pk(relationship.id),
+				':sk': DynamoKey.affirmation.buildKey(userId),
 			},
 		},
 	});
@@ -131,8 +131,8 @@ export const updateAffirmation = async (
 		});
 
 	return updateItem<Affirmation>({
-		pk: KeyPrefix.affirmation.pk(relationshipId),
-		sk: KeyPrefix.affirmation.sk(ownerId, affirmationId),
+		pk: DynamoKey.affirmation.pk(relationshipId),
+		sk: DynamoKey.affirmation.sk(ownerId, affirmationId),
 		update: dto,
 	});
 };
@@ -145,7 +145,7 @@ export const deleteAffirmation = async (ownerId: string, relationshipId: string,
 			message: 'Affirmation not found',
 		});
 
-	await deleteItem(KeyPrefix.affirmation.pk(relationshipId), KeyPrefix.affirmation.sk(ownerId, affirmationId));
+	await deleteItem(DynamoKey.affirmation.pk(relationshipId), DynamoKey.affirmation.sk(ownerId, affirmationId));
 	return affirmation;
 };
 
@@ -155,7 +155,7 @@ export const deleteAffirmationsForRelationship = async (relationshipId: string) 
 			queryExpression: {
 				expression: '#pk = :pk',
 				variables: {
-					':pk': KeyPrefix.affirmation.pk(relationshipId),
+					':pk': DynamoKey.affirmation.pk(relationshipId),
 				},
 			},
 			exhaustive: true,
@@ -179,8 +179,8 @@ export const deleteAffirmationsForRelationship = async (relationshipId: string) 
 export const createReceivedAffirmation = async (receiver: string, relationshipId: string, affirmation: string) => {
 	const timestamp = new Date().toISOString();
 	return putItem<ReceivedAffirmation, DatabaseReceivedAffirmation>({
-		pk: KeyPrefix.receivedAffirmation.pk(relationshipId),
-		sk: KeyPrefix.receivedAffirmation.sk(receiver, timestamp),
+		pk: DynamoKey.receivedAffirmation.pk(relationshipId),
+		sk: DynamoKey.receivedAffirmation.sk(receiver, timestamp),
 		affirmation,
 		timestamp,
 		entityType: EntityType.RECEIVED_AFFIRMATION,
@@ -196,8 +196,8 @@ export const getReceivedAffirmations = async (
 		queryExpression: {
 			expression: '#pk = :pk and begins_with(#sk, :sk)',
 			variables: {
-				':pk': KeyPrefix.receivedAffirmation.pk(relationshipId),
-				':sk': KeyPrefix.receivedAffirmation.buildKey(userId),
+				':pk': DynamoKey.receivedAffirmation.pk(relationshipId),
+				':sk': DynamoKey.receivedAffirmation.buildKey(userId),
 			},
 		},
 		limit,
@@ -212,8 +212,8 @@ export const getTodaysReceivedAffirmations = async (userId: string, relationship
 		queryExpression: {
 			expression: '#pk = :pk and begins_with(#sk, :sk)',
 			variables: {
-				':pk': KeyPrefix.receivedAffirmation.pk(relationshipId),
-				':sk': KeyPrefix.receivedAffirmation.buildKey(userId, today),
+				':pk': DynamoKey.receivedAffirmation.pk(relationshipId),
+				':sk': DynamoKey.receivedAffirmation.buildKey(userId, today),
 			},
 		},
 	});

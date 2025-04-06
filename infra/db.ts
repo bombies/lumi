@@ -1,16 +1,4 @@
-import { spawnSync } from 'child_process';
-
-import {
-	cdnPrivateKey,
-	postgresDatabase,
-	postgresPassword,
-	postgresPort,
-	postgresUsername,
-	redisHost,
-	redisPassword,
-	redisPort,
-	redisUser,
-} from './secrets';
+import { cdnPrivateKey, redisHost, redisPassword, redisPort, redisUser } from './secrets';
 import { contentBucket, contentCdn, contentCdnPublicKey } from './storage';
 
 export const db = new sst.aws.Dynamo('Database', {
@@ -117,6 +105,31 @@ db.subscribe(
 					Keys: {
 						pk: {
 							S: [{ prefix: 'moment::details#' }],
+						},
+					},
+				},
+			},
+		],
+	},
+);
+
+db.subscribe(
+	'MomentTagOperationHandler',
+	{
+		handler: 'packages/functions/db/moment-tag.handler',
+		link: [db, redisHost, redisPort, redisUser, redisPassword],
+		environment: {
+			TABLE_NAME: db.name,
+		},
+	},
+	{
+		filters: [
+			{
+				eventName: ['INSERT', 'REMOVE'],
+				dynamodb: {
+					Keys: {
+						pk: {
+							S: [{ prefix: 'moment::tag#' }],
 						},
 					},
 				},

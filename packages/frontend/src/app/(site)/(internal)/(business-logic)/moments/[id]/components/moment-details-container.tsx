@@ -7,7 +7,9 @@ import { motion } from 'framer-motion';
 
 import { WebsocketTopic } from '@/components/providers/web-sockets/topics';
 import { useWebSocket } from '@/components/providers/web-sockets/web-socket-provider';
+import { Separator } from '@/components/ui/separator';
 import UserAvatar from '@/components/ui/user-avatar';
+import { GetMomentTags } from '@/hooks/trpc/moment-hooks';
 import { cn } from '@/lib/utils';
 import CommentDrawer from './comment-drawer';
 import MomentSettings from './moment-settings';
@@ -20,6 +22,7 @@ type Props = {
 
 const MomentDetailsContainer: FC<Props> = ({ moment, uploader, currentUser: user }) => {
 	const { subscribeToTopic } = useWebSocket();
+	const { data: momentTags } = GetMomentTags(moment.id);
 	const [expanded, setExpanded] = useState(false);
 
 	useEffect(() => {
@@ -49,11 +52,24 @@ const MomentDetailsContainer: FC<Props> = ({ moment, uploader, currentUser: user
 						<p
 							className={cn(
 								'text-xs line-clamp-2 whitespace-pre-wrap',
-								expanded && 'line-clamp-none max-h-[80%]',
+								expanded && 'line-clamp-none max-h-[80%] overflow-y-scroll',
 							)}
 						>
 							{moment.description}
 						</p>
+						{momentTags?.length && (
+							<>
+								<Separator className="my-1" />
+								<p
+									className={cn(
+										'text-xs line-clamp-1 whitespace-pre-wrap text-primary',
+										expanded && 'line-clamp-none',
+									)}
+								>
+									{momentTags.map(tag => `#${tag.tag}`).join(', ')}
+								</p>
+							</>
+						)}
 					</div>
 				</div>
 				<div className="flex flex-col tablet:flex-row gap-1">

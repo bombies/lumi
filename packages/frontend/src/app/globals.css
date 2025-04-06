@@ -181,6 +181,14 @@
 	}
 }
 
+@layer utilities {
+	/* Fix on shadcn's combo-box component's container width not relative to its trigger button width */
+	.popover-content-width-full {
+		width: var(--radix-popover-trigger-width);
+		max-height: var(--radix-popover-content-available-height);
+	}
+}
+
 @theme inline {
 	--color-sidebar: var(--sidebar);
 	--color-sidebar-foreground: var(--sidebar-foreground);

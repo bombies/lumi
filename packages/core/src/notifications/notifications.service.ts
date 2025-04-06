@@ -2,7 +2,6 @@ import { TRPCError } from '@trpc/server';
 import { Resource } from 'sst';
 import webpush, { PushSubscription } from 'web-push';
 
-import { EntityType, KeyPrefix } from '../types/dynamo.types';
 import {
 	DatabaseNotificationSubscriber,
 	DatabaseStoredNotification,
@@ -22,6 +21,7 @@ import {
 	updateItem,
 	updateMany,
 } from '../utils/dynamo/dynamo.service';
+import { DynamoKey, EntityType } from '../utils/dynamo/dynamo.types';
 import { chunkArray, getUUID } from '../utils/utils';
 import { MqttClientType, emitAsyncWebsocketEvent } from '../websockets/websockets.service';
 import {
@@ -41,21 +41,21 @@ export const createNotificationSubscription = async (userId: string, subscriptio
 	};
 
 	return putItem<NotificationSubscriber, DatabaseNotificationSubscriber>({
-		pk: KeyPrefix.notificationSubscriber.pk(userId),
-		sk: KeyPrefix.notificationSubscriber.sk(subscription.endpoint),
+		pk: DynamoKey.notificationSubscriber.pk(userId),
+		sk: DynamoKey.notificationSubscriber.sk(subscription.endpoint),
 		entityType: EntityType.NOTIFICATION_SUBSCRIBER,
 		...sub,
 	});
 };
 
 export const deleteNotificationSubscription = async (userId: string, endpoint: string) => {
-	return deleteItem(KeyPrefix.notificationSubscriber.pk(userId), KeyPrefix.notificationSubscriber.sk(endpoint));
+	return deleteItem(DynamoKey.notificationSubscriber.pk(userId), DynamoKey.notificationSubscriber.sk(endpoint));
 };
 
 export const getNotificationSubscription = async (userId: string, endpoint: string) => {
 	return getItem<NotificationSubscriber>(
-		KeyPrefix.notificationSubscriber.pk(userId),
-		KeyPrefix.notificationSubscriber.sk(endpoint),
+		DynamoKey.notificationSubscriber.pk(userId),
+		DynamoKey.notificationSubscriber.sk(endpoint),
 	);
 };
 
@@ -64,7 +64,7 @@ export const getNotificationSubscriptions = async (userId: string) => {
 		queryExpression: {
 			expression: '#pk = :pk',
 			variables: {
-				':pk': KeyPrefix.notificationSubscriber.pk(userId),
+				':pk': DynamoKey.notificationSubscriber.pk(userId),
 			},
 		},
 	});
@@ -187,12 +187,12 @@ export const storeNotification = async (userId: string, dto: CreateNotificationD
 	};
 
 	const notif = await putItem<StoredNotification, DatabaseStoredNotification>({
-		pk: KeyPrefix.notifications.pk(id),
-		sk: KeyPrefix.notifications.sk(id),
-		gsi1pk: KeyPrefix.notifications.gsi1pk(userId),
-		gsi1sk: KeyPrefix.notifications.gsi1sk(notification.createdAt),
-		gsi2pk: KeyPrefix.notifications.gsi2pk(userId),
-		gsi2sk: KeyPrefix.notifications.gsi2sk(notification.read, notification.createdAt),
+		pk: DynamoKey.notifications.pk(id),
+		sk: DynamoKey.notifications.sk(id),
+		gsi1pk: DynamoKey.notifications.gsi1pk(userId),
+		gsi1sk: DynamoKey.notifications.gsi1sk(notification.createdAt),
+		gsi2pk: DynamoKey.notifications.gsi2pk(userId),
+		gsi2sk: DynamoKey.notifications.gsi2sk(notification.read, notification.createdAt),
 		...notification,
 		entityType: EntityType.NOTIFICATION,
 	});
@@ -207,7 +207,7 @@ export const getStoredNotifications = async (userId: string, dto: GetNotificatio
 		queryExpression: {
 			expression: '#gsi1pk = :gsi1pk',
 			variables: {
-				':gsi1pk': KeyPrefix.notifications.gsi1pk(userId),
+				':gsi1pk': DynamoKey.notifications.gsi1pk(userId),
 			},
 		},
 		order: 'desc',
@@ -222,8 +222,8 @@ export const getFilteredStoredNotifications = async (userId: string, dto: GetFil
 		queryExpression: {
 			expression: '#gsi2pk = :gsi2pk and begins_with(#gsi2sk, :gsi2sk)',
 			variables: {
-				':gsi2pk': KeyPrefix.notifications.gsi2pk(userId),
-				':gsi2sk': KeyPrefix.notifications.buildKey(dto.filter),
+				':gsi2pk': DynamoKey.notifications.gsi2pk(userId),
+				':gsi2sk': DynamoKey.notifications.buildKey(dto.filter),
 			},
 		},
 		order: 'desc',
@@ -234,8 +234,8 @@ export const getFilteredStoredNotifications = async (userId: string, dto: GetFil
 
 export const updateNotification = async (notificationId: string, dto: UpdateNotificationDto) => {
 	const oldNotif = await getItem<DatabaseStoredNotification>(
-		KeyPrefix.notifications.pk(notificationId),
-		KeyPrefix.notifications.sk(notificationId),
+		DynamoKey.notifications.pk(notificationId),
+		DynamoKey.notifications.sk(notificationId),
 	);
 	if (!oldNotif)
 		throw new TRPCError({
@@ -244,11 +244,11 @@ export const updateNotification = async (notificationId: string, dto: UpdateNoti
 		});
 
 	const res = await updateItem<DatabaseStoredNotification>({
-		pk: KeyPrefix.notifications.pk(notificationId),
-		sk: KeyPrefix.notifications.sk(notificationId),
+		pk: DynamoKey.notifications.pk(notificationId),
+		sk: DynamoKey.notifications.sk(notificationId),
 		update: {
 			...dto,
-			gsi2sk: dto.read !== undefined ? KeyPrefix.notifications.gsi2sk(dto.read, oldNotif.createdAt) : undefined,
+			gsi2sk: dto.read !== undefined ? DynamoKey.notifications.gsi2sk(dto.read, oldNotif.createdAt) : undefined,
 		},
 	});
 
@@ -264,8 +264,8 @@ export const markAllNotificationsAsRead = async (userId: string) => {
 		queryExpression: {
 			expression: '#gsi2pk = :gsi2pk and begins_with(#gsi2sk, :gsi2sk)',
 			variables: {
-				':gsi2pk': KeyPrefix.notifications.gsi1pk(userId),
-				':gsi2sk': KeyPrefix.notifications.buildKey('unread'),
+				':gsi2pk': DynamoKey.notifications.gsi1pk(userId),
+				':gsi2sk': DynamoKey.notifications.buildKey('unread'),
 			},
 		},
 		exhaustive: true,
@@ -275,7 +275,7 @@ export const markAllNotificationsAsRead = async (userId: string) => {
 		unreadNotifications.data?.map(notif => ({
 			pk: notif.pk,
 			sk: notif.sk,
-			update: { read: true, gsi2sk: KeyPrefix.notifications.gsi2sk(true, notif.createdAt) },
+			update: { read: true, gsi2sk: DynamoKey.notifications.gsi2sk(true, notif.createdAt) },
 		})) ?? [],
 	);
 
@@ -289,9 +289,9 @@ export const markBulkNotificationsAsRead = async (
 ) => {
 	const res = await updateMany<DatabaseStoredNotification>(
 		[...new Set(notificationData)].map(data => ({
-			pk: KeyPrefix.notifications.pk(data.id),
-			sk: KeyPrefix.notifications.sk(data.id),
-			update: { read: true, gsi2sk: KeyPrefix.notifications.gsi2sk(true, data.createdAt) },
+			pk: DynamoKey.notifications.pk(data.id),
+			sk: DynamoKey.notifications.sk(data.id),
+			update: { read: true, gsi2sk: DynamoKey.notifications.gsi2sk(true, data.createdAt) },
 		})),
 	);
 
@@ -312,7 +312,7 @@ export const deleteNotificationsForUser = async (userId: string) => {
 			queryExpression: {
 				expression: `#gsi1pk = :gsi1sk`,
 				variables: {
-					':gsi1sk': KeyPrefix.notifications.gsi1pk(userId),
+					':gsi1sk': DynamoKey.notifications.gsi1pk(userId),
 				},
 			},
 			exhaustive: true,
@@ -335,8 +335,8 @@ export const deleteNotificationsForUser = async (userId: string) => {
 
 export const getUnreadNotificationCount = async (userId: string) => {
 	return getItem<UnreadNotificationCount>(
-		KeyPrefix.unreadNotificationCount.pk(userId),
-		KeyPrefix.unreadNotificationCount.sk(userId),
+		DynamoKey.unreadNotificationCount.pk(userId),
+		DynamoKey.unreadNotificationCount.sk(userId),
 	);
 };
 
@@ -344,14 +344,14 @@ export const addUnreadNotificationToCount = async (userId: string) => {
 	const existingCount = await getUnreadNotificationCount(userId);
 	if (existingCount)
 		return updateItem<UnreadNotificationCount>({
-			pk: KeyPrefix.unreadNotificationCount.pk(userId),
-			sk: KeyPrefix.unreadNotificationCount.sk(userId),
+			pk: DynamoKey.unreadNotificationCount.pk(userId),
+			sk: DynamoKey.unreadNotificationCount.sk(userId),
 			update: { count: existingCount.count + 1 },
 		});
 
 	return putItem<UnreadNotificationCount, DatabaseUnreadNotificationCount>({
-		pk: KeyPrefix.unreadNotificationCount.pk(userId),
-		sk: KeyPrefix.unreadNotificationCount.pk(userId),
+		pk: DynamoKey.unreadNotificationCount.pk(userId),
+		sk: DynamoKey.unreadNotificationCount.pk(userId),
 		userId,
 		count: 1,
 		entityType: EntityType.UNREAD_NOTIFICATION_COUNT,
@@ -362,8 +362,8 @@ export const removeUnreadNotificationFromCount = async (userId: string) => {
 	const existingCount = await getUnreadNotificationCount(userId);
 	if (!existingCount) {
 		return putItem<UnreadNotificationCount, DatabaseUnreadNotificationCount>({
-			pk: KeyPrefix.unreadNotificationCount.pk(userId),
-			sk: KeyPrefix.unreadNotificationCount.pk(userId),
+			pk: DynamoKey.unreadNotificationCount.pk(userId),
+			sk: DynamoKey.unreadNotificationCount.pk(userId),
 			userId,
 			count: 0,
 			entityType: EntityType.UNREAD_NOTIFICATION_COUNT,
@@ -371,16 +371,16 @@ export const removeUnreadNotificationFromCount = async (userId: string) => {
 	}
 
 	return updateItem<UnreadNotificationCount>({
-		pk: KeyPrefix.unreadNotificationCount.pk(userId),
-		sk: KeyPrefix.unreadNotificationCount.sk(userId),
+		pk: DynamoKey.unreadNotificationCount.pk(userId),
+		sk: DynamoKey.unreadNotificationCount.sk(userId),
 		update: { count: Math.max(0, existingCount.count - 1) },
 	});
 };
 
 export const updateUnreadNotificationCount = async (userId: string, count: number) => {
 	return putItem<UnreadNotificationCount, DatabaseUnreadNotificationCount>({
-		pk: KeyPrefix.unreadNotificationCount.pk(userId),
-		sk: KeyPrefix.unreadNotificationCount.sk(userId),
+		pk: DynamoKey.unreadNotificationCount.pk(userId),
+		sk: DynamoKey.unreadNotificationCount.sk(userId),
 		userId,
 		count: Math.max(0, count),
 		entityType: EntityType.UNREAD_NOTIFICATION_COUNT,
