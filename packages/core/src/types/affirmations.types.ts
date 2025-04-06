@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 import { affirmationSchema, receivedAffirmationSchema } from '../affirmations/affirmations.dto';
-import { EntityType } from './dynamo.types';
+import { EntityType } from '../utils/dynamo/dynamo.types';
 
 export type Affirmation = z.infer<typeof affirmationSchema>;
 

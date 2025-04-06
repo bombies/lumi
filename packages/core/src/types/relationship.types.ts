@@ -1,4 +1,4 @@
-import { EntityType } from './dynamo.types';
+import { EntityType } from '../utils/dynamo/dynamo.types';
 import { User } from './user.types';
 
 export type RelationshipRequest = {
