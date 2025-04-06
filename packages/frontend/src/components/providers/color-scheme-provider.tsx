@@ -22,16 +22,25 @@ export const useColorScheme = () => {
 const ColorSchemeProvider: FC<PropsWithChildren> = ({ children }) => {
 	const localStorage = useLocalStorage();
 	const [currentColorScheme, setCurrentColorScheme] = useState<ColorScheme | undefined>();
+	const [schemeInitialized, setSchemeInitialized] = useState(false);
 
 	useEffect(() => {
 		if (!localStorage) return;
+
+		const storedColorScheme = localStorage.getItem('colorScheme') as ColorScheme | undefined;
+		if (storedColorScheme) setCurrentColorScheme(storedColorScheme);
+		setSchemeInitialized(true);
+	}, [localStorage]);
+
+	useEffect(() => {
+		if (!localStorage || !schemeInitialized) return;
 
 		if (!currentColorScheme) {
 			localStorage.removeItem('colorScheme');
 		} else {
 			localStorage.setItem('colorScheme', currentColorScheme);
 		}
-	}, [currentColorScheme, localStorage]);
+	}, [currentColorScheme, localStorage, schemeInitialized]);
 
 	useEffect(() => {
 		document.documentElement.classList.toggle(
