@@ -18,7 +18,6 @@ import {
 import { Button } from '@/components/ui/button';
 import { GetSelfUser } from '@/hooks/trpc/user-hooks';
 import { auth } from '@/lib/better-auth/auth-client';
-import { useSignOut } from '@/lib/hooks/useSignOut';
 
 const DeleteAccountButton: FC = () => {
 	const { data: self } = GetSelfUser();
