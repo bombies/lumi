@@ -433,7 +433,7 @@ type BatchWriteParams = {
 	  }
 );
 
-export async function bactchWrite(...params: BatchWriteParams[]) {
+export async function batchWrite(...params: BatchWriteParams[]) {
 	const groupedParams = Object.groupBy(params, param => param.table ?? process.env.TABLE_NAME!);
 	const res = await dynamo.batchWrite({
 		RequestItems: Object.entries(groupedParams).reduce(

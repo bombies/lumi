@@ -12,9 +12,8 @@ import {
 } from '../types/notification.types';
 import { User } from '../types/user.types';
 import {
-	bactchWrite,
+	batchWrite,
 	deleteItem,
-	dynamo,
 	getItem,
 	getItems,
 	putItem,
@@ -29,7 +28,6 @@ import {
 	GetFilteredNotificationsDto,
 	GetNotificationsDto,
 	UpdateNotificationDto,
-	updateNotificationDto,
 } from './notification.dto';
 
 export const createNotificationSubscription = async (userId: string, subscription: PushSubscription) => {
@@ -321,7 +319,7 @@ export const deleteNotificationsForUser = async (userId: string) => {
 
 	return Promise.all(
 		chunkArray(notifications, 25).map(chunk =>
-			bactchWrite(
+			batchWrite(
 				...chunk.map(chunkItem => ({
 					deleteItem: {
 						pk: chunkItem.pk,

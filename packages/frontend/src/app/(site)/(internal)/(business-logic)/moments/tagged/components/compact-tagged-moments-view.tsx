@@ -7,6 +7,7 @@ import { Select, SelectOption } from '@/components/ui/multiselect';
 import { Separator } from '@/components/ui/separator';
 import CreateMomentTagButton from '../../components/create-moment-tag.button';
 import MomentsGridContent from '../../components/moments-grid-content';
+import DeleteTagButton from './delete-tag-button';
 import { useTaggedMomentsData } from './tagged-moments-provider';
 
 export const CompactTaggedMomentsView: FC = () => {
@@ -62,6 +63,11 @@ export const CompactTaggedMomentsView: FC = () => {
 						<InfiniteLoader hasMore={hasMoreTags} fetchMore={fetchMoreTags} loading={isFetchingMoreTags} />
 					}
 				/>
+				{selectedTag && (
+					<>
+						<DeleteTagButton tag={selectedTag} onDelete={() => setSelectedTag(undefined)} />
+					</>
+				)}
 				<CreateMomentTagButton />
 			</div>
 			{selectedTag ? (

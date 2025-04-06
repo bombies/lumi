@@ -19,7 +19,11 @@ const momentTagCreationFormSchema = z.object({
 
 type MomentTagCreationFormSchema = z.infer<typeof momentTagCreationFormSchema>;
 
-const CreateMomentTagButton: FC = () => {
+type Props = {
+	disabled?: boolean;
+};
+
+const CreateMomentTagButton: FC<Props> = ({ disabled }) => {
 	const [dialogOpen, setDialogOpen] = useState(false);
 	const { mutateAsync: createMomentTag, isPending: isCreatingMomentTag } = CreateRelationshipMomentTag();
 	const onSubmit = useCallback<SubmitHandler<MomentTagCreationFormSchema>>(
@@ -39,7 +43,7 @@ const CreateMomentTagButton: FC = () => {
 	return (
 		<Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
 			<DialogTrigger asChild>
-				<Button>
+				<Button disabled={disabled}>
 					<TagIcon className="size-[18px]" /> Create New Tag
 				</Button>
 			</DialogTrigger>

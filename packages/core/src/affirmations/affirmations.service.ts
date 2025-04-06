@@ -12,15 +12,7 @@ import {
 import { Relationship } from '../types/relationship.types';
 import { User } from '../types/user.types';
 import { WebSocketToken } from '../types/websockets.types';
-import {
-	bactchWrite,
-	deleteItem,
-	dynamo,
-	getItem,
-	getItems,
-	putItem,
-	updateItem,
-} from '../utils/dynamo/dynamo.service';
+import { batchWrite, deleteItem, dynamo, getItem, getItems, putItem, updateItem } from '../utils/dynamo/dynamo.service';
 import { DynamoKey, EntityType } from '../utils/dynamo/dynamo.types';
 import { extractPartnerIdFromRelationship } from '../utils/global-utils';
 import { chunkArray, getUUID } from '../utils/utils';
@@ -164,7 +156,7 @@ export const deleteAffirmationsForRelationship = async (relationshipId: string) 
 
 	return Promise.all(
 		chunkArray(relationshipAffirmations, 25).map(chunk =>
-			bactchWrite(
+			batchWrite(
 				...chunk.map(chunkItem => ({
 					deleteItem: {
 						pk: chunkItem.pk,

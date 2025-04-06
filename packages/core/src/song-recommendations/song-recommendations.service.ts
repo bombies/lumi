@@ -1,15 +1,7 @@
 import { TRPCError } from '@trpc/server';
 
 import { DatabaseSongRecommendation, SongRecommendation } from '../types/song-recommendation.types';
-import {
-	bactchWrite,
-	deleteItem,
-	dynamo,
-	getItem,
-	getItems,
-	putItem,
-	updateItem,
-} from '../utils/dynamo/dynamo.service';
+import { batchWrite, deleteItem, dynamo, getItem, getItems, putItem, updateItem } from '../utils/dynamo/dynamo.service';
 import { DynamoKey, EntityType } from '../utils/dynamo/dynamo.types';
 import { chunkArray, getUUID } from '../utils/utils';
 import {
@@ -169,7 +161,7 @@ export const deleteSongRecommendationsByRelationshipId = async (relationshipId: 
 
 	return Promise.all(
 		chunkArray(songRecs.data, 25).map(async chunk =>
-			bactchWrite(
+			batchWrite(
 				...chunk.map(chunkItem => ({
 					deleteItem: {
 						pk: DynamoKey.songRecommendation.pk(chunkItem.id),

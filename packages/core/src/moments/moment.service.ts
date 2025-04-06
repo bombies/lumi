@@ -15,6 +15,7 @@ import {
 } from '../types/moment.types';
 import {
 	batchGetItems,
+	batchWrite,
 	deleteItem,
 	deleteManyItems,
 	getItem,
@@ -24,7 +25,7 @@ import {
 } from '../utils/dynamo/dynamo.service';
 import { DynamoKey, EntityType } from '../utils/dynamo/dynamo.types';
 import { ContentPaths, StorageClient } from '../utils/s3/s3.service';
-import { getUUID } from '../utils/utils';
+import { chunkArray, getUUID } from '../utils/utils';
 import { attachUrlsToMoment } from './moment.helpers';
 import {
 	CreateMomentDetailsDto,
@@ -219,15 +220,58 @@ export const searchMoments = async (relationshipId: string, { query, limit, curs
 	};
 };
 
-export const updateMomentDetails = async (id: string, data: UpdateMomentDetailsDto): Promise<Moment> => {
+export const updateMomentDetails = async (id: string, { tags, ...dto }: UpdateMomentDetailsDto): Promise<Moment> => {
 	const updatedMoment = await updateItem<Moment>({
 		pk: DynamoKey.moment.pk(id),
 		sk: DynamoKey.moment.sk(id),
 		update: {
-			...data,
-			...(data.title ? { normalizedTitle: normalizeMomentTitle(data.title) } : {}),
+			...dto,
+			...(dto.title ? { normalizedTitle: normalizeMomentTitle(dto.title) } : {}),
 		},
 	});
+
+	// Only create new tags if they are not already present
+	tags = tags?.map(tag => normalizeMomentTag(tag));
+	const existingTags = await getTagsForMoment(id);
+	const existingTagNames = existingTags.map(tag => tag.tag);
+	const newTags = tags?.filter(tag => !existingTagNames.includes(tag));
+	const removedTags = existingTags.filter(tag => !tags?.includes(tag.tag));
+
+	if (newTags?.length) {
+		const createdAt = new Date().toISOString();
+		const relationshipId = updatedMoment.relationshipId;
+		await Promise.all(
+			chunkArray(newTags, 25).map(chunk =>
+				batchWrite(
+					...chunk.map(tag => ({
+						put: {
+							item: {
+								pk: DynamoKey.momentTag.pk(id),
+								sk: DynamoKey.momentTag.sk(tag),
+								gsi1pk: DynamoKey.momentTag.gsi1pk(relationshipId),
+								gsi1sk: DynamoKey.momentTag.gsi1sk(tag),
+								entityType: EntityType.MOMENT_TAG,
+								momentId: id,
+								tag,
+								taggerId: updatedMoment.userId,
+								relationshipId,
+								createdAt,
+							} satisfies DatabaseMomentTag,
+						},
+					})),
+				),
+			),
+		);
+	}
+
+	if (removedTags.length) {
+		await deleteManyItems(
+			removedTags.map(tag => ({
+				pk: DynamoKey.momentTag.pk(id),
+				sk: DynamoKey.momentTag.sk(tag.tag),
+			})),
+		);
+	}
 
 	return attachUrlsToMoment(updatedMoment);
 };
@@ -324,7 +368,7 @@ export const getRelationshipMomentTags = async (
 	});
 };
 
-const getMomentTagsForRelationshipTag = async (relationshipId: string, tag: string) => {
+export const getMomentTagsForRelationshipTag = async (relationshipId: string, tag: string) => {
 	return getItems<DatabaseMomentTag>({
 		index: 'GSI1',
 		queryExpression: {
@@ -339,8 +383,6 @@ const getMomentTagsForRelationshipTag = async (relationshipId: string, tag: stri
 };
 
 export const deleteRelationshipMomentTag = async (relationshipId: string, tag: string) => {
-	const momentTags = await getMomentTagsForRelationshipTag(relationshipId, tag);
-	await deleteManyItems(momentTags.data.map(momentTag => ({ pk: momentTag.pk, sk: momentTag.sk })));
 	return deleteItem(
 		DynamoKey.relationshipMomentTag.pk(relationshipId),
 		DynamoKey.relationshipMomentTag.sk(normalizeMomentTag(tag)),

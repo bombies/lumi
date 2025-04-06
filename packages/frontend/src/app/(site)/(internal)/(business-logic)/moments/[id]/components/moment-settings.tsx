@@ -1,8 +1,9 @@
 'use client';
 
 import { FC, useCallback } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { CogIcon, TrashIcon } from '@heroicons/react/24/solid';
+import { CogIcon, PencilIcon, TrashIcon } from '@heroicons/react/24/solid';
 import { Moment } from '@lumi/core/types/moment.types';
 import { toast } from 'sonner';
 
@@ -49,8 +50,13 @@ const MomentSettings: FC<Props> = ({ moment }) => {
 			</DropdownMenuTrigger>
 			<DropdownMenuContent side="left">
 				<DropdownMenuLabel>Moment Settings</DropdownMenuLabel>
+				<DropdownMenuItem asChild>
+					<Link href={`/moments/${moment.id}/edit`}>
+						<PencilIcon className="size-[16px] text-current" /> Edit Moment
+					</Link>
+				</DropdownMenuItem>
 				<DropdownMenuItem variant="destructive" onClick={deleteMoment} disabled={isDeleting}>
-					<TrashIcon className="size-[18px] mr-2" />
+					<TrashIcon className="size-[16px]" />
 					Delete Moment
 				</DropdownMenuItem>
 			</DropdownMenuContent>

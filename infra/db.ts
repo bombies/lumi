@@ -137,3 +137,28 @@ db.subscribe(
 		],
 	},
 );
+
+db.subscribe(
+	'RelationshipMomentTagDeletionHandler',
+	{
+		handler: 'packages/functions/db/relationship-moment-tag.handler',
+		link: [db, redisHost, redisPort, redisUser, redisPassword],
+		environment: {
+			TABLE_NAME: db.name,
+		},
+	},
+	{
+		filters: [
+			{
+				eventName: ['REMOVE'],
+				dynamodb: {
+					Keys: {
+						pk: {
+							S: [{ prefix: 'relationship::moment::tag#' }],
+						},
+					},
+				},
+			},
+		],
+	},
+);

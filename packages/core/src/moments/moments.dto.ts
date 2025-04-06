@@ -27,7 +27,12 @@ export const updateMomentDetailsDto = momentSchema
 	.omit({
 		objectKey: true,
 	})
-	.partial();
+	.partial()
+	.and(
+		z.object({
+			tags: z.array(z.string()).optional(),
+		}),
+	);
 
 export const getInfiniteMomentsDto = createInfiniteDataDto({
 	defaultLimit: 10,

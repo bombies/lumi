@@ -11,6 +11,7 @@ import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import CreateMomentTagButton from '../../components/create-moment-tag.button';
 import MomentsGridContent from '../../components/moments-grid-content';
+import DeleteTagButton from './delete-tag-button';
 import { useTaggedMomentsData } from './tagged-moments-provider';
 
 const SpaciousTaggedMomentsView: FC = () => {
@@ -58,12 +59,15 @@ const SpaciousTaggedMomentsView: FC = () => {
 				{!selectedTag ? (
 					<Input className="w-96" placeholder="Search for a tag" onTypingEnd={setTagSearch} />
 				) : (
-					<Button variant="default:flat" onClick={() => setSelectedTag(undefined)} className="relative">
-						#{selectedTag}
-						<span className="absolute -top-2 -right-2 p-1 rounded-full bg-destructive/40 border border-destructive text-destructive">
-							<XIcon className="size-[12px]" />
-						</span>
-					</Button>
+					<>
+						<Button variant="default:flat" onClick={() => setSelectedTag(undefined)} className="relative">
+							#{selectedTag}
+							<span className="absolute -top-2 -right-2 p-1 rounded-full bg-destructive/40 border border-destructive text-destructive">
+								<XIcon className="size-[12px]" />
+							</span>
+						</Button>
+						<DeleteTagButton tag={selectedTag} onDelete={() => setSelectedTag(undefined)} />
+					</>
 				)}
 				<CreateMomentTagButton />
 			</div>

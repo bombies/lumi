@@ -1,15 +1,19 @@
+import { useEffect, useState } from 'react';
 import { FieldValues } from 'react-hook-form';
 
 import { FormDescription, FormItem, FormMessage } from '../../form';
 import { Select, SelectProps } from '../../multiselect';
 import EasyFormField, { EasyFormFieldProps } from '../easy-form-field';
+import { useForm } from '../easy-form-provider';
 import EasyFormLabel from './easy-form-label';
 
 type Props<T extends FieldValues> = Pick<
 	EasyFormFieldProps<T>,
 	'name' | 'label' | 'labelClassName' | 'className' | 'showErrorMessage' | 'optional' | 'description'
 > &
-	Omit<SelectProps, 'onChange' | 'selected'>;
+	Omit<SelectProps, 'onChange' | 'selected'> & {
+		defaultValue?: string[];
+	};
 
 export default function EasyFormSelect<T extends FieldValues>({
 	name,
@@ -19,8 +23,19 @@ export default function EasyFormSelect<T extends FieldValues>({
 	description,
 	showErrorMessage,
 	optional,
+	defaultValue,
 	...multiSelectProps
 }: Props<T>) {
+	const form = useForm<T>();
+	const [defaultValueInitialized, setDefaultValueInitialized] = useState(false);
+
+	useEffect(() => {
+		if (!defaultValueInitialized && defaultValue) {
+			form.form.setValue(name, defaultValue as any);
+			setDefaultValueInitialized(true);
+		}
+	}, [defaultValue, defaultValueInitialized, form.form, name]);
+
 	return (
 		<EasyFormField
 			name={name}
@@ -34,7 +49,7 @@ export default function EasyFormSelect<T extends FieldValues>({
 					<Select
 						className={className}
 						onChange={field.onChange}
-						selected={field.value ?? []}
+						selected={field.value ?? defaultValue ?? []}
 						{...multiSelectProps}
 					/>
 					{description && <FormDescription>{description}</FormDescription>}
