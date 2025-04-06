@@ -1,6 +1,5 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
 import { skipToken } from '@tanstack/react-query';
 
 import { useRouteInvalidation } from '@/lib/hooks/useRouteInvalidation';
