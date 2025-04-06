@@ -25,6 +25,12 @@ jobs:
             TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
             STAGE: ajani
         steps:
+            - name: Configure AWS Credentials
+              uses: aws-actions/configure-aws-credentials@v4
+              with:
+                  aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+                  aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
+                  aws-region: us-east-1
             - name: Clone Repository
               uses: actions/checkout@v3
             - name: Setup Node.js ${{ matrix.node-version }}
@@ -40,6 +46,7 @@ jobs:
               run: |
                   echo "Logging in to Turborepo..."
                   bunx turbo login --token ${{ secrets.TURBO_TOKEN }}
+                  bunx turbo link
             - name: Build Project
               run: |
                   bun run build
