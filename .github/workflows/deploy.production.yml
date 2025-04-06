@@ -17,10 +17,29 @@ jobs:
             AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}
             TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
         steps:
+            - name: Configure AWS Credentials
+              uses: aws-actions/configure-aws-credentials@v4
+              with:
+                  aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+                  aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
+                  aws-region: us-east-1
+            - name: Write AWS Credentials to Config File
+              run: |
+                  mkdir -p ~/.aws
+                  echo "[default]" > ~/.aws/config
+                  echo "aws_access_key_id=${{ secrets.AWS_ACCESS_KEY }}" >> ~/.aws/config
+                  echo "aws_secret_access_key=${{ secrets.AWS_SECRET_KEY }}" >> ~/.aws/config
             - name: Clone Repository
-              uses: actions/checkout@v3
+              uses: actions/checkout@v4
+            - name: Cache turbo build setup
+              uses: actions/cache@v4
+              with:
+                  path: .turbo
+                  key: ${{ runner.os }}-turbo-${{ github.sha }}
+                  restore-keys: |
+                      ${{ runner.os }}-turbo-
             - name: Setup Node.js ${{ matrix.node-version }}
-              uses: actions/setup-node@v2
+              uses: actions/setup-node@v4
             - uses: oven-sh/setup-bun@v2
               with:
                   bun-version: latest
@@ -31,14 +50,6 @@ jobs:
                   mkdir -p ./cdn-keys
                   echo "${{ secrets.CDN_PUBLIC_KEY }}" > ./cdn-keys/production.public_key.pem
                   echo "${{ secrets.CDN_PRIVATE_KEY }}" > ./cdn-keys/production.private_key.pem
-            - name: 'Setup Build Cache'
-              uses: actions/cache@v3
-              with:
-                  path: |
-                      ${{ github.workspace }}/packages/frontend/.next/cache
-                  key: ${{ runner.os }}-nextjs-${{ hashFiles('**/bun.lock') }}-${{ hashFiles('**/*.[jt]s', '**/*.[jt]sx') }}
-                  restore-keys: |
-                      ${{ runner.os }}-nextjs-${{ hashFiles('**/bun.lock') }}-
             - name: Build & Deploy Project
               run: |
                   bunx turbo run deploy --filter=// -- --stage=production
