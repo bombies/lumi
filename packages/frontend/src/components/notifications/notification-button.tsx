@@ -41,7 +41,7 @@ const NotificationButton: FC = () => {
 				<Button size="icon" variant="ghost" className="relative">
 					<BellIcon size={18} />
 					{unreadNotificationCount?.count ? (
-						<div className="absolute top-0 right-0 rounded-full size-[18px] bg-destructive text-foreground text-xs flex justify-center items-center">
+						<div className="absolute top-0 right-0 rounded-full size-[18px] bg-destructive text-primary-foreground text-xs flex justify-center items-center">
 							{unreadNotificationCount?.count > 99 ? '99+' : unreadNotificationCount?.count}
 						</div>
 					) : undefined}

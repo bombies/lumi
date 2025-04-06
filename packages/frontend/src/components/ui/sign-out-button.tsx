@@ -1,13 +1,10 @@
 'use client';
 
 import { FC } from 'react';
-import { useRouter } from 'next/navigation';
 import { LogOutIcon } from 'lucide-react';
-import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
-import { sendSignOutNotification } from '@/lib/actions/relationship-actions';
-import { auth } from '@/lib/better-auth/auth-client';
+import { useSignOut } from '@/lib/hooks/useSignOut';
 
 type Props = {
 	iconOnly?: boolean;
@@ -17,29 +14,14 @@ type Props = {
 };
 
 const SignOutButton: FC<Props> = ({ iconOnly, className, disableNotification, variant }) => {
-	const { data: session } = auth.useSession();
-	const router = useRouter();
+	const signOut = useSignOut({ disableNotification });
 
 	return (
 		<Button
 			size={iconOnly ? 'icon' : undefined}
 			className={className}
 			variant={variant || 'destructive'}
-			onClick={async () => {
-				if (!session) return;
-				const user = session.user;
-				if (!disableNotification) await sendSignOutNotification(user.id, user.name);
-
-				toast.promise(auth.signOut(), {
-					loading: 'Signing out...',
-					async success() {
-						localStorage.removeItem('auth-jwt');
-						router.push('/auth/login');
-						return 'Signed out successfully.';
-					},
-					error: 'Could not sign out.',
-				});
-			}}
+			onClick={signOut}
 			tooltip={iconOnly ? 'Sign Out' : undefined}
 		>
 			{iconOnly ? (

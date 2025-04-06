@@ -45,23 +45,27 @@ const MomentCard: FC<Props> = ({ moment, linkClassName, className, compactUpload
 						sizes="100vh"
 						objectFit="contain"
 					/>
-					<div className="w-full flex grow flex-col p-4 text-foreground justif gap-2">
+					<div className="w-full flex grow flex-col p-4 text-foreground justify-between gap-2">
 						<div className="space-y-2">
 							{momentTags?.length ? (
-								<>
+								<div className="hidden tablet:block space-y-2">
 									<div className="flex flex-wrap gap-1">
 										{momentTags.map(tag => (
 											<span
-												className="text-xs px-2 py-1 rounded-sm bg-foreground text-background"
+												className="text-[10px] tablet:text-xs px-2 py-1 rounded-sm bg-foreground text-background"
 												key={`${moment.id}#${tag.tag}`}
 											>{`#${tag.tag}`}</span>
 										))}
 									</div>
 									<Separator className="my-1" />
-								</>
+								</div>
 							) : undefined}
-							<h6 className="text-xl font-bold line-clamp-2">{moment.title}</h6>
-							{moment.description && <p className="truncate">{moment.description}</p>}
+							<h6 className="text-lg tablet:text-xl font-bold line-clamp-2">{moment.title}</h6>
+							{moment.description && (
+								<p className={cn('line-clamp-2', momentTags?.length && 'tablet:line-clamp-1')}>
+									{moment.description}
+								</p>
+							)}
 						</div>
 
 						<div className="flex gap-2">
@@ -78,7 +82,7 @@ const MomentCard: FC<Props> = ({ moment, linkClassName, className, compactUpload
 							) : (
 								<p className="font-medium">
 									{uploader?.firstName}{' '}
-									<span className="text-xs text-background/60">
+									<span className="text-xs text-foreground/40">
 										•{' '}
 										{new Date(moment.createdAt).toLocaleDateString('en-US', {
 											dateStyle: 'short',

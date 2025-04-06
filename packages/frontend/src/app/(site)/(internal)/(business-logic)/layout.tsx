@@ -1,7 +1,7 @@
 import { FC, PropsWithChildren } from 'react';
 
 import Footer from '@/components/footer/footer';
-import Header from '@/components/header';
+import Header from '@/components/header/header';
 import ContentContainer from './components/content-container';
 
 const BusinessLogicLayout: FC<PropsWithChildren> = async ({ children }) => {

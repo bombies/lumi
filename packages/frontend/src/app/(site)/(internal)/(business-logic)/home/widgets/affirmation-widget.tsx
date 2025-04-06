@@ -24,7 +24,7 @@ const AffirmationWidget: FC = () => {
 	);
 
 	return (
-		<div className="max-w-[45rem] rounded-md bg-primary p-6 space-y-4">
+		<div className="max-w-[45rem] rounded-md bg-primary text-primary-foreground p-6 space-y-4">
 			<h3 className="font-bold text-2xl">
 				Today&apos;s Affirmation{(affirmationElements?.length ?? 0 > 1) ? 's' : ''}
 			</h3>

@@ -2,7 +2,7 @@
 
 import { FC, useMemo } from 'react';
 import { usePathname } from 'next/navigation';
-import { CameraIcon, HeartIcon, HomeIcon, MusicalNoteIcon, UserCircleIcon } from '@heroicons/react/24/solid';
+import { CameraIcon, HeartIcon, HomeIcon, MusicalNoteIcon } from '@heroicons/react/24/solid';
 
 import FooterItem from '@/components/footer/footer-item';
 import { cn } from '@/lib/utils';
@@ -29,7 +29,6 @@ const Footer: FC = () => {
 				<FooterItem label="Moments" href="/moments" icon={CameraIcon} />
 				<FooterItem label="Affirmations" href="/affirmations" icon={HeartIcon} />
 				<FooterItem label="Music" href="/music-sharing" icon={MusicalNoteIcon} />
-				<FooterItem label="You" href="/settings" icon={UserCircleIcon} />
 			</nav>
 		</footer>
 	);

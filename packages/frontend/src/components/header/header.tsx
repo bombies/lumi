@@ -3,6 +3,7 @@ import Link from 'next/link';
 
 import NotificationButton from '@/components/notifications/notification-button';
 import { cn } from '@/lib/utils';
+import UserProfileButton from './user-profile-button';
 
 type Props = {
 	className?: string;
@@ -19,7 +20,10 @@ const Header: FC<Props> = ({ className }) => {
 			<Link href="/home">
 				<h1 className="font-cursive text-2xl">Lumi.</h1>
 			</Link>
-			<NotificationButton />
+			<div className="flex gap-2 items-center">
+				<NotificationButton />
+				<UserProfileButton />
+			</div>
 		</header>
 	);
 };
