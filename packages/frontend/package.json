@@ -4,12 +4,13 @@
 	"private": true,
 	"scripts": {
 		"dev": "next dev --turbopack --experimental-https",
-		"build": "next build",
+		"build": "bunx sst shell next build",
 		"start": "next start",
 		"lint": "eslint \"src/**/*.+(ts|tsx)\"",
 		"lint:fix": "eslint \"src/**/*.+(ts|tsx)\" --fix",
 		"format": "prettier . --write",
-		"format:check": "prettier . --check"
+		"format:check": "prettier . --check",
+		"check-types": "tsc --noEmit"
 	},
 	"dependencies": {
 		"@auth/dynamodb-adapter": "^2.8.0",

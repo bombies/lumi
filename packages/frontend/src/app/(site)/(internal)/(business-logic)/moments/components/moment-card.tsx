@@ -47,7 +47,7 @@ const MomentCard: FC<Props> = ({ moment, linkClassName, className, compactUpload
 					/>
 					<div className="w-full flex grow flex-col p-4 text-foreground justif gap-2">
 						<div className="space-y-2">
-							{momentTags?.length && (
+							{momentTags?.length ? (
 								<>
 									<div className="flex flex-wrap gap-1">
 										{momentTags.map(tag => (
@@ -59,7 +59,7 @@ const MomentCard: FC<Props> = ({ moment, linkClassName, className, compactUpload
 									</div>
 									<Separator className="my-1" />
 								</>
-							)}
+							) : undefined}
 							<h6 className="text-xl font-bold line-clamp-2">{moment.title}</h6>
 							{moment.description && <p className="truncate">{moment.description}</p>}
 						</div>

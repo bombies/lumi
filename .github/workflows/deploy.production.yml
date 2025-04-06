@@ -40,7 +40,7 @@ jobs:
                       ${{ runner.os }}-nextjs-${{ hashFiles('**/bun.lock') }}-
             - name: Build & Deploy Project
               run: |
-                  bunx sst deploy --stage=production
+                  bunx turbo run deploy --filter=// -- --stage=production
             - name: Run Db Migrations
               run: |
                   cd packages/frontend

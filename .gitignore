@@ -19,6 +19,8 @@ node_modules
 # misc
 .DS_Store
 
+.turbo
+
 cdn-keys/
 
 # Environment variables

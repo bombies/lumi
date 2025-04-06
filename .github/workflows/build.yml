@@ -22,6 +22,8 @@ jobs:
         env:
             AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY }}
             AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}
+            TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+            STAGE: ajani
         steps:
             - name: Clone Repository
               uses: actions/checkout@v3
@@ -44,5 +46,4 @@ jobs:
                       ${{ runner.os }}-nextjs-${{ hashFiles('**/bun.lock') }}-
             - name: Build Project
               run: |
-                  cd packages/frontend && \
-                  bunx sst shell --stage ajani -- bun run build
+                  bun run build
