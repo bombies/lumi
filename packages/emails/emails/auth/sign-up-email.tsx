@@ -11,7 +11,7 @@ export type SignUpEmailProps = {
 
 const SignUpEmail: React.FC<SignUpEmailProps> = ({ siteUrl, email }) => {
 	return (
-		<EmailTemplate>
+		<EmailTemplate preview="Welcome to Lumi! Please confirm your account by clicking the link">
 			<Text>Hey,</Text>
 			<Text>Welcome to Lumi! Please confirm your account by clicking the link below:</Text>
 			<Button className="bg-[#76A34E] text-[#F8FFF1] px-4 py-2 rounded-lg cursor-pointer" href={siteUrl}>

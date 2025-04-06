@@ -1,5 +1,6 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { skipToken } from '@tanstack/react-query';
 
 import { useRouteInvalidation } from '@/lib/hooks/useRouteInvalidation';
@@ -32,3 +33,5 @@ export const UploadUserAvatar = () => {
 };
 
 export const GetUserByIdSafe = (userId: string) => trpc.users.getUserByIdSafe.useQuery(userId);
+
+export const DeleteSelf = () => trpc.users.deleteSelf.useMutation();

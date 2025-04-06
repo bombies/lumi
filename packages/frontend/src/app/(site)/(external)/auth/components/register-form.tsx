@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import EasyForm from '@/components/ui/form-extras/easy-form';
 import EasyFormField from '@/components/ui/form-extras/easy-form-field';
 import { Input } from '@/components/ui/input';
+import PasswordInput from '@/components/ui/password-input';
 import { Separator } from '@/components/ui/separator';
 import { auth } from '@/lib/better-auth/auth-client';
 import { register } from '../actions';
@@ -27,7 +28,11 @@ const RegisterForm: FC = () => {
 	const [isAuthenticating, setIsAuthenticating] = useState(false);
 	const onSubmit = useCallback<SubmitHandler<RegisterSchema>>(async ({ confirmPassword, ...data }) => {
 		setIsAuthenticating(true);
-		if (data.password !== confirmPassword) return toast.error('Passwords do not match');
+
+		if (data.password !== confirmPassword) {
+			toast.error('Passwords do not match');
+			return setIsAuthenticating(false);
+		}
 
 		const { data: _data, error } = await auth.signUp.email({
 			email: data.email,
@@ -74,10 +79,10 @@ const RegisterForm: FC = () => {
 				</EasyFormField>
 			</div>
 			<EasyFormField<RegisterSchema> name="password" label="Password" showErrorMessage>
-				<Input type="password" />
+				<PasswordInput />
 			</EasyFormField>
 			<EasyFormField<RegisterSchema> name="confirmPassword" label="Confirm Password" showErrorMessage>
-				<Input type="password" />
+				<PasswordInput />
 			</EasyFormField>
 			<Button type="submit" loading={isAuthenticating}>
 				Register

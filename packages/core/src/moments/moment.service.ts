@@ -93,7 +93,8 @@ export const createMomentDetails = async (
 		entityType: EntityType.MOMENT_DETAILS,
 	});
 
-	if (tags) await Promise.all(tags.map(tag => createMomentTag(userId, relationshipId, { tag, momentId: id })));
+	if (tags?.length)
+		await Promise.all(tags.map(tag => createMomentTag(userId, relationshipId, { tag, momentId: id })));
 
 	return attachUrlsToMoment(moment);
 };

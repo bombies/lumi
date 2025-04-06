@@ -2,8 +2,9 @@ import { TRPCError } from '@trpc/server';
 import mime from 'mime';
 import { Resource } from 'sst';
 
+import { deleteUserRelationship, getRelationshipForUser } from '../relationships/relationship.service';
 import { DatabaseUser, User } from '../types/user.types';
-import { getItem, getItems, putItem, updateItem } from '../utils/dynamo/dynamo.service';
+import { deleteItem, getItem, getItems, putItem, updateItem } from '../utils/dynamo/dynamo.service';
 import { DynamoKey, EntityType } from '../utils/dynamo/dynamo.types';
 import { ContentPaths, StorageClient } from '../utils/s3/s3.service';
 import { getUUID } from '../utils/utils';
@@ -180,6 +181,11 @@ export const updateUser = async (userId: string, dto: UpdateUserDto) => {
 			updatedAt: new Date().toISOString(),
 		},
 	});
+};
+
+export const deleteUser = async (userId: string) => {
+	await deleteUserRelationship(userId, { safeReturn: true });
+	return deleteItem(DynamoKey.user.pk(userId), DynamoKey.user.sk(userId));
 };
 
 export const getUserAvatarUploadUrl = async ({

@@ -57,7 +57,7 @@ const MomentDetailsContainer: FC<Props> = ({ moment, uploader, currentUser: user
 						>
 							{moment.description}
 						</p>
-						{momentTags?.length && (
+						{momentTags?.length ? (
 							<>
 								<Separator className="my-1" />
 								<p
@@ -69,7 +69,7 @@ const MomentDetailsContainer: FC<Props> = ({ moment, uploader, currentUser: user
 									{momentTags.map(tag => `#${tag.tag}`).join(', ')}
 								</p>
 							</>
-						)}
+						) : undefined}
 					</div>
 				</div>
 				<div className="flex flex-col tablet:flex-row gap-1">

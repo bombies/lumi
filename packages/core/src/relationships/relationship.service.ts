@@ -319,13 +319,20 @@ export const acceptRelationshipRequest = async (userId: string, requestId: strin
 	}
 };
 
-export const deleteUserRelationship = async (userId: string) => {
+export const deleteUserRelationship = async (
+	userId: string,
+	args?: {
+		safeReturn?: boolean;
+	},
+) => {
 	const relationship = await getRelationshipForUser(userId);
 	if (!relationship)
-		throw new TRPCError({
-			code: 'NOT_FOUND',
-			message: 'Relationship not found',
-		});
+		if (!args?.safeReturn) return undefined;
+		else
+			throw new TRPCError({
+				code: 'NOT_FOUND',
+				message: 'Relationship not found',
+			});
 
 	try {
 		await writeTransaction(

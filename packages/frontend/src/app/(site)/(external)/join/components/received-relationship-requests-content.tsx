@@ -62,7 +62,7 @@ const RelationshipRequestElement: FC<RelationshipRequestProps> = ({
 			<div className="space-y-2">
 				<p className="text-primary">
 					<span className="text-xs text-foreground">@</span>
-					{sender.username ?? 'Unknown'}
+					{sender?.username ?? 'Unknown'}
 				</p>
 				<p className="text-xs text-foreground-secondary/50">
 					{new Date(request.createdAt).toLocaleDateString()}

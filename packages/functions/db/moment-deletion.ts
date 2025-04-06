@@ -1,5 +1,4 @@
-import { QueryCommandOutput } from '@aws-sdk/lib-dynamodb';
-import { MomentMessage } from '@lumi/core/types/moment.types';
+import { DatabaseMomentMessage, DatabaseRelationshipMomentTag } from '@lumi/core/types/moment.types';
 import { dynamo, getItems } from '@lumi/core/utils/dynamo/dynamo.service';
 import { DynamoKey } from '@lumi/core/utils/dynamo/dynamo.types';
 import { ContentPaths, StorageClient } from '@lumi/core/utils/s3/s3.service';
@@ -21,30 +20,47 @@ export const handler: Handler<DynamoDBStreamEvent> = async event => {
 		const oldImage = record.dynamodb?.OldImage;
 		if (!oldImage) continue;
 
-		const relatedRecords = await getItems<MomentMessage>({
+		const relationshipId = oldImage.id.S!;
+		console.log(`Relationship with ID ${relationshipId} was deleted. Now performing cleanup...`);
+		const relatedMessageRecords = await getItems<DatabaseMomentMessage>({
 			table: Resource.Database.name,
 			index: 'GSI1',
 			queryExpression: {
 				expression: '#gsi1pk = :gsi1pk',
 				variables: {
-					':gsi1pk': DynamoKey.moment.gsi1pk(oldImage.id.S!),
+					':gsi1pk': DynamoKey.moment.gsi1pk(relationshipId),
+				},
+			},
+			exhaustive: true,
+		});
+
+		const relatedTagRecords = await getItems<DatabaseRelationshipMomentTag>({
+			table: Resource.Database.name,
+			queryExpression: {
+				expression: '#pk = :pk',
+				variables: {
+					':pk': DynamoKey.relationshipMomentTag.pk(relationshipId),
 				},
 			},
 			exhaustive: true,
 		});
 
 		// Batch delete related records
-		console.log(`Deleting ${relatedRecords.data.length} related records...`);
-		if (relatedRecords.data.length)
-			chunkArray(relatedRecords.data, 25).forEach(async (chunk, chunkIndex) => {
+		console.log(
+			`Deleting ${relatedMessageRecords.data.length} related message records and ${relatedTagRecords.data.length} tag records...`,
+		);
+
+		const aggregatedData = [...relatedMessageRecords.data, ...relatedTagRecords.data];
+		if (aggregatedData.length)
+			chunkArray(aggregatedData, 25).forEach(async (chunk, chunkIndex) => {
 				console.log(`Deleting ${chunk.length} records... (Chunk ${chunkIndex + 1}/${chunkArray.length})`);
 				await dynamo.batchWrite({
 					RequestItems: {
 						[Resource.Database.name]: chunk.map(record => ({
 							DeleteRequest: {
 								Key: {
-									pk: DynamoKey.moment.pk(record.id),
-									sk: DynamoKey.moment.sk(record.id),
+									pk: record.pk,
+									sk: record.sk,
 								},
 							},
 						})),

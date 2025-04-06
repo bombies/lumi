@@ -6,21 +6,8 @@ import { DynamoDBStreamEvent, Handler } from 'aws-lambda';
 
 const updateRelationshipMomentTag = async (relationshipId: string, tag: string, countDelta: number) => {
 	let relationshipMomentTag = await getRelationshipMomentTag(relationshipId, tag);
-	if (!relationshipMomentTag) {
-		console.log(`Relationship tag ${relationshipId}#${tag} doesn't exist, creating it...`);
-		try {
-			relationshipMomentTag = await createRelationshipMomentTag(
-				relationshipId,
-				{ tag },
-				{
-					withInitialCount: countDelta < 0 ? false : true,
-				},
-			);
-			return console.log('Successfully created the relationship moment tag!');
-		} catch (e) {
-			return console.error('Error creating relationship moment tag!', e);
-		}
-	}
+	if (!relationshipMomentTag)
+		return console.log(`Relationship tag ${relationshipId}#${tag} doesn't exist, skipping update.`);
 
 	try {
 		console.log(`Updating relationship moment tag for ${relationshipId}#${tag}`);

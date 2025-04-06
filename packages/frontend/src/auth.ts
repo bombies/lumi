@@ -1,6 +1,7 @@
 import { spotifyApiScopes } from '@lumi/core/auth/auth.const';
 import redis from '@lumi/core/redis/redis';
 import { SpotifyProviderDatabaseAccount } from '@lumi/core/types/better-auth.types';
+import { sendAccountDeletionEmail } from '@lumi/emails/auth/delete-account-email';
 import { sendSignUpEmail } from '@lumi/emails/auth/sign-up-email';
 import { betterAuth } from 'better-auth';
 import { nextCookies } from 'better-auth/next-js';
@@ -40,6 +41,20 @@ export const auth = betterAuth({
 		},
 	},
 	trustedOrigins: process.env.NODE_ENV === 'development' ? ['*'] : undefined,
+	user: {
+		deleteUser: {
+			enabled: true,
+			async sendDeleteAccountVerification({ user, url }) {
+				try {
+					logger.debug('Attempting to send account deletion email...');
+					const details = await sendAccountDeletionEmail({ email: user.email, siteUrl: url });
+					logger.debug('Sucessfully sent email!', details);
+				} catch (e) {
+					logger.error('Failed to send account deletion email', e);
+				}
+			},
+		},
+	},
 	account: {
 		accountLinking: {
 			allowDifferentEmails: true,
