@@ -2,7 +2,7 @@
 
 import { FC, useState } from 'react';
 import { EnvelopeIcon } from '@heroicons/react/24/solid';
-import { StoredNotification } from '@lumi/core/types/notification.types';
+import { StoredNotification } from '@lumi/core/notifications/notification.types';
 import { AnimatePresence, motion } from 'motion/react';
 import { createPortal } from 'react-dom';
 import { toast } from 'sonner';

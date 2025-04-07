@@ -1,7 +1,7 @@
 'use client';
 
 import { FC, useCallback, useState } from 'react';
-import { Affirmation } from '@lumi/core/types/affirmations.types';
+import { Affirmation } from '@lumi/core/affirmations/affirmations.types';
 import { PencilIcon } from 'lucide-react';
 import { SubmitHandler } from 'react-hook-form';
 import { z } from 'zod';

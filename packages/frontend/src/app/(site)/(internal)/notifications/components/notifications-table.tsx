@@ -1,7 +1,7 @@
 'use client';
 
 import { FC } from 'react';
-import { StoredNotification } from '@lumi/core/types/notification.types';
+import { StoredNotification } from '@lumi/core/notifications/notification.types';
 
 import { Badge } from '@/components/ui/badge';
 import InfiniteLoader from '@/components/ui/infinite-loader';

@@ -1,8 +1,8 @@
-import { User } from '@lumi/core/types/user.types';
-import { DatabaseWebSocketHeartbeat, WebSocketSubTopic, WebSocketToken } from '@lumi/core/types/websockets.types';
+import { User } from '@lumi/core/users/user.types';
 import { dynamo, updateItem } from '@lumi/core/utils/dynamo/dynamo.service';
 import { DynamoKey } from '@lumi/core/utils/dynamo/dynamo.types';
 import { createAsyncWebsocketConnection, emitAsyncWebsocketEvent } from '@lumi/core/websockets/websockets.service';
+import { DatabaseWebSocketHeartbeat, WebSocketSubTopic, WebSocketToken } from '@lumi/core/websockets/websockets.types';
 import { APIGatewayProxyEvent, Handler } from 'aws-lambda';
 import { ISubscriptionMap } from 'mqtt';
 import { Resource } from 'sst';

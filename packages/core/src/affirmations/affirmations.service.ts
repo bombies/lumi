@@ -8,7 +8,7 @@ import {
 	DatabaseAffirmation,
 	DatabaseReceivedAffirmation,
 	ReceivedAffirmation,
-} from '../types/affirmations.types';
+} from './affirmations.types';
 import { Relationship } from '../types/relationship.types';
 import { User } from '../types/user.types';
 import { WebSocketToken } from '../types/websockets.types';

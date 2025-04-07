@@ -1,5 +1,5 @@
 import { FC } from 'react';
-import { User } from '@lumi/core/types/user.types';
+import { User } from '@lumi/core/users/user.types';
 import { AvatarProps } from '@radix-ui/react-avatar';
 
 import { cn } from '@/lib/utils';

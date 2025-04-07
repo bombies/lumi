@@ -1,5 +1,5 @@
 import { getRelationshipById } from '@lumi/core/relationships/relationship.service';
-import { WebSocketSubTopic, WebSocketToken } from '@lumi/core/types/websockets.types';
+import { WebSocketSubTopic, WebSocketToken } from '@lumi/core/websockets/websockets.types';
 import { realtime } from 'sst/aws/realtime';
 
 export const handler = realtime.authorizer(async token => {

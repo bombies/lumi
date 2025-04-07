@@ -2,7 +2,7 @@
 
 import { FC, useMemo } from 'react';
 import { ChatBubbleLeftIcon, ClockIcon, StarIcon } from '@heroicons/react/24/solid';
-import { SongRecommendation } from '@lumi/core/types/song-recommendation.types';
+import { SongRecommendation } from '@lumi/core/song-recommendations/song-recommendation.types';
 import moment from 'moment';
 
 import { useRelationship } from '@/components/providers/relationships/relationship-provder';

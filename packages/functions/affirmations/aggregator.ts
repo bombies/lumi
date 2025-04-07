@@ -1,6 +1,6 @@
 import { SQS } from '@aws-sdk/client-sqs';
 import { ScanCommandInput, ScanCommandOutput } from '@aws-sdk/lib-dynamodb';
-import { DatabaseAffirmation } from '@lumi/core/types/affirmations.types';
+import { DatabaseAffirmation } from '@lumi/core/affirmations/affirmations.types';
 import { dynamo } from '@lumi/core/utils/dynamo/dynamo.service';
 import { DynamoKey } from '@lumi/core/utils/dynamo/dynamo.types';
 import { Handler } from 'aws-lambda';

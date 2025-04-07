@@ -4,7 +4,7 @@ import { FC, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { CogIcon, PencilIcon, TrashIcon } from '@heroicons/react/24/solid';
-import { Moment } from '@lumi/core/types/moment.types';
+import { Moment } from '@lumi/core/moments/moment.types';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';

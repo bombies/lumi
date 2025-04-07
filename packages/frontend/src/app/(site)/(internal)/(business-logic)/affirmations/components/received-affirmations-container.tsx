@@ -1,7 +1,7 @@
 'use client';
 
 import { Fragment, useMemo, useState } from 'react';
-import { ReceivedAffirmation } from '@lumi/core/types/affirmations.types';
+import { ReceivedAffirmation } from '@lumi/core/affirmations/affirmations.types';
 
 import InfiniteLoader from '@/components/ui/infinite-loader';
 import { Separator } from '@/components/ui/separator';

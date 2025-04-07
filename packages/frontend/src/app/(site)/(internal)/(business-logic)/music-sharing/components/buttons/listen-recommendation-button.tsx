@@ -4,7 +4,7 @@ import { FC, useState } from 'react';
 import Link from 'next/link';
 import { PlayIcon } from '@heroicons/react/24/solid';
 import { SiSpotify } from '@icons-pack/react-simple-icons';
-import { SongRecommendation } from '@lumi/core/types/song-recommendation.types';
+import { SongRecommendation } from '@lumi/core/song-recommendations/song-recommendation.types';
 
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '@/components/ui/dialog';

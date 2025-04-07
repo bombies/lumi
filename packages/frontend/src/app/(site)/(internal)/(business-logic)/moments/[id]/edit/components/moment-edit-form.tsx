@@ -3,7 +3,7 @@
 import { FC, useCallback, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Moment } from '@lumi/core/types/moment.types';
+import { Moment } from '@lumi/core/moments/moment.types';
 import { UploadIcon, XIcon } from 'lucide-react';
 import Player from 'next-video/player';
 import MediaThemeInstaplay from 'player.style/instaplay/react';

@@ -1,12 +1,12 @@
 'use server';
 
+import { createWebsocketConnection } from '@lumi/core/websockets/websockets.service';
 import {
 	Event,
 	InferredWebSocketMessagePayload,
 	WebSocketMessage,
 	WebSocketToken,
-} from '@lumi/core/types/websockets.types';
-import { createWebsocketConnection } from '@lumi/core/websockets/websockets.service';
+} from '@lumi/core/websockets/websockets.types';
 import { Resource } from 'sst';
 
 import { logger } from '@/lib/logger';

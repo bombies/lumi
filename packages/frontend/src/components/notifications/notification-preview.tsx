@@ -3,7 +3,7 @@
 import { FC, useCallback, useState } from 'react';
 import Link from 'next/link';
 import { EyeIcon, InboxArrowDownIcon, SparklesIcon } from '@heroicons/react/24/solid';
-import { StoredNotification } from '@lumi/core/types/notification.types';
+import { StoredNotification } from '@lumi/core/notifications/notification.types';
 import { getRelativeTime } from '@lumi/core/utils/global-utils';
 import { SwipeableList, SwipeableListItem, SwipeAction, TrailingActions, Type } from 'react-swipeable-list';
 

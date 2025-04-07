@@ -1,7 +1,7 @@
 'use client';
 
 import { FC, useMemo } from 'react';
-import { Moment } from '@lumi/core/types/moment.types';
+import { Moment } from '@lumi/core/moments/moment.types';
 import { Separator } from '@radix-ui/react-separator';
 
 import InfiniteLoader from '@/components/ui/infinite-loader';

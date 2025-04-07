@@ -1,5 +1,5 @@
 import { createMomentMessage } from '@lumi/core/moments/moment.service';
-import { Event, InferredWebSocketMessage } from '@lumi/core/types/websockets.types';
+import { Event, InferredWebSocketMessage } from '@lumi/core/websockets/websockets.types';
 import { Handler } from 'aws-lambda';
 
 export const subscriber: Handler<InferredWebSocketMessage<Event>> = async event => {

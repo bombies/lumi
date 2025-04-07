@@ -1,8 +1,8 @@
 'use client';
 
 import { FC, useEffect, useState } from 'react';
-import { Moment } from '@lumi/core/types/moment.types';
-import { User as LumiUser } from '@lumi/core/types/user.types';
+import { Moment } from '@lumi/core/moments/moment.types';
+import { User as LumiUser } from '@lumi/core/users/user.types';
 import { motion } from 'framer-motion';
 
 import { WebsocketTopic } from '@/components/providers/web-sockets/topics';

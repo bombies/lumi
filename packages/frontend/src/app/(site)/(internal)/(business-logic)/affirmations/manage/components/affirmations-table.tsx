@@ -1,7 +1,7 @@
 'use client';
 
 import { FC } from 'react';
-import { Affirmation } from '@lumi/core/types/affirmations.types';
+import { Affirmation } from '@lumi/core/affirmations/affirmations.types';
 
 import ManagedTable from '@/components/ui/table/managed-table';
 import ManagedTableHeader from '@/components/ui/table/managed-table-header';

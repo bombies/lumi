@@ -1,7 +1,7 @@
 'use client';
 
 import { FC, useEffect } from 'react';
-import { InferredWebSocketMessagePayload } from '@lumi/core/types/websockets.types';
+import { InferredWebSocketMessagePayload } from '@lumi/core/websockets/websockets.types';
 import { toast } from 'sonner';
 
 import { StoreNotification } from '@/hooks/trpc/notification-hooks';

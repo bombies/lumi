@@ -2,7 +2,7 @@
 
 import { FC, useCallback, useState } from 'react';
 import { StarIcon } from '@heroicons/react/24/solid';
-import { SongRecommendation } from '@lumi/core/types/song-recommendation.types';
+import { SongRecommendation } from '@lumi/core/song-recommendations/song-recommendation.types';
 import { SubmitHandler } from 'react-hook-form';
 import { z } from 'zod';
 

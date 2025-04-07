@@ -2,8 +2,8 @@
 
 import { FC, useMemo } from 'react';
 import { TrashIcon } from '@heroicons/react/24/solid';
-import { RelationshipRequest } from '@lumi/core/types/relationship.types';
-import { User } from '@lumi/core/types/user.types';
+import { RelationshipRequest } from '@lumi/core/relationships/relationship.types';
+import { User } from '@lumi/core/users/user.types';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';

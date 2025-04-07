@@ -1,6 +1,6 @@
 import { FC } from 'react';
 import Link from 'next/link';
-import { Moment } from '@lumi/core/types/moment.types';
+import { Moment } from '@lumi/core/moments/moment.types';
 
 import { Card, CardContent, CardTitle } from '@/components/ui/card';
 import Image from '@/components/ui/image';

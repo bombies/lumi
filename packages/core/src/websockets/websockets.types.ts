@@ -1,4 +1,4 @@
-import { User } from '@lumi/core/types/user.types';
+import { User } from '@lumi/core/users/user.types';
 
 import { EntityType } from '../utils/dynamo/dynamo.types';
 

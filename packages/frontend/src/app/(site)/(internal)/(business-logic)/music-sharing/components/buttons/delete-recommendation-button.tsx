@@ -2,7 +2,7 @@
 
 import { FC } from 'react';
 import TrashIcon from '@heroicons/react/24/solid/TrashIcon';
-import { SongRecommendation } from '@lumi/core/types/song-recommendation.types';
+import { SongRecommendation } from '@lumi/core/song-recommendations/song-recommendation.types';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';

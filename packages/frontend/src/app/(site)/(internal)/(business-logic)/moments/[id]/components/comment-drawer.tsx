@@ -2,8 +2,8 @@
 
 import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ChatBubbleOvalLeftEllipsisIcon, PaperAirplaneIcon } from '@heroicons/react/24/solid';
-import { Moment, MomentMessage } from '@lumi/core/types/moment.types';
-import { WebSocketEventHandler } from '@lumi/core/types/websockets.types';
+import { Moment, MomentMessage } from '@lumi/core/moments/moment.types';
+import { WebSocketEventHandler } from '@lumi/core/websockets/websockets.types';
 import { AnimatePresence, motion, Variants } from 'motion/react';
 import { SubmitHandler } from 'react-hook-form';
 import { z } from 'zod';

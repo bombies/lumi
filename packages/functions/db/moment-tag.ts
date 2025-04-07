@@ -1,5 +1,5 @@
 import { createRelationshipMomentTag, getRelationshipMomentTag } from '@lumi/core/moments/moment.service';
-import { RelationshipMomentTag } from '@lumi/core/types/moment.types';
+import { RelationshipMomentTag } from '@lumi/core/moments/moment.types';
 import { updateItem } from '@lumi/core/utils/dynamo/dynamo.service';
 import { DynamoKey } from '@lumi/core/utils/dynamo/dynamo.types';
 import { DynamoDBStreamEvent, Handler } from 'aws-lambda';

@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, FC, PropsWithChildren, useContext, useMemo, useState } from 'react';
-import { Moment, RelationshipMomentTag } from '@lumi/core/types/moment.types';
+import { Moment, RelationshipMomentTag } from '@lumi/core/moments/moment.types';
 
 import { GetMomentsForRelationshipTag, GetRelationshipMomentTags } from '@/hooks/trpc/moment-hooks';
 

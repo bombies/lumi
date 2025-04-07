@@ -1,4 +1,4 @@
-import { DatabaseMomentMessage, DatabaseRelationshipMomentTag } from '@lumi/core/types/moment.types';
+import { DatabaseMomentMessage, DatabaseRelationshipMomentTag } from '@lumi/core/moments/moment.types';
 import { dynamo, getItems } from '@lumi/core/utils/dynamo/dynamo.service';
 import { DynamoKey } from '@lumi/core/utils/dynamo/dynamo.types';
 import { ContentPaths, StorageClient } from '@lumi/core/utils/s3/s3.service';

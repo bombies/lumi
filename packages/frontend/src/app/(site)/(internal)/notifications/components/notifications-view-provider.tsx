@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, FC, PropsWithChildren, useContext, useMemo, useState } from 'react';
-import { StoredNotification } from '@lumi/core/types/notification.types';
+import { StoredNotification } from '@lumi/core/notifications/notification.types';
 
 import { GetNotifications, GetUnreadNotificationCount } from '@/hooks/trpc/notification-hooks';
 

@@ -1,6 +1,6 @@
 import { spotifyApiScopes } from '@lumi/core/auth/auth.const';
+import { SpotifyProviderDatabaseAccount } from '@lumi/core/auth/better-auth.types';
 import redis from '@lumi/core/redis/redis';
-import { SpotifyProviderDatabaseAccount } from '@lumi/core/types/better-auth.types';
 import { sendAccountDeletionEmail } from '@lumi/emails/auth/delete-account-email';
 import { sendSignUpEmail } from '@lumi/emails/auth/sign-up-email';
 import { betterAuth } from 'better-auth';

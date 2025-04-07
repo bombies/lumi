@@ -2,8 +2,8 @@
 
 import { FC, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { RelationshipRequest } from '@lumi/core/types/relationship.types';
-import { User } from '@lumi/core/types/user.types';
+import { RelationshipRequest } from '@lumi/core/relationships/relationship.types';
+import { User } from '@lumi/core/users/user.types';
 import { CheckIcon, XIcon } from 'lucide-react';
 import { toast } from 'sonner';
 

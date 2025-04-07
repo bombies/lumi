@@ -1,6 +1,6 @@
 import { sendNotification, storeNotification } from '@lumi/core/notifications/notifications.service';
-import { Event, InferredWebSocketMessage, WebSocketToken } from '@lumi/core/types/websockets.types';
 import { getUserById } from '@lumi/core/users/users.service';
+import { Event, InferredWebSocketMessage, WebSocketToken } from '@lumi/core/websockets/websockets.types';
 import { Handler } from 'aws-lambda';
 
 export const subscriber: Handler<InferredWebSocketMessage<Event>> = async event => {

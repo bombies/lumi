@@ -3,7 +3,7 @@
 import { FC } from 'react';
 import Link from 'next/link';
 import { LinkIcon } from '@heroicons/react/24/solid';
-import { StoredNotification } from '@lumi/core/types/notification.types';
+import { StoredNotification } from '@lumi/core/notifications/notification.types';
 import { VariantProps } from 'class-variance-authority';
 
 import { Button, buttonVariants } from '@/components/ui/button';

@@ -5,6 +5,7 @@ import { notificationsTopic, realtimeServer } from './realtime';
 import {
 	authSecret,
 	cdnPrivateKey,
+	frontendCdnCachePolicyId,
 	mailerHostSecret,
 	mailerPasswordSecret,
 	mailerPortSecret,
@@ -35,7 +36,7 @@ export const frontend = new sst.aws.Nextjs('Frontend', {
 	server: {
 		install: ['sharp'],
 	},
-	cachePolicy: $app.stage !== 'staging' ? '5ec0f852-6fd4-45c7-80fe-d6cd77ed35a4' : undefined,
+	cachePolicy: $app.stage !== 'staging' ? frontendCdnCachePolicyId.value : undefined,
 	openNextVersion: '3.5.4',
 	link: [
 		trpc,

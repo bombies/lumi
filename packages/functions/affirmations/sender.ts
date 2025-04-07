@@ -1,9 +1,9 @@
 import { selectAffirmation, sendAffirmationToUser } from '@lumi/core/affirmations/affirmations.service';
 import { getRelationshipById } from '@lumi/core/relationships/relationship.service';
-import { User } from '@lumi/core/types/user.types';
-import { WebSocketToken } from '@lumi/core/types/websockets.types';
+import { User } from '@lumi/core/users/user.types';
 import { getUserById } from '@lumi/core/users/users.service';
 import { createAsyncWebsocketConnection } from '@lumi/core/websockets/websockets.service';
+import { WebSocketToken } from '@lumi/core/websockets/websockets.types';
 import { Handler, SQSEvent } from 'aws-lambda';
 import { Resource } from 'sst';
 

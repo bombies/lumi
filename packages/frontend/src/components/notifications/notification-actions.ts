@@ -1,11 +1,11 @@
 'use server';
 
+import { NotificationSubscriber } from '@lumi/core/notifications/notification.types';
 import {
 	createNotificationSubscription,
 	deleteNotificationSubscription,
 	getNotificationSubscriptions,
 } from '@lumi/core/notifications/notifications.service';
-import { NotificationSubscriber } from '@lumi/core/types/notification.types';
 import webpush, { PushSubscription as WebPushSubscription } from 'web-push';
 
 import { getServerSession } from '@/lib/better-auth/auth-actions';

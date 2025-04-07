@@ -1,7 +1,7 @@
 'use client';
 
 import { FC } from 'react';
-import { ProviderAccount } from '@lumi/core/types/better-auth.types';
+import { ProviderAccount } from '@lumi/core/auth/better-auth.types';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 

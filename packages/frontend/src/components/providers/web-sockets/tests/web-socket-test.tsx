@@ -1,7 +1,7 @@
 'use client';
 
 import { FC, useEffect, useState } from 'react';
-import { WebSocketEventHandler } from '@lumi/core/types/websockets.types';
+import { WebSocketEventHandler } from '@lumi/core/websockets/websockets.types';
 
 import { useWebSocket } from '@/components/providers/web-sockets/web-socket-provider';
 import { Button } from '@/components/ui/button';

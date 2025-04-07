@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, FC, PropsWithChildren, useContext, useMemo } from 'react';
-import { ProviderAccount } from '@lumi/core/types/better-auth.types';
+import { ProviderAccount } from '@lumi/core/auth/better-auth.types';
 
 import { useSpotifyAPI, UseSpotifyAPIReturnType } from '@/lib/hooks/useSpotifyAPI';
 

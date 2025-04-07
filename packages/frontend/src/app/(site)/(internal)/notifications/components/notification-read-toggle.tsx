@@ -2,7 +2,7 @@
 
 import { FC, useCallback } from 'react';
 import { EnvelopeIcon, EnvelopeOpenIcon } from '@heroicons/react/24/solid';
-import { StoredNotification } from '@lumi/core/types/notification.types';
+import { StoredNotification } from '@lumi/core/notifications/notification.types';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';

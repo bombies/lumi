@@ -2,7 +2,7 @@
 
 import { redirect } from 'next/navigation';
 import { getRelationshipForUser } from '@lumi/core/relationships/relationship.service';
-import { Relationship } from '@lumi/core/types/relationship.types';
+import { Relationship } from '@lumi/core/relationships/relationship.types';
 import { getUserById } from '@lumi/core/users/users.service';
 
 import { getServerSession } from '../better-auth/auth-actions';

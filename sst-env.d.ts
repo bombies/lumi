@@ -21,6 +21,14 @@ declare module "sst" {
       "name": string
       "type": "sst.aws.Bucket"
     }
+    "ContentCdnKeyGroupId": {
+      "type": "sst.sst.Secret"
+      "value": string
+    }
+    "ContentCdnPublicKeyId": {
+      "type": "sst.sst.Secret"
+      "value": string
+    }
     "Database": {
       "name": string
       "type": "sst.aws.Dynamo"
@@ -28,6 +36,10 @@ declare module "sst" {
     "Frontend": {
       "type": "sst.aws.Nextjs"
       "url": string
+    }
+    "FrontendCdnCachePolicyId": {
+      "type": "sst.sst.Secret"
+      "value": string
     }
     "MailerHost": {
       "type": "sst.sst.Secret"

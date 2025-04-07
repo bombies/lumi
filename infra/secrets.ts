@@ -30,3 +30,7 @@ export const spotifyClientId = new sst.Secret('SpotifyClientId');
 export const spotifyClientSecret = new sst.Secret('SpotifyClientSecret');
 
 export const sentryAuthToken = new sst.Secret('SentryAuthToken');
+
+export const contentCdnPublicKeyId = new sst.Secret('ContentCdnPublicKeyId');
+export const contentCdnKeyGroupId = new sst.Secret('ContentCdnKeyGroupId');
+export const frontendCdnCachePolicyId = new sst.Secret('FrontendCdnCachePolicyId');
