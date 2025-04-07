@@ -2,6 +2,8 @@ import { createId } from '@paralleldrive/cuid2';
 import { TRPCError } from '@trpc/server';
 import mqtt from 'mqtt';
 
+import { dynamo } from '../utils/dynamo/dynamo.service';
+import { DynamoKey, EntityType } from '../utils/dynamo/dynamo.types';
 import {
 	DatabaseWebSocketHeartbeat,
 	Event,
@@ -9,9 +11,7 @@ import {
 	InferredWebSocketMessagePayload,
 	WebSocketHeartbeat,
 	WebSocketMessage,
-} from '../types/websockets.types';
-import { dynamo } from '../utils/dynamo/dynamo.service';
-import { DynamoKey, EntityType } from '../utils/dynamo/dynamo.types';
+} from '../websockets/websockets.types';
 
 export type MqttClientType = mqtt.MqttClient;
 

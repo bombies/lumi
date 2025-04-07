@@ -2,15 +2,7 @@ import { TRPCError } from '@trpc/server';
 import { Resource } from 'sst';
 import webpush, { PushSubscription } from 'web-push';
 
-import {
-	DatabaseNotificationSubscriber,
-	DatabaseStoredNotification,
-	DatabaseUnreadNotificationCount,
-	NotificationSubscriber,
-	StoredNotification,
-	UnreadNotificationCount,
-} from '../types/notification.types';
-import { User } from '../types/user.types';
+import { User } from '../users/user.types';
 import {
 	batchWrite,
 	deleteItem,
@@ -29,6 +21,14 @@ import {
 	GetNotificationsDto,
 	UpdateNotificationDto,
 } from './notification.dto';
+import {
+	DatabaseNotificationSubscriber,
+	DatabaseStoredNotification,
+	DatabaseUnreadNotificationCount,
+	NotificationSubscriber,
+	StoredNotification,
+	UnreadNotificationCount,
+} from './notification.types';
 
 export const createNotificationSubscription = async (userId: string, subscription: PushSubscription) => {
 	const sub: NotificationSubscriber = {

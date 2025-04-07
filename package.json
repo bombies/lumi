@@ -8,6 +8,7 @@
 		"dev": "sst dev",
 		"build": "turbo build:wrapped --filter=@lumi/frontend -- --stage $STAGE",
 		"deploy": "sst deploy",
+		"typecheck": "turbo typecheck",
 		"migrate-auth": "bunx sst shell  -- bunx @better-auth/cli generate --config packages/frontend/src/auth.ts && @better-auth/cli migrate"
 	},
 	"packageManager": "bun@1.2.6",

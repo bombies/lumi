@@ -1,19 +1,19 @@
 import { TRPCError } from '@trpc/server';
 
 import { buildInfiniteData } from '../types/infinite-data.dto';
-import {
-	DatabaseRelationship,
-	DatabaseRelationshipRequest,
-	Relationship,
-	RelationshipRequest,
-} from '../types/relationship.types';
-import { User } from '../types/user.types';
 import { Nullable } from '../types/util.types';
+import { User } from '../users/user.types';
 import { getUserById } from '../users/users.service';
 import { deleteItem, dynamo, getItem, getItems, putItem, writeTransaction } from '../utils/dynamo/dynamo.service';
 import { DynamoKey, EntityType } from '../utils/dynamo/dynamo.types';
 import { chunkArray, getUUID } from '../utils/utils';
 import { GetRelationshipRequestsForUserDto } from './relationship.dto';
+import {
+	DatabaseRelationship,
+	DatabaseRelationshipRequest,
+	Relationship,
+	RelationshipRequest,
+} from './relationship.types';
 
 export const getRelationshipById = async (relationshipId: string) => {
 	return getItem<Relationship>(DynamoKey.relationship.pk(relationshipId), DynamoKey.relationship.sk(relationshipId));

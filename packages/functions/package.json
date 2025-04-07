@@ -7,6 +7,9 @@
 		"./api/router.ts",
 		"./api/utils/trpc.ts"
 	],
+	"scripts": {
+		"typecheck": "tsc --noEmit"
+	},
 	"dependencies": {
 		"@aws-sdk/client-dynamodb": "3.775.0",
 		"@aws-sdk/client-s3": "^3.775.0",

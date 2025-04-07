@@ -3,7 +3,8 @@
 	"version": "0.0.0",
 	"type": "module",
 	"scripts": {
-		"dev": "sst shell email dev"
+		"dev": "sst shell email dev",
+		"typecheck": "tsc --noEmit"
 	},
 	"exports": {
 		"./*": [

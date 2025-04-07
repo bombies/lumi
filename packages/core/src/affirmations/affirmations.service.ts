@@ -3,26 +3,26 @@ import { Resource } from 'sst';
 
 import { sendNotification } from '../notifications/notifications.service';
 import { getPartnerForUser, getRelationshipForUser } from '../relationships/relationship.service';
-import {
-	Affirmation,
-	DatabaseAffirmation,
-	DatabaseReceivedAffirmation,
-	ReceivedAffirmation,
-} from './affirmations.types';
-import { Relationship } from '../types/relationship.types';
-import { User } from '../types/user.types';
-import { WebSocketToken } from '../types/websockets.types';
+import { Relationship } from '../relationships/relationship.types';
+import { User } from '../users/user.types';
 import { batchWrite, deleteItem, dynamo, getItem, getItems, putItem, updateItem } from '../utils/dynamo/dynamo.service';
 import { DynamoKey, EntityType } from '../utils/dynamo/dynamo.types';
 import { extractPartnerIdFromRelationship } from '../utils/global-utils';
 import { chunkArray, getUUID } from '../utils/utils';
 import { MqttClientType, createAsyncWebsocketConnection } from '../websockets/websockets.service';
+import { WebSocketToken } from '../websockets/websockets.types';
 import {
 	CreateAffirmationDto,
 	GetReceivedAffirmationsDto,
 	SendCustomAffirmationDto,
 	UpdateAffirmationDto,
 } from './affirmations.dto';
+import {
+	Affirmation,
+	DatabaseAffirmation,
+	DatabaseReceivedAffirmation,
+	ReceivedAffirmation,
+} from './affirmations.types';
 
 export const createAffirmation = async (dto: CreateAffirmationDto) => {
 	const affirmationId = getUUID();

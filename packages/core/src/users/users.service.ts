@@ -3,11 +3,11 @@ import mime from 'mime';
 import { Resource } from 'sst';
 
 import { deleteUserRelationship, getRelationshipForUser } from '../relationships/relationship.service';
-import { DatabaseUser, User } from '../types/user.types';
 import { deleteItem, getItem, getItems, putItem, updateItem } from '../utils/dynamo/dynamo.service';
 import { DynamoKey, EntityType } from '../utils/dynamo/dynamo.types';
 import { ContentPaths, StorageClient } from '../utils/s3/s3.service';
 import { getUUID } from '../utils/utils';
+import { DatabaseUser, User } from './user.types';
 import {
 	CreateUserDto,
 	GetUserAvatarUploadUrlDto,

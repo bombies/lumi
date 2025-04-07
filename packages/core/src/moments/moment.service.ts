@@ -4,16 +4,6 @@ import { Resource } from 'sst';
 
 import { buildInfiniteData } from '../types/infinite-data.dto';
 import {
-	DatabaseMoment,
-	DatabaseMomentMessage,
-	DatabaseMomentTag,
-	DatabaseRelationshipMomentTag,
-	Moment,
-	MomentMessage,
-	MomentTag,
-	RelationshipMomentTag,
-} from '../types/moment.types';
-import {
 	batchGetItems,
 	batchWrite,
 	deleteItem,
@@ -27,6 +17,16 @@ import { DynamoKey, EntityType } from '../utils/dynamo/dynamo.types';
 import { ContentPaths, StorageClient } from '../utils/s3/s3.service';
 import { chunkArray, getUUID } from '../utils/utils';
 import { attachUrlsToMoment } from './moment.helpers';
+import {
+	DatabaseMoment,
+	DatabaseMomentMessage,
+	DatabaseMomentTag,
+	DatabaseRelationshipMomentTag,
+	Moment,
+	MomentMessage,
+	MomentTag,
+	RelationshipMomentTag,
+} from './moment.types';
 import {
 	CreateMomentDetailsDto,
 	CreateMomentMessageDto,
