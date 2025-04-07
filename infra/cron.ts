@@ -14,6 +14,7 @@ export const affirmationSenderQueue = new sst.aws.Queue('AffirmationSenderQueue'
 affirmationSenderQueue.subscribe({
 	handler: 'packages/functions/affirmations/sender.handler',
 	link: [realtimeServer, vapidPublicKey, vapidPrivateKey, db],
+	runtime: 'nodejs22.x',
 	environment: {
 		NOTIFICATIONS_TOPIC: notificationsTopic,
 		TABLE_NAME: db.name,
@@ -29,6 +30,7 @@ export const affirmationSenderJob = new sst.aws.Cron('AffirmationAggregatorJob',
 	schedule: $dev ? 'rate(30 minutes)' : 'cron(0 16 * * ? *)',
 	function: {
 		handler: 'packages/functions/affirmations/aggregator.handler',
+		runtime: 'nodejs22.x',
 		link: [db, affirmationSenderQueue],
 		environment: {
 			TABLE_NAME: db.name,

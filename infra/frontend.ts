@@ -83,7 +83,7 @@ export const frontend = new sst.aws.Nextjs('Frontend', {
 		CONTENT_BUCKET_ENDPOINT: contentBucket.nodes.bucket.bucketRegionalDomainName,
 		CDN_PRIVATE_KEY: cdnPrivateKey,
 		KEY_PAIR_ID: contentCdnPublicKey.id,
-		CDN_URL: contentCdn.url,
+		CDN_URL: $interpolate`${contentCdn.domainUrl.apply(domainUrl => domainUrl ?? contentCdn.url)}`,
 		NEXT_PUBLIC_SPOTIFY_CLIENT_ID: spotifyClientId.value,
 		SPOTIFY_CLIENT_SECRET: spotifyClientSecret.value,
 

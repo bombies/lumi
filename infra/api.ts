@@ -24,6 +24,7 @@ export const trpc = new sst.aws.Function('Trpc', {
 					allowOrigins: [`https://${webDNS}`],
 				},
 			},
+	runtime: 'nodejs22.x',
 	link: [
 		contentBucket,
 		db,
@@ -45,7 +46,7 @@ export const trpc = new sst.aws.Function('Trpc', {
 		WEB_SOCKET_TOKEN: websocketToken.value,
 		CDN_PRIVATE_KEY: cdnPrivateKey,
 		KEY_PAIR_ID: contentCdnPublicKey.id,
-		CDN_URL: contentCdn.url,
+		CDN_URL: $interpolate`${contentCdn.domainUrl.apply(domainUrl => domainUrl ?? contentCdn.url)}`,
 		FRONTEND_URL: !$dev ? `https://${webDNS}` : 'https://localhost:3000',
 		// @ts-ignore
 		NODE_TLS_REJECT_UNAUTHORIZED: $dev ? '0' : undefined,

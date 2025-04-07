@@ -45,6 +45,7 @@ db.subscribe(
 		environment: {
 			TABLE_NAME: db.name,
 		},
+		runtime: 'nodejs22.x',
 	},
 	{
 		filters: [
@@ -66,6 +67,7 @@ db.subscribe(
 	{
 		handler: 'packages/functions/db/moment-deletion.handler',
 		link: [db, contentBucket],
+		runtime: 'nodejs22.x',
 	},
 	{
 		filters: [
@@ -93,8 +95,9 @@ db.subscribe(
 			TABLE_NAME: db.name,
 			CDN_PRIVATE_KEY: cdnPrivateKey,
 			KEY_PAIR_ID: contentCdnPublicKey.id,
-			CDN_URL: contentCdn.url,
+			CDN_URL: $interpolate`${contentCdn.domainUrl.apply(domainUrl => domainUrl ?? contentCdn.url)}`,
 		},
+		runtime: 'nodejs22.x',
 		nodejs: { install: ['ffmpeg-static'] },
 	},
 	{
@@ -118,6 +121,7 @@ db.subscribe(
 	{
 		handler: 'packages/functions/db/moment-tag.handler',
 		link: [db, redisHost, redisPort, redisUser, redisPassword],
+		runtime: 'nodejs22.x',
 		environment: {
 			TABLE_NAME: db.name,
 		},
@@ -142,6 +146,7 @@ db.subscribe(
 	'RelationshipMomentTagDeletionHandler',
 	{
 		handler: 'packages/functions/db/relationship-moment-tag.handler',
+		runtime: 'nodejs22.x',
 		link: [db, redisHost, redisPort, redisUser, redisPassword],
 		environment: {
 			TABLE_NAME: db.name,

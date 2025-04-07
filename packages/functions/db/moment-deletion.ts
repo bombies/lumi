@@ -20,15 +20,15 @@ export const handler: Handler<DynamoDBStreamEvent> = async event => {
 		const oldImage = record.dynamodb?.OldImage;
 		if (!oldImage) continue;
 
-		const relationshipId = oldImage.id.S!;
-		console.log(`Relationship with ID ${relationshipId} was deleted. Now performing cleanup...`);
+		const momentId = oldImage.id.S!;
+		console.log(`Moment with ID ${momentId} was deleted. Now performing cleanup...`);
 		const relatedMessageRecords = await getItems<DatabaseMomentMessage>({
 			table: Resource.Database.name,
 			index: 'GSI1',
 			queryExpression: {
 				expression: '#gsi1pk = :gsi1pk',
 				variables: {
-					':gsi1pk': DynamoKey.moment.gsi1pk(relationshipId),
+					':gsi1pk': DynamoKey.momentMessage.gsi1pk(momentId),
 				},
 			},
 			exhaustive: true,
@@ -39,7 +39,7 @@ export const handler: Handler<DynamoDBStreamEvent> = async event => {
 			queryExpression: {
 				expression: '#pk = :pk',
 				variables: {
-					':pk': DynamoKey.relationshipMomentTag.pk(relationshipId),
+					':pk': DynamoKey.momentTag.pk(momentId),
 				},
 			},
 			exhaustive: true,
@@ -75,9 +75,9 @@ export const handler: Handler<DynamoDBStreamEvent> = async event => {
 			ContentPaths.relationshipMoments(oldImage.relationshipId.S!, oldImage.objectKey.S!),
 		);
 
-		if (oldImage.thumbnailObjectKey.S)
+		if (oldImage.thumbnailObjectKey)
 			await storageClient.deleteObject(
-				ContentPaths.relationshipMoments(oldImage.relationshipId.S!, oldImage.thumbnailObjectKey.S),
+				ContentPaths.relationshipMoments(oldImage.relationshipId.S!, oldImage.thumbnailObjectKey.S!),
 			);
 
 		console.log('Deleted the video from S3!');

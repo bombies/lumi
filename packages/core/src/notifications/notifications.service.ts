@@ -317,7 +317,7 @@ export const deleteNotificationsForUser = async (userId: string) => {
 		})
 	).data;
 
-	return Promise.all(
+	await Promise.all(
 		chunkArray(notifications, 25).map(chunk =>
 			batchWrite(
 				...chunk.map(chunkItem => ({
@@ -329,6 +329,8 @@ export const deleteNotificationsForUser = async (userId: string) => {
 			),
 		),
 	);
+
+	return deleteItem(DynamoKey.unreadNotificationCount.pk(userId), DynamoKey.unreadNotificationCount.sk(userId));
 };
 
 export const getUnreadNotificationCount = async (userId: string) => {
