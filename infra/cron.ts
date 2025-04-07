@@ -1,4 +1,6 @@
+import { trpc } from './api';
 import { db } from './db';
+import { frontend } from './frontend';
 import { notificationsTopic, realtimeServer } from './realtime';
 import { vapidPrivateKey, vapidPublicKey } from './secrets';
 
@@ -37,3 +39,20 @@ export const affirmationSenderJob = new sst.aws.Cron('AffirmationAggregatorJob',
 		},
 	},
 });
+
+export let lambdaWarmer: sst.aws.Cron;
+
+if ($app.stage === 'production') {
+	lambdaWarmer = new sst.aws.Cron('LamdaWarmer', {
+		schedule: 'rate(5 minutes)',
+		function: {
+			handler: 'packages/functions/cron/warmer.handler',
+			runtime: 'nodejs22.x',
+			link: [frontend, trpc],
+			environment: {
+				FRONTEND_FUNCTION_NAME: frontend.nodes.server?.name ?? '',
+				API_FUNCTION_NAME: trpc.nodes.function.name,
+			},
+		},
+	});
+}

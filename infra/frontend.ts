@@ -34,6 +34,7 @@ export const frontend = new sst.aws.Nextjs('Frontend', {
 		command: 'bun run dev',
 	},
 	server: {
+		runtime: 'nodejs22.x',
 		install: ['sharp'],
 	},
 	cachePolicy: $app.stage !== 'staging' ? frontendCdnCachePolicyId.value : undefined,

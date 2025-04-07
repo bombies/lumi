@@ -1,6 +1,6 @@
 import { ReactElement, useEffect } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { DefaultValues, FieldValues, SubmitHandler, useForm } from 'react-hook-form';
+import { DefaultValues, FieldValues, SubmitHandler, useForm, UseFormReturn } from 'react-hook-form';
 import { z } from 'zod';
 
 import { Form as ShadForm } from '../form';
@@ -13,7 +13,10 @@ type Props<T extends FieldValues> = {
 	submitting?: boolean;
 	disabled?: boolean;
 	className?: string;
-	children: ReactElement<any> | (ReactElement<any> | undefined)[];
+	children:
+		| ReactElement<any>
+		| (ReactElement<any> | undefined)[]
+		| ((form: UseFormReturn<T>) => ReactElement<any> | (ReactElement<any> | undefined)[]);
 	showRequiredAsterisk?: boolean;
 	clearOnSubmit?: boolean;
 	initialValues?: DefaultValues<T>;
@@ -59,6 +62,7 @@ export default function EasyForm<T extends FieldValues>({
 				onSubmit={
 					onSubmit &&
 					form.handleSubmit(async (args, e) => {
+						e?.preventDefault();
 						const res = onSubmit(args, e);
 						if (res instanceof Promise) await res;
 						if (clearOnSubmit) {
@@ -74,7 +78,7 @@ export default function EasyForm<T extends FieldValues>({
 					formDisabled={disabled}
 					requiredAsterisk={showRequiredAsterisk}
 				>
-					{children}
+					{typeof children === 'function' ? children(form) : children}
 				</EasyFormProvider>
 			</form>
 		</ShadForm>

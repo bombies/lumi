@@ -34,7 +34,7 @@ const CreateMomentTagButton: FC<Props> = ({ disabled }) => {
 					setDialogOpen(false);
 					return 'Successfully created moment tag!';
 				},
-				error: 'Could not create moment tag.',
+				error: e => e.message.message ?? 'Could not create moment tag.',
 			});
 		},
 		[createMomentTag],
@@ -51,18 +51,23 @@ const CreateMomentTagButton: FC<Props> = ({ disabled }) => {
 				<DialogHeader>
 					<DialogTitle>Create Moment Tag</DialogTitle>
 				</DialogHeader>
-				<EasyForm
-					schema={momentTagCreationFormSchema}
-					onSubmit={onSubmit}
-					className="space-y-6"
-					submitting={isCreatingMomentTag}
-				>
-					<EasyFormField<MomentTagCreationFormSchema> name="tag" label="Tag">
-						<Input max={50} placeholder="Enter the name of your tag" />
-					</EasyFormField>
-					<Button type="submit" loading={isCreatingMomentTag}>
-						Create Tag
-					</Button>
+				<EasyForm schema={momentTagCreationFormSchema} className="space-y-6" submitting={isCreatingMomentTag}>
+					{form => (
+						<>
+							<EasyFormField<MomentTagCreationFormSchema> name="tag" label="Tag">
+								<Input max={50} placeholder="Enter the name of your tag" />
+							</EasyFormField>
+							<Button
+								type="button"
+								loading={isCreatingMomentTag}
+								onClick={() => {
+									onSubmit(form.getValues());
+								}}
+							>
+								Create Tag
+							</Button>
+						</>
+					)}
 				</EasyForm>
 			</DialogContent>
 		</Dialog>
