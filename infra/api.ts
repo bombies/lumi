@@ -12,6 +12,8 @@ import {
 	redisPassword,
 	redisPort,
 	redisUser,
+	vapidPrivateKey,
+	vapidPublicKey,
 	websocketToken,
 } from './secrets';
 import { contentBucket, contentCdn, contentCdnPublicKey } from './storage';
@@ -37,6 +39,8 @@ export const trpc = new sst.aws.Function('Trpc', {
 		redisUser,
 		redisPassword,
 		realtimeServer,
+		vapidPublicKey,
+		vapidPrivateKey,
 	],
 	environment: {
 		APP_STAGE: $app.stage,
