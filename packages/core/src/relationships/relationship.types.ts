@@ -6,7 +6,11 @@ export type RelationshipRequest = {
 	sender: string;
 	receiver: string;
 	createdAt: string;
-};
+} & RelationshipRequestExtras;
+
+export type RelationshipRequestExtras = Partial<{
+	otherUser: Pick<User, 'id' | 'username' | 'firstName' | 'lastName'>;
+}>;
 
 export type DatabaseRelationshipRequest = RelationshipRequest & {
 	/**

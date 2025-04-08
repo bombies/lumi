@@ -154,8 +154,20 @@ export const deleteAffirmationsForRelationship = async (relationshipId: string) 
 		})
 	).data;
 
+	const receivedAffirmations = (
+		await getItems<DatabaseReceivedAffirmation>({
+			queryExpression: {
+				expression: '#pk = :pk',
+				variables: {
+					':pk': DynamoKey.receivedAffirmation.pk(relationshipId),
+				},
+			},
+			exhaustive: true,
+		})
+	).data;
+
 	return Promise.all(
-		chunkArray(relationshipAffirmations, 25).map(chunk =>
+		chunkArray([...relationshipAffirmations, ...receivedAffirmations], 25).map(chunk =>
 			batchWrite(
 				...chunk.map(chunkItem => ({
 					deleteItem: {

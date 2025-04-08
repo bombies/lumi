@@ -53,6 +53,12 @@ if ($app.stage === 'production') {
 				FRONTEND_FUNCTION_NAME: frontend.nodes.server?.name ?? '',
 				API_FUNCTION_NAME: trpc.nodes.function.name,
 			},
+			permissions: frontend.nodes.server && [
+				{
+					actions: ['lambda:InvokeFunction'],
+					resources: [frontend.nodes.server.arn],
+				},
+			],
 		},
 	});
 }

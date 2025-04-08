@@ -1,3 +1,4 @@
+import { DynamoDB } from '@aws-sdk/client-dynamodb';
 import { TRPCError } from '@trpc/server';
 import { Resource } from 'sst';
 import webpush, { PushSubscription } from 'web-push';
@@ -317,8 +318,16 @@ export const deleteNotificationsForUser = async (userId: string) => {
 		})
 	).data;
 
+	const unreadNotificationAggregate = await getItem<DatabaseUnreadNotificationCount>(
+		DynamoKey.unreadNotificationCount.pk(userId),
+		DynamoKey.unreadNotificationCount.sk(userId),
+	);
+
 	await Promise.all(
-		chunkArray(notifications, 25).map(chunk =>
+		chunkArray(
+			unreadNotificationAggregate ? [...notifications, unreadNotificationAggregate] : notifications,
+			25,
+		).map(chunk =>
 			batchWrite(
 				...chunk.map(chunkItem => ({
 					deleteItem: {

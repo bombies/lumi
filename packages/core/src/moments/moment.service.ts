@@ -325,7 +325,7 @@ export const deleteMomentMessage = async (id: string) => {
 };
 
 export const deleteMomentDetailsForRelationship = async (relationshipId: string) => {
-	const momentDetails = await getItems<Moment>({
+	const momentDetails = await getItems<DatabaseMoment>({
 		index: 'GSI1',
 		queryExpression: {
 			expression: '#gsi1pk = :gsi1pk',
@@ -336,10 +336,29 @@ export const deleteMomentDetailsForRelationship = async (relationshipId: string)
 		exhaustive: true,
 	});
 
+	const relationshipMomentTags = await getItems<DatabaseRelationshipMomentTag>({
+		queryExpression: {
+			expression: '#pk = :pk',
+			variables: {
+				':pk': DynamoKey.relationshipMomentTag.pk(relationshipId),
+			},
+		},
+		exhaustive: true,
+	});
+
+	if (relationshipMomentTags.data.length) {
+		await deleteManyItems(
+			relationshipMomentTags.data.map(tag => ({
+				pk: tag.pk,
+				sk: tag.sk,
+			})),
+		);
+	}
+
 	return deleteManyItems(
 		momentDetails.data.map(moment => ({
-			pk: DynamoKey.moment.pk(moment.id),
-			sk: DynamoKey.moment.sk(moment.id),
+			pk: moment.pk,
+			sk: moment.sk,
 		})),
 	);
 };

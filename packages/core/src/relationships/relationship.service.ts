@@ -93,7 +93,7 @@ export const sendRelationshipRequest = async (senderId: string, receiverId: stri
 			message: 'User is already in a relationship!',
 		});
 
-	if (await userHasRequestFromUser(receiverId, receiverId))
+	if (await userHasRequestFromUser(receiverId, senderId))
 		throw new TRPCError({
 			code: 'BAD_REQUEST',
 			message: 'You already have already sent this user a request!',
@@ -182,23 +182,28 @@ const getRelationshipRequestsForUser = async ({
 	const fetchedUsers = {} as Record<string, Pick<User, 'id' | 'username' | 'firstName' | 'lastName'>>;
 
 	for (const batch of batchedData) {
-		const userIds = {} as Record<string, string>;
+		const userIds = new Set<string>();
 		batch.forEach(request => {
-			if (request.sender !== userId) userIds[request.id] = request.sender;
-			else userIds[request.id] = request.receiver;
+			if (request.sender !== userId) userIds.add(request.sender);
+			else userIds.add(request.receiver);
 		});
+
+		console.log(userIds);
 
 		// Batch fetch users
 		let batchRes = await dynamo.batchGet({
 			RequestItems: {
 				[process.env.TABLE_NAME!]: {
-					Keys: Object.keys(userIds).map(
-						id =>
-							({
-								pk: DynamoKey.user.pk(userIds[id]),
-								sk: DynamoKey.user.sk(userIds[id]),
-							}) as const,
-					),
+					Keys: userIds
+						.values()
+						.toArray()
+						.map(
+							id =>
+								({
+									pk: DynamoKey.user.pk(id),
+									sk: DynamoKey.user.sk(id),
+								}) as const,
+						),
 				},
 			},
 		});
@@ -210,13 +215,17 @@ const getRelationshipRequestsForUser = async ({
 		});
 	}
 
-	const requestsWithUsers = res.data.map(request => {
+	const requestsWithUsers = res.data.reduce((acc, request) => {
 		const otherUser = fetchedUsers[request.sender === userId ? request.receiver : request.sender];
-		return {
+
+		if (acc.find(req => req.otherUser?.id === otherUser.id)) return acc;
+
+		acc.push({
 			...request,
 			otherUser,
-		};
-	});
+		});
+		return acc;
+	}, [] as RelationshipRequest[]);
 
 	return buildInfiniteData(requestsWithUsers, res.nextCursor);
 };
