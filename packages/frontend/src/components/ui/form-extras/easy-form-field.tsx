@@ -86,6 +86,8 @@ export default function EasyFormField<T extends FieldValues = FieldValues>({
 						<FormControl defaultValue={defaultValue}>
 							{cloneElement(typeof children === 'function' ? children(form, field) : children!, {
 								...field,
+								// @ts-expect-error cloneElement props types are weird.
+								value: field.value ?? '',
 							})}
 						</FormControl>
 						{description && <FormDescription>{description}</FormDescription>}

@@ -99,11 +99,11 @@ const SpaciousTaggedMomentsView: FC = () => {
 					</>
 				) : (
 					<div className="p-6 max-w-sm border border-primary bg-primary/10 rounded-md border-dashed">
-						<p className="text-lg font-medium">You have not selected any tags...</p>
+						<p className="text-lg font-medium">There are no tags...</p>
 						<Separator className="my-2" />
 						<p className="text-sm">
-							<span className="text-primary font-bold">Tip:</span> Select a tag to view all moments for
-							that tag.
+							<span className="text-primary font-bold">Tip:</span> Create a new tag to have it show up
+							here!
 						</p>
 					</div>
 				)}
