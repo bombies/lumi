@@ -23,7 +23,7 @@ const NotificationsTable: FC = () => {
 			loading={isLoading}
 			items={notifications ?? []}
 			allowRowSelection
-			className="tablet:max-w-[45rem] border border-border rounded-lg"
+			className="w-full tablet:max-w-[45rem] border border-border rounded-lg"
 			rowClassName={row => {
 				const data = row.original;
 				if (data.read) return undefined;

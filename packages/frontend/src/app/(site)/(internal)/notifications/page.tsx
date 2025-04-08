@@ -11,8 +11,8 @@ const NotificationsPage: FC = () => {
 		<NotificationsViewProvider>
 			<SidebarProvider>
 				<NotificationsSidebar />
-				<SidebarTrigger />
 				<main className="px-2 py-24 phone-big:px-12 tablet:pl-6 tablet:pr-0 w-full space-y-6">
+					<SidebarTrigger />
 					<NotificationsTitle />
 					<NotificationsTable />
 				</main>

@@ -18,6 +18,7 @@ type NotificationsViewData = {
 		loadMore: () => void;
 		isLoadingMore: boolean;
 		unreadCount?: number;
+		unreadCountLoading?: boolean;
 	};
 };
 
@@ -42,7 +43,7 @@ const NotificationsViewProvider: FC<PropsWithChildren> = ({ children }) => {
 		filter,
 		limit: 10,
 	});
-	const { data: unreadCount } = GetUnreadNotificationCount();
+	const { data: unreadCount, isLoading: unreadCountLoading } = GetUnreadNotificationCount();
 
 	const memoizedValues = useMemo<NotificationsViewData>(
 		() => ({
@@ -58,6 +59,7 @@ const NotificationsViewProvider: FC<PropsWithChildren> = ({ children }) => {
 				loadMore: fetchMoreNotifications,
 				isLoadingMore: moreNotificationsLoading,
 				unreadCount: unreadCount?.count ?? undefined,
+				unreadCountLoading,
 			},
 		}),
 		[
@@ -69,6 +71,7 @@ const NotificationsViewProvider: FC<PropsWithChildren> = ({ children }) => {
 			notificationsLoading,
 			refetchingNotifications,
 			unreadCount?.count,
+			unreadCountLoading,
 		],
 	);
 
