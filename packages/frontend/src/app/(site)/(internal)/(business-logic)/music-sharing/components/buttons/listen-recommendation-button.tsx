@@ -28,7 +28,7 @@ const ListenRecommendationButton: FC<Props> = ({ track }) => {
 				<DialogTitle hidden>
 					Listen to {track.track.name} by {track.track.artistName}
 				</DialogTitle>
-				<div className="flex flex-col tablet:flex-row tablet:w-[45rem] gap-4 tablet:gap-8">
+				<div className="flex flex-col w-full tablet:flex-row gap-4 tablet:gap-8">
 					<Image
 						src={track.track.albumImage}
 						alt={`${track.track.name} by ${track.track.artistName} album art`}

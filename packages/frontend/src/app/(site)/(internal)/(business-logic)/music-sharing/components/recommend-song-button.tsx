@@ -72,6 +72,7 @@ const RecommendSongButton: FC = () => {
 			</DialogTrigger>
 			<DialogContent
 				className="p-2 gap-2 max-h-screen overflow-y-auto bg-background/50 backdrop-blur-lg"
+				position="top-center"
 				hideCloseButton
 			>
 				<DialogTitle hidden>Song Search</DialogTitle>

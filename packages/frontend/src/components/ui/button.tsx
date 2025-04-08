@@ -57,7 +57,10 @@ function Button({
 	...props
 }: Props) {
 	const Comp = asChild ? Slot : 'button';
-	const currentChildren = React.useMemo(() => (loading ? <Spinner /> : children), [children, loading]);
+	const currentChildren = React.useMemo(
+		() => (loading ? <Spinner size={12} light={!variant || variant !== 'outline'} /> : children),
+		[children, loading, variant],
+	);
 
 	const elem = React.useMemo(
 		() => (
