@@ -24,7 +24,7 @@ const ListenRecommendationButton: FC<Props> = ({ track }) => {
 					<PlayIcon className="size-[18px]" />
 				</Button>
 			</DialogTrigger>
-			<DialogContent className="p-2 flex bg-background/50 tablet:!max-w-fit backdrop-blur-lg" hideCloseButton>
+			<DialogContent className="p-2 flex tablet:!max-w-fit bg-background/20 backdrop-blur-lg" hideCloseButton>
 				<DialogTitle hidden>
 					Listen to {track.track.name} by {track.track.artistName}
 				</DialogTitle>

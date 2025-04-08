@@ -92,9 +92,16 @@ const RateRecommendationButton: FC<Props> = ({ track, onRate }) => {
 					<EasyFormField<FormSchema> name="comments" label="Comments" optional>
 						<Textarea rows={20} className="min-h-24 resize-none" />
 					</EasyFormField>
-					<Button type="submit" variant="accent" loading={isUpdatingSongRec}>
+					<Button
+						type="submit"
+						variant="accent"
+						loading={isUpdatingSongRec}
+						className="justify-start h-fit max-w-full break-words"
+					>
 						<StarIcon className="size-[18px]" />
-						Rate {track.track.name} by {track.track.artistName}
+						<span className="break-all">
+							Rate {track.track.name} by {track.track.artistName}
+						</span>
 					</Button>
 				</EasyForm>
 			</DialogContent>

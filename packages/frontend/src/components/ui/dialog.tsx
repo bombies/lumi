@@ -37,23 +37,21 @@ function DialogOverlay({ className, ...props }: React.ComponentProps<typeof Dial
 }
 
 const dialogVariants = cva(
-	'fixed z-50 grid w-full  gap-4 border bg-background p-6 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 rounded-lg',
+	'fixed z-50 gap-4 border bg-background p-6 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 rounded-lg',
 	{
 		variants: {
 			position: {
-				left: 'left-4 top-[50%] translate-y-[-50%] data-[state=closed]:slide-out-to-left data-[state=closed]:slide-out-to-top-[50%] data-[state=open]:slide-in-from-left data-[state=open]:slide-in-from-top-[50%]',
+				left: 'left-4 top-[50%] translate-y-[-50%] data-[state=closed]:slide-out-to-top-[50%]  data-[state=open]:slide-in-from-top-[50%]',
 				center: 'left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%] data-[state=closed]:slide-out-to-top-[50%] data-[state=open]:slide-in-from-top-[50%]',
 				right: 'right-4 top-[50%] translate-y-[-50%] data-[state=closed]:slide-out-to-right data-[state=closed]:slide-out-to-top-[50%] data-[state=open]:slide-in-from-right data-[state=open]:slide-in-from-top-[50%]',
-				'top-left':
-					'left-4 top-4  translate-x-0 translate-y-0 data-[state=closed]:slide-out-to-left data-[state=open]:slide-in-from-left',
+				'top-left': 'left-4 top-4  translate-x-0 translate-y-0 ',
 				'top-center':
-					'left-[50%] top-4 translate-x-[-50%] translate-y-0  data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[50%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[50%]',
+					'left-[50%] top-4 translate-x-[-50%] translate-y-0 data-[state=closed]:slide-out-to-top-[50%] data-[state=open]:slide-in-from-top-[50%]',
 				'top-right':
 					'left-auto right-4 top-4 translate-x-0 translate-y-0 data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right',
-				'bottom-left':
-					'bottom-4 left-4 translate-x-0 translate-y-0 data-[state=closed]:slide-out-to-left data-[state=open]:slide-in-from-left',
+				'bottom-left': 'bottom-4 left-4 translate-x-0 translate-y-0 ',
 				'bottom-center':
-					'bottom-4 left-[50%] translate-x-[-50%] translate-y-0 data-[state=closed]:slide-out-to-bottom-[50%] data-[state=closed]:slide-out-to-left-1/2 data-[state=open]:slide-in-from-bottom-[50%] data-[state=open]:slide-in-from-left-1/2',
+					'bottom-4 left-[50%] translate-x-[-50%] translate-y-0 data-[state=closed]:slide-out-to-bottom-[50%]-1/2 data-[state=open]:slide-in-from-bottom-[50%]',
 				'bottom-right':
 					'bottom-4 left-auto right-4 translate-x-0 translate-y-0 data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right',
 			},
