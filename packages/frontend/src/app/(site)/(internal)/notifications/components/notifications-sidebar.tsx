@@ -2,11 +2,14 @@
 
 import { FC, useMemo } from 'react';
 import Link from 'next/link';
+import { HomeIcon } from '@heroicons/react/24/solid';
 import { IconType } from '@icons-pack/react-simple-icons';
 
+import { Button } from '@/components/ui/button';
 import {
 	Sidebar,
 	SidebarContent,
+	SidebarFooter,
 	SidebarGroup,
 	SidebarGroupContent,
 	SidebarGroupLabel,
@@ -97,6 +100,13 @@ const NotificationsSidebar: FC = () => {
 				</Link>
 			</SidebarHeader>
 			<SidebarContent>{itemElements}</SidebarContent>
+			<SidebarFooter>
+				<Link href="/home">
+					<Button className="w-full">
+						<HomeIcon className="size-[18px]" /> Go Home
+					</Button>
+				</Link>
+			</SidebarFooter>
 		</Sidebar>
 	);
 };
