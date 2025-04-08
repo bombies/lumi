@@ -9,7 +9,7 @@ const MusicSharingLoadingPage: FC = () => {
 			<Card className="tablet:w-fit px-2" glass>
 				<CardHeader className="py-12">
 					<CardTitle hidden>Music Sharing</CardTitle>
-					<Skeleton className="h-12 w-[310px]" />
+					<Skeleton className="h-12 w-full tablet:w-[310px]" />
 				</CardHeader>
 			</Card>
 			<Skeleton className="w-full tablet:w-[45rem] h-96" />
