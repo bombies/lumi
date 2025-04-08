@@ -94,9 +94,9 @@ const RecommendedTrack: FC<Props> = ({ track: { track: trackDetails, ...track },
 								<span
 									className={cn(
 										trackRating === 10 && 'text-amber-400',
-										trackRating <= 9 && trackRating >= 7 && 'text-green-500',
-										trackRating <= 6 && trackRating >= 4 && 'text-yellow-200',
-										trackRating <= 3 && trackRating >= 0 && 'text-red-500',
+										trackRating < 10 && trackRating >= 7 && 'text-green-500',
+										trackRating < 7 && trackRating >= 4 && 'text-yellow-200',
+										trackRating < 4 && trackRating >= 0 && 'text-red-500',
 									)}
 								>
 									{track.rating ?? '?'}
@@ -116,8 +116,8 @@ const RecommendedTrack: FC<Props> = ({ track: { track: trackDetails, ...track },
 									<DialogTitle>
 										{trackDetails.name} by {trackDetails.artistName}
 									</DialogTitle>
-									<DialogDescription>
-										<p>
+									<DialogDescription className="flex flex-col text-xs">
+										<span>
 											Recommended on{' '}
 											{new Date(track.createdAt).toLocaleDateString('en-US', {
 												dateStyle: 'medium',
@@ -126,8 +126,8 @@ const RecommendedTrack: FC<Props> = ({ track: { track: trackDetails, ...track },
 											{new Date(track.createdAt).toLocaleTimeString('en-US', {
 												timeStyle: 'short',
 											})}
-										</p>
-										<p>
+										</span>
+										<span>
 											Rated on{' '}
 											{track.updatedAt
 												? new Date(track.updatedAt).toLocaleDateString('en-US', {
@@ -138,11 +138,13 @@ const RecommendedTrack: FC<Props> = ({ track: { track: trackDetails, ...track },
 														timeStyle: 'short',
 													})
 												: 'unknown'}
-										</p>
+										</span>
 									</DialogDescription>
 								</DialogHeader>
-								<h3 className="text-2xl text-primary font-bold">Comments from {receiver.firstName}</h3>
-								<Separator />
+								<h3 className="text-2xl text-primary font-bold mt-6">
+									Comments from {receiver.firstName}
+								</h3>
+								<Separator className="my-4" />
 								<p className="whitespace-pre-wrap break-words">{track.comments}</p>
 							</DialogContent>
 						</Dialog>
