@@ -32,7 +32,7 @@ const DeleteRelationshipRequest = () => {
 
 type RelationshipRequestProps = {
 	request: RelationshipRequest;
-	sender: Partial<User>;
+	sender?: Partial<User>;
 	disabled?: boolean;
 	onDelete: (req: RelationshipRequest) => void;
 };
@@ -48,7 +48,7 @@ const RelationshipRequestElement: FC<RelationshipRequestProps> = ({
 			<div className="space-y-2">
 				<p className="text-primary">
 					<span className="text-xs text-foreground">@</span>
-					{sender.username ?? 'Unknown'}
+					{sender?.username ?? 'Unknown'}
 				</p>
 				<p className="text-xs text-foreground-secondary/50">
 					{new Date(request.createdAt).toLocaleDateString()}
@@ -87,7 +87,7 @@ const SentRelationshipRequestsContainer: FC = () => {
 						toast.promise(deleteRequest(elReq.id), {
 							loading: 'Deleting request...',
 							success() {
-								return `You have delete the relationship request to ${otherUser.username}.`;
+								return `You have delete the relationship request to ${otherUser?.username ?? 'Unknown user'}.`;
 							},
 							error(e) {
 								return getErrorMessage(e);

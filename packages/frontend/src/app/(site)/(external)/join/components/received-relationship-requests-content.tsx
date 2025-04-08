@@ -44,7 +44,7 @@ const RejectRelationshipRequest = () => {
 
 type RelationshipRequestProps = {
 	request: RelationshipRequest;
-	sender: Partial<User>;
+	sender?: Partial<User>;
 	disabled?: boolean;
 	onAccept: (req: RelationshipRequest) => void;
 	onReject: (req: RelationshipRequest) => void;
@@ -105,7 +105,7 @@ const ReceivedRelationshipRequestsContent: FC = () => {
 						toast.promise(acceptRequest(elReq.id), {
 							loading: 'Accepting request...',
 							success() {
-								return `You have accepted the relationship request from ${otherUser.username}.`;
+								return `You have accepted the relationship request from ${otherUser?.username ?? 'Unknown user'}.`;
 							},
 							error(e) {
 								return getErrorMessage(e);
@@ -116,7 +116,7 @@ const ReceivedRelationshipRequestsContent: FC = () => {
 						toast.promise(rejectRequest(elReq.id), {
 							loading: 'Rejecting request...',
 							success() {
-								return `You have rejected the relationship request from ${otherUser.username}.`;
+								return `You have rejected the relationship request from ${otherUser?.username ?? 'Unknown user'}.`;
 							},
 							error(e) {
 								return getErrorMessage(e);
