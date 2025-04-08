@@ -1,6 +1,6 @@
 'use client';
 
-import { FC, useMemo } from 'react';
+import { FC, Fragment, useMemo } from 'react';
 import Link from 'next/link';
 import { MusicalNoteIcon } from '@heroicons/react/24/solid';
 
@@ -22,10 +22,10 @@ const MusicWidget: FC = () => {
 		() =>
 			songRecs?.pages.flatMap(page =>
 				page.data.map(songRec => (
-					<>
-						<RecommendedTrack key={`rec_track_${songRec.id}`} track={songRec} type="receiver" />
+					<Fragment key={`rec_track_${songRec.id}`}>
+						<RecommendedTrack track={songRec} type="receiver" />
 						<Separator />
-					</>
+					</Fragment>
 				)),
 			),
 		[songRecs?.pages],
