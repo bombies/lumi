@@ -24,9 +24,17 @@ const registerSchema = registerUserDto.and(
 
 type RegisterSchema = z.infer<typeof registerSchema>;
 
+/**
+ * This is the array of emails allowed to register on the app. For now, it's just me an Sarah <3
+ */
+const permittedEmails = ['ajani.green@outlook.com', 'juzsarahx@gmail.com'];
+
 const RegisterForm: FC = () => {
 	const [isAuthenticating, setIsAuthenticating] = useState(false);
 	const onSubmit = useCallback<SubmitHandler<RegisterSchema>>(async ({ confirmPassword, ...data }) => {
+		if (!permittedEmails.includes(data.email.toLowerCase()))
+			return toast.error("You aren't permitted to register!");
+
 		setIsAuthenticating(true);
 
 		if (data.password !== confirmPassword) {
