@@ -20,6 +20,8 @@ type ConnectToWebsocketArgs = {
 		| ((message: unknown, clientId: string) => Promise<void>);
 } & IClientOptions;
 
+const RECONNECT_MAX = 5;
+
 export const connectToWebsocket = ({
 	endpoint,
 	authorizer,
@@ -68,6 +70,14 @@ export const connectToWebsocket = ({
 		const jsonMsg = JSON.parse(message);
 		const cb = onMessage?.(jsonMsg, clientId);
 		if (cb instanceof Promise) await cb;
+	});
+
+	mqttConnection.on('reconnect', async () => {
+		if (mqttConnection._reconnectCount === 5) {
+			logger.info('Reached the max websocket reconnect limit. Closing connection.');
+			mqttConnection._reconnectCount = 0;
+			mqttConnection.end(true);
+		}
 	});
 
 	mqttConnection.connect();
