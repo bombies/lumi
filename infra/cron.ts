@@ -2,7 +2,7 @@ import { trpc } from './api';
 import { db } from './db';
 import { frontend } from './frontend';
 import { notificationsTopic, realtimeServer } from './realtime';
-import { vapidPrivateKey, vapidPublicKey } from './secrets';
+import { sentryAuthToken, vapidPrivateKey, vapidPublicKey } from './secrets';
 
 const affirmationSenderDLQ = new sst.aws.Queue('AffirmationSenderDLQ');
 
@@ -36,6 +36,7 @@ export const affirmationSenderJob = new sst.aws.Cron('AffirmationAggregatorJob',
 		link: [db, affirmationSenderQueue],
 		environment: {
 			TABLE_NAME: db.name,
+			SENTRY_AUTH_TOKEN: sentryAuthToken.value,
 		},
 	},
 });
@@ -52,6 +53,7 @@ if ($app.stage === 'production') {
 			environment: {
 				FRONTEND_FUNCTION_NAME: frontend.nodes.server?.name ?? '',
 				API_FUNCTION_NAME: trpc.nodes.function.name,
+				SENTRY_AUTH_TOKEN: sentryAuthToken.value,
 			},
 			permissions: frontend.nodes.server && [
 				{

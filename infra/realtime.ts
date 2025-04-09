@@ -1,6 +1,14 @@
 import { accountId } from './constants';
 import { db } from './db';
-import { redisHost, redisPassword, redisPort, redisUser, vapidPrivateKey, vapidPublicKey } from './secrets';
+import {
+	redisHost,
+	redisPassword,
+	redisPort,
+	redisUser,
+	sentryAuthToken,
+	vapidPrivateKey,
+	vapidPublicKey,
+} from './secrets';
 import { appify } from './utils';
 
 export const notificationsTopic = `${$app.name}/${$app.stage}/notifications`;
@@ -14,6 +22,7 @@ export const realtimeServer = new sst.aws.Realtime('RealtimeServer', {
 			NOTIFICATIONS_TOPIC: notificationsTopic,
 			AWS_ACCOUNT_ID: accountId,
 			TABLE_NAME: db.name,
+			SENTRY_AUTH_TOKEN: sentryAuthToken.value,
 		},
 	},
 });
@@ -26,6 +35,7 @@ export const socketCleanupScheduler = new sst.aws.Cron('SocketCleanupScheduler',
 		environment: {
 			NOTIFICATIONS_TOPIC: notificationsTopic,
 			TABLE_NAME: db.name,
+			SENTRY_AUTH_TOKEN: sentryAuthToken.value,
 		},
 	},
 	schedule: 'rate(5 minutes)',
@@ -39,6 +49,7 @@ export const heartbeatSubscriber = realtimeServer.subscribe(
 		link: [db],
 		environment: {
 			TABLE_NAME: db.name,
+			SENTRY_AUTH_TOKEN: sentryAuthToken.value,
 		},
 	},
 	{
@@ -54,6 +65,7 @@ export const momentMessageSubscriber = realtimeServer.subscribe(
 		link: [db, redisHost, redisPort, redisUser, redisPassword],
 		environment: {
 			TABLE_NAME: db.name,
+			SENTRY_AUTH_TOKEN: sentryAuthToken.value,
 		},
 	},
 	{
@@ -69,6 +81,7 @@ export const presenceSubscriber = realtimeServer.subscribe(
 		link: [db],
 		environment: {
 			TABLE_NAME: db.name,
+			SENTRY_AUTH_TOKEN: sentryAuthToken.value,
 		},
 	},
 	{
@@ -84,6 +97,7 @@ export const notificationSubscriber = realtimeServer.subscribe(
 		runtime: 'nodejs22.x',
 		environment: {
 			TABLE_NAME: db.name,
+			SENTRY_AUTH_TOKEN: sentryAuthToken.value,
 		},
 	},
 	{

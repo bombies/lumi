@@ -1,4 +1,4 @@
-import { cdnPrivateKey, redisHost, redisPassword, redisPort, redisUser } from './secrets';
+import { cdnPrivateKey, redisHost, redisPassword, redisPort, redisUser, sentryAuthToken } from './secrets';
 import { contentBucket, contentCdn, contentCdnPublicKey } from './storage';
 
 export const db = new sst.aws.Dynamo('Database', {
@@ -44,6 +44,7 @@ db.subscribe(
 		link: [db, redisHost, redisPort, redisUser, redisPassword],
 		environment: {
 			TABLE_NAME: db.name,
+			SENTRY_AUTH_TOKEN: sentryAuthToken.value,
 		},
 		runtime: 'nodejs22.x',
 	},
@@ -68,6 +69,9 @@ db.subscribe(
 		handler: 'packages/functions/db/moment-deletion.handler',
 		link: [db, contentBucket],
 		runtime: 'nodejs22.x',
+		environment: {
+			SENTRY_AUTH_TOKEN: sentryAuthToken.value,
+		},
 	},
 	{
 		filters: [
@@ -96,6 +100,7 @@ db.subscribe(
 			CDN_PRIVATE_KEY: cdnPrivateKey,
 			KEY_PAIR_ID: contentCdnPublicKey.id,
 			CDN_URL: $interpolate`${contentCdn.domainUrl.apply(domainUrl => domainUrl ?? contentCdn.url)}`,
+			SENTRY_AUTH_TOKEN: sentryAuthToken.value,
 		},
 		runtime: 'nodejs22.x',
 		nodejs: { install: ['ffmpeg-static'] },
@@ -124,6 +129,7 @@ db.subscribe(
 		runtime: 'nodejs22.x',
 		environment: {
 			TABLE_NAME: db.name,
+			SENTRY_AUTH_TOKEN: sentryAuthToken.value,
 		},
 	},
 	{
@@ -150,6 +156,7 @@ db.subscribe(
 		link: [db, redisHost, redisPort, redisUser, redisPassword],
 		environment: {
 			TABLE_NAME: db.name,
+			SENTRY_AUTH_TOKEN: sentryAuthToken.value,
 		},
 	},
 	{

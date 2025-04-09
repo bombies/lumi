@@ -12,6 +12,7 @@ import {
 	redisPassword,
 	redisPort,
 	redisUser,
+	sentryAuthToken,
 	vapidPrivateKey,
 	vapidPublicKey,
 	websocketToken,
@@ -54,6 +55,8 @@ export const trpc = new sst.aws.Function('Trpc', {
 		FRONTEND_URL: !$dev ? `https://${webDNS}` : 'https://localhost:3000',
 		// @ts-ignore
 		NODE_TLS_REJECT_UNAUTHORIZED: $dev ? '0' : undefined,
+
+		SENTRY_AUTH_TOKEN: sentryAuthToken.value,
 	},
 	handler: 'packages/functions/api/index.handler',
 });
