@@ -16,6 +16,7 @@ import EasyFormSelect from '@/components/ui/form-extras/fields/easy-form-select'
 import InfiniteLoader from '@/components/ui/infinite-loader';
 import { Input } from '@/components/ui/input';
 import { SelectOption } from '@/components/ui/multiselect';
+import { Progress } from '@/components/ui/progress';
 import { Textarea } from '@/components/ui/textarea';
 import Title from '@/components/ui/title';
 import { CreateMomentDetails, GetRelationshipMomentTags, UploadMoment } from '@/hooks/trpc/moment-hooks';
@@ -158,7 +159,7 @@ const MomentUploadForm: FC<Props> = ({ momentFile, onCancel }) => {
 						/>
 					</EasyFormField>
 					<div className="flex gap-4">
-						<div className="space-x-2">
+						<div className="flex flex-col gap-y-2">
 							<Button
 								type="submit"
 								variant="accent"
@@ -166,11 +167,7 @@ const MomentUploadForm: FC<Props> = ({ momentFile, onCancel }) => {
 							>
 								<UploadIcon size={18} /> Upload Moment
 							</Button>
-							{isUploading && (
-								<span className="bg-accent/20 text-accent px-x py-2 rounded-sm text-xs">
-									{momentUploadProgress}% Done
-								</span>
-							)}
+							{isUploading && <Progress value={momentUploadProgress} />}
 						</div>
 
 						<Button
