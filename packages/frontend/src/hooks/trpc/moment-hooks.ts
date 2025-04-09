@@ -54,10 +54,7 @@ export const UpdateMomentDetails = () => {
 };
 
 export const DeleteMomentDetails = () => {
-	const invalidateRoutes = useRouteInvalidation([trpc.moments.getMomentDetails]);
-	return trpc.moments.deleteMomentDetails.useMutation({
-		onSuccess: () => invalidateRoutes(),
-	});
+	return trpc.moments.deleteMomentDetails.useMutation();
 };
 
 export const GetMessagesForMoment = (momentId: string) =>

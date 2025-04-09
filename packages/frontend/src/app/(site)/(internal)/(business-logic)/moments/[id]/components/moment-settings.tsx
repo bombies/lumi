@@ -28,16 +28,20 @@ const MomentSettings: FC<Props> = ({ moment }) => {
 
 	const deleteMoment = useCallback(async () => {
 		try {
-			toast.promise(doMomentDeletion({ momentId: moment.id }), {
-				loading: 'Deleting moment...',
-				success() {
+			toast.promise(
+				doMomentDeletion({ momentId: moment.id }).then(() => {
 					router.push('/moments');
-					return 'Moment deleted!';
+				}),
+				{
+					loading: 'Deleting moment...',
+					success() {
+						return 'Moment deleted!';
+					},
+					error(e) {
+						return getErrorMessage(e);
+					},
 				},
-				error(e) {
-					return getErrorMessage(e);
-				},
-			});
+			);
 		} catch {}
 	}, [doMomentDeletion, moment.id, router]);
 

@@ -51,7 +51,6 @@ export const useSingleMediaUploader = <
 				throw error;
 			} finally {
 				setIsUploading(false);
-				setCurrentProgress(0);
 			}
 		},
 		[urlFetcher],
