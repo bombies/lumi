@@ -1,5 +1,6 @@
 import { cdnPrivateKey, redisHost, redisPassword, redisPort, redisUser } from './secrets';
 import { contentBucket, contentCdn, contentCdnPublicKey } from './storage';
+import { appify } from './utils';
 
 export const db = new sst.aws.Dynamo('Database', {
 	fields: {
@@ -38,7 +39,7 @@ export const db = new sst.aws.Dynamo('Database', {
 });
 
 db.subscribe(
-	'RelationshipStreamHandler',
+	appify('RelationshipStreamHandler'),
 	{
 		handler: 'packages/functions/db/stream.handler',
 		link: [db, redisHost, redisPort, redisUser, redisPassword],
@@ -63,7 +64,7 @@ db.subscribe(
 );
 
 db.subscribe(
-	'MomentMetadataDeletionHandler',
+	appify('MomentMetadataDeletionHandler'),
 	{
 		handler: 'packages/functions/db/moment-deletion.handler',
 		link: [db, contentBucket],
@@ -86,7 +87,7 @@ db.subscribe(
 );
 
 db.subscribe(
-	'MomentThumbnailTranscoder',
+	appify('MomentThumbnailTranscoder'),
 	{
 		handler: 'packages/functions/db/moment-thumbnail-transcoder.handler',
 		link: [contentBucket, db, redisHost, redisPort, redisUser, redisPassword],
@@ -117,7 +118,7 @@ db.subscribe(
 );
 
 db.subscribe(
-	'MomentTagOperationHandler',
+	appify('MomentTagOperationHandler'),
 	{
 		handler: 'packages/functions/db/moment-tag.handler',
 		link: [db, redisHost, redisPort, redisUser, redisPassword],
@@ -143,7 +144,7 @@ db.subscribe(
 );
 
 db.subscribe(
-	'RelationshipMomentTagDeletionHandler',
+	appify('RelationshipMomentTagDeletionHandler'),
 	{
 		handler: 'packages/functions/db/relationship-moment-tag.handler',
 		runtime: 'nodejs22.x',

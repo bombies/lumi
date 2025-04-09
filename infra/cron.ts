@@ -3,6 +3,7 @@ import { db } from './db';
 import { frontend } from './frontend';
 import { notificationsTopic, realtimeServer } from './realtime';
 import { vapidPrivateKey, vapidPublicKey } from './secrets';
+import { appify } from './utils';
 
 const affirmationSenderDLQ = new sst.aws.Queue('AffirmationSenderDLQ');
 
@@ -14,6 +15,7 @@ export const affirmationSenderQueue = new sst.aws.Queue('AffirmationSenderQueue'
 });
 
 affirmationSenderQueue.subscribe({
+	name: appify('AffirmationSenderHandler'),
 	handler: 'packages/functions/affirmations/sender.handler',
 	link: [realtimeServer, vapidPublicKey, vapidPrivateKey, db],
 	runtime: 'nodejs22.x',

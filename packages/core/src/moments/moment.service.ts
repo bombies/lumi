@@ -93,8 +93,10 @@ export const createMomentDetails = async (
 		entityType: EntityType.MOMENT_DETAILS,
 	});
 
-	if (tags?.length)
+	if (tags?.length) {
+		console.log(`Creating ${tags.length} tags...`);
 		await Promise.all(tags.map(tag => createMomentTag(userId, relationshipId, { tag, momentId: id })));
+	}
 
 	return attachUrlsToMoment(moment);
 };
@@ -236,7 +238,7 @@ export const updateMomentDetails = async (id: string, { tags, ...dto }: UpdateMo
 	const existingTags = await getTagsForMoment(id);
 	const existingTagNames = existingTags.map(tag => tag.tag);
 	const newTags = tags?.filter(tag => !existingTagNames.includes(tag));
-	const removedTags = existingTags.filter(tag => !tags?.includes(tag.tag));
+	const removedTags = tags?.length ? existingTags.filter(tag => !tags?.includes(tag.tag)) : [];
 
 	if (newTags?.length) {
 		const createdAt = new Date().toISOString();

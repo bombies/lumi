@@ -10,7 +10,7 @@ const updateRelationshipMomentTag = async (relationshipId: string, tag: string, 
 		return console.log(`Relationship tag ${relationshipId}#${tag} doesn't exist, skipping update.`);
 
 	try {
-		console.log(`Updating relationship moment tag for ${relationshipId}#${tag}`);
+		console.log(`Updating relationship moment tag for ${relationshipId}#${tag} (${countDelta})`);
 		await updateItem<RelationshipMomentTag>({
 			pk: DynamoKey.relationshipMomentTag.pk(relationshipId),
 			sk: DynamoKey.relationshipMomentTag.sk(tag),

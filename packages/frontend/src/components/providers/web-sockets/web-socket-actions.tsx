@@ -73,7 +73,7 @@ export const connectToWebsocket = ({
 	});
 
 	mqttConnection.on('reconnect', async () => {
-		if (mqttConnection._reconnectCount === 5) {
+		if (mqttConnection._reconnectCount === RECONNECT_MAX) {
 			logger.info('Reached the max websocket reconnect limit. Closing connection.');
 			mqttConnection._reconnectCount = 0;
 			mqttConnection.end(true);
