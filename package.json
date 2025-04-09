@@ -21,6 +21,6 @@
 	"dependencies": {
 		"@aws-sdk/credential-provider-node": "^3.775.0",
 		"@aws-sdk/credential-providers": "^3.775.0",
-		"sst": "^3.10.12"
+		"sst": "^3.13.7"
 	}
 }

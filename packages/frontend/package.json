@@ -80,7 +80,7 @@
 		"react-swipeable-list": "^1.10.0",
 		"sharp": "^0.33.5",
 		"sonner": "^2.0.1",
-		"sst": "^3.12.3",
+		"sst": "^3.13.7",
 		"tailwind-merge": "^3.0.2",
 		"tailwindcss-animate": "^1.0.7",
 		"tailwindcss-displaymodes": "^1.0.8",
