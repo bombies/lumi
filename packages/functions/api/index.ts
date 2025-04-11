@@ -1,8 +1,11 @@
 import * as Sentry from '@sentry/aws-serverless';
 import { awsLambdaRequestHandler } from '@trpc/server/adapters/aws-lambda';
 
+import { initSentry } from '../utils/sentry';
 import { appRouter } from './router';
 import { createContext } from './utils/trpc';
+
+initSentry();
 
 export const handler = Sentry.wrapHandler(
 	awsLambdaRequestHandler({
