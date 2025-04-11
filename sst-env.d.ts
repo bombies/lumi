@@ -135,7 +135,7 @@ declare module "sst" {
       "type": "sst.sst.Secret"
       "value": string
     }
-    "lumi-ajani-cdn-key-group": {
+    "lumi-staging-cdn-key-group": {
       "id": string
       "items": any
       "type": "aws.cloudfront/keyGroup.KeyGroup"
