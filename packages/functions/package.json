@@ -20,6 +20,8 @@
 		"@datastructures-js/priority-queue": "^6.3.2",
 		"@lumi/core": "*",
 		"@lumi/emails": "*",
+		"@sentry/aws-serverless": "^9.12.0",
+		"@sentry/profiling-node": "^9.12.0",
 		"@trpc-limiter/redis": "^0.0.2",
 		"@trpc/client": "^11.1.0",
 		"@trpc/server": "^11.1.0",

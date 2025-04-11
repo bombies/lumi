@@ -47,6 +47,7 @@ const Image: FC<Props> = ({
 				}}
 				className={cn(globalClassName, imageClassName)}
 				style={{ objectFit, ...props.style }}
+				sizes={props.fill ? '100%' : undefined}
 				draggable={false}
 			/>
 		</motion.div>

@@ -4,6 +4,7 @@ import { notificationsTopic, realtimeServer } from './realtime';
 import {
 	authSecret,
 	cdnPrivateKey,
+	defaultSentryEnvironmentVariables,
 	mailerHostSecret,
 	mailerPasswordSecret,
 	mailerPortSecret,
@@ -28,6 +29,9 @@ export const trpc = new sst.aws.Function('Trpc', {
 				},
 			},
 	runtime: 'nodejs22.x',
+	nodejs: {
+		install: ['@sentry/aws-serverless', '@sentry/profiling-node'],
+	},
 	link: [
 		contentBucket,
 		db,
@@ -56,7 +60,7 @@ export const trpc = new sst.aws.Function('Trpc', {
 		// @ts-ignore
 		NODE_TLS_REJECT_UNAUTHORIZED: $dev ? '0' : undefined,
 
-		SENTRY_AUTH_TOKEN: sentryAuthToken.value,
+		...defaultSentryEnvironmentVariables,
 	},
 	handler: 'packages/functions/api/index.handler',
 });

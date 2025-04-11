@@ -40,9 +40,9 @@ const MomentCard: FC<Props> = ({ moment, linkClassName, className, compactUpload
 						height={1920}
 						style={{
 							width: 'auto',
-							height: '100vh',
+							height: '100%',
 						}}
-						sizes="100vh"
+						sizes="100%"
 						objectFit="contain"
 					/>
 					<div className="w-full flex grow flex-col p-4 text-foreground justify-between gap-2">

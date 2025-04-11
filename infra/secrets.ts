@@ -30,6 +30,14 @@ export const spotifyClientId = new sst.Secret('SpotifyClientId');
 export const spotifyClientSecret = new sst.Secret('SpotifyClientSecret');
 
 export const sentryAuthToken = new sst.Secret('SentryAuthToken');
+export const sentryDsn = new sst.Secret('SentryDsn');
+
+export const defaultSentryEnvironmentVariables = {
+	SENTRY_DSN: sentryDsn.value,
+	SENTRY_AUTH_TOKEN: sentryAuthToken.value,
+	SENTRY_TRACES_SAMPLE_RATE: '1.0',
+	NODE_OPTIONS: '--import @sentry/aws-serverless/awslambda-auto',
+};
 
 export const contentCdnPublicKeyId = new sst.Secret('ContentCdnPublicKeyId');
 export const contentCdnKeyGroupId = new sst.Secret('ContentCdnKeyGroupId');

@@ -16,7 +16,6 @@ export const useSpotifyAPI = () => {
 		if (!session) return;
 
 		(async () => {
-			console.log('session tokens', session.tokens);
 			const spotifyProviderToken = tokens?.accessToken ?? session.tokens.spotify?.accessToken;
 			const spotifyRefreshToken = tokens?.refreshToken ?? session.tokens.spotify?.refreshToken;
 
