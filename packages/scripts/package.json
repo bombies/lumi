@@ -4,7 +4,7 @@
 	"type": "module",
 	"dependencies": {
 		"@lumi/core": "*",
-		"sst": "^3.13.7"
+		"sst": "^3.13.9"
 	},
 	"scripts": {
 		"typecheck": "tsc --noEmit"

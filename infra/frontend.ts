@@ -38,7 +38,7 @@ export const frontend = new sst.aws.Nextjs('Frontend', {
 		install: ['sharp'],
 	},
 	cachePolicy: $app.stage !== 'staging' ? frontendCdnCachePolicyId.value : undefined,
-	openNextVersion: '3.5.5',
+	openNextVersion: '3.5.6',
 	link: [
 		trpc,
 		contentBucket,

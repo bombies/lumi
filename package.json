@@ -13,14 +13,14 @@
 	},
 	"packageManager": "bun@1.2.6",
 	"devDependencies": {
-		"@trivago/prettier-plugin-sort-imports": "^4.3.0",
+		"@trivago/prettier-plugin-sort-imports": "^5.2.2",
 		"@tsconfig/node22": "^22.0.1",
 		"turbo": "^2.5.0",
-		"typescript": "^5.8.2"
+		"typescript": "^5.8.3"
 	},
 	"dependencies": {
-		"@aws-sdk/credential-provider-node": "^3.775.0",
-		"@aws-sdk/credential-providers": "^3.775.0",
-		"sst": "^3.13.7"
+		"@aws-sdk/credential-provider-node": "^3.787.0",
+		"@aws-sdk/credential-providers": "^3.787.0",
+		"sst": "^3.13.9"
 	}
 }
