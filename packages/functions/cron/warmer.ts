@@ -9,10 +9,6 @@ const lambda = new Lambda({
 export const handler: Handler<APIGatewayProxyEvent> = async () => {
 	const functions = [
 		{
-			name: 'Frontend',
-			functionName: process.env.FRONTEND_FUNCTION_NAME!,
-		},
-		{
 			name: 'API',
 			functionName: process.env.API_FUNCTION_NAME!,
 		},

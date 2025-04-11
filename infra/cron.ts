@@ -53,7 +53,6 @@ if ($app.stage === 'production') {
 			runtime: 'nodejs22.x',
 			link: [frontend, trpc],
 			environment: {
-				FRONTEND_FUNCTION_NAME: frontend.nodes.server?.name ?? '',
 				API_FUNCTION_NAME: trpc.nodes.function.name,
 				SENTRY_AUTH_TOKEN: sentryAuthToken.value,
 			},
