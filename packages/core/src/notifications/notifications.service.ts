@@ -101,23 +101,31 @@ export const sendNotification = async ({
 			console.log(
 				'Attempting to send notifcation with payload',
 				JSON.stringify({
-					title: payload.title.slice(0, Math.min(30, payload.title.length)),
-					body: payload.body.slice(0, Math.min(150, payload.body.length)),
+					title: payload.title,
+					body: payload.body,
 					icon: '/favicon-96x96.png',
 					openUrl: payload.openUrl,
 				}),
 			);
 			for (const sub of notificationSubs.data) {
 				try {
-					await webpush.sendNotification(
+					const sendResult = await webpush.sendNotification(
 						sub,
 						JSON.stringify({
-							title: payload.title.slice(0, Math.min(30, payload.title.length)),
-							body: payload.body.slice(0, Math.min(150, payload.body.length)),
+							title: payload.title,
+							body: payload.body,
 							icon: '/favicon-96x96.png',
 							openUrl: payload.openUrl,
 						}),
 					);
+
+					if (sendResult.statusCode !== 201 && sendResult.statusCode !== 200) {
+						console.error(
+							`(Code: ${sendResult.statusCode}) Failed to send notification to ${user.username}`,
+							sendResult,
+						);
+						continue;
+					}
 
 					let subService: string;
 					const endpoint = sub.endpoint;

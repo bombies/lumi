@@ -46,7 +46,7 @@ const RateRecommendationButton: FC<Props> = ({ track, onRate }) => {
 
 				await sendNotificationToPartner({
 					title: 'Song Recommendation Rated',
-					content: `${self.firstName} has given "${track.track.name}" a ${data.rating}/10 rating.`,
+					content: `${self.firstName} has given "${track.track.name}" a ${data.rating}/10 rating.${data.comments?.length ? `Comments: ${data.comments}` : ''}`,
 					openUrl: '/music-sharing',
 				});
 			} catch {}
