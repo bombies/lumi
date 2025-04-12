@@ -36,12 +36,12 @@
 		"sst": "^3.13.9",
 		"uuid": "^11.1.0",
 		"web-push": "^3.6.7",
-		"zod": "^3.24.2"
+		"zod": "^4.0.0-beta.20250412T085909"
 	},
 	"devDependencies": {
 		"@types/nodemailer": "^6.4.17",
 		"@types/otp-generator": "^4.0.2",
-		"@types/react": "^19.1.0",
+		"@types/react": "^19.1.1",
 		"@types/request-ip": "^0.0.41",
 		"vitest": "^3.1.1"
 	}

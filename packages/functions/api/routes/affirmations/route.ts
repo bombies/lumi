@@ -40,7 +40,7 @@ export const affirmationsRouter = router({
 		.input(
 			updateAffirmationDto.and(
 				z.object({
-					id: z.string().uuid(),
+					id: z.uuid(),
 				}),
 			),
 		)
@@ -49,7 +49,7 @@ export const affirmationsRouter = router({
 		),
 
 	deleteAffirmation: relationshipProcedure
-		.input(z.string().uuid())
+		.input(z.uuid())
 		.mutation(({ input, ctx: { user, relationship } }) => deleteAffirmation(user.id, relationship.id, input)),
 
 	getReceivedAffirmations: relationshipProcedure

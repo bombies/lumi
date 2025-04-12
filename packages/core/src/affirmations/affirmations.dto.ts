@@ -3,20 +3,20 @@ import { z } from 'zod';
 import { createInfiniteDataDto, infiniteDataOrderDto } from '../types/infinite-data.dto';
 
 export const affirmationSchema = z.object({
-	id: z.string().uuid(),
+	id: z.uuid(),
 	affirmation: z.string().min(1).max(150),
 	selectedCount: z.number().positive(),
-	relationshipId: z.string().uuid(),
+	relationshipId: z.uuid(),
 	ownerId: z.string(),
 });
 
 export const receivedAffirmationSchema = z.object({
 	affirmation: z.string().min(1).max(150),
-	timestamp: z.string().datetime(),
+	timestamp: z.iso.datetime(),
 });
 
 export const createAffirmationDto = z.object({
-	relationshipId: z.string().uuid(),
+	relationshipId: z.uuid(),
 	ownerId: z.string(),
 	affirmation: z.string().min(1).max(150),
 });

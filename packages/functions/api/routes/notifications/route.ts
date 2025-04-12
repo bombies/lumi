@@ -34,7 +34,7 @@ export const notificationsRouter = router({
 		.input(
 			updateNotificationDto.and(
 				z.object({
-					notificationId: z.string().uuid(),
+					notificationId: z.uuid(),
 				}),
 			),
 		)
@@ -48,8 +48,8 @@ export const notificationsRouter = router({
 		.input(
 			z.array(
 				z.object({
-					id: z.string().uuid(),
-					createdAt: z.string().datetime(),
+					id: z.uuid(),
+					createdAt: z.iso.datetime(),
 				}),
 			),
 		)

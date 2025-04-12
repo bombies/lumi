@@ -13,9 +13,9 @@ export const momentSchema = z.object({
 
 export const momentMessageSchema = z.object({
 	senderId: z.string(),
-	momentId: z.string().uuid(),
+	momentId: z.uuid(),
 	content: z.string().min(0).max(1024),
-	repliedTo: z.string().uuid().optional(),
+	repliedTo: z.uuid().optional(),
 });
 
 export const createMomentDetailsDto = momentSchema.omit({ normalizedTitle: true }).and(
@@ -44,7 +44,7 @@ export const getInfiniteMomentMessagesDto = createInfiniteDataDto({
 	.and(infiniteDataOrderDtoWithDefault('desc'))
 	.and(
 		z.object({
-			momentId: z.string().uuid(),
+			momentId: z.uuid(),
 		}),
 	);
 
@@ -54,7 +54,7 @@ export const createMomentMessageDto = momentMessageSchema
 	})
 	.and(
 		z.object({
-			timestamp: z.string().datetime().optional(),
+			timestamp: z.iso.datetime().optional(),
 		}),
 	);
 
@@ -70,7 +70,7 @@ export const searchMomentsDto = createInfiniteDataDto({
 	.and(
 		z.object({
 			query: z.string(),
-			cursor: z.array(z.record(z.any()).or(z.null()), z.record(z.any()).or(z.null())).optional(),
+			cursor: z.array(z.record(z.string(), z.any()).or(z.null())).optional(),
 		}),
 	);
 
@@ -85,7 +85,7 @@ export const createRelationshipMomentTagDto = z.object({
 });
 
 export const createMomentTagDto = z.object({
-	momentId: z.string().uuid(),
+	momentId: z.uuid(),
 	tag: z.string().min(1).max(50),
 });
 
@@ -98,7 +98,7 @@ export const getMomentsByTagDto = createInfiniteDataDto({ defaultLimit: 10 })
 	);
 
 export const deleteMomentTagDto = z.object({
-	momentId: z.string().uuid(),
+	momentId: z.uuid(),
 	tag: z.string().min(1).max(50),
 });
 

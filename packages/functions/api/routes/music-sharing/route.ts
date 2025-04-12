@@ -42,7 +42,7 @@ export const musicSharingRouter = router({
 		.input(
 			updateSongRecommendationDto.and(
 				z.object({
-					recId: z.string().uuid(),
+					recId: z.uuid(),
 				}),
 			),
 		)

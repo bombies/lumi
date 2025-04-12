@@ -119,6 +119,7 @@ const MomentUploadForm: FC<Props> = ({ momentFile, onCancel }) => {
 					theme={MediaThemeInstaplay}
 					loop
 					playsInline
+					muted
 				/>
 			</div>
 			<div className="w-full phone-big:w-[35rem] space-y-6">

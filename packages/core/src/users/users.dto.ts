@@ -23,15 +23,16 @@ export const userDto = z.object({
 
 export const createUserDto = z.object({
 	id: z.string().optional(),
-	email: z.string().email(),
-	username: z
-		.string()
-		.regex(
-			USERNAME_REGEX,
-			'The username must be between 3 and 32 characters long and start with a letter. It can only contain lowercase letters, numbers, and underscores.',
-		),
-	firstName: z.string().regex(FIRST_NAME_REGEX, 'Invalid first name.'),
-	lastName: z.string().regex(LAST_NAME_REGEX, 'Invalid last name.'),
+	email: z.email(),
+	username: z.string().regex(USERNAME_REGEX, {
+		error: 'The username must be between 3 and 32 characters long and start with a letter. It can only contain lowercase letters, numbers, and underscores.',
+	}),
+	firstName: z.string().regex(FIRST_NAME_REGEX, {
+		error: 'Invalid first name.',
+	}),
+	lastName: z.string().regex(LAST_NAME_REGEX, {
+		error: 'Invalid last name.',
+	}),
 });
 
 export const updateUserDto = createUserDto

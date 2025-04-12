@@ -86,7 +86,7 @@ export const momentsRouter = router({
 		.input(
 			updateMomentDetailsDto.and(
 				z.object({
-					momentId: z.string().uuid(),
+					momentId: z.uuid(),
 				}),
 			),
 		)
@@ -105,7 +105,7 @@ export const momentsRouter = router({
 	deleteMomentDetails: relationshipProcedure
 		.input(
 			z.object({
-				momentId: z.string().uuid(),
+				momentId: z.uuid(),
 			}),
 		)
 		.mutation(async ({ input: { momentId }, ctx: { user, relationship } }) => {

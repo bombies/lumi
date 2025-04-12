@@ -3,11 +3,11 @@ import { z } from 'zod';
 import { createInfiniteDataDto } from '../types/infinite-data.dto';
 
 export const notificationSchema = z.object({
-	id: z.string().uuid(),
+	id: z.uuid(),
 	userId: z.string(),
 	title: z.string().optional(),
 	content: z.string(),
-	createdAt: z.string().datetime(),
+	createdAt: z.iso.datetime(),
 	read: z.boolean(),
 	openUrl: z.string().optional(),
 });
