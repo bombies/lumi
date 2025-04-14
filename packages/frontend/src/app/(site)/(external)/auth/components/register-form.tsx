@@ -32,7 +32,7 @@ const permittedEmails = ['ajani.green@outlook.com', 'juzsarahx@gmail.com'];
 const RegisterForm: FC = () => {
 	const [isAuthenticating, setIsAuthenticating] = useState(false);
 	const onSubmit = useCallback<SubmitHandler<RegisterSchema>>(async ({ confirmPassword, ...data }) => {
-		if (!permittedEmails.includes(data.email.toLowerCase()))
+		if (process.env.NEXT_PUBLIC_APP_STAGE === 'production' && !permittedEmails.includes(data.email.toLowerCase()))
 			return toast.error("You aren't permitted to register!");
 
 		setIsAuthenticating(true);
