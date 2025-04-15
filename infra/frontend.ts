@@ -21,6 +21,7 @@ import {
 	redisPort,
 	redisUser,
 	sentryAuthToken,
+	sentryDsn,
 	spotifyClientId,
 	spotifyClientSecret,
 	vapidPrivateKey,
@@ -91,6 +92,7 @@ export const frontend = new sst.aws.Nextjs('Frontend', {
 		SPOTIFY_CLIENT_SECRET: spotifyClientSecret.value,
 
 		SENTRY_AUTH_TOKEN: sentryAuthToken.value,
+		NEXT_PUBLIC_SENTRY_DSN: sentryDsn.value,
 	},
 	permissions: [
 		{
