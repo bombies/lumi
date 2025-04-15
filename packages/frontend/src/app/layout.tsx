@@ -3,12 +3,13 @@ import { Cookie } from 'next/font/google';
 import localFont from 'next/font/local';
 
 import Providers from '@/components/providers/providers';
-import { HydrateClient } from '@/lib/trpc/server';
+import { getHydrationHelpers } from '@/lib/trpc/server';
 
 import './globals.css';
 
-import SessionProvider from '@/components/providers/session-provider';
-import { createSupabaseServerClient } from '@/lib/supabase/server';
+import Script from 'next/script';
+
+import { getServerSession } from '@/lib/better-auth/auth-actions';
 
 const sfProDisplay = localFont({
 	src: [
@@ -103,6 +104,7 @@ const sfProDisplay = localFont({
 			style: 'italic',
 		},
 	],
+
 	variable: '--font-sf-pro-display',
 });
 
@@ -115,11 +117,31 @@ const cookie = Cookie({
 
 export const metadata: Metadata = {
 	title: 'Lumi',
-	description: 'A space for you an your partner.',
+	description: 'A space for you and your partner.',
+	appleWebApp: {
+		capable: true,
+		statusBarStyle: 'default',
+		title: 'Lumi',
+	},
+	other: {
+		'apple-mobile-web-app-capable': 'yes',
+	},
 };
 
 export const viewport: Viewport = {
+	maximumScale: 1,
+	userScalable: false,
 	interactiveWidget: 'resizes-content',
+	themeColor: [
+		{
+			media: '(prefers-color-scheme: dark)',
+			color: '#10130d',
+		},
+		{
+			media: '(prefers-color-scheme: light)',
+			color: '#f8fff1',
+		},
+	],
 };
 
 export default async function RootLayout({
@@ -127,17 +149,29 @@ export default async function RootLayout({
 }: Readonly<{
 	children: React.ReactNode;
 }>) {
-	const supabaseSession = await createSupabaseServerClient();
-	const supabaseUser = await supabaseSession.auth.getUser();
+	await getServerSession();
+	const { HydrateClient } = await getHydrationHelpers();
 
 	return (
-		<html lang="en" className={`${sfProDisplay.variable} ${cookie.variable}`}>
+		<html lang="en" className={`${sfProDisplay.variable} ${cookie.variable} antialiased`}>
 			<body className={`antialiased`}>
-				<SessionProvider userResponse={supabaseUser}>
-					<Providers>
-						<HydrateClient>{children}</HydrateClient>
-					</Providers>
-				</SessionProvider>
+				<Providers>
+					<HydrateClient>{children}</HydrateClient>
+				</Providers>
+				<Script
+					strategy="beforeInteractive"
+					type="text/javascript"
+					src="https://cdn.jsdelivr.net/npm/ios-pwa-splash@1.0.0/cdn.min.js"
+				/>
+				<Script
+					id="load-ios-splash"
+					strategy="beforeInteractive"
+					type="text/javascript"
+					dangerouslySetInnerHTML={{
+						__html: `
+						try { iosPWASplash('/web-app-manifest-512x512.png', '#76A34E');} catch (e) { console.error('Something went wrong setting the splash screen!', e);}`,
+					}}
+				/>
 			</body>
 		</html>
 	);

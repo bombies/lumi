@@ -4,7 +4,7 @@ import { z } from 'zod';
 export const infiniteDataDto = z
 	.object({
 		limit: z.number().positive(),
-		cursor: z.record(z.string()),
+		cursor: z.record(z.string(), z.string()),
 	})
 	.partial();
 
@@ -35,7 +35,7 @@ export const createInfiniteDataDto = ({
 	return z
 		.object({
 			limit,
-			cursor: z.record(z.string()),
+			cursor: z.record(z.string(), z.string()).or(z.null()),
 		})
 		.partial();
 };

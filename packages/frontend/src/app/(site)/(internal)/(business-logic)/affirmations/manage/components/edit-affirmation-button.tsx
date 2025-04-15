@@ -1,7 +1,7 @@
 'use client';
 
 import { FC, useCallback, useState } from 'react';
-import { Affirmation } from '@lumi/core/types/affirmations.types';
+import { Affirmation } from '@lumi/core/affirmations/affirmations.types';
 import { PencilIcon } from 'lucide-react';
 import { SubmitHandler } from 'react-hook-form';
 import { z } from 'zod';
@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import EasyForm from '@/components/ui/form-extras/easy-form';
 import EasyFormField from '@/components/ui/form-extras/easy-form-field';
 import { Textarea } from '@/components/ui/textarea';
-import { UpdateAffirmation } from '../../hooks';
+import { UpdateAffirmation } from '@/hooks/trpc/affirmation-hooks';
 
 type Props = {
 	affirmation: Affirmation;

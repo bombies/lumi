@@ -2,8 +2,8 @@
 
 import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ChatBubbleOvalLeftEllipsisIcon, PaperAirplaneIcon } from '@heroicons/react/24/solid';
-import { Moment, MomentMessage } from '@lumi/core/types/moment.types';
-import { WebSocketEventHandler } from '@lumi/core/types/websockets.types';
+import { Moment, MomentMessage } from '@lumi/core/moments/moment.types';
+import { WebSocketEventHandler } from '@lumi/core/websockets/websockets.types';
 import { AnimatePresence, motion, Variants } from 'motion/react';
 import { SubmitHandler } from 'react-hook-form';
 import { z } from 'zod';
@@ -52,8 +52,9 @@ const CommentDrawer: FC<Props> = ({ moment }) => {
 		fetchNextPage,
 		isFetchingNextPage,
 	} = GetMessagesForMoment(moment.id);
-	const { self, partner } = useRelationship();
+	const { self, partner, sendNotificationToPartner, selfState } = useRelationship();
 	const { addEventHandler, removeEventHandler, emitEvent } = useWebSocket();
+	const [drawerOpen, setDrawerOpen] = useState(false);
 	const [messages, setMessages] = useState<MomentMessage[]>([]);
 	const [partnerTyping, setPartnerTyping] = useState(false);
 	const submitButtonRef = useRef<HTMLButtonElement>(null);
@@ -165,12 +166,33 @@ const CommentDrawer: FC<Props> = ({ moment }) => {
 					topic: WebsocketTopic.momentChatTopic(moment.relationshipId, moment.id),
 				},
 			);
+
+			await sendNotificationToPartner({
+				title: `📩 New Moment Message`,
+				content: `${self.firstName}:  ${messageContent}`,
+				openUrl: `/moments/${moment.id}`,
+				metadata: {
+					momentId: moment.id,
+				},
+			});
 		},
-		[addMessage, emitEvent, moment.id, moment.relationshipId, self.id],
+		[addMessage, emitEvent, moment.id, moment.relationshipId, self.firstName, self.id, sendNotificationToPartner],
 	);
 
 	return (
-		<Drawer>
+		<Drawer
+			open={drawerOpen}
+			onOpenChange={val => {
+				setDrawerOpen(val);
+				if (val) {
+					selfState?.updateState?.('viewingMomentMessages', {
+						momentId: moment.id,
+					});
+				} else {
+					selfState?.updateState?.(null);
+				}
+			}}
+		>
 			<DrawerTrigger asChild>
 				<Button className="bg-transparent text-foreground" size="icon">
 					<ChatBubbleOvalLeftEllipsisIcon className="size-[18px]" />

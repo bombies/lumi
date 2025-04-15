@@ -6,17 +6,21 @@
 	],
 	"scripts": {
 		"dev": "sst dev",
-		"sync-secrets": "sst shell node packages/scripts/src/sync_secrets.mjs"
+		"build": "turbo build:wrapped --filter=@lumi/frontend -- --stage $STAGE",
+		"deploy": "sst deploy",
+		"typecheck": "turbo typecheck",
+		"migrate-auth": "bunx sst shell  -- bunx @better-auth/cli generate --config packages/frontend/src/auth.ts && @better-auth/cli migrate"
 	},
+	"packageManager": "bun@1.2.6",
 	"devDependencies": {
-		"@trivago/prettier-plugin-sort-imports": "^4.3.0",
-		"@tsconfig/node22": "^22.0.0",
-		"supabase": "^2.19.7",
-		"typescript": "^5.8.2"
+		"@trivago/prettier-plugin-sort-imports": "^5.2.2",
+		"@tsconfig/node22": "^22.0.1",
+		"turbo": "^2.5.0",
+		"typescript": "^5.8.3"
 	},
 	"dependencies": {
-		"@aws-sdk/credential-provider-node": "^3.758.0",
-		"@aws-sdk/credential-providers": "^3.758.0",
-		"sst": "^3.9.33"
+		"@aws-sdk/credential-provider-node": "^3.787.0",
+		"@aws-sdk/credential-providers": "^3.787.0",
+		"sst": "^3.13.9"
 	}
 }

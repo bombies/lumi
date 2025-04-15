@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, PropsWithChildren, useContext, useMemo, useState } from 'react';
+import { createContext, PropsWithChildren, useContext, useEffect, useState } from 'react';
 import {
 	ColumnDef,
 	ColumnFiltersState,
@@ -9,10 +9,11 @@ import {
 	getPaginationRowModel,
 	getSortedRowModel,
 	PaginationState,
+	Row,
+	RowData,
 	RowSelectionState,
 	SortingState,
 	Table,
-	Updater,
 	useReactTable,
 	VisibilityState,
 } from '@tanstack/react-table';
@@ -32,13 +33,13 @@ type ManagedTableGlobals<T> = {
 
 const ManagedTableContext = createContext<ManagedTableGlobals<any> | undefined>(undefined);
 
-export const useEasyTableGlobals = <T,>() => {
+export const useManagedTableGlobals = <T,>() => {
 	const context = useContext(ManagedTableContext);
 	if (context === undefined) throw new Error('useEasyTableGlobals must be used within a EasyTableProvider');
 	return context as ManagedTableGlobals<T>;
 };
 
-type ManagedTableProviderProps<T> = PropsWithChildren<{
+type ManagedTableProviderProps<T extends { id: string }> = PropsWithChildren<{
 	data: T[];
 	paginationType?: 'server' | 'client';
 	hasMorePages?: boolean;
@@ -46,11 +47,18 @@ type ManagedTableProviderProps<T> = PropsWithChildren<{
 	maxItemsPerPage?: number;
 	columns: ColumnDef<T>[];
 	allowRowSelection?: boolean;
-	onRowSelectionChange?: (rowSelection: Updater<RowSelectionState>) => void;
+	onRowSelectionChange?: (rowSelection: RowSelectionState) => void;
 	loading?: boolean;
+	rowClassName?: (row: Row<T>) => string | undefined;
 }>;
 
-export default function ManagedTableProvider<T>({
+declare module '@tanstack/table-core' {
+	interface TableMeta<TData extends RowData> {
+		getRowClassName?: (row: Row<TData>) => string | undefined;
+	}
+}
+
+export default function ManagedTableProvider<T extends { id: string }>({
 	data,
 	columns,
 	paginationType,
@@ -61,50 +69,58 @@ export default function ManagedTableProvider<T>({
 	allowRowSelection,
 	onRowSelectionChange,
 	loading,
+	rowClassName,
 }: ManagedTableProviderProps<T>) {
 	const [sorting, setSorting] = useState<SortingState>([]);
 	const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 	const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
-	const [rowSelection, setRowSelection] = useState({});
-
-	const finalColumns = useMemo(() => {
-		if (!allowRowSelection) return columns;
-
-		return [
-			{
-				id: 'select',
-				header: ({ table }) => (
-					<Checkbox
-						checked={
-							table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && 'indeterminate')
-						}
-						onCheckedChange={value => table.toggleAllPageRowsSelected(!!value)}
-						aria-label="Select all"
-					/>
-				),
-				cell: ({ row }) => (
-					<Checkbox
-						checked={row.getIsSelected()}
-						onCheckedChange={value => row.toggleSelected(!!value)}
-						aria-label="Select row"
-					/>
-				),
-				enableSorting: false,
-				enableHiding: false,
-			},
-			...columns,
-		];
-	}, [allowRowSelection, columns]);
-
+	const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
 	const [pagination, setPagination] = useState<PaginationState>({
 		pageIndex: 0,
 		pageSize: maxItemsPerPage ?? 10,
 	});
 
+	useEffect(() => {
+		onRowSelectionChange?.(rowSelection);
+	}, [onRowSelectionChange, rowSelection]);
+
+	const finalColumns: ColumnDef<T>[] = !allowRowSelection
+		? columns
+		: [
+				{
+					id: 'select',
+					header: ({ table }) => {
+						return (
+							<Checkbox
+								checked={
+									table.getIsAllPageRowsSelected() ||
+									(table.getIsSomePageRowsSelected() && 'indeterminate')
+								}
+								onCheckedChange={value => table.toggleAllPageRowsSelected(!!value)}
+								aria-label="Select all"
+							/>
+						);
+					},
+					cell: ({ row }) => {
+						return (
+							<Checkbox
+								checked={row.getIsSelected()}
+								onCheckedChange={value => row.toggleSelected(!!value)}
+								aria-label="Select row"
+							/>
+						);
+					},
+					enableSorting: false,
+					enableHiding: false,
+				},
+				...columns,
+			];
+
 	const table = useReactTable({
 		data,
 		columns: finalColumns,
 		getCoreRowModel: getCoreRowModel(),
+		getRowId: row => row.id as string,
 		manualPagination: paginationType === 'server',
 		pageCount,
 		onPaginationChange: setPagination,
@@ -113,10 +129,8 @@ export default function ManagedTableProvider<T>({
 		getSortedRowModel: getSortedRowModel(),
 		onColumnFiltersChange: setColumnFilters,
 		getFilteredRowModel: getFilteredRowModel(),
-		onRowSelectionChange: rowSelection => {
-			setRowSelection(rowSelection);
-			onRowSelectionChange?.(rowSelection);
-		},
+		enableRowSelection: allowRowSelection ?? false,
+		onRowSelectionChange: setRowSelection,
 		onColumnVisibilityChange: setColumnVisibility,
 		state: {
 			sorting,
@@ -125,21 +139,25 @@ export default function ManagedTableProvider<T>({
 			rowSelection,
 			pagination,
 		},
+		meta: {
+			getRowClassName: rowClassName,
+		},
 	});
 
-	const providerValue = useMemo<ManagedTableGlobals<T>>(
-		() => ({
-			data,
-			table,
-			columns,
-			maxItemsPerPage,
-			hasMorePages,
-			paginationType,
-			allowRowSelection: allowRowSelection ?? false,
-			loading,
-		}),
-		[allowRowSelection, columns, data, hasMorePages, loading, maxItemsPerPage, paginationType, table],
+	return (
+		<ManagedTableContext.Provider
+			value={{
+				data,
+				table,
+				columns,
+				maxItemsPerPage,
+				hasMorePages,
+				paginationType,
+				allowRowSelection: allowRowSelection ?? false,
+				loading,
+			}}
+		>
+			{children}
+		</ManagedTableContext.Provider>
 	);
-
-	return <ManagedTableContext.Provider value={providerValue}>{children}</ManagedTableContext.Provider>;
 }

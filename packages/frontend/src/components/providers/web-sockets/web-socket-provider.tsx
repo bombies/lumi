@@ -1,15 +1,15 @@
 'use client';
 
 import { createContext, FC, PropsWithChildren, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { User } from '@lumi/core/types/user.types';
+import { User } from '@lumi/core/users/user.types';
+import { emitAsyncWebsocketEvent, MqttClientType } from '@lumi/core/websockets/websockets.service';
 import {
 	Event,
 	events,
 	InferredWebSocketMessage,
 	WebSocketEventHandler,
 	WebSocketToken,
-} from '@lumi/core/types/websockets.types';
-import { emitAsyncWebsocketEvent, MqttClientType } from '@lumi/core/websockets/websockets.service';
+} from '@lumi/core/websockets/websockets.types';
 
 import { connectToWebsocket } from '@/components/providers/web-sockets/web-socket-actions';
 import { UpdateUser } from '@/hooks/trpc/user-hooks';

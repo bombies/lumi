@@ -7,11 +7,9 @@ import NotificationWatcher from '@/components/providers/web-sockets/notification
 import { PresenceWatcher } from '@/components/providers/web-sockets/presence-watcher';
 import WebSocketProvider from '@/components/providers/web-sockets/web-socket-provider';
 import { requireRelationship } from '@/lib/actions/requireRelationship';
-import { getUserBySession } from '@/lib/server-utils';
 
 const InternalLayout: FC<PropsWithChildren> = async ({ children }) => {
-	const { partner, ...relationship } = await requireRelationship({ withPartner: true });
-	const user = await getUserBySession();
+	const { partner, self: user, ...relationship } = await requireRelationship({ withPartner: true, withSelf: true });
 	if (!user) redirect('/auth/login');
 
 	return (

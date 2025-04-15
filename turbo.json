@@ -1,0 +1,15 @@
+{
+	"$schema": "https://turbo.build/schema.json",
+	"tasks": {
+		"build:wrapped": {
+			"dependsOn": ["^build:wrapped"],
+			"outputs": [".next/**", "!.next/cache/**"]
+		},
+		"typecheck": {
+			"dependsOn": ["^typecheck"]
+		},
+		"//#deploy": {
+			"outputs": [".next/**", "!.next/cache/**", ".sst/**"]
+		}
+	}
+}

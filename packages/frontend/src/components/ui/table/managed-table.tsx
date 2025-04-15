@@ -1,7 +1,7 @@
 import { FC, ReactElement } from 'react';
-import { Column, ColumnDef, RowSelectionState, Updater } from '@tanstack/react-table';
+import { Column, ColumnDef, Row, RowSelectionState, Updater } from '@tanstack/react-table';
 
-import EasyTableDisplay from './managed-table-display';
+import ManagedTableDisplay from './managed-table-display';
 import ManagedTablePagination, { ManagedTablePaginationProps } from './managed-table-pagination';
 import ManagedTableProvider from './managed-table-provider';
 
@@ -20,13 +20,14 @@ type Props<T> = {
 	allowRowSelection?: boolean;
 	onRowSelectionChange?: (rowSelection: Updater<RowSelectionState>) => void;
 	loading?: boolean;
+	rowClassName?: (row: Row<T>) => string | undefined;
 };
 
 export const makeColumnSortable = <T,>(column: Column<T>) => {
 	return column.toggleSorting(column.getIsSorted() === 'asc');
 };
 
-export default function ManagedTable<T>({
+export default function ManagedTable<T extends { id: string }>({
 	items,
 	className,
 	paginationType,
@@ -40,6 +41,7 @@ export default function ManagedTable<T>({
 	allowRowSelection,
 	onRowSelectionChange,
 	loading,
+	rowClassName,
 }: Readonly<Props<T>>): ReturnType<FC<T>> {
 	return (
 		<div>
@@ -50,12 +52,13 @@ export default function ManagedTable<T>({
 				pageCount={pageCount}
 				hasMorePages={hasMorePages}
 				columns={columns}
-				allowRowSelection={allowRowSelection}
+				allowRowSelection={loading ? false : allowRowSelection}
 				onRowSelectionChange={onRowSelectionChange}
 				loading={loading}
+				rowClassName={rowClassName}
 			>
 				{header && <div className="mb-6">{header}</div>}
-				<EasyTableDisplay className={className} />
+				<ManagedTableDisplay className={className} />
 				<ManagedTablePagination {...paginationProps} />
 				{footer && <div className="mt-6">{footer}</div>}
 			</ManagedTableProvider>

@@ -1,0 +1,53 @@
+name: Build & Deploy
+
+on:
+    push:
+        branches:
+            - staging
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+        environment: Staging
+        strategy:
+            matrix:
+                node-version: [22.x]
+        env:
+            TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+            TURBO_TEAM: ${{ vars.TURBO_TEAM }}
+            TURBO_CACHE: remote:rw
+        steps:
+            - name: Configure AWS Credentials
+              uses: aws-actions/configure-aws-credentials@v4
+              with:
+                  aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+                  aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
+                  aws-region: us-east-1
+            - name: Write AWS Credentials to Config File
+              run: |
+                  mkdir -p ~/.aws
+                  echo "[default]" > ~/.aws/config
+                  echo "aws_access_key_id=${{ secrets.AWS_ACCESS_KEY }}" >> ~/.aws/config
+                  echo "aws_secret_access_key=${{ secrets.AWS_SECRET_KEY }}" >> ~/.aws/config
+            - name: Clone Repository
+              uses: actions/checkout@v4
+            - name: Setup Node.js ${{ matrix.node-version }}
+              uses: actions/setup-node@v4
+            - uses: oven-sh/setup-bun@v2
+              with:
+                  bun-version: latest
+            - name: Install Dependencies
+              run: bun i
+            - name: Create CDN Key Files
+              run: |
+                  mkdir -p ./cdn-keys
+                  echo "${{ secrets.CDN_PUBLIC_KEY }}" > ./cdn-keys/staging.public_key.pem
+                  echo "${{ secrets.CDN_PRIVATE_KEY }}" > ./cdn-keys/staging.private_key.pem
+            - name: Build & Deploy Project
+              run: |
+                  bunx turbo run deploy --filter=// -- --stage=staging
+            - name: Run Db Migrations
+              run: |
+                  cd packages/frontend
+                  bunx sst shell --stage staging -- bunx @better-auth/cli generate --y
+                  bunx sst shell --stage staging -- bunx @better-auth/cli migrate --y

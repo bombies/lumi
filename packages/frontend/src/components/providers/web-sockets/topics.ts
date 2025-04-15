@@ -1,4 +1,4 @@
-import { WebSocketSubTopic } from '@lumi/core/types/websockets.types';
+import { WebSocketSubTopic } from '@lumi/core/websockets/websockets.types';
 
 export class WebsocketTopic {
 	private static prefix = process.env.NEXT_PUBLIC_NOTIFICATIONS_TOPIC!;
@@ -14,7 +14,7 @@ export class WebsocketTopic {
 	}
 
 	static userNotificationsTopic(userId: string) {
-		return `${this.prefix}/${userId}`;
+		return `${this.prefix}/${userId}/notifications`;
 	}
 
 	static momentChatTopic(relationshipId: string, momentId: string) {

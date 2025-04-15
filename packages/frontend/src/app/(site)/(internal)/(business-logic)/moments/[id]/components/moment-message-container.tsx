@@ -1,7 +1,7 @@
 'use client';
 
 import { FC, useMemo } from 'react';
-import { MomentMessage } from '@lumi/core/types/moment.types';
+import { MomentMessage } from '@lumi/core/moments/moment.types';
 
 import { useRelationship } from '@/components/providers/relationships/relationship-provder';
 import UserAvatar from '@/components/ui/user-avatar';

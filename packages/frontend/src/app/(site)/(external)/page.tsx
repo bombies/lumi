@@ -3,11 +3,14 @@ import { redirect } from 'next/navigation';
 import { ArrowRight } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
-import { getServerSession } from '@/lib/supabase/server';
+import { getServerSession } from '@/lib/better-auth/auth-actions';
 
 export default async function Home() {
 	const session = await getServerSession();
-	if (session) redirect('/home');
+	if (session) {
+		if (session.user.emailVerified) redirect('/home');
+		else redirect('/auth/register/confirm');
+	}
 
 	return (
 		<main className="flex flex-col justify-center items-center h-screen gap-y-4">

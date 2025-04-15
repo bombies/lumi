@@ -5,6 +5,7 @@ import {
 	updateUserDto,
 } from '@lumi/core/users/users.dto';
 import {
+	deleteUser,
 	getUserAvatarUploadUrl,
 	getUserById,
 	getUsersByEmail,
@@ -40,4 +41,6 @@ export const usersRouter = router({
 			projections: ['id', 'firstName', 'lastName', 'avatarUrl', 'avatarKey', 'username'],
 		}),
 	),
+
+	deleteSelf: protectedProcedure.mutation(({ ctx: { user } }) => deleteUser(user.id)),
 });

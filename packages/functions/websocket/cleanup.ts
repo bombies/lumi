@@ -1,8 +1,8 @@
-import { KeyPrefix } from '@lumi/core/types/dynamo.types';
-import { User } from '@lumi/core/types/user.types';
-import { DatabaseWebSocketHeartbeat, WebSocketSubTopic, WebSocketToken } from '@lumi/core/types/websockets.types';
-import { dynamo, getDynamicUpdateStatements } from '@lumi/core/utils/dynamo/dynamo.service';
+import { User } from '@lumi/core/users/user.types';
+import { dynamo, updateItem } from '@lumi/core/utils/dynamo/dynamo.service';
+import { DynamoKey } from '@lumi/core/utils/dynamo/dynamo.types';
 import { createAsyncWebsocketConnection, emitAsyncWebsocketEvent } from '@lumi/core/websockets/websockets.service';
+import { DatabaseWebSocketHeartbeat, WebSocketSubTopic, WebSocketToken } from '@lumi/core/websockets/websockets.types';
 import { APIGatewayProxyEvent, Handler } from 'aws-lambda';
 import { ISubscriptionMap } from 'mqtt';
 import { Resource } from 'sst';
@@ -23,7 +23,7 @@ export const handler: Handler<APIGatewayProxyEvent> = async () => {
 			'#timestamp': 'timestamp',
 		},
 		ExpressionAttributeValues: {
-			':pk': KeyPrefix.WEBSOCKET_HEARTBEAT,
+			':pk': DynamoKey.webSocketHeartbeat.pk(),
 			':timestamp': latestHealthyTime,
 		},
 	});
@@ -55,21 +55,13 @@ export const handler: Handler<APIGatewayProxyEvent> = async () => {
 
 		// Update each user's status to offline
 		const userIds = expiredConnections.map(({ payload }) => payload.userId);
-		const updateRequests = userIds.map(userId => {
-			const { updateStatements, expressionAttributeNames, expressionAttributeValues } =
-				getDynamicUpdateStatements<User>({ status: 'offline' });
-
-			return dynamo.update({
-				TableName: process.env.TABLE_NAME,
-				Key: {
-					pk: `${KeyPrefix.USER}${userId}`,
-					sk: `${KeyPrefix.USER}${userId}`,
-				},
-				UpdateExpression: updateStatements,
-				ExpressionAttributeNames: expressionAttributeNames,
-				ExpressionAttributeValues: expressionAttributeValues,
-			});
-		});
+		const updateRequests = userIds.map(userId =>
+			updateItem<User>({
+				pk: DynamoKey.user.pk(userId),
+				sk: DynamoKey.user.sk(userId),
+				update: { status: 'offline' },
+			}),
+		);
 
 		await Promise.all(updateRequests);
 

@@ -11,20 +11,18 @@ type Props = {
 	fetchMore: () => void;
 };
 
-const InfinteLoader: FC<Props> = ({ loading, hasMore, fetchMore }) => {
+const InfiniteLoader: FC<Props> = ({ loading, hasMore, fetchMore }) => {
 	const loaderRef = useInfiniteLoader({
 		loading,
 		hasMoreData: hasMore,
 		loadMoreData: fetchMore,
 	});
 
-	return (
-		hasMore && (
-			<div className="w-full flex justify-center" ref={loaderRef}>
-				<Spinner />
-			</div>
-		)
-	);
+	return hasMore ? (
+		<div className="w-full flex justify-center" ref={loaderRef}>
+			<Spinner />
+		</div>
+	) : undefined;
 };
 
-export default InfinteLoader;
+export default InfiniteLoader;

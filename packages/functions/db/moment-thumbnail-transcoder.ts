@@ -30,54 +30,59 @@ export const handler: Handler<DynamoDBStreamEvent> = async event => {
 
 		console.log('Starting thumbnail transcoder for moment:', newImage.id.S);
 
-		const objectKey = ContentPaths.relationshipMoments(newImage.relationshipId.S!, newImage.objectKey.S!);
-		const videoObject = await storageBucket.getObject(objectKey);
-		const videoBuffer = await videoObject.Body?.transformToByteArray();
+		try {
+			const objectKey = ContentPaths.relationshipMoments(newImage.relationshipId.S!, newImage.objectKey.S!);
+			const videoObject = await storageBucket.getObject(objectKey);
+			const videoBuffer = await videoObject.Body?.transformToByteArray();
 
-		if (!videoBuffer) {
-			console.warn('No video buffer for object key: ', objectKey);
-			continue;
+			if (!videoBuffer) {
+				console.warn('No video buffer for object key: ', objectKey);
+				continue;
+			}
+
+			console.log('Received video buffer');
+
+			// Store the file in the ephemeral storage on the lambda
+			const videoPath = `/tmp/${newImage.objectKey.S!}`;
+			await fs.writeFile(videoPath, videoBuffer);
+
+			console.log('Saved video buffer to local file');
+
+			const outputFile = `${newImage.objectKey.S!.split('.')[0]}.png`;
+			const outputPath = path.join('/tmp', outputFile);
+
+			console.log('Initializing ffmpeg params...');
+
+			const ffmpegParams = ['-i', videoPath, '-frames:v', '1', outputPath];
+
+			console.log('Starting ffmpeg processing... ffmpeg path: ', ffmpeg);
+			const spawnResult = spawnSync(ffmpeg, ffmpegParams, { stdio: 'inherit' });
+
+			if (spawnResult.error) {
+				console.error('Error spawning ffmpeg: ', spawnResult.error);
+				continue;
+			} else if (spawnResult.stderr) {
+				console.error('FFmpeg error: ', spawnResult.stderr.toString());
+				continue;
+			}
+
+			console.log('Generated thumbnail');
+
+			const thumbnail = await fs.readFile(outputPath);
+			await storageBucket.uploadObject(
+				ContentPaths.relationshipMoments(newImage.relationshipId.S!, outputFile),
+				thumbnail,
+			);
+
+			console.log('Uploaded thumbnail to storage');
+
+			await updateMomentDetails(newImage.id.S!, {
+				thumbnailObjectKey: outputFile,
+			});
+
+			console.log('Updated moment details');
+		} catch (e) {
+			console.error('Error in transcoder: ', e);
 		}
-
-		console.log('Received video buffer');
-
-		// Store the file in the ephemeral storage on the lambda
-		const videoPath = `/tmp/${newImage.objectKey.S!}`;
-		await fs.writeFile(videoPath, videoBuffer);
-
-		console.log('Saved video buffer to local file');
-
-		const outputFile = `${newImage.objectKey.S!.split('.')[0]}.png`;
-		const outputPath = path.join('/tmp', outputFile);
-
-		const ffmpegParams = [
-			'-ss',
-			'1',
-			'-i',
-			videoPath,
-			'-vf',
-			'thumbnail,scale=1920:-1',
-			'-vframes',
-			'1',
-			outputPath,
-		];
-
-		spawnSync(ffmpeg, ffmpegParams, { stdio: 'pipe' });
-
-		console.log('Generated thumbnail');
-
-		const thumbnail = await fs.readFile(outputPath);
-		await storageBucket.uploadObject(
-			ContentPaths.relationshipMoments(newImage.relationshipId.S!, outputFile),
-			thumbnail,
-		);
-
-		console.log('Uploaded thumbnail to storage');
-
-		await updateMomentDetails(newImage.id.S!, {
-			thumbnailObjectKey: outputFile,
-		});
-
-		console.log('Updated moment details');
 	}
 };

@@ -1,53 +1,59 @@
 'use client';
 
-import { FC, useMemo } from 'react';
+import { FC, useState } from 'react';
+import Link from 'next/link';
+import { TagIcon } from '@heroicons/react/24/solid';
+import { SearchIcon } from 'lucide-react';
 
-import InfiniteLoader from '@/components/ui/infinite-loader';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { GetMoments } from '@/hooks/trpc/moment-hooks';
-import MomentCard from './moment-card';
-import MomentCardSkeleton from './moment-card-skeleton';
+import MomentsGridContent from './moments-grid-content';
 
 const MomentsGrid: FC = () => {
+	const [search, setSearch] = useState('');
+	const [isSearching, setIsSearching] = useState(false);
 	const {
 		data: momentPages,
 		isLoading: momentsLoading,
 		hasNextPage,
 		fetchNextPage,
 		isFetchingNextPage,
-	} = GetMoments();
-
-	const moments = useMemo(() => momentPages?.pages.flatMap(page => page.data), [momentPages?.pages]);
-
-	const momentElements = useMemo(
-		() => moments?.map(moment => <MomentCard key={moment.id} moment={moment} />),
-		[moments],
-	);
+	} = GetMoments(undefined, { search: search.length ? search : undefined });
 
 	return (
 		<div>
-			<div className="grid phone-big:grid-cols-2 laptop:grid-cols-3 desktop:grid-cols-4 gap-4">
-				{momentsLoading ? (
-					<>
-						<MomentCardSkeleton />
-						<MomentCardSkeleton />
-						<MomentCardSkeleton />
-						<MomentCardSkeleton />
-						<MomentCardSkeleton />
-						<MomentCardSkeleton />
-					</>
-				) : momentElements?.length ? (
-					momentElements
-				) : (
-					<div className="tablet:pt-6 tablet:pl-6">
-						<p className="text-3xl font-semibold mb-3">There's nothing here yet...</p>
-						<p>
-							<span className="font-bold text-primary">Tip:</span> Start sharing memories by clicking the
-							"Upload Moment" button!
-						</p>
-					</div>
-				)}
+			<div className="flex gap-2">
+				<Input
+					onValueChange={() => {
+						setIsSearching(true);
+					}}
+					onTypingEnd={val => {
+						setSearch(val);
+						setIsSearching(false);
+					}}
+					startContent={<SearchIcon />}
+					placeholder="Search for a moment"
+					typingEndDelay={500}
+					className="tablet:w-96"
+				/>
+				<Link href="/moments/tagged">
+					<Button variant="default:flat">
+						<TagIcon className="size-[18px]" /> Tags
+					</Button>
+				</Link>
 			</div>
-			<InfiniteLoader hasMore={hasNextPage} loading={isFetchingNextPage} fetchMore={fetchNextPage} />
+			<MomentsGridContent
+				momentPages={momentPages}
+				momentsLoading={momentsLoading}
+				isSearching={isSearching}
+				searchActive={!!search}
+				infiniteOpts={{
+					hasNextPage,
+					fetchNextPage,
+					isFetchingNextPage,
+				}}
+			/>
 		</div>
 	);
 };

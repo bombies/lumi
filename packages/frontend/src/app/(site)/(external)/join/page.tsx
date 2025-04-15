@@ -8,24 +8,15 @@ import ReceivedRelationshipRequestsContent from '@/app/(site)/(external)/join/co
 import SendRelationshipRequestContent from '@/app/(site)/(external)/join/components/send-relationship-request-content';
 import SignOutButton from '@/components/ui/sign-out-button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { createSupabaseServerClient, getServerSession } from '@/lib/supabase/server';
+import { getServerSession } from '@/lib/better-auth/auth-actions';
+import SentRelationshipRequestsContainer from './components/sent-relationship-requests.container';
 
 const JoinPage: FC = async () => {
 	const session = (await getServerSession())!;
+	if (!session.user.emailVerified) redirect('/auth/register/confirm');
 
-	const relationship = await getRelationshipForUser(session.id);
-	if (relationship) {
-		if (!session.user_metadata.relationshipId) {
-			const supabase = await createSupabaseServerClient();
-			await supabase.auth.updateUser({
-				data: {
-					...session.user_metadata,
-					relationshipId: relationship.id,
-				},
-			});
-		}
-		redirect('/home');
-	}
+	const relationship = await getRelationshipForUser(session.user.id);
+	if (relationship) redirect('/home');
 
 	return (
 		<main className="p-12 space-y-6">
@@ -59,7 +50,9 @@ const JoinPage: FC = async () => {
 					<TabsContent value="received">
 						<ReceivedRelationshipRequestsContent />
 					</TabsContent>
-					<TabsContent value="sent">3:</TabsContent>
+					<TabsContent value="sent">
+						<SentRelationshipRequestsContainer />
+					</TabsContent>
 				</Tabs>
 			</section>
 			<SignOutButton variant="destructive:flat" disableNotification />

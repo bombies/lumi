@@ -2,10 +2,10 @@
 
 import { Button } from '../button';
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from '../dropdown-menu';
-import { useEasyTableGlobals } from './managed-table-provider';
+import { useManagedTableGlobals } from './managed-table-provider';
 
 export default function ManagedTableVisibleColumnsDropdown<T>() {
-	const { table } = useEasyTableGlobals<T>();
+	const { table } = useManagedTableGlobals<T>();
 	return (
 		<DropdownMenu>
 			<DropdownMenuTrigger asChild>

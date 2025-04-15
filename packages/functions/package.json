@@ -7,29 +7,35 @@
 		"./api/router.ts",
 		"./api/utils/trpc.ts"
 	],
+	"scripts": {
+		"typecheck": "tsc --noEmit"
+	},
 	"dependencies": {
-		"@aws-sdk/client-dynamodb": "3.758.0",
-		"@aws-sdk/client-s3": "^3.758.0",
-		"@aws-sdk/client-sqs": "^3.758.0",
-		"@aws-sdk/credential-providers": "^3.758.0",
-		"@aws-sdk/lib-dynamodb": "3.758.0",
+		"@aws-sdk/client-dynamodb": "3.787.0",
+		"@aws-sdk/client-lambda": "^3.787.0",
+		"@aws-sdk/client-s3": "^3.787.0",
+		"@aws-sdk/client-sqs": "^3.787.0",
+		"@aws-sdk/credential-providers": "^3.787.0",
+		"@aws-sdk/lib-dynamodb": "3.787.0",
 		"@datastructures-js/priority-queue": "^6.3.2",
 		"@lumi/core": "*",
 		"@lumi/emails": "*",
+		"@sentry/aws-serverless": "^9.12.0",
+		"@sentry/profiling-node": "^9.12.0",
 		"@trpc-limiter/redis": "^0.0.2",
-		"@trpc/client": "^11.0.0-rc.840",
-		"@trpc/server": "^11.0.0-rc.840",
+		"@trpc/client": "^11.1.0",
+		"@trpc/server": "^11.1.0",
 		"ffmpeg-static": "^5.2.0",
-		"ioredis": "^5.6.0",
-		"mqtt": "^5.10.4",
-		"react": "^19.0.0",
-		"react-dom": "^19.0.0",
-		"sst": "^3.10.1",
+		"ioredis": "^5.6.1",
+		"mqtt": "^5.11.0",
+		"react": "^19.1.0",
+		"react-dom": "^19.1.0",
+		"sst": "^3.13.9",
 		"standardwebhooks": "^1.0.0",
 		"web-push": "^3.6.7",
-		"zod": "^3.24.2"
+		"zod": "^4.0.0-beta.20250412T085909"
 	},
 	"devDependencies": {
-		"@types/aws-lambda": "^8"
+		"@types/aws-lambda": "^8.10.149"
 	}
 }

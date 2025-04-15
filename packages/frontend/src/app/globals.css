@@ -1,11 +1,12 @@
 @import 'tailwindcss';
 
 @plugin "tailwindcss-animate";
+@plugin 'tailwindcss-displaymodes';
 
 @custom-variant dark (&:is(.dark *));
 
 @theme {
-	--text-sm: 16px;
+	--text-sm: 1rem;
 	--font-sans: var(--font-sf-pro-display);
 	--font-cursive: var(--font-cookie);
 
@@ -176,7 +177,15 @@
 	}
 	body {
 		@apply bg-background text-foreground;
-		font-size: 16px;
+		-webkit-tap-highlight-color: transparent;
+	}
+}
+
+@layer utilities {
+	/* Fix on shadcn's combo-box component's container width not relative to its trigger button width */
+	.popover-content-width-full {
+		width: var(--radix-popover-trigger-width);
+		max-height: var(--radix-popover-content-available-height);
 	}
 }
 

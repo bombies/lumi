@@ -6,16 +6,15 @@ import { appRouter } from '@lumi/functions/router';
 import { createCallerFactory } from '@lumi/functions/utils/trpc';
 import { createHydrationHelpers } from '@trpc/react-query/rsc';
 
-import { createSupabaseServerClient } from '../supabase/server';
+import { getServerSession } from '../better-auth/auth-actions';
 import { makeQueryClient } from './query-client';
 
 // IMPORTANT: Create a stable getter for the query client that
 //            will return the same client during the same request.
-export const getQueryClient = cache(makeQueryClient);
+export const getQueryClient = async () => cache(makeQueryClient);
 
 const createContext = cache(async () => {
-	const supabase = await createSupabaseServerClient();
-	const { data: sessionData } = await supabase.auth.getSession();
+	const sessionData = await getServerSession();
 	const reqHeaders = (await headers()).entries().reduce(
 		(acc, [key, value]) => {
 			acc[key] = value;
@@ -24,9 +23,9 @@ const createContext = cache(async () => {
 		{} as Record<string, string>,
 	);
 
-	reqHeaders['authorization'] = `Bearer ${sessionData.session?.access_token}`;
+	reqHeaders['authorization'] = `Bearer ${sessionData?.session?.token}`;
 	return { headers: reqHeaders };
 });
 
 const caller = createCallerFactory(appRouter)(createContext);
-export const { trpc, HydrateClient } = createHydrationHelpers<typeof appRouter>(caller, getQueryClient);
+export const getHydrationHelpers = async () => createHydrationHelpers<typeof appRouter>(caller, await getQueryClient());

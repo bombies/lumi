@@ -2,12 +2,11 @@
 
 import { FC, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { RelationshipRequest } from '@lumi/core/types/relationship.types';
-import { User } from '@lumi/core/types/user.types';
+import { RelationshipRequest } from '@lumi/core/relationships/relationship.types';
+import { User } from '@lumi/core/users/user.types';
 import { CheckIcon, XIcon } from 'lucide-react';
 import { toast } from 'sonner';
 
-import { useSession } from '@/components/providers/session-provider';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -25,14 +24,9 @@ const FetchReceivedRequests = () =>
 
 const AcceptRelationshipRequest = () => {
 	const invalidateRoute = useRouteInvalidation([trpc.relationships.getReceivedRelationshipRequests]);
-	const { update: updateSession } = useSession();
 	const router = useRouter();
 	return trpc.relationships.acceptRelationshipRequest.useMutation({
-		async onSuccess(relationship) {
-			await updateSession({
-				relationshipId: relationship.id,
-			});
-
+		onSuccess() {
 			invalidateRoute();
 			router.push('/home');
 		},
@@ -50,7 +44,7 @@ const RejectRelationshipRequest = () => {
 
 type RelationshipRequestProps = {
 	request: RelationshipRequest;
-	sender: Partial<User>;
+	sender?: Partial<User>;
 	disabled?: boolean;
 	onAccept: (req: RelationshipRequest) => void;
 	onReject: (req: RelationshipRequest) => void;
@@ -68,19 +62,19 @@ const RelationshipRequestElement: FC<RelationshipRequestProps> = ({
 			<div className="space-y-2">
 				<p className="text-primary">
 					<span className="text-xs text-foreground">@</span>
-					{sender.username ?? 'Unknown'}
+					{sender?.username ?? 'Unknown'}
 				</p>
 				<p className="text-xs text-foreground-secondary/50">
 					{new Date(request.createdAt).toLocaleDateString()}
 				</p>
 			</div>
 			<div className="flex gap-2">
-				<Button size="icon" tooltip="Accept request" disabled={disabled} onClick={() => onAccept(request)}>
+				<Button size="icon" tooltip="Accept Request" disabled={disabled} onClick={() => onAccept(request)}>
 					<CheckIcon className="size-[18px]" />
 				</Button>
 				<Button
 					size="icon"
-					tooltip="Reject request"
+					tooltip="Reject Request"
 					variant="destructive"
 					disabled={disabled}
 					onClick={() => onReject(request)}
@@ -111,7 +105,7 @@ const ReceivedRelationshipRequestsContent: FC = () => {
 						toast.promise(acceptRequest(elReq.id), {
 							loading: 'Accepting request...',
 							success() {
-								return `You have accepted the relationship request from ${otherUser.username}.`;
+								return `You have accepted the relationship request from ${otherUser?.username ?? 'Unknown user'}.`;
 							},
 							error(e) {
 								return getErrorMessage(e);
@@ -122,7 +116,7 @@ const ReceivedRelationshipRequestsContent: FC = () => {
 						toast.promise(rejectRequest(elReq.id), {
 							loading: 'Rejecting request...',
 							success() {
-								return `You have rejected the relationship request from ${otherUser.username}.`;
+								return `You have rejected the relationship request from ${otherUser?.username ?? 'Unknown user'}.`;
 							},
 							error(e) {
 								return getErrorMessage(e);

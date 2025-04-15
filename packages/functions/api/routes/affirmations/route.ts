@@ -1,6 +1,7 @@
 import {
 	createAffirmationDto,
 	getReceivedAffirmationsDto,
+	sendCustomAffirmationDto,
 	updateAffirmationDto,
 } from '@lumi/core/affirmations/affirmations.dto';
 import {
@@ -9,8 +10,12 @@ import {
 	getAffirmationById,
 	getOwnedAffirmationsForUser,
 	getReceivedAffirmations,
+	getTodaysReceivedAffirmations,
+	sendAffirmationToUser,
 	updateAffirmation,
 } from '@lumi/core/affirmations/affirmations.service';
+import { getPartnerForUser } from '@lumi/core/relationships/relationship.service';
+import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
 
 import { relationshipProcedure, router } from '../../utils/trpc';
@@ -35,7 +40,7 @@ export const affirmationsRouter = router({
 		.input(
 			updateAffirmationDto.and(
 				z.object({
-					id: z.string().uuid(),
+					id: z.uuid(),
 				}),
 			),
 		)
@@ -44,10 +49,26 @@ export const affirmationsRouter = router({
 		),
 
 	deleteAffirmation: relationshipProcedure
-		.input(z.string().uuid())
+		.input(z.uuid())
 		.mutation(({ input, ctx: { user, relationship } }) => deleteAffirmation(user.id, relationship.id, input)),
 
 	getReceivedAffirmations: relationshipProcedure
 		.input(getReceivedAffirmationsDto)
 		.query(({ input, ctx: { user, relationship } }) => getReceivedAffirmations(user.id, relationship.id, input)),
+
+	getTodaysReceivedAffirmations: relationshipProcedure.query(({ ctx: { user, relationship } }) =>
+		getTodaysReceivedAffirmations(user.id, relationship.id),
+	),
+
+	sendCustomAffirmation: relationshipProcedure
+		.input(sendCustomAffirmationDto)
+		.mutation(async ({ input, ctx: { user } }) => {
+			const partner = await getPartnerForUser(user.id);
+			if (!partner)
+				throw new TRPCError({
+					code: 'NOT_FOUND',
+					message: `You do not have a partner!`,
+				});
+			return sendAffirmationToUser(partner, input);
+		}),
 });

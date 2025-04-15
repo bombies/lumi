@@ -1,17 +1,29 @@
 'use client';
 
-import { createContext, FC, PropsWithChildren, useContext, useEffect, useMemo, useState } from 'react';
-import { Relationship } from '@lumi/core/types/relationship.types';
-import { User } from '@lumi/core/types/user.types';
-import { WebSocketEventHandler } from '@lumi/core/types/websockets.types';
+import { createContext, FC, PropsWithChildren, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { Relationship } from '@lumi/core/relationships/relationship.types';
+import { User } from '@lumi/core/users/user.types';
+import { InferredWebSocketMessagePayload, WebSocketEventHandler } from '@lumi/core/websockets/websockets.types';
 
 import { useWebSocket } from '@/components/providers/web-sockets/web-socket-provider';
 import { logger } from '@/lib/logger';
+import { WebsocketTopic } from '../web-sockets/topics';
+import { InferredSelfStatePayload, SelfState, SelfStateData } from './self-state';
 
 type RelationshipProviderData = {
 	relationship: Relationship;
 	self: User;
+	selfState?: {
+		state?: SelfStateData<SelfState>;
+		updateState?: <T extends SelfState>(state: T | null, payload?: InferredSelfStatePayload<T>) => void;
+	};
 	partner: User;
+	sendNotificationToPartner: (
+		message: InferredWebSocketMessagePayload<'notification'>['message'] & {
+			openUrl?: string;
+			metadata?: Record<string, any>;
+		},
+	) => Promise<void>;
 };
 
 type RelationshipProviderProps = PropsWithChildren<{
@@ -29,15 +41,16 @@ export const useRelationship = () => {
 };
 
 const RelationshipProvider: FC<RelationshipProviderProps> = ({ children, relationship, self, partner }) => {
-	const { addEventHandler, removeEventHandler } = useWebSocket();
-	const [userState, setUserState] = useState<User>(partner);
+	const { addEventHandler, removeEventHandler, emitEvent } = useWebSocket();
+	const [partnerState, setPartnerState] = useState<User>(partner);
+	const [selfState, setSelfState] = useState<SelfStateData<SelfState>>();
 
 	useEffect(() => {
 		const presenceHandler: WebSocketEventHandler<'presence'> = payload => {
 			logger.debug('presence event received', payload);
 			if (payload.userId !== partner.id) return;
 			logger.debug('handling partner presence event', payload);
-			setUserState(state => ({ ...state, status: payload.status }));
+			setPartnerState(state => ({ ...state, status: payload.status }));
 		};
 
 		addEventHandler('presence', presenceHandler);
@@ -47,7 +60,53 @@ const RelationshipProvider: FC<RelationshipProviderProps> = ({ children, relatio
 		};
 	}, [addEventHandler, partner.id, removeEventHandler]);
 
-	const memoizedValue = useMemo(() => ({ relationship, partner: userState, self }), [relationship, self, userState]);
+	const sendNotificationToPartner = useCallback(
+		({
+			title,
+			content,
+			openUrl,
+			metadata,
+		}: InferredWebSocketMessagePayload<'notification'>['message'] & {
+			openUrl?: string;
+			metadata?: Record<string, any>;
+		}) => {
+			return emitEvent(
+				'notification',
+				{
+					receiverId: partner.id,
+					from: { type: 'user' },
+					message: { title, content },
+					openUrl,
+					metadata,
+				},
+				{
+					topic: WebsocketTopic.userNotificationsTopic(partner.id),
+				},
+			);
+		},
+		[emitEvent, partner.id],
+	);
+
+	const updateState = useCallback<
+		<T extends SelfState>(state: T | null, payload?: InferredSelfStatePayload<T>) => void
+	>((state, payload) => {
+		if (!state) setSelfState(undefined);
+		else if (payload) setSelfState({ state, payload });
+	}, []);
+
+	const memoizedValue = useMemo(
+		() => ({
+			relationship,
+			partner: partnerState,
+			self,
+			sendNotificationToPartner,
+			selfState: {
+				state: selfState,
+				updateState,
+			},
+		}),
+		[relationship, partnerState, self, sendNotificationToPartner, selfState, updateState],
+	);
 	return <RelationshipContext.Provider value={memoizedValue}>{children}</RelationshipContext.Provider>;
 };
 

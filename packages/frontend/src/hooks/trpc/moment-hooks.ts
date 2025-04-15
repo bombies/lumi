@@ -1,5 +1,6 @@
 'use client';
 
+import { skipToken } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
 import { useRouteInvalidation } from '@/lib/hooks/useRouteInvalidation';
@@ -13,13 +14,37 @@ export const CreateMomentDetails = () =>
 		},
 	});
 export const GetMomentDetails = (momentId: string) => trpc.moments.getMomentDetails.useQuery(momentId);
-export const GetMoments = (userId?: string) =>
-	trpc.moments.getMoments.useInfiniteQuery(
-		{ userId },
+
+export const SearchMoments = (
+	query: string,
+	args?: {
+		limit?: number;
+		order?: 'asc' | 'desc';
+	},
+) =>
+	trpc.moments.searchMoments.useInfiniteQuery(
 		{
-			getNextPageParam: lastPage => lastPage.cursor,
+			query,
+			...args,
+		},
+		{
+			getNextPageParam: lastPage => {
+				const [titleCursor, tagCursor] = lastPage.nextCursor;
+				if (!titleCursor && !tagCursor) return undefined;
+				else return lastPage.nextCursor;
+			},
 		},
 	);
+
+export const GetMoments = (userId?: string, args?: { limit?: number; order?: 'asc' | 'desc'; search?: string }) =>
+	args?.search
+		? SearchMoments(args.search, { limit: args.limit, order: args.order })
+		: trpc.moments.getMoments.useInfiniteQuery(
+				{ userId, limit: args?.limit },
+				{
+					getNextPageParam: lastPage => lastPage.nextCursor,
+				},
+			);
 
 export const UpdateMomentDetails = () => {
 	const invalidateRoutes = useRouteInvalidation([trpc.moments.getMomentDetails]);
@@ -29,10 +54,7 @@ export const UpdateMomentDetails = () => {
 };
 
 export const DeleteMomentDetails = () => {
-	const invalidateRoutes = useRouteInvalidation([trpc.moments.getMomentDetails]);
-	return trpc.moments.deleteMomentDetails.useMutation({
-		onSuccess: () => invalidateRoutes(),
-	});
+	return trpc.moments.deleteMomentDetails.useMutation();
 };
 
 export const GetMessagesForMoment = (momentId: string) =>
@@ -42,7 +64,7 @@ export const GetMessagesForMoment = (momentId: string) =>
 		},
 		{
 			staleTime: Infinity,
-			getNextPageParam: lastPage => lastPage.cursor,
+			getNextPageParam: lastPage => lastPage.nextCursor,
 		},
 	);
 
@@ -61,6 +83,58 @@ export const DeleteMomentMessage = () => {
 };
 
 export const GetMomentUploadUrl = () => trpc.moments.getMomentUploadUrl.useMutation();
+
+export const GetRelationshipMomentTags = (query?: string, limit?: number) =>
+	trpc.moments.getRelationshipMomentTags.useInfiniteQuery(
+		{ query, limit },
+		{
+			getNextPageParam: lastPage => lastPage.nextCursor,
+		},
+	);
+
+export const GetMomentsForRelationshipTag = (
+	tag?: string,
+	args?: {
+		limit?: number;
+		order?: 'asc' | 'desc';
+	},
+) =>
+	trpc.moments.getMomentsByTag.useInfiniteQuery(
+		tag ? { tagQuery: tag, limit: args?.limit, order: args?.order } : skipToken,
+		{
+			getNextPageParam: lastPage => lastPage.cursor,
+		},
+	);
+
+export const CreateRelationshipMomentTag = () => {
+	const invalidateRoutes = useRouteInvalidation([trpc.moments.getRelationshipMomentTags]);
+	return trpc.moments.createRelationshipMomentTag.useMutation({
+		onSuccess: () => invalidateRoutes(),
+	});
+};
+
+export const DeleteRelationshipMomentTag = () => {
+	const invalidateRoutes = useRouteInvalidation([trpc.moments.getRelationshipMomentTags]);
+	return trpc.moments.deleteRelationshipMomentTag.useMutation({
+		onSuccess: () => invalidateRoutes(),
+	});
+};
+
+export const GetMomentTags = (momentId: string) => trpc.moments.getTagsForMoment.useQuery(momentId);
+
+export const CreateMomentTag = () => {
+	const invalidateRoutes = useRouteInvalidation([trpc.moments.getTagsForMoment]);
+	return trpc.moments.createTagForMoment.useMutation({
+		onSuccess: () => invalidateRoutes(),
+	});
+};
+
+export const DeleteMomentTag = () => {
+	const invalidateRoutes = useRouteInvalidation([trpc.moments.getTagsForMoment]);
+	return trpc.moments.deleteTagForMoment.useMutation({
+		onSuccess: () => invalidateRoutes(),
+	});
+};
 
 export const UploadMoment = () => {
 	const { mutateAsync: fetchUrl } = GetMomentUploadUrl();

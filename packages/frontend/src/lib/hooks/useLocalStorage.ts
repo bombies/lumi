@@ -6,12 +6,16 @@ export class ClientLocalStorage {
 	constructor(private readonly storage: Storage) {}
 
 	setItem(key: string, value: unknown) {
-		this.storage.setItem(key, JSON.stringify(value));
+		this.setItemRaw(key, JSON.stringify(value));
+	}
+
+	setItemRaw(key: string, value: string) {
+		this.storage.setItem(key, value);
 	}
 
 	getItem<T = unknown>(key: string) {
 		try {
-			const value = this.storage.getItem(key);
+			const value = this.getItemRaw(key);
 			return value ? (JSON.parse(value) as T) : null;
 		} catch (e) {
 			if (e instanceof SyntaxError) return null;
@@ -19,8 +23,16 @@ export class ClientLocalStorage {
 		}
 	}
 
+	getItemRaw(key: string) {
+		return this.storage.getItem(key);
+	}
+
 	removeItem(key: string) {
 		this.storage.removeItem(key);
+	}
+
+	hasKey(key: string) {
+		return key in this.storage;
 	}
 }
 

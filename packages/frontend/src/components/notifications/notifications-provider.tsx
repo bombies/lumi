@@ -54,9 +54,11 @@ const NotificationsProvider: FC<NotificationsProviderProps> = ({ children }) => 
 	}, []);
 
 	const unsubscribe = useCallback(async () => {
+		const registration = await navigator.serviceWorker.ready;
 		if (!subscription) return;
 
 		await subscription?.unsubscribe();
+		await registration?.unregister();
 		await unsubscribeUser(subscription.endpoint);
 		setSubscription(null);
 	}, [subscription]);

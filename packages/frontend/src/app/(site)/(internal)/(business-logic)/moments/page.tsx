@@ -2,6 +2,7 @@ import { FC } from 'react';
 import Link from 'next/link';
 import { UploadIcon } from 'lucide-react';
 
+import BreadcrumbBuilder from '@/components/ui/breadcrumb-builder';
 import { Button } from '@/components/ui/button';
 import Title from '@/components/ui/title';
 import MomentsGrid from './components/moments-grid';
@@ -9,6 +10,18 @@ import MomentsGrid from './components/moments-grid';
 const MomentsPage: FC = () => {
 	return (
 		<>
+			<BreadcrumbBuilder
+				breadcrumbs={[
+					{
+						label: 'Home',
+						href: '/home',
+					},
+					{
+						label: 'Moments',
+						href: '/moments',
+					},
+				]}
+			/>
 			<Title>Your Moments</Title>
 			<Link href="/moments/upload">
 				<Button variant="accent" className="mb-6">

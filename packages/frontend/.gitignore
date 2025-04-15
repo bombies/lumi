@@ -42,3 +42,9 @@ next-env.d.ts
 
 certificates
 /videos/
+
+# Sentry Config File
+.env.sentry-build-plugin
+
+better-auth_migrations/
+public/_next-video

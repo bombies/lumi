@@ -15,12 +15,10 @@ export default $config({
 			AwsAccountID: infra.accountId,
 			Website: infra.frontend.url,
 			Api: infra.trpc.url,
-			Router: infra.router?.url ?? 'No router available!',
-			ContentCdn: infra.contentCdn.url,
+			ContentCdn: $interpolate`${infra.contentCdn.domainUrl.apply(domainUrl => domainUrl ?? infra.contentCdn.url)}`,
 			Database: infra.db.arn,
 			RealtimeEndpoint: infra.realtimeServer.endpoint,
 			RealtimeAuthorizer: infra.realtimeServer.authorizer,
-			EmailSender: infra.emailSender.url,
 		};
 	},
 });

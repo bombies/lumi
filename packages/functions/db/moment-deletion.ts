@@ -1,7 +1,6 @@
-import { QueryCommandOutput } from '@aws-sdk/lib-dynamodb';
-import { KeyPrefix } from '@lumi/core/types/dynamo.types';
-import { MomentMessage } from '@lumi/core/types/moment.types';
-import { dynamo } from '@lumi/core/utils/dynamo/dynamo.service';
+import { DatabaseMomentMessage, DatabaseRelationshipMomentTag } from '@lumi/core/moments/moment.types';
+import { dynamo, getItems } from '@lumi/core/utils/dynamo/dynamo.service';
+import { DynamoKey } from '@lumi/core/utils/dynamo/dynamo.types';
 import { ContentPaths, StorageClient } from '@lumi/core/utils/s3/s3.service';
 import { chunkArray } from '@lumi/core/utils/utils';
 import { DynamoDBStreamEvent, Handler } from 'aws-lambda';
@@ -21,37 +20,47 @@ export const handler: Handler<DynamoDBStreamEvent> = async event => {
 		const oldImage = record.dynamodb?.OldImage;
 		if (!oldImage) continue;
 
-		let res: QueryCommandOutput | undefined;
-		const relatedRecords: MomentMessage[] = [];
-		do {
-			res = await dynamo.query({
-				TableName: Resource.Database.name,
-				IndexName: 'GSI1',
-				KeyConditionExpression: '#pk = :pk',
-				ExpressionAttributeNames: {
-					'#pk': 'gsi1pk',
+		const momentId = oldImage.id.S!;
+		console.log(`Moment with ID ${momentId} was deleted. Now performing cleanup...`);
+		const relatedMessageRecords = await getItems<DatabaseMomentMessage>({
+			table: Resource.Database.name,
+			index: 'GSI1',
+			queryExpression: {
+				expression: '#gsi1pk = :gsi1pk',
+				variables: {
+					':gsi1pk': DynamoKey.momentMessage.gsi1pk(momentId),
 				},
-				ExpressionAttributeValues: {
-					':pk': `${KeyPrefix.MOMENT_MESSAGE}${oldImage.id.S!}`,
-				},
-				ExclusiveStartKey: res?.LastEvaluatedKey,
-			});
+			},
+			exhaustive: true,
+		});
 
-			if (res.Items) relatedRecords.push(...res.Items.map(item => item as MomentMessage));
-		} while (res.LastEvaluatedKey);
+		const relatedTagRecords = await getItems<DatabaseRelationshipMomentTag>({
+			table: Resource.Database.name,
+			queryExpression: {
+				expression: '#pk = :pk',
+				variables: {
+					':pk': DynamoKey.momentTag.pk(momentId),
+				},
+			},
+			exhaustive: true,
+		});
 
 		// Batch delete related records
-		console.log(`Deleting ${relatedRecords.length} related records...`);
-		if (relatedRecords.length)
-			chunkArray(relatedRecords, 25).forEach(async (chunk, chunkIndex) => {
+		console.log(
+			`Deleting ${relatedMessageRecords.data.length} related message records and ${relatedTagRecords.data.length} tag records...`,
+		);
+
+		const aggregatedData = [...relatedMessageRecords.data, ...relatedTagRecords.data];
+		if (aggregatedData.length)
+			chunkArray(aggregatedData, 25).forEach(async (chunk, chunkIndex) => {
 				console.log(`Deleting ${chunk.length} records... (Chunk ${chunkIndex + 1}/${chunkArray.length})`);
 				await dynamo.batchWrite({
 					RequestItems: {
 						[Resource.Database.name]: chunk.map(record => ({
 							DeleteRequest: {
 								Key: {
-									pk: `${KeyPrefix.MOMENT_MESSAGE}${record.id}`,
-									sk: `${KeyPrefix.MOMENT_MESSAGE}${record.id}`,
+									pk: record.pk,
+									sk: record.sk,
 								},
 							},
 						})),
@@ -66,9 +75,9 @@ export const handler: Handler<DynamoDBStreamEvent> = async event => {
 			ContentPaths.relationshipMoments(oldImage.relationshipId.S!, oldImage.objectKey.S!),
 		);
 
-		if (oldImage.thumbnailObjectKey.S)
+		if (oldImage.thumbnailObjectKey)
 			await storageClient.deleteObject(
-				ContentPaths.relationshipMoments(oldImage.relationshipId.S!, oldImage.thumbnailObjectKey.S),
+				ContentPaths.relationshipMoments(oldImage.relationshipId.S!, oldImage.thumbnailObjectKey.S!),
 			);
 
 		console.log('Deleted the video from S3!');

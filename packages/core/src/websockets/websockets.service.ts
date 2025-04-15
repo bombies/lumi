@@ -2,7 +2,8 @@ import { createId } from '@paralleldrive/cuid2';
 import { TRPCError } from '@trpc/server';
 import mqtt from 'mqtt';
 
-import { EntityType, KeyPrefix } from '../types/dynamo.types';
+import { dynamo } from '../utils/dynamo/dynamo.service';
+import { DynamoKey, EntityType } from '../utils/dynamo/dynamo.types';
 import {
 	DatabaseWebSocketHeartbeat,
 	Event,
@@ -10,8 +11,7 @@ import {
 	InferredWebSocketMessagePayload,
 	WebSocketHeartbeat,
 	WebSocketMessage,
-} from '../types/websockets.types';
-import { dynamo } from '../utils/dynamo/dynamo.service';
+} from '../websockets/websockets.types';
 
 export type MqttClientType = mqtt.MqttClient;
 
@@ -122,8 +122,8 @@ export const storeWebsocketHeartbeat = async (
 	const res = await dynamo.put({
 		TableName: process.env.TABLE_NAME,
 		Item: {
-			pk: `${KeyPrefix.WEBSOCKET_HEARTBEAT}`,
-			sk: `${KeyPrefix.WEBSOCKET_HEARTBEAT}${clientId}`,
+			pk: DynamoKey.webSocketHeartbeat.pk(),
+			sk: DynamoKey.webSocketHeartbeat.sk(clientId),
 			...heartbeat,
 			entityType: EntityType.WEBSOCKET_HEARTBEAT,
 		} satisfies DatabaseWebSocketHeartbeat,

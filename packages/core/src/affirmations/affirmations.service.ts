@@ -1,19 +1,28 @@
 import { TRPCError } from '@trpc/server';
+import { Resource } from 'sst';
 
-import { getRelationshipForUser } from '../relationships/relationship.service';
+import { sendNotification } from '../notifications/notifications.service';
+import { getPartnerForUser, getRelationshipForUser } from '../relationships/relationship.service';
+import { Relationship } from '../relationships/relationship.types';
+import { User } from '../users/user.types';
+import { batchWrite, deleteItem, dynamo, getItem, getItems, putItem, updateItem } from '../utils/dynamo/dynamo.service';
+import { DynamoKey, EntityType } from '../utils/dynamo/dynamo.types';
+import { extractPartnerIdFromRelationship } from '../utils/global-utils';
+import { chunkArray, getUUID } from '../utils/utils';
+import { MqttClientType, createAsyncWebsocketConnection } from '../websockets/websockets.service';
+import { WebSocketToken } from '../websockets/websockets.types';
+import {
+	CreateAffirmationDto,
+	GetReceivedAffirmationsDto,
+	SendCustomAffirmationDto,
+	UpdateAffirmationDto,
+} from './affirmations.dto';
 import {
 	Affirmation,
 	DatabaseAffirmation,
 	DatabaseReceivedAffirmation,
 	ReceivedAffirmation,
-} from '../types/affirmations.types';
-import { EntityType, KeyPrefix } from '../types/dynamo.types';
-import { buildInfiniteData } from '../types/infinite-data.dto';
-import { Relationship } from '../types/relationship.types';
-import { dynamo, getDynamicUpdateStatements } from '../utils/dynamo/dynamo.service';
-import { extractPartnerIdFromRelationship } from '../utils/global-utils';
-import { getUUID } from '../utils/utils';
-import { CreateAffirmationDto, GetReceivedAffirmationsDto, UpdateAffirmationDto } from './affirmations.dto';
+} from './affirmations.types';
 
 export const createAffirmation = async (dto: CreateAffirmationDto) => {
 	const affirmationId = getUUID();
@@ -23,43 +32,23 @@ export const createAffirmation = async (dto: CreateAffirmationDto) => {
 		selectedCount: 0,
 	};
 
-	const res = await dynamo.put({
-		TableName: process.env.TABLE_NAME,
-		Item: {
-			pk: `${KeyPrefix.AFFIRMATION}${dto.relationshipId}`,
-			sk: `${KeyPrefix.AFFIRMATION}${dto.ownerId}#${affirmationId}`,
-			...affirmation,
-			entityType: EntityType.AFFIRMATION,
-		} satisfies DatabaseAffirmation,
+	return putItem<Affirmation, DatabaseAffirmation>({
+		pk: DynamoKey.affirmation.pk(dto.relationshipId),
+		sk: DynamoKey.affirmation.sk(dto.ownerId, affirmationId),
+		...affirmation,
+		entityType: EntityType.AFFIRMATION,
 	});
-
-	if (res.$metadata.httpStatusCode !== 200)
-		throw new TRPCError({
-			code: 'INTERNAL_SERVER_ERROR',
-			message: 'Failed to create affirmation',
-		});
-
-	return affirmation;
 };
 
 export const getAffirmationById = async (ownerId: string, relationshipId: string, affirmationId: string) => {
-	const res = await dynamo.get({
-		TableName: process.env.TABLE_NAME,
-		Key: {
-			pk: `${KeyPrefix.AFFIRMATION}${relationshipId}`,
-			sk: `${KeyPrefix.AFFIRMATION}${ownerId}#${affirmationId}`,
-		},
-	});
-	if (res.$metadata.httpStatusCode !== 200)
-		throw new TRPCError({
-			code: 'INTERNAL_SERVER_ERROR',
-			message: 'Failed to get affirmation',
-		});
-	return res.Item as Affirmation;
+	return getItem<Affirmation>(
+		DynamoKey.affirmation.pk(relationshipId),
+		DynamoKey.affirmation.sk(ownerId, affirmationId),
+	);
 };
 
 export const selectAffirmation = async (userId: string) => {
-	const affirmations = await getAffirmationsFromPartner(userId);
+	const affirmations = (await getAffirmationsFromPartner(userId)).data;
 	if (!affirmations.length) return undefined;
 
 	const weights = affirmations.map(affirmation => 1 / (affirmation.selectedCount + 1));
@@ -98,26 +87,15 @@ export const getOwnedAffirmationsForUser = async (userId: string, rship?: Relati
 			message: 'You are not in a relationship!',
 		});
 
-	const res = await dynamo.query({
-		TableName: process.env.TABLE_NAME,
-		KeyConditionExpression: '#pk = :pk and begins_with(#sk, :sk)',
-		ExpressionAttributeNames: {
-			'#pk': 'pk',
-			'#sk': 'sk',
-		},
-		ExpressionAttributeValues: {
-			':pk': `${KeyPrefix.AFFIRMATION}${relationship.id}`,
-			':sk': `${KeyPrefix.AFFIRMATION}${userId}`,
+	return getItems<Affirmation>({
+		queryExpression: {
+			expression: '#pk = :pk and begins_with(#sk, :sk)',
+			variables: {
+				':pk': DynamoKey.affirmation.pk(relationship.id),
+				':sk': DynamoKey.affirmation.buildKey(userId),
+			},
 		},
 	});
-
-	if (res.$metadata.httpStatusCode !== 200)
-		throw new TRPCError({
-			code: 'INTERNAL_SERVER_ERROR',
-			message: 'Failed to get affirmations',
-		});
-
-	return res.Items as Affirmation[];
 };
 
 export const getAffirmationsFromPartner = async (userId: string) => {
@@ -137,30 +115,18 @@ export const updateAffirmation = async (
 	affirmationId: string,
 	dto: UpdateAffirmationDto,
 ) => {
-	const { updateStatements, expressionAttributeValues, expressionAttributeNames } =
-		getDynamicUpdateStatements<Affirmation>(dto);
-
-	const relationship = await getAffirmationById(ownerId, relationshipId, affirmationId);
-
-	const res = await dynamo.update({
-		TableName: process.env.TABLE_NAME,
-		Key: {
-			pk: `${KeyPrefix.AFFIRMATION}${relationshipId}`,
-			sk: `${KeyPrefix.AFFIRMATION}${ownerId}#${affirmationId}`,
-		},
-		UpdateExpression: updateStatements,
-		ExpressionAttributeValues: expressionAttributeValues,
-		ExpressionAttributeNames: expressionAttributeNames,
-		ReturnValues: 'ALL_NEW',
-	});
-
-	if (res.$metadata.httpStatusCode !== 200)
+	const affirmation = await getAffirmationById(ownerId, relationshipId, affirmationId);
+	if (!affirmation)
 		throw new TRPCError({
-			code: 'INTERNAL_SERVER_ERROR',
-			message: 'Failed to update affirmation',
+			code: 'NOT_FOUND',
+			message: 'Affirmation not found',
 		});
 
-	return res.Attributes as Affirmation;
+	return updateItem<Affirmation>({
+		pk: DynamoKey.affirmation.pk(relationshipId),
+		sk: DynamoKey.affirmation.sk(ownerId, affirmationId),
+		update: dto,
+	});
 };
 
 export const deleteAffirmation = async (ownerId: string, relationshipId: string, affirmationId: string) => {
@@ -171,59 +137,58 @@ export const deleteAffirmation = async (ownerId: string, relationshipId: string,
 			message: 'Affirmation not found',
 		});
 
-	const relationship = await getAffirmationById(ownerId, relationshipId, affirmationId);
-
-	const res = await dynamo.delete({
-		TableName: process.env.TABLE_NAME,
-		Key: {
-			pk: `${KeyPrefix.AFFIRMATION}${relationshipId}`,
-			sk: `${KeyPrefix.AFFIRMATION}${ownerId}#${affirmationId}`,
-		},
-	});
-
-	if (res.$metadata.httpStatusCode !== 200)
-		throw new TRPCError({
-			code: 'INTERNAL_SERVER_ERROR',
-			message: 'Failed to delete affirmation',
-		});
-
+	await deleteItem(DynamoKey.affirmation.pk(relationshipId), DynamoKey.affirmation.sk(ownerId, affirmationId));
 	return affirmation;
 };
 
 export const deleteAffirmationsForRelationship = async (relationshipId: string) => {
-	// TODO: Fix this. Need to fetch each affirmation independently and batch delete them in chunks.
-	const res = await dynamo.delete({
-		TableName: process.env.TABLE_NAME,
-		Key: {
-			pk: `${KeyPrefix.AFFIRMATION}${relationshipId}`,
-		},
-	});
+	const relationshipAffirmations = (
+		await getItems<DatabaseAffirmation>({
+			queryExpression: {
+				expression: '#pk = :pk',
+				variables: {
+					':pk': DynamoKey.affirmation.pk(relationshipId),
+				},
+			},
+			exhaustive: true,
+		})
+	).data;
+
+	const receivedAffirmations = (
+		await getItems<DatabaseReceivedAffirmation>({
+			queryExpression: {
+				expression: '#pk = :pk',
+				variables: {
+					':pk': DynamoKey.receivedAffirmation.pk(relationshipId),
+				},
+			},
+			exhaustive: true,
+		})
+	).data;
+
+	return Promise.all(
+		chunkArray([...relationshipAffirmations, ...receivedAffirmations], 25).map(chunk =>
+			batchWrite(
+				...chunk.map(chunkItem => ({
+					deleteItem: {
+						pk: chunkItem.pk,
+						sk: chunkItem.sk,
+					},
+				})),
+			),
+		),
+	);
 };
 
 export const createReceivedAffirmation = async (receiver: string, relationshipId: string, affirmation: string) => {
 	const timestamp = new Date().toISOString();
-	const receivedAffirmation: ReceivedAffirmation = {
+	return putItem<ReceivedAffirmation, DatabaseReceivedAffirmation>({
+		pk: DynamoKey.receivedAffirmation.pk(relationshipId),
+		sk: DynamoKey.receivedAffirmation.sk(receiver, timestamp),
 		affirmation,
 		timestamp,
-	};
-
-	const res = await dynamo.put({
-		TableName: process.env.TABLE_NAME,
-		Item: {
-			pk: `${KeyPrefix.RECEIVED_AFFIRMATION}${relationshipId}`,
-			sk: `${KeyPrefix.RECEIVED_AFFIRMATION}${receiver}#${timestamp}`,
-			...receivedAffirmation,
-			entityType: EntityType.RECEIVED_AFFIRMATION,
-		} satisfies DatabaseReceivedAffirmation,
+		entityType: EntityType.RECEIVED_AFFIRMATION,
 	});
-
-	if (res.$metadata.httpStatusCode !== 200)
-		throw new TRPCError({
-			code: 'INTERNAL_SERVER_ERROR',
-			message: 'Failed to create received affirmation',
-		});
-
-	return receivedAffirmation;
 };
 
 export const getReceivedAffirmations = async (
@@ -231,27 +196,67 @@ export const getReceivedAffirmations = async (
 	relationshipId: string,
 	{ limit, cursor, order }: GetReceivedAffirmationsDto,
 ) => {
-	const res = await dynamo.query({
-		TableName: process.env.TABLE_NAME,
-		KeyConditionExpression: '#pk = :pk and begins_with(#sk, :sk)',
-		ExpressionAttributeNames: {
-			'#pk': 'pk',
-			'#sk': 'sk',
+	return getItems<ReceivedAffirmation>({
+		queryExpression: {
+			expression: '#pk = :pk and begins_with(#sk, :sk)',
+			variables: {
+				':pk': DynamoKey.receivedAffirmation.pk(relationshipId),
+				':sk': DynamoKey.receivedAffirmation.buildKey(userId),
+			},
 		},
-		ExpressionAttributeValues: {
-			':pk': `${KeyPrefix.RECEIVED_AFFIRMATION}${relationshipId}`,
-			':sk': `${KeyPrefix.RECEIVED_AFFIRMATION}${userId}#`,
-		},
-		ScanIndexForward: order === 'asc',
-		Limit: limit,
-		ExclusiveStartKey: cursor,
+		limit,
+		cursor,
+		order,
 	});
+};
 
-	if (res.$metadata.httpStatusCode !== 200)
+export const getTodaysReceivedAffirmations = async (userId: string, relationshipId: string) => {
+	const today = new Date().toISOString().split('T')[0];
+	return getItems<ReceivedAffirmation>({
+		queryExpression: {
+			expression: '#pk = :pk and begins_with(#sk, :sk)',
+			variables: {
+				':pk': DynamoKey.receivedAffirmation.pk(relationshipId),
+				':sk': DynamoKey.receivedAffirmation.buildKey(userId, today),
+			},
+		},
+	});
+};
+
+export const sendAffirmationToUser = async (
+	user: User,
+	dto: SendCustomAffirmationDto & { mqttClient?: MqttClientType; partner?: User },
+) => {
+	const partner = dto.partner ?? (await getPartnerForUser(user.id));
+	if (!partner || !user.relationshipId)
 		throw new TRPCError({
-			code: 'INTERNAL_SERVER_ERROR',
-			message: 'Failed to get received affirmations',
+			code: 'UNAUTHORIZED',
+			message: 'You are not in a relationship!',
 		});
 
-	return buildInfiniteData((res.Items ?? []) as ReceivedAffirmation[], res.LastEvaluatedKey);
+	const mqttConnection =
+		dto.mqttClient ??
+		(await createAsyncWebsocketConnection({
+			endpoint: Resource.RealtimeServer.endpoint,
+			authorizer: Resource.RealtimeServer.authorizer,
+			token: WebSocketToken.GLOBAL,
+		}));
+
+	await sendNotification({
+		user,
+		payload: {
+			title: `${partner.firstName} says`,
+			body: dto.affirmation,
+			openUrl: '/affirmations',
+		},
+		opts: {
+			offlineWebSocketMessage: {
+				mqttConnection,
+				topic: `${process.env.NOTIFICATIONS_TOPIC}/${user.id}/notifications`,
+			},
+			async onSuccess() {
+				await createReceivedAffirmation(user.id, user.relationshipId!, dto.affirmation);
+			},
+		},
+	});
 };

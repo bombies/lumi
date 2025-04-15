@@ -1,5 +1,5 @@
 import { FC } from 'react';
-import { User } from '@lumi/core/types/user.types';
+import { User } from '@lumi/core/users/user.types';
 import { AvatarProps } from '@radix-ui/react-avatar';
 
 import { cn } from '@/lib/utils';
@@ -14,14 +14,24 @@ type Props = {
 	loading?: boolean;
 	hideStatus?: boolean;
 	containerClassName?: string;
+	statusClassName?: string;
 } & AvatarProps;
 
-const UserAvatar: FC<Props> = ({ user, srcOverride, loading, className, containerClassName, hideStatus, ...args }) => {
+const UserAvatar: FC<Props> = ({
+	user,
+	srcOverride,
+	loading,
+	className,
+	containerClassName,
+	statusClassName,
+	hideStatus,
+	...args
+}) => {
 	return loading ? (
 		<Skeleton className={cn('size-32 rounded-full', className)} />
 	) : (
 		<div className={cn('relative overflow-hidden', containerClassName)}>
-			<Avatar className={cn(' size-32', className)} {...args}>
+			<Avatar className={cn('size-32', className)} {...args}>
 				<AvatarImage src={srcOverride || user?.avatarUrl} alt={'@' + user?.username} className="object-cover" />
 				<AvatarFallback>{user?.firstName.charAt(0) || '?'}</AvatarFallback>
 			</Avatar>
@@ -30,7 +40,10 @@ const UserAvatar: FC<Props> = ({ user, srcOverride, loading, className, containe
 					<Tooltip>
 						<TooltipTrigger asChild>
 							<Badge
-								className="absolute bottom-[10%] right-0 rounded-full size-4 p-2 uppercase border-2 border-white"
+								className={cn(
+									'absolute bottom-[10%] right-0 rounded-full size-4 p-2 uppercase border-2 border-white',
+									statusClassName,
+								)}
 								variant={
 									user?.status === 'online'
 										? 'primary'

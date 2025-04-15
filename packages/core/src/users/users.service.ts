@@ -2,12 +2,12 @@ import { TRPCError } from '@trpc/server';
 import mime from 'mime';
 import { Resource } from 'sst';
 
-import { EntityType, KeyPrefix } from '../types/dynamo.types';
-import { getInfiniteData } from '../types/infinite-data.dto';
-import { DatabaseUser, User } from '../types/user.types';
-import { dynamo, getDynamicUpdateStatements } from '../utils/dynamo/dynamo.service';
+import { deleteUserRelationship, getRelationshipForUser } from '../relationships/relationship.service';
+import { deleteItem, getItem, getItems, putItem, updateItem } from '../utils/dynamo/dynamo.service';
+import { DynamoKey, EntityType } from '../utils/dynamo/dynamo.types';
 import { ContentPaths, StorageClient } from '../utils/s3/s3.service';
 import { getUUID } from '../utils/utils';
+import { DatabaseUser, User } from './user.types';
 import {
 	CreateUserDto,
 	GetUserAvatarUploadUrlDto,
@@ -40,21 +40,18 @@ export const createUser = async ({
 
 	const userId = dto.id ?? getUUID();
 	const [createdAt, updatedAt] = [new Date().toISOString(), new Date().toISOString()];
-	await dynamo.put({
-		TableName: process.env.TABLE_NAME,
-		Item: {
-			pk: `${KeyPrefix.USER}${userId}`,
-			sk: `${KeyPrefix.USER}${userId}`,
-			gsi1pk: `${KeyPrefix.USER}username`,
-			gsi1sk: `${KeyPrefix.USER}${dto.username}`,
-			gsi2pk: `${KeyPrefix.USER}email`,
-			gsi2sk: `${KeyPrefix.USER}${dto.email}`,
-			entityType: EntityType.USER,
-			createdAt: new Date().toISOString(),
-			updatedAt: new Date().toISOString(),
-			...dto,
-			id: userId,
-		} satisfies DatabaseUser,
+	await putItem<DatabaseUser>({
+		pk: DynamoKey.user.pk(userId),
+		sk: DynamoKey.user.sk(userId),
+		gsi1pk: DynamoKey.user.gsi1pk(),
+		gsi1sk: DynamoKey.user.gsi1sk(dto.username),
+		gsi2pk: DynamoKey.user.gsi2pk(),
+		gsi2sk: DynamoKey.user.gsi2sk(dto.email),
+		entityType: EntityType.USER,
+		createdAt: new Date().toISOString(),
+		updatedAt: new Date().toISOString(),
+		...dto,
+		id: userId,
 	});
 
 	return { id: userId, createdAt, updatedAt, verified: false, ...dto } as User;
@@ -82,104 +79,79 @@ type GetUserByIdArgs = {
 };
 
 export const getUserById = async (userId: string, args?: GetUserByIdArgs) => {
-	const res = await dynamo.get({
-		TableName: process.env.TABLE_NAME,
-		Key: {
-			pk: `${KeyPrefix.USER}${userId}`,
-			sk: `${KeyPrefix.USER}${userId}`,
-		},
-		ProjectionExpression: args?.projections?.join(','),
+	const res = await getItem<User>(DynamoKey.user.pk(userId), DynamoKey.user.sk(userId), {
+		projectedAttributes: args?.projections,
 	});
 
-	return attachAvatarToUser({ user: res.Item as User | undefined });
+	return attachAvatarToUser({ user: res ?? undefined });
 };
 
 export const getUserByUsername = async (username: string) => {
-	const res = await dynamo.query({
-		TableName: process.env.TABLE_NAME,
-		IndexName: 'GSI1',
-		KeyConditionExpression: '#pk = :pk AND #sk = :sk',
-		ExpressionAttributeNames: {
-			'#pk': 'gsi1pk',
-			'#sk': 'gsi1sk',
-		},
-		ExpressionAttributeValues: {
-			':pk': `${KeyPrefix.USER_NAME}`,
-			':sk': `${KeyPrefix.USER}${username}`,
-		},
-	});
+	const res = (
+		await getItems<User>({
+			index: 'GSI1',
+			queryExpression: {
+				expression: '#gsi1pk = :gsi1pk AND #gsi1sk = :gsi1sk',
+				variables: {
+					':gsi1pk': DynamoKey.user.gsi1pk(),
+					':gsi1sk': DynamoKey.user.gsi1sk(username),
+				},
+			},
+		})
+	).data[0];
 
-	return attachAvatarToUser({ user: res.Items?.[0] as User | undefined });
+	return attachAvatarToUser({ user: res });
 };
 
 export const getUsersByUsername = async ({ username, limit, cursor, projections }: GetUsersByUsernameDto) => {
-	const res = await dynamo.query({
-		TableName: process.env.TABLE_NAME,
-		IndexName: 'GSI1',
-		KeyConditionExpression: '#pk = :pk AND begins_with(#sk, :sk)',
-		ProjectionExpression: projections?.join(','),
-		ExpressionAttributeNames: {
-			'#pk': 'gsi1pk',
-			'#sk': 'gsi1sk',
+	return getItems<User>({
+		index: 'GSI1',
+		queryExpression: {
+			expression: '#gsi1pk = :gsi1pk AND begins_with(#gsi1sk, :gsi1sk)',
+			variables: {
+				':gsi1pk': DynamoKey.user.gsi1pk(),
+				':gsi1sk': DynamoKey.user.gsi1sk(username),
+			},
 		},
-		ExpressionAttributeValues: {
-			':pk': `${KeyPrefix.USER_NAME}`,
-			':sk': `${KeyPrefix.USER}${username}`,
-		},
-		Limit: limit,
-		ExclusiveStartKey: cursor,
+		limit,
+		cursor,
+		projectedAttributes: projections,
+		mapper: user => attachAvatarToUser({ user, throws: true }),
 	});
-
-	return getInfiniteData<User>(res, user =>
-		attachAvatarToUser({
-			user,
-			throws: true,
-		}),
-	);
 };
 
 export const getUsersByEmail = async ({ email, limit, cursor, projections }: GetUsersByEmailDto) => {
-	const res = await dynamo.query({
-		TableName: process.env.TABLE_NAME,
-		IndexName: 'GSI2',
-		KeyConditionExpression: '#pk = :pk AND begins_with(#sk, :sk)',
-		ProjectionExpression: projections?.join(','),
-		ExpressionAttributeNames: {
-			'#pk': 'gsi2pk',
-			'#sk': 'gsi12k',
+	return getItems<User>({
+		index: 'GSI2',
+		queryExpression: {
+			expression: '#gsi2pk = :gsi2pk AND begins_with(#gsi2sk, :gsi2sk)',
+			variables: {
+				':gsi2pk': DynamoKey.user.gsi2pk(),
+				':gsi2sk': DynamoKey.user.gsi2sk(email),
+			},
 		},
-		ExpressionAttributeValues: {
-			':pk': `${KeyPrefix.USER_EMAIL}`,
-			':sk': `${KeyPrefix.USER}${email}`,
-		},
-		Limit: limit,
-		ExclusiveStartKey: cursor,
+		limit,
+		cursor,
+		projectedAttributes: projections,
+		mapper: user => attachAvatarToUser({ user, throws: true }),
 	});
-
-	return getInfiniteData<User>(res, user =>
-		attachAvatarToUser({
-			user,
-			throws: true,
-		}),
-	);
 };
 
 export const getUserByEmail = async (email: string) => {
-	const res = await dynamo.query({
-		TableName: process.env.TABLE_NAME,
-		IndexName: 'GSI2',
-		KeyConditionExpression: '#pk = :pk AND #sk = :sk',
-		ExpressionAttributeNames: {
-			'#pk': 'gsi2pk',
-			'#sk': 'gsi2sk',
-		},
-		ExpressionAttributeValues: {
-			':pk': `${KeyPrefix.USER}email`,
-			':sk': `${KeyPrefix.USER}${email}`,
-		},
-	});
+	const res = (
+		await getItems<User>({
+			index: 'GSI2',
+			queryExpression: {
+				expression: '#gsi2pk = :gsi2pk AND #gsi2sk = :gsi2sk',
+				variables: {
+					':gsi2pk': DynamoKey.user.gsi2pk(),
+					':gsi2sk': DynamoKey.user.gsi2sk(email),
+				},
+			},
+		})
+	).data[0];
 
-	return attachAvatarToUser({ user: res.Items?.[0] as User | undefined });
+	return attachAvatarToUser({ user: res });
 };
 
 export const userExists = async (value: string) => {
@@ -195,36 +167,25 @@ export const getUserByEmailOrUsername = async (emailOrUsername: string) => {
 };
 
 export const updateUser = async (userId: string, dto: UpdateUserDto) => {
-	const { updateStatements, expressionAttributeNames, expressionAttributeValues } = getDynamicUpdateStatements<User>({
-		...dto,
-		updatedAt: new Date().toISOString(),
-	});
-
 	if (!(await userExists(userId)))
 		throw new TRPCError({
 			code: 'NOT_FOUND',
 			message: 'User not found',
 		});
 
-	const res = await dynamo.update({
-		TableName: process.env.TABLE_NAME,
-		Key: {
-			pk: `${KeyPrefix.USER}${userId}`,
-			sk: `${KeyPrefix.USER}${userId}`,
+	return updateItem<User>({
+		pk: DynamoKey.user.pk(userId),
+		sk: DynamoKey.user.sk(userId),
+		update: {
+			...dto,
+			updatedAt: new Date().toISOString(),
 		},
-		UpdateExpression: updateStatements,
-		ExpressionAttributeNames: expressionAttributeNames,
-		ExpressionAttributeValues: expressionAttributeValues,
-		ReturnValues: 'ALL_NEW',
 	});
+};
 
-	if (res.$metadata.httpStatusCode !== 200)
-		throw new TRPCError({
-			message: `Error with updating user: Code ${res.$metadata.httpStatusCode}`,
-			code: 'INTERNAL_SERVER_ERROR',
-		});
-
-	return res.Attributes as User;
+export const deleteUser = async (userId: string) => {
+	await deleteUserRelationship(userId, { safeReturn: true });
+	return deleteItem(DynamoKey.user.pk(userId), DynamoKey.user.sk(userId));
 };
 
 export const getUserAvatarUploadUrl = async ({

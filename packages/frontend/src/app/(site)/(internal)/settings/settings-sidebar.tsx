@@ -6,12 +6,14 @@ import { usePathname } from 'next/navigation';
 import { HeartIcon, LockClosedIcon, PaintBrushIcon, UserCircleIcon as UserIcon } from '@heroicons/react/24/outline';
 import {
 	HeartIcon as HeartFilledIcon,
+	HomeIcon,
 	LockClosedIcon as LockClosedFilledIcon,
 	PaintBrushIcon as PaintBrushFilledIcon,
 	UserCircleIcon as UserFilledIcon,
 } from '@heroicons/react/24/solid';
 import { IconType } from '@icons-pack/react-simple-icons';
 
+import { Button } from '@/components/ui/button';
 import {
 	Sidebar,
 	SidebarContent,
@@ -144,6 +146,11 @@ const SettingsSidebar: FC = () => {
 			</SidebarHeader>
 			<SidebarContent>{itemElements}</SidebarContent>
 			<SidebarFooter>
+				<Link href="/home">
+					<Button className="w-full">
+						<HomeIcon className="size-[18px]" /> Go Home
+					</Button>
+				</Link>
 				<SignOutButton iconOnly={!open} />
 			</SidebarFooter>
 		</Sidebar>

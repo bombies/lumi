@@ -1,30 +1,44 @@
 'use client';
 
 import { FC, useEffect } from 'react';
-import { InferredWebSocketMessagePayload } from '@lumi/core/types/websockets.types';
+import { InferredWebSocketMessagePayload } from '@lumi/core/websockets/websockets.types';
 import { toast } from 'sonner';
 
-import { useNotifications } from '@/components/notifications/notifications-provider';
+import { StoreNotification } from '@/hooks/trpc/notification-hooks';
 import { GetSelfUserOnDemand } from '@/hooks/trpc/user-hooks';
+import { useRelationship } from '../relationships/relationship-provder';
 import { useWebSocket } from './web-socket-provider';
 
 const NotificationWatcher: FC = () => {
-	const { sendNotification } = useNotifications();
+	const { selfState } = useRelationship();
 	const { addEventHandler, removeEventHandler } = useWebSocket();
 	const { mutateAsync: getSelf } = GetSelfUserOnDemand();
+	const { mutateAsync: storeNotification } = StoreNotification();
 
 	useEffect(() => {
 		const handleNotification = async (payload: InferredWebSocketMessagePayload<'notification'>) => {
 			const self = await getSelf();
 			if (!self) return;
 
-			if (self.status !== 'online') {
-				sendNotification({
-					title: payload.message.title.slice(0, Math.min(29, payload.message.content.length - 1)),
-					message: payload.message.content.slice(0, Math.min(149, payload.message.content.length - 1)),
+			if (self.status === 'online') {
+				// Handle notification ignores
+				if (
+					payload.message.title.includes('New Moment Message') &&
+					selfState?.state?.state === 'viewingMomentMessages' &&
+					selfState.state.payload.momentId === payload.metadata?.momentId
+				) {
+					return;
+				}
+
+				toast.info(payload.message.title, {
+					description: payload.message.content,
 				});
-			} else {
-				toast.info(payload.message.content);
+				await storeNotification({
+					title: payload.message.title,
+					content: payload.message.content,
+					read: true,
+					openUrl: payload.openUrl,
+				});
 			}
 		};
 
@@ -33,7 +47,7 @@ const NotificationWatcher: FC = () => {
 		return () => {
 			removeEventHandler('notification', handleNotification);
 		};
-	}, [addEventHandler, getSelf, removeEventHandler, sendNotification]);
+	}, [addEventHandler, getSelf, removeEventHandler, selfState, storeNotification]);
 
 	return <></>;
 };

@@ -1,9 +1,9 @@
 'use client';
 
 import { FC, useCallback, useEffect, useRef, useState } from 'react';
-import { Relationship } from '@lumi/core/types/relationship.types';
-import { User } from '@lumi/core/types/user.types';
-import { InferredWebSocketMessage, WebSocketEventHandler } from '@lumi/core/types/websockets.types';
+import { Relationship } from '@lumi/core/relationships/relationship.types';
+import { User } from '@lumi/core/users/user.types';
+import { InferredWebSocketMessage, WebSocketEventHandler } from '@lumi/core/websockets/websockets.types';
 
 import { useWebSocket } from '@/components/providers/web-sockets/web-socket-provider';
 import { logger } from '@/lib/logger';

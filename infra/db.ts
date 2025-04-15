@@ -1,5 +1,6 @@
-import { cdnPrivateKey, redisHost, redisPassword, redisPort, redisUser } from './secrets';
+import { cdnPrivateKey, redisHost, redisPassword, redisPort, redisUser, sentryAuthToken } from './secrets';
 import { contentBucket, contentCdn, contentCdnPublicKey } from './storage';
+import { appify } from './utils';
 
 export const db = new sst.aws.Dynamo('Database', {
 	fields: {
@@ -38,10 +39,15 @@ export const db = new sst.aws.Dynamo('Database', {
 });
 
 db.subscribe(
-	'RelationshipStreamHandler',
+	appify('RelationshipStreamHandler'),
 	{
 		handler: 'packages/functions/db/stream.handler',
-		link: [db],
+		link: [db, redisHost, redisPort, redisUser, redisPassword],
+		environment: {
+			TABLE_NAME: db.name,
+			SENTRY_AUTH_TOKEN: sentryAuthToken.value,
+		},
+		runtime: 'nodejs22.x',
 	},
 	{
 		filters: [
@@ -59,10 +65,14 @@ db.subscribe(
 );
 
 db.subscribe(
-	'MomentMetadataDeletionHandler',
+	appify('MomentMetadataDeletionHandler'),
 	{
 		handler: 'packages/functions/db/moment-deletion.handler',
 		link: [db, contentBucket],
+		runtime: 'nodejs22.x',
+		environment: {
+			SENTRY_AUTH_TOKEN: sentryAuthToken.value,
+		},
 	},
 	{
 		filters: [
@@ -81,7 +91,7 @@ db.subscribe(
 );
 
 db.subscribe(
-	'MomentThumbnailTranscoder',
+	appify('MomentThumbnailTranscoder'),
 	{
 		handler: 'packages/functions/db/moment-thumbnail-transcoder.handler',
 		link: [contentBucket, db, redisHost, redisPort, redisUser, redisPassword],
@@ -90,8 +100,10 @@ db.subscribe(
 			TABLE_NAME: db.name,
 			CDN_PRIVATE_KEY: cdnPrivateKey,
 			KEY_PAIR_ID: contentCdnPublicKey.id,
-			CDN_URL: contentCdn.url,
+			CDN_URL: $interpolate`${contentCdn.domainUrl.apply(domainUrl => domainUrl ?? contentCdn.url)}`,
+			SENTRY_AUTH_TOKEN: sentryAuthToken.value,
 		},
+		runtime: 'nodejs22.x',
 		nodejs: { install: ['ffmpeg-static'] },
 	},
 	{
@@ -102,6 +114,60 @@ db.subscribe(
 					Keys: {
 						pk: {
 							S: [{ prefix: 'moment::details#' }],
+						},
+					},
+				},
+			},
+		],
+	},
+);
+
+db.subscribe(
+	appify('MomentTagOperationHandler'),
+	{
+		handler: 'packages/functions/db/moment-tag.handler',
+		link: [db, redisHost, redisPort, redisUser, redisPassword],
+		runtime: 'nodejs22.x',
+		environment: {
+			TABLE_NAME: db.name,
+			SENTRY_AUTH_TOKEN: sentryAuthToken.value,
+		},
+	},
+	{
+		filters: [
+			{
+				eventName: ['INSERT', 'REMOVE'],
+				dynamodb: {
+					Keys: {
+						pk: {
+							S: [{ prefix: 'moment::tag#' }],
+						},
+					},
+				},
+			},
+		],
+	},
+);
+
+db.subscribe(
+	appify('RelationshipMomentTagDeletionHandler'),
+	{
+		handler: 'packages/functions/db/relationship-moment-tag.handler',
+		runtime: 'nodejs22.x',
+		link: [db, redisHost, redisPort, redisUser, redisPassword],
+		environment: {
+			TABLE_NAME: db.name,
+			SENTRY_AUTH_TOKEN: sentryAuthToken.value,
+		},
+	},
+	{
+		filters: [
+			{
+				eventName: ['REMOVE'],
+				dynamodb: {
+					Keys: {
+						pk: {
+							S: [{ prefix: 'relationship::moment::tag#' }],
 						},
 					},
 				},

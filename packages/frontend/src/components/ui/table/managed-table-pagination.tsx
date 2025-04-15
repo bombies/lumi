@@ -5,7 +5,7 @@ import { ChevronLeftIcon, ChevronRightIcon, ChevronsLeftIcon, ChevronsRightIcon 
 
 import { Button } from '../button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../select';
-import { useEasyTableGlobals } from './managed-table-provider';
+import { useManagedTableGlobals } from './managed-table-provider';
 
 export type ManagedTablePaginationProps = {
 	onPageChange?: (pageIndex: number) => void;
@@ -18,7 +18,7 @@ export type ManagedTablePaginationProps = {
 };
 
 export default function ManagedTablePagination<T>({ buttonVisibilities, onPageChange }: ManagedTablePaginationProps) {
-	const { maxItemsPerPage, allowRowSelection, hasMorePages, paginationType, table } = useEasyTableGlobals<T>();
+	const { maxItemsPerPage, allowRowSelection, hasMorePages, paginationType, table } = useManagedTableGlobals<T>();
 
 	const rowsPerPageOptions = useMemo(() => {
 		const defaultOptions = [10, 20, 30, 40, 50];

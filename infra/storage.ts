@@ -1,3 +1,4 @@
+import { contentCdnKeyGroupId, contentCdnPublicKeyId } from './secrets';
 import { appify } from './utils';
 
 const originAccessIdentity = new aws.cloudfront.OriginAccessIdentity(appify('ContentCdnOriginAccessIdentity'));
@@ -22,21 +23,17 @@ export const contentBucket = new sst.aws.Bucket(`ContentBucket`, {
 	},
 });
 
-export const contentCdnPublicKey = new aws.cloudfront.PublicKey('ContentCdnPublicKey', {
-	comment: 'The public key for the content CDN',
-	name: `${appify('cdn-public-key')}`,
-	encodedKey: std
-		.file({
-			input: `${process.cwd()}/cdn-keys/public_key.pem`,
-		})
-		.then(invoke => invoke.result),
-});
+const customCdnKeyStages = new Set(['production', 'staging']);
 
-export const contentCdnKeyGroup = new aws.cloudfront.KeyGroup('ContentCdnKeyGroup', {
-	comment: 'The key group for the content CDN',
-	items: [contentCdnPublicKey.id],
-	name: `${appify('cdn-key-group')}`,
-});
+export const contentCdnPublicKey = aws.cloudfront.PublicKey.get(
+	customCdnKeyStages.has($app.stage) ? `${appify('cdn-public-key')}` : `${$app.name}-ajani-cdn-public-key`,
+	contentCdnPublicKeyId.value,
+);
+
+export const contentCdnKeyGroup = aws.cloudfront.KeyGroup.get(
+	customCdnKeyStages.has($app.stage) ? `${appify('cdn-key-group')}` : `${$app.name}-ajani-cdn-key-group`,
+	contentCdnKeyGroupId.value,
+);
 
 sst.Linkable.wrap(aws.cloudfront.KeyGroup, kg => ({
 	properties: { id: kg.id, items: kg.items },

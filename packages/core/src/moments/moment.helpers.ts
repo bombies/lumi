@@ -1,7 +1,7 @@
 import redis, { RedisHashKeys } from '../redis/redis';
-import { Moment } from '../types/moment.types';
 import { signCdnUrl } from '../utils/s3/cloudfront.service';
 import { ContentPaths } from '../utils/s3/s3.service';
+import { Moment } from './moment.types';
 
 export const attachUrlsToMoment = async (moment: Moment): Promise<Moment> => {
 	return {

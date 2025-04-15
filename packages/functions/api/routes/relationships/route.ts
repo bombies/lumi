@@ -2,6 +2,7 @@ import { getRelationshipRequestsForUserDto } from '@lumi/core/relationships/rela
 import {
 	acceptRelationshipRequest,
 	deleteRelationshipRequestById,
+	deleteUserRelationship,
 	getReceivedRelationshipRequestsForUser,
 	getSentRelationshipRequestsForUser,
 	sendRelationshipRequest,
@@ -13,11 +14,9 @@ import { z } from 'zod';
 import { protectedProcedure, relationshipProcedure, router } from '../../utils/trpc';
 
 export const relationshipsRouter = router({
-	sendRelationshipRequest: protectedProcedure
-		.input(z.string().uuid('Invalid user ID!'))
-		.mutation(({ input, ctx: { user } }) => {
-			return sendRelationshipRequest(user.id, input);
-		}),
+	sendRelationshipRequest: protectedProcedure.input(z.string()).mutation(({ input, ctx: { user } }) => {
+		return sendRelationshipRequest(user.id, input);
+	}),
 
 	acceptRelationshipRequest: protectedProcedure
 		.input(z.string().uuid('Invalid relationship request ID!'))
@@ -64,4 +63,6 @@ export const relationshipsRouter = router({
 		const partner = await getUserById(partnerId);
 		return partner;
 	}),
+
+	leaveRelationship: relationshipProcedure.mutation(({ ctx: { user } }) => deleteUserRelationship(user.id)),
 });
