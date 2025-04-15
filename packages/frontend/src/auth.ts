@@ -11,7 +11,7 @@ import { Resource } from 'sst';
 
 import { logger } from './lib/logger';
 
-const db = new Pool(
+export const db = new Pool(
 	Resource.PostgresConnectionString.value.length
 		? {
 				connectionString: Resource.PostgresConnectionString.value,

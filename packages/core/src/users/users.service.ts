@@ -58,10 +58,10 @@ export const createUser = async ({
 };
 
 function attachAvatarToUser(args: { user?: User; throws: true }): User;
+function attachAvatarToUser(args: { user?: User; throws?: false | undefined }): User | undefined;
+function attachAvatarToUser(args: { user?: User; throws?: boolean | undefined }): User | undefined;
 
-function attachAvatarToUser(args: { user?: User; throws?: false }): User | undefined;
-
-function attachAvatarToUser({ user, throws }: { user?: User; throws?: boolean }): User | undefined {
+function attachAvatarToUser({ user, throws }: { user?: User; throws?: boolean | undefined }): User | undefined {
 	if (!user)
 		if (throws) throw new TRPCError({ code: 'NOT_FOUND', message: 'User not found' });
 		else return undefined;
@@ -76,6 +76,7 @@ function attachAvatarToUser({ user, throws }: { user?: User; throws?: boolean })
 
 type GetUserByIdArgs = {
 	projections?: (keyof User)[];
+	throws?: boolean;
 };
 
 export const getUserById = async (userId: string, args?: GetUserByIdArgs) => {
@@ -83,7 +84,7 @@ export const getUserById = async (userId: string, args?: GetUserByIdArgs) => {
 		projectedAttributes: args?.projections,
 	});
 
-	return attachAvatarToUser({ user: res ?? undefined });
+	return attachAvatarToUser({ user: res ?? undefined, throws: args?.throws });
 };
 
 export const getUserByUsername = async (username: string) => {

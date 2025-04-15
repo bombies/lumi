@@ -1,6 +1,7 @@
 import { db } from './db';
 import { apiDNS, webDNS } from './dns';
 import { notificationsTopic, realtimeServer } from './realtime';
+import { router } from './router';
 import {
 	authSecret,
 	cdnPrivateKey,
@@ -24,9 +25,13 @@ export const trpc = new sst.aws.Function('Trpc', {
 	url: $dev
 		? true
 		: {
-				cors: {
-					allowOrigins: [`https://${webDNS}`],
+				route: router && {
+					router,
+					domain: apiDNS,
 				},
+				// cors: {
+				// 	allowOrigins: [`https://${webDNS}`],
+				// },
 			},
 	runtime: 'nodejs22.x',
 	nodejs: {

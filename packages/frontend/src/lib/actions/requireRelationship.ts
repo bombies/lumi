@@ -3,9 +3,9 @@
 import { redirect } from 'next/navigation';
 import { getRelationshipForUser } from '@lumi/core/relationships/relationship.service';
 import { Relationship } from '@lumi/core/relationships/relationship.types';
-import { getUserById } from '@lumi/core/users/users.service';
+import { createUser, getUserById } from '@lumi/core/users/users.service';
 
-import { getServerSession } from '../better-auth/auth-actions';
+import { getSelfUser, getServerSession, signOut } from '../better-auth/auth-actions';
 
 type RequireRelationshipArgs = {
 	withPartner?: boolean;
@@ -27,7 +27,29 @@ export const requireRelationship = async (args?: RequireRelationshipArgs): Promi
 		relationship.partner = partner;
 	}
 
-	if (args?.withSelf) relationship.self = await getUserById(session.user.id);
+	if (args?.withSelf) {
+		relationship.self = await getUserById(session.user.id, { throws: false });
+
+		if (!relationship.self) {
+			const self = await getSelfUser();
+			if (!self) {
+				await signOut();
+				redirect('/auth/login');
+			}
+
+			const [firstName, lastName] = self.name.split(' ');
+			await createUser({
+				id: session.user.id,
+				email: session.user.email,
+				username: self.username,
+				firstName,
+				lastName,
+				args: {
+					sendOTP: false,
+				},
+			});
+		}
+	}
 
 	return relationship;
 };

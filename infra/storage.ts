@@ -1,27 +1,10 @@
+import { cdnDNS } from './dns';
 import { contentCdnKeyGroupId, contentCdnPublicKeyId } from './secrets';
 import { appify } from './utils';
 
 const originAccessIdentity = new aws.cloudfront.OriginAccessIdentity(appify('ContentCdnOriginAccessIdentity'));
 
-export const contentBucket = new sst.aws.Bucket(`ContentBucket`, {
-	transform: {
-		policy(args) {
-			args.policy = {
-				Version: '2012-10-17',
-				Statement: [
-					{
-						Effect: 'Allow',
-						Principal: {
-							AWS: originAccessIdentity.iamArn,
-						},
-						Action: ['s3:GetObject'],
-						Resource: [$interpolate`${contentBucket.arn}/*`],
-					},
-				],
-			};
-		},
-	},
-});
+export const contentBucket = new sst.aws.Bucket(`ContentBucket`);
 
 const customCdnKeyStages = new Set(['production', 'staging']);
 
@@ -35,10 +18,6 @@ export const contentCdnKeyGroup = aws.cloudfront.KeyGroup.get(
 	contentCdnKeyGroupId.value,
 );
 
-sst.Linkable.wrap(aws.cloudfront.KeyGroup, kg => ({
-	properties: { id: kg.id, items: kg.items },
-}));
-
 const contentBucketOriginId = appify('ContentBucketOriginId');
 export const contentCdn = new sst.aws.Cdn('ContentCdn', {
 	origins: [
@@ -50,7 +29,7 @@ export const contentCdn = new sst.aws.Cdn('ContentCdn', {
 			},
 		},
 	],
-	domain: $app.stage === 'production' ? 'cdn.lumi.ajani.me' : undefined,
+	domain: !$dev ? cdnDNS : undefined,
 	defaultCacheBehavior: {
 		allowedMethods: ['DELETE', 'GET', 'HEAD', 'OPTIONS', 'PATCH', 'POST', 'PUT'],
 		compress: true,

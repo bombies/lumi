@@ -1,11 +1,11 @@
 import { trpc } from './api';
 import { db } from './db';
-import { apiDNS, webDNS } from './dns';
+import { apiDNS, cdnDNS, webDNS } from './dns';
 import { notificationsTopic, realtimeServer } from './realtime';
+import { router } from './router';
 import {
 	authSecret,
 	cdnPrivateKey,
-	frontendCdnCachePolicyId,
 	mailerHostSecret,
 	mailerPasswordSecret,
 	mailerPortSecret,
@@ -27,19 +27,23 @@ import {
 	vapidPrivateKey,
 	vapidPublicKey,
 } from './secrets';
-import { contentBucket, contentCdn, contentCdnPublicKey } from './storage';
+import { contentBucket, contentCdnPublicKey } from './storage';
 
 export const frontend = new sst.aws.Nextjs('Frontend', {
 	path: 'packages/frontend',
 	dev: {
 		command: 'bun run dev',
 	},
-	cdn: false,
 	server: {
 		runtime: 'nodejs22.x',
 		install: ['sharp'],
 	},
-	cachePolicy: $app.stage !== 'staging' ? frontendCdnCachePolicyId.value : undefined,
+	route:
+		!$dev && router
+			? {
+					router,
+				}
+			: undefined,
 	openNextVersion: '3.5.6',
 	warm: $app.stage === 'production' ? 5 : 0,
 	link: [
@@ -88,7 +92,7 @@ export const frontend = new sst.aws.Nextjs('Frontend', {
 		CONTENT_BUCKET_ENDPOINT: contentBucket.nodes.bucket.bucketRegionalDomainName,
 		CDN_PRIVATE_KEY: cdnPrivateKey,
 		KEY_PAIR_ID: contentCdnPublicKey.id,
-		CDN_URL: $interpolate`${contentCdn.domainUrl.apply(domainUrl => domainUrl ?? contentCdn.url)}`,
+		CDN_URL: cdnDNS,
 		NEXT_PUBLIC_SPOTIFY_CLIENT_ID: spotifyClientId.value,
 		SPOTIFY_CLIENT_SECRET: spotifyClientSecret.value,
 

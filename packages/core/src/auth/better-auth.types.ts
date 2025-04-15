@@ -22,3 +22,15 @@ export type SpotifyProviderDatabaseAccount = {
 	createdAt: Date;
 	updatedAt: Date;
 };
+
+export type BetterAuthDatabaseUser = {
+	id: string;
+	name: string;
+	email: string;
+	emailVerified: boolean;
+	image?: string | null;
+	createdAt: string;
+	updatedAt: string;
+	username: string;
+	displayUsername?: string;
+};
