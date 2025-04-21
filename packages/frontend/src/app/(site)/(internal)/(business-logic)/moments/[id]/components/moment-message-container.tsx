@@ -2,6 +2,7 @@
 
 import { FC, useMemo } from 'react';
 import { MomentMessage } from '@lumi/core/moments/moment.types';
+import { formatTime } from '@lumi/core/utils/global-utils';
 
 import { useRelationship } from '@/components/providers/relationships/relationship-provder';
 import UserAvatar from '@/components/ui/user-avatar';
@@ -23,11 +24,18 @@ const MomentMessageContainer: FC<Props> = ({ messages }) => {
 						key={message.id}
 						id={message.id}
 						className={cn(
-							'rounded-md bg-primary px-3 py-1 w-fit max-w-full self-end break-words',
+							'flex rounded-md bg-primary px-3 py-1 w-fit max-w-full self-end break-words gap-2',
 							!userIsSelf && 'self-start bg-secondary',
 						)}
 					>
 						<p className="text-white whitespace-pre-wrap">{message.content}</p>
+						<p
+							className={cn(
+								'text-[10px] phone:text-[8px] shrink-0 w-fit text-white/20 text-right self-end',
+							)}
+						>
+							{formatTime(new Date(message.timestamp))}
+						</p>
 					</div>
 				))}
 			</div>

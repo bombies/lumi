@@ -62,6 +62,32 @@ const CommentDrawer: FC<Props> = ({ moment }) => {
 	const [selfTyping, setSelfTyping] = useState(false);
 	const submitButtonRef = useRef<HTMLButtonElement>(null);
 
+	const scrollAreaRef = useRef<HTMLDivElement>(null);
+	const scrollToBottom = useCallback((onSuccess?: () => void) => {
+		const viewport = scrollAreaRef.current?.querySelector('[data-radix-scroll-area-viewport]');
+		if (viewport) {
+			logger.debug('Viewport found, scrolling to bottom!');
+			viewport.scrollTop = viewport.scrollHeight;
+			onSuccess?.();
+		}
+	}, []);
+
+	useEffect(() => {
+		if (!drawerOpen) return;
+
+		const observer = new MutationObserver(() => {
+			scrollToBottom(() => {
+				observer.disconnect(); // Stop observing once done
+				logger.debug('Scroll area viewport was found and scroll was completed!');
+			});
+		});
+
+		logger.debug('Observing for scroll area changes...');
+		observer.observe(document.body, { childList: true, subtree: true });
+
+		return () => observer.disconnect();
+	}, [drawerOpen, scrollToBottom]);
+
 	const fetchedMessages = useMemo(() => {
 		if (!messagePages) return [];
 		return messagePages.pages.flatMap(page => page.data).reverse();
@@ -76,30 +102,61 @@ const CommentDrawer: FC<Props> = ({ moment }) => {
 		return [...fetchedMessages, ...uniqueNewMessages];
 	}, [fetchedMessages, newMessages, fetchedMessageIds]);
 
-	const messageElements = useMemo(() => {
-		const groupedMessages: [string, MomentMessage[]][] = [];
+	const groupedMessages = useMemo(() => {
+		const messagesByDay = Object.groupBy(allMessages, message => {
+			const date = new Date(message.timestamp);
+			const epoch = new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
+			return epoch.toString();
+		});
 
-		for (const message of allMessages) {
-			// Iterate over combined list
-			const latestGroup = groupedMessages[groupedMessages.length - 1];
+		const finalGroups: Record<string, [string, MomentMessage[]][]> = {};
+		for (const [date, messages] of Object.entries(messagesByDay)) {
+			if (!messages) return;
+			const groupedMessages: [string, MomentMessage[]][] = [];
 
-			if (!latestGroup || latestGroup[0] !== message.senderId) {
-				groupedMessages.push([message.senderId, [message]]);
-			} else {
-				latestGroup[1].push(message);
+			for (const message of messages) {
+				// Iterate over combined list
+				const latestGroup = groupedMessages[groupedMessages.length - 1];
+
+				if (!latestGroup || latestGroup[0] !== message.senderId) {
+					groupedMessages.push([message.senderId, [message]]);
+				} else {
+					latestGroup[1].push(message);
+				}
 			}
+
+			finalGroups[date] = groupedMessages;
 		}
 
+		return finalGroups;
+	}, [allMessages]);
+
+	const messageElements = useMemo(() => {
+		if (!groupedMessages) return undefined;
 		// Use stable message ID for keys if possible within MomentMessageContainer
 		// The group key remains less stable but necessary for grouping render
-		return groupedMessages.map(([senderId, messagesInGroup], groupIndex) => (
-			<MomentMessageContainer
-				// Using the first message ID + sender might be more stable if available
-				key={`messagecontainer_${senderId}_${messagesInGroup[0]?.id ?? groupIndex}`}
-				messages={messagesInGroup}
-			/>
+		return Object.entries(groupedMessages).map(([date, messageGroup]) => (
+			<div key={`datecontainer_${date}`} className="space-y-2">
+				<p className="text-center text-white/30 text-xs font-semibold">
+					{new Date(parseInt(date)).toLocaleDateString('en-US', {
+						year: 'numeric',
+						month: 'long',
+						day: '2-digit',
+					})}
+				</p>
+				{messageGroup.map(([senderId, messagesInGroup], groupIndex) => (
+					<MomentMessageContainer
+						key={`messagecontainer_${senderId}_${messagesInGroup[0]?.id ?? groupIndex}`}
+						messages={messagesInGroup}
+					/>
+				))}
+			</div>
 		));
-	}, [allMessages]);
+	}, [groupedMessages]);
+
+	useEffect(() => {
+		scrollToBottom();
+	}, [messageElements, scrollToBottom, partnerTyping]);
 
 	const addNewMessage = useCallback((message: MomentMessage) => {
 		setNewMessages(prev => {
@@ -160,6 +217,7 @@ const CommentDrawer: FC<Props> = ({ moment }) => {
 			} satisfies MomentMessage;
 
 			addNewMessage(optimisticMessage);
+			scrollToBottom();
 
 			await emitEvent(
 				'momentTypingEnd',
@@ -201,30 +259,12 @@ const CommentDrawer: FC<Props> = ({ moment }) => {
 			emitEvent,
 			moment.id,
 			moment.relationshipId,
+			scrollToBottom,
 			self.firstName,
 			self.id,
 			sendNotificationToPartner,
 		],
 	);
-
-	const scrollAreaRef = useRef<HTMLDivElement>(null);
-	useEffect(() => {
-		if (!drawerOpen) return;
-
-		const observer = new MutationObserver(() => {
-			const viewport = scrollAreaRef.current?.querySelector('[data-radix-scroll-area-viewport]');
-			if (viewport) {
-				viewport.scrollTop = viewport.scrollHeight;
-				observer.disconnect(); // Stop observing once done
-				logger.debug('Scroll area viewport was found and scroll was completed!');
-			}
-		});
-
-		logger.debug('Observing for scroll area changes...');
-		observer.observe(document.body, { childList: true, subtree: true });
-
-		return () => observer.disconnect();
-	}, [drawerOpen]);
 
 	return (
 		<Drawer
@@ -253,6 +293,7 @@ const CommentDrawer: FC<Props> = ({ moment }) => {
 							<Spinner />
 						) : (
 							<>
+								{messageElements}
 								<AnimatePresence>
 									{partnerTyping && (
 										<motion.div
@@ -292,7 +333,6 @@ const CommentDrawer: FC<Props> = ({ moment }) => {
 										</motion.div>
 									)}
 								</AnimatePresence>
-								<div className="space-y-1 flex flex-col">{messageElements}</div>
 							</>
 						)}
 						<InfiniteLoader hasMore={hasNextPage} fetchMore={fetchNextPage} loading={isFetchingNextPage} />
