@@ -16,10 +16,12 @@ import { Drawer, DrawerContent, DrawerTrigger } from '@/components/ui/drawer';
 import EasyForm from '@/components/ui/form-extras/easy-form';
 import EasyFormField from '@/components/ui/form-extras/easy-form-field';
 import InfiniteLoader from '@/components/ui/infinite-loader';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import Spinner from '@/components/ui/spinner';
 import { Textarea } from '@/components/ui/textarea';
 import UserAvatar from '@/components/ui/user-avatar';
 import { GetMessagesForMoment } from '@/hooks/trpc/moment-hooks';
+import { logger } from '@/lib/logger';
 import MomentMessageContainer from './moment-message-container';
 
 type Props = {
@@ -205,6 +207,25 @@ const CommentDrawer: FC<Props> = ({ moment }) => {
 		],
 	);
 
+	const scrollAreaRef = useRef<HTMLDivElement>(null);
+	useEffect(() => {
+		if (!drawerOpen) return;
+
+		const observer = new MutationObserver(() => {
+			const viewport = scrollAreaRef.current?.querySelector('[data-radix-scroll-area-viewport]');
+			if (viewport) {
+				viewport.scrollTop = viewport.scrollHeight;
+				observer.disconnect(); // Stop observing once done
+				logger.debug('Scroll area viewport was found and scroll was completed!');
+			}
+		});
+
+		logger.debug('Observing for scroll area changes...');
+		observer.observe(document.body, { childList: true, subtree: true });
+
+		return () => observer.disconnect();
+	}, [drawerOpen]);
+
 	return (
 		<Drawer
 			open={drawerOpen}
@@ -227,7 +248,7 @@ const CommentDrawer: FC<Props> = ({ moment }) => {
 			<DrawerContent className="h-[75vh] px-6 py-2" onWheel={e => e.stopPropagation()}>
 				<div className="h-[calc(75vh-24px-16px)] overflow-auto flex flex-col justify-between gap-2 pt-4">
 					{/* Messages container */}
-					<div className="overflow-auto flex flex-col-reverse" autoFocus>
+					<ScrollArea className="h-full overflow-auto flex flex-col-reverse" autoFocus ref={scrollAreaRef}>
 						{messagesLoading ? (
 							<Spinner />
 						) : (
@@ -275,7 +296,7 @@ const CommentDrawer: FC<Props> = ({ moment }) => {
 							</>
 						)}
 						<InfiniteLoader hasMore={hasNextPage} fetchMore={fetchNextPage} loading={isFetchingNextPage} />
-					</div>
+					</ScrollArea>
 					{/* Chat input */}
 					<div className="flex gap-2 shrink-0 p-2">
 						<EasyForm schema={formSchema} onSubmit={sendMessage} className="w-full" clearOnSubmit>
