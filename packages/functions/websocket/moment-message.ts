@@ -6,6 +6,7 @@ export const subscriber: Handler<InferredWebSocketMessage<Event>> = async event 
 	if (event.type === 'momentChat') {
 		const { payload } = event;
 		await createMomentMessage(payload.senderId, {
+			id: payload.messageId,
 			momentId: payload.momentId,
 			content: payload.message,
 			timestamp: payload.timestamp,

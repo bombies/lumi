@@ -12,6 +12,8 @@ export interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextArea
 	onValueChange?: (value: string) => void;
 	onTypingStart?: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
 	onTypingEnd?: (value?: string) => void;
+	isTyping?: boolean;
+	setIsTyping?: (isTyping: boolean) => void;
 	typingEndDelay?: number;
 	variableHeight?:
 		| boolean
@@ -34,6 +36,8 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
 			typingEndDelay = 400,
 			variableHeight,
 			value,
+			isTyping: controlledIsTyping,
+			setIsTyping: setControlledIsTyping,
 			...props
 		},
 		ref,
@@ -47,11 +51,11 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
 
 			const timeout = setTimeout(() => {
 				onTypingEnd?.(currentValue);
-				setIsTyping(false);
+				(setControlledIsTyping ?? setIsTyping)(false);
 			}, typingEndDelay);
 
 			return () => clearTimeout(timeout);
-		}, [currentValue, onTypingEnd, onTypingStart, typingEndDelay]);
+		}, [currentValue, onTypingEnd, onTypingStart, setControlledIsTyping, typingEndDelay]);
 
 		React.useEffect(() => {
 			setCurrentValue(value);
@@ -85,8 +89,8 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
 						setCurrentValue(e.target.value);
 						onValueChange?.(e.target.value);
 
-						if ((onTypingStart || onTypingEnd) && !isTyping) {
-							setIsTyping(true);
+						if ((onTypingStart || onTypingEnd) && !(controlledIsTyping ?? isTyping)) {
+							(setControlledIsTyping ?? setIsTyping)(true);
 							onTypingStart?.(e);
 						}
 

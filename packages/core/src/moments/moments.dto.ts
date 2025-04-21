@@ -55,6 +55,7 @@ export const createMomentMessageDto = momentMessageSchema
 	.and(
 		z.object({
 			timestamp: z.iso.datetime().optional(),
+			id: z.uuid().optional(),
 		}),
 	);
 

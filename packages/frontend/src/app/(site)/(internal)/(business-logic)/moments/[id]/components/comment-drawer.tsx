@@ -55,59 +55,75 @@ const CommentDrawer: FC<Props> = ({ moment }) => {
 	const { self, partner, sendNotificationToPartner, selfState } = useRelationship();
 	const { addEventHandler, removeEventHandler, emitEvent } = useWebSocket();
 	const [drawerOpen, setDrawerOpen] = useState(false);
-	const [messages, setMessages] = useState<MomentMessage[]>([]);
+	const [newMessages, setNewMessages] = useState<MomentMessage[]>([]);
 	const [partnerTyping, setPartnerTyping] = useState(false);
+	const [selfTyping, setSelfTyping] = useState(false);
 	const submitButtonRef = useRef<HTMLButtonElement>(null);
 
-	const addMessage = useCallback((message: MomentMessage) => {
-		setMessages(prev => [...prev, message]);
-	}, []);
+	const fetchedMessages = useMemo(() => {
+		if (!messagePages) return [];
+		return messagePages.pages.flatMap(page => page.data).reverse();
+	}, [messagePages]);
 
-	const addMessasgeHistory = useCallback((messages: MomentMessage[]) => {
-		setMessages(prev => [...messages, ...prev]);
-	}, []);
+	const fetchedMessageIds = useMemo(() => {
+		return new Set(fetchedMessages.map(msg => msg.id));
+	}, [fetchedMessages]);
 
-	useEffect(() => {
-		if (!messagePages) return;
-		const mostRecentPage = messagePages.pages[messagePages.pages.length - 1];
-		addMessasgeHistory(mostRecentPage.data.toReversed());
-	}, [addMessasgeHistory, messagePages]);
+	const allMessages = useMemo(() => {
+		const uniqueNewMessages = newMessages.filter(newMsg => !fetchedMessageIds.has(newMsg.id));
+		return [...fetchedMessages, ...uniqueNewMessages];
+	}, [fetchedMessages, newMessages, fetchedMessageIds]);
 
 	const messageElements = useMemo(() => {
 		const groupedMessages: [string, MomentMessage[]][] = [];
 
-		for (let idx = 0; idx < messages.length; idx++) {
-			const latestGroup: [string, MomentMessage[]] | undefined = groupedMessages[groupedMessages.length - 1];
+		for (const message of allMessages) {
+			// Iterate over combined list
+			const latestGroup = groupedMessages[groupedMessages.length - 1];
 
-			if (!latestGroup) {
-				groupedMessages.push([messages[idx].senderId, [messages[idx]]]);
-				continue;
-			}
-
-			if (latestGroup[0] === messages[idx].senderId) {
-				latestGroup[1].push(messages[idx]);
+			if (!latestGroup || latestGroup[0] !== message.senderId) {
+				groupedMessages.push([message.senderId, [message]]);
 			} else {
-				groupedMessages.push([messages[idx].senderId, [messages[idx]]]);
+				latestGroup[1].push(message);
 			}
 		}
 
-		return groupedMessages.map(([senderId, messages], idx) => (
-			<MomentMessageContainer key={`messagecontainer_${senderId}_${idx}`} messages={messages} />
+		// Use stable message ID for keys if possible within MomentMessageContainer
+		// The group key remains less stable but necessary for grouping render
+		return groupedMessages.map(([senderId, messagesInGroup], groupIndex) => (
+			<MomentMessageContainer
+				// Using the first message ID + sender might be more stable if available
+				key={`messagecontainer_${senderId}_${messagesInGroup[0]?.id ?? groupIndex}`}
+				messages={messagesInGroup}
+			/>
 		));
-	}, [messages]);
+	}, [allMessages]);
+
+	const addNewMessage = useCallback((message: MomentMessage) => {
+		setNewMessages(prev => {
+			if (prev.some(m => m.id === message.id)) {
+				return prev;
+			}
+			return [...prev, message];
+		});
+	}, []);
 
 	// Handle receiving messages in real-time.
 	useEffect(() => {
 		const handleMessageReceive: WebSocketEventHandler<'momentChat'> = payload => {
+			// Ignore messages sent by self (already handled optimistically)
 			if (payload.senderId === self.id) return;
+
 			const message = {
-				id: crypto.randomUUID(),
+				id: payload.messageId ?? crypto.randomUUID(),
 				senderId: payload.senderId,
 				momentId: moment.id,
 				content: payload.message,
 				timestamp: payload.timestamp,
 			} satisfies MomentMessage;
-			addMessage(message);
+
+			addNewMessage(message);
+			setPartnerTyping(false);
 		};
 
 		const handleTypingStart: WebSocketEventHandler<'momentTypingStart'> = payload => {
@@ -129,7 +145,7 @@ const CommentDrawer: FC<Props> = ({ moment }) => {
 			removeEventHandler('momentTypingStart', handleTypingStart);
 			removeEventHandler('momentTypingEnd', handleTypingEnd);
 		};
-	}, [addEventHandler, addMessage, moment.id, removeEventHandler, self.id]);
+	}, [addEventHandler, removeEventHandler, self.id, moment.id, addNewMessage]);
 
 	const sendMessage = useCallback<SubmitHandler<FormSchema>>(
 		async ({ messageContent }) => {
@@ -141,7 +157,7 @@ const CommentDrawer: FC<Props> = ({ moment }) => {
 				timestamp: new Date().toISOString(),
 			} satisfies MomentMessage;
 
-			addMessage(optimisticMessage);
+			addNewMessage(optimisticMessage);
 
 			await emitEvent(
 				'momentTypingEnd',
@@ -153,12 +169,14 @@ const CommentDrawer: FC<Props> = ({ moment }) => {
 					topic: WebsocketTopic.momentChatTopic(moment.relationshipId, moment.id),
 				},
 			);
+			setSelfTyping(false);
 
 			await emitEvent(
 				'momentChat',
 				{
 					senderId: self.id,
 					message: messageContent,
+					messageId: optimisticMessage.id,
 					timestamp: optimisticMessage.timestamp,
 					momentId: moment.id,
 				},
@@ -176,7 +194,15 @@ const CommentDrawer: FC<Props> = ({ moment }) => {
 				},
 			});
 		},
-		[addMessage, emitEvent, moment.id, moment.relationshipId, self.firstName, self.id, sendNotificationToPartner],
+		[
+			addNewMessage,
+			emitEvent,
+			moment.id,
+			moment.relationshipId,
+			self.firstName,
+			self.id,
+			sendNotificationToPartner,
+		],
 	);
 
 	return (
@@ -265,6 +291,8 @@ const CommentDrawer: FC<Props> = ({ moment }) => {
 										onKeyDown={e => {
 											if (e.ctrlKey && e.key === 'Enter') submitButtonRef.current?.click();
 										}}
+										isTyping={selfTyping}
+										setIsTyping={setSelfTyping}
 										onTypingStart={async () => {
 											await emitEvent(
 												'momentTypingStart',

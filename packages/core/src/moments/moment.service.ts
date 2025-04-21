@@ -283,8 +283,8 @@ export const deleteMomentDetails = async (id: string) => {
 	return deleteItem(DynamoKey.moment.pk(id), DynamoKey.moment.sk(id));
 };
 
-export const createMomentMessage = async (userId: string, dto: CreateMomentMessageDto) => {
-	const id = getUUID();
+export const createMomentMessage = async (userId: string, { id: messageId, ...dto }: CreateMomentMessageDto) => {
+	const id = messageId ?? getUUID();
 	const timestamp = dto.timestamp ?? new Date().toISOString();
 	const message: MomentMessage = {
 		id,

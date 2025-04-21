@@ -49,7 +49,7 @@ export type WebSocketMessageMap = {
 	heartbeat: WebSocketMessage<'heartbeat', { userId: string; username: string; relationshipId: string }>;
 	momentChat: WebSocketMessage<
 		'momentChat',
-		{ senderId: string; message: string; timestamp: string; momentId: string }
+		{ senderId: string; message: string; messageId?: string; timestamp: string; momentId: string }
 	>;
 	momentTypingStart: WebSocketMessage<'momentTypingStart', { senderId: string; timestamp: string }>;
 	momentTypingEnd: WebSocketMessage<'momentTypingEnd', { senderId: string; timestamp: string }>;
