@@ -32,7 +32,7 @@ import { contentBucket, contentCdn, contentCdnPublicKey } from './storage';
 export const frontend = new sst.aws.Nextjs('Frontend', {
 	path: 'packages/frontend',
 	dev: {
-		command: 'bun run dev',
+		command: process.env.NEXT_SCAN === 'true' ? 'bun run dev:scan' : 'bun run dev',
 	},
 	server: {
 		runtime: 'nodejs22.x',

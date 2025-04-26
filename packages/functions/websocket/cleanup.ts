@@ -32,6 +32,7 @@ export const handler: Handler<APIGatewayProxyEvent> = async () => {
 		console.error('Failed to query expired connections');
 		return;
 	}
+	
 
 	const expiredConnections = (res.Items ?? []) as DatabaseWebSocketHeartbeat[];
 

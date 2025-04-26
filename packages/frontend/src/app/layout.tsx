@@ -9,6 +9,7 @@ import './globals.css';
 
 import Script from 'next/script';
 
+import ReactScan from '@/components/react-scan';
 import { getServerSession } from '@/lib/better-auth/auth-actions';
 
 const sfProDisplay = localFont({
@@ -154,6 +155,7 @@ export default async function RootLayout({
 
 	return (
 		<html lang="en" className={`${sfProDisplay.variable} ${cookie.variable} antialiased`}>
+			{process.env.NODE_ENV === 'development' && <ReactScan />}
 			<body className={`antialiased`}>
 				<Providers>
 					<HydrateClient>{children}</HydrateClient>

@@ -82,6 +82,7 @@ const NotificationsProvider: FC<NotificationsProviderProps> = ({ children }) => 
 	}, []);
 
 	useEffect(() => {
+		logger.debug('effect 1');
 		if ('serviceWorker' in navigator && 'PushManager' in window) {
 			(async () => {
 				// @ts-expect-error Type def not setup for chromium based browsers
@@ -90,20 +91,18 @@ const NotificationsProvider: FC<NotificationsProviderProps> = ({ children }) => 
 					if (canNotify === 'granted') {
 						setIsSupported(true);
 						registerServiceWorker();
-
-						if (!subscription) subscribe();
+						subscribe();
 					}
 				} else {
 					if (Notification.permission === 'granted') {
 						setIsSupported(true);
 						registerServiceWorker();
-
-						if (!subscription) subscribe();
+						subscribe();
 					} else setShowNotificationDialog(true);
 				}
 			})();
 		}
-	}, [registerServiceWorker, showNotificationDialog, subscribe, subscription]);
+	}, [registerServiceWorker, showNotificationDialog, subscribe]);
 
 	const dataValue = useMemo<NotificationsData>(
 		() => ({
