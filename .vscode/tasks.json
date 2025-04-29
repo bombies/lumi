@@ -36,6 +36,23 @@
 			"problemMatcher": [
 				"$eslint-stylish"
 			]
+		},
+		{
+			"label": "Build",
+			"type": "shell",
+			"command": "bun",
+			"args": [
+				"run",
+				"build"
+			],
+			"options": {
+				"env": {
+					"STAGE": "ajani"
+				}
+			},
+			"problemMatcher": [
+				"$eslint-stylish"
+			]
 		}
 	]
 }
