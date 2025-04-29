@@ -19,6 +19,14 @@ export default antfu(
 
 		// Format settings
 		formatters: true,
+
+		ignores: [
+			'**/.next',
+			'**/.open-next',
+			'**/.turbo',
+			'node_modules',
+			'**/node_modules',
+		],
 	},
 	// --- Next.js Specific Rules ---
 	{
