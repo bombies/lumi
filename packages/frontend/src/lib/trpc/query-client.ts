@@ -5,6 +5,7 @@ export function makeQueryClient() {
 		defaultOptions: {
 			queries: {
 				staleTime: 30 * 1000,
+				retryDelay: 500, // 500ms
 			},
 			dehydrate: {
 				shouldDehydrateQuery: query => defaultShouldDehydrateQuery(query) || query.state.status === 'pending',

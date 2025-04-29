@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import type { FC } from 'react';
 
 import Setting from '../components/setting';
 import SettingsSection from '../components/settings-section';

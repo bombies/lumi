@@ -1,11 +1,12 @@
 'use client';
 
-import { FC, useMemo } from 'react';
-import { MomentMessage } from '@lumi/core/moments/moment.types';
-
+import type { MomentMessage } from '@lumi/core/moments/moment.types';
+import type { FC } from 'react';
 import { useRelationship } from '@/components/providers/relationships/relationship-provder';
+
 import UserAvatar from '@/components/ui/user-avatar';
 import { cn } from '@/lib/utils';
+import { useMemo } from 'react';
 import MomentMessageElement from './moment-message';
 
 type Props = {

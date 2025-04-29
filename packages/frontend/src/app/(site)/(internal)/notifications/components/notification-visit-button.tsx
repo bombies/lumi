@@ -1,13 +1,14 @@
 'use client';
 
-import { FC } from 'react';
-import Link from 'next/link';
-import { LinkIcon } from '@heroicons/react/24/solid';
-import { StoredNotification } from '@lumi/core/notifications/notification.types';
-import { VariantProps } from 'class-variance-authority';
-
-import { Button, buttonVariants } from '@/components/ui/button';
+import type { buttonVariants } from '@/components/ui/button';
+import type { StoredNotification } from '@lumi/core/notifications/notification.types';
+import type { VariantProps } from 'class-variance-authority';
+import type { FC } from 'react';
+import { Button } from '@/components/ui/button';
 import { UpdateNotification } from '@/hooks/trpc/notification-hooks';
+
+import { LinkIcon } from '@heroicons/react/24/solid';
+import Link from 'next/link';
 
 type Props = {
 	notification: StoredNotification;
@@ -34,7 +35,9 @@ const NotificationVisitButton: FC<Props> = ({ notification, disabled, iconOnly, 
 						});
 					}}
 				>
-					<LinkIcon /> {!iconOnly ? 'Visit' : ''}
+					<LinkIcon />
+					{' '}
+					{!iconOnly ? 'Visit' : ''}
 				</Button>
 			</Link>
 		)

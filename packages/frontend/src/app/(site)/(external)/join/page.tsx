@@ -1,14 +1,14 @@
-import { FC } from 'react';
-import Link from 'next/link';
-import { redirect } from 'next/navigation';
-import { EnvelopeIcon, InboxArrowDownIcon, PaperAirplaneIcon } from '@heroicons/react/24/solid';
-import { getRelationshipForUser } from '@lumi/core/relationships/relationship.service';
-
+import type { FC } from 'react';
 import ReceivedRelationshipRequestsContent from '@/app/(site)/(external)/join/components/received-relationship-requests-content';
 import SendRelationshipRequestContent from '@/app/(site)/(external)/join/components/send-relationship-request-content';
 import SignOutButton from '@/components/ui/sign-out-button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+
 import { getServerSession } from '@/lib/better-auth/auth-actions';
+import { EnvelopeIcon, InboxArrowDownIcon, PaperAirplaneIcon } from '@heroicons/react/24/solid';
+import { getRelationshipForUser } from '@lumi/core/relationships/relationship.service';
+import Link from 'next/link';
+import { redirect } from 'next/navigation';
 import SentRelationshipRequestsContainer from './components/sent-relationship-requests.container';
 
 const JoinPage: FC = async () => {
@@ -25,7 +25,9 @@ const JoinPage: FC = async () => {
 			</Link>
 			<section className="space-y-3">
 				<h1 className="text-5xl font-bold">
-					Join a <span className="text-primary">space</span>
+					Join a
+					{' '}
+					<span className="text-primary">space</span>
 				</h1>
 				<p className="max-w-sm">
 					Before you can start using Lumi, you must join a space. You can either send a request to a user or
@@ -34,10 +36,14 @@ const JoinPage: FC = async () => {
 				<Tabs defaultValue="send" className="w-full phone-big:w-96">
 					<TabsList>
 						<TabsTrigger value="send">
-							<PaperAirplaneIcon className="size-[18px]" /> Send
+							<PaperAirplaneIcon className="size-[18px]" />
+							{' '}
+							Send
 						</TabsTrigger>
 						<TabsTrigger value="received">
-							<InboxArrowDownIcon className="size-[18px]" /> Received
+							<InboxArrowDownIcon className="size-[18px]" />
+							{' '}
+							Received
 						</TabsTrigger>
 						<TabsTrigger value="sent">
 							<EnvelopeIcon className="size-[18px]" />

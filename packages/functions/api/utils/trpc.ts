@@ -1,35 +1,32 @@
+import type { CreateAWSLambdaContextOptions } from '@trpc/server/adapters/aws-lambda';
+import type { APIGatewayProxyEvent } from 'aws-lambda';
 import { decodeBearerToken } from '@lumi/core/auth/auth.service';
 import { getRelationshipForUser } from '@lumi/core/relationships/relationship.service';
-import { TRPCError, initTRPC } from '@trpc/server';
-import { CreateAWSLambdaContextOptions } from '@trpc/server/adapters/aws-lambda';
-import { APIGatewayProxyEvent } from 'aws-lambda';
+import { initTRPC, TRPCError } from '@trpc/server';
 
 type Context = Awaited<ReturnType<typeof createContext>>;
 
 export const t = initTRPC.context<Context>().create();
-export async function createContext({ event, context, info }: CreateAWSLambdaContextOptions<APIGatewayProxyEvent>) {
+export async function createContext({ event }: CreateAWSLambdaContextOptions<APIGatewayProxyEvent>) {
 	const headers = event.headers as Record<string, string | undefined>;
 	const authorizationHeader = event.headers.authorization;
 	if (!authorizationHeader) return { headers };
-	try {
-		const decodedToken = await decodeBearerToken(authorizationHeader);
-		if (!decodedToken) return { headers };
-		return {
-			headers,
-			user: {
-				id: decodedToken.id,
-			},
-		};
-	} catch (e) {
-		throw e;
-	}
+
+	const decodedToken = await decodeBearerToken(authorizationHeader);
+	if (!decodedToken) return { headers };
+	return {
+		headers,
+		user: {
+			id: decodedToken.id,
+		},
+	};
 }
 
 export const createCallerFactory = t.createCallerFactory;
 
 export const router = t.router;
 
-export const publicProcedure = t.procedure.use(async function procedure(opts) {
+export const publicProcedure = t.procedure.use(async (opts) => {
 	const {
 		ctx: { user },
 	} = opts;
@@ -39,7 +36,7 @@ export const publicProcedure = t.procedure.use(async function procedure(opts) {
 	});
 });
 
-export const protectedProcedure = publicProcedure.use(async function isAuthenticated(opts) {
+export const protectedProcedure = publicProcedure.use(async (opts) => {
 	const { ctx } = opts;
 	if (!ctx.user) throw new TRPCError({ code: 'UNAUTHORIZED', message: 'You are not authenticated!' });
 	return opts.next({
@@ -49,7 +46,7 @@ export const protectedProcedure = publicProcedure.use(async function isAuthentic
 	});
 });
 
-export const relationshipProcedure = protectedProcedure.use(async function isRelationship(opts) {
+export const relationshipProcedure = protectedProcedure.use(async (opts) => {
 	const { ctx } = opts;
 
 	const relationship = await getRelationshipForUser(ctx.user.id);

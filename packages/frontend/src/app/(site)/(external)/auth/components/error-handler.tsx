@@ -1,7 +1,8 @@
 'use client';
 
-import { FC, useEffect } from 'react';
+import type { FC } from 'react';
 import { useSearchParams } from 'next/navigation';
+import { useEffect } from 'react';
 import { toast } from 'sonner';
 
 const useErrorHandler = () => {
@@ -23,8 +24,8 @@ const useErrorHandler = () => {
 				break;
 			}
 			case 'OAuthAccountNotLinked': {
-				errorMessage =
-					'This account is already linked to another provider. Please sign in with the correct provider.';
+				errorMessage
+					= 'This account is already linked to another provider. Please sign in with the correct provider.';
 				break;
 			}
 			case 'Verification': {

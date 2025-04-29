@@ -1,16 +1,17 @@
 'use client';
 
-import { FC, useCallback, useState } from 'react';
-import { SubmitHandler } from 'react-hook-form';
-import { toast } from 'sonner';
-import { z } from 'zod';
-
+import type { FC } from 'react';
+import type { SubmitHandler } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import EasyForm from '@/components/ui/form-extras/easy-form';
+
 import EasyFormField from '@/components/ui/form-extras/easy-form-field';
 import PasswordInput from '@/components/ui/password-input';
 import { auth } from '@/lib/better-auth/auth-client';
+import { useCallback, useState } from 'react';
+import { toast } from 'sonner';
+import { z } from 'zod';
 
 const resetPasswordFormSchema = z.object({
 	oldPassword: z.string().min(1, 'Old password is required'),
@@ -24,7 +25,7 @@ const ResetPasswordButton: FC = () => {
 	const [dialogOpen, setDialogOpen] = useState(false);
 	const [isChangingPassword, setIsChangingPassword] = useState(false);
 	const onSubmit = useCallback<SubmitHandler<ResetPasswordFormValues>>(
-		async data => {
+		async (data) => {
 			if (isChangingPassword) return;
 			if (data.newPassword !== data.confirmPassword) toast.error('Passwords do not match!');
 
@@ -55,7 +56,7 @@ const ResetPasswordButton: FC = () => {
 				<Button size="sm">Change Password</Button>
 			</DialogTrigger>
 			<DialogContent
-				onInteractOutside={e => {
+				onInteractOutside={(e) => {
 					e.preventDefault();
 				}}
 			>

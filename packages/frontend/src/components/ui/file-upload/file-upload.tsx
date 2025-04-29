@@ -1,18 +1,21 @@
 'use client';
 
-import { FC, Fragment, ReactElement, RefObject, useCallback, useRef, useState } from 'react';
+import type { FC, ReactElement, RefObject } from 'react';
+import type { Area, CropperProps, Point } from 'react-easy-crop';
+import type { FileSize } from './file-size';
+import type MediaType from './media-type';
 import { AnimatePresence } from 'framer-motion';
 import getBlobDuration from 'get-blob-duration';
 import { CheckIcon, XIcon } from 'lucide-react';
-import Cropper, { Area, CropperProps, Point } from 'react-easy-crop';
-import { toast } from 'sonner';
+import { Fragment, useCallback, useRef, useState } from 'react';
 
+import Cropper from 'react-easy-crop';
+import { toast } from 'sonner';
 import { Button } from '../button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../dialog';
 import { Popover, PopoverContent, PopoverTrigger } from '../popover';
 import { Progress } from '../progress';
 import { Separator } from '../separator';
-import { FileSize } from './file-size';
 import getCroppedImg, {
 	clearInput,
 	handleFileRemoval,
@@ -21,7 +24,6 @@ import getCroppedImg, {
 	isVideoFile,
 	processFiles,
 } from './helpers';
-import MediaType from './media-type';
 
 export type DefaultFileUploadProps = {
 	maxFileSize?: FileSize;
@@ -50,21 +52,21 @@ export type FileUploadToastOptions = {
 export type FileUploadProps = DefaultFileUploadProps &
 	(
 		| {
-				type: 'single';
-				onLocalUploadSuccess?: (file: File, clearInput: () => void) => void;
-				handleServerUpload?: (file: File) => boolean | string | Promise<boolean | string>;
-				maxFiles?: never;
-				crop?: Partial<
-					Omit<CropperProps, 'crop' | 'onCropChange' | 'zoom' | 'onZoomChange' | 'image' | 'onCropComplete'>
-				>;
-		  }
+			type: 'single';
+			onLocalUploadSuccess?: (file: File, clearInput: () => void) => void;
+			handleServerUpload?: (file: File) => boolean | string | Promise<boolean | string>;
+			maxFiles?: never;
+			crop?: Partial<
+				Omit<CropperProps, 'crop' | 'onCropChange' | 'zoom' | 'onZoomChange' | 'image' | 'onCropComplete'>
+			>;
+		}
 		| {
-				type: 'multiple';
-				maxFiles?: number;
-				onLocalUploadSuccess?: (file: File[], clearInput: () => void) => void;
-				handleServerUpload?: (file: File[]) => boolean | string | Promise<boolean | string>;
-				crop: never;
-		  }
+			type: 'multiple';
+			maxFiles?: number;
+			onLocalUploadSuccess?: (file: File[], clearInput: () => void) => void;
+			handleServerUpload?: (file: File[]) => boolean | string | Promise<boolean | string>;
+			crop: never;
+		}
 	);
 
 const FileUpload: FC<FileUploadProps> = ({
@@ -87,14 +89,14 @@ const FileUpload: FC<FileUploadProps> = ({
 	crop: cropArgs,
 }) => {
 	const [currentFiles, setCurrentFiles] = useState<File[]>();
-	const [showLazyPopup, setShowLazyPopup] = useState(!!cropArgs ? false : true);
+	const [showLazyPopup, setShowLazyPopup] = useState(!cropArgs);
 	const [crop, setCrop] = useState<Point>({ x: 0, y: 0 });
 	const [cropZoom, setCropZoom] = useState(1);
 	const [cropModalOpen, setCropModalOpen] = useState(false);
 	const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area>();
 
 	const resetShowLazyPopup = useCallback(() => {
-		setShowLazyPopup(!!cropArgs ? false : true);
+		setShowLazyPopup(!cropArgs);
 	}, [cropArgs]);
 
 	const inputRef = useRef<HTMLInputElement>(null);
@@ -169,7 +171,7 @@ const FileUpload: FC<FileUploadProps> = ({
 				className="hidden"
 				accept={fileTypes.join(',')}
 				disabled={disabled || isUploading}
-				onChange={async e => {
+				onChange={async (e) => {
 					e.preventDefault();
 
 					const clearInputHandler = () => clearInput({ inputRef });
@@ -203,123 +205,129 @@ const FileUpload: FC<FileUploadProps> = ({
 			/>
 			<div className="relative flex flex-col justify-start items-start gap-4">
 				{children?.(inputRef)}
-				{showLazyPopup ? (
-					<AnimatePresence>
-						{uploadType === 'lazy' && currentFiles && (
-							<Popover open={true}>
-								<PopoverTrigger className="opacity-0 p-0 m-0 size-0">confirm</PopoverTrigger>
-								<PopoverContent>
-									<h3 className="text-lg">Confirm Upload</h3>
-									<Separator className="my-2" />
-									<div className="bg-primary/20 text-primary px-4 py-2 rounded-xl break-all text-wrap mb-4">
-										<p className="text-xs ">{currentFiles.map(file => file.name).join(', ')}</p>
+				{showLazyPopup
+					? (
+							<AnimatePresence>
+								{uploadType === 'lazy' && currentFiles && (
+									<Popover open={true}>
+										<PopoverTrigger className="opacity-0 p-0 m-0 size-0">confirm</PopoverTrigger>
+										<PopoverContent>
+											<h3 className="text-lg">Confirm Upload</h3>
+											<Separator className="my-2" />
+											<div className="bg-primary/20 text-primary px-4 py-2 rounded-xl break-all text-wrap mb-4">
+												<p className="text-xs ">{currentFiles.map(file => file.name).join(', ')}</p>
+											</div>
+											<div className="flex gap-4">
+												<Button
+													disabled={isUploading || disabled}
+													loading={isUploading}
+													size="sm"
+													className="self-center"
+													variant="default:flat"
+													onClick={async () => {
+														const defaultErrorHandler = (msg: string) =>
+															`There was an error uploading that file: ${msg}`;
+														toast.promise(uploadFilesToServer(currentFiles), {
+															loading: toastOptions?.uploadingMsg ?? 'Uploading file...',
+															success: toastOptions?.successMsg ?? 'Successfully uploaded file!',
+															error: toastOptions?.errorHandler ?? defaultErrorHandler,
+														});
+													}}
+												>
+													<CheckIcon width={16} height={16} className="mr-4" />
+													{' '}
+													Upload
+												</Button>
+												<Button
+													disabled={isUploading || disabled}
+													size="sm"
+													variant="destructive:flat"
+													className="self-center"
+													onClick={() => {
+														setCurrentFiles(undefined);
+														resetShowLazyPopup();
+														if (inputRef.current) {
+															inputRef.current.value = '';
+															inputRef.current.files = null;
+														}
+
+														if (onFileRemove) onFileRemove();
+													}}
+												>
+													<XIcon width={16} height={16} className="mr-4" />
+													{' '}
+													Cancel
+												</Button>
+											</div>
+											{isUploading && serverUploadProgress !== undefined && (
+												<Progress className="mt-4 h-2" value={serverUploadProgress} />
+											)}
+										</PopoverContent>
+									</Popover>
+								)}
+							</AnimatePresence>
+						)
+					: (
+							<Dialog open={cropModalOpen} onOpenChange={setCropModalOpen}>
+								<DialogContent>
+									<DialogHeader>
+										<DialogTitle>Crop Image</DialogTitle>
+									</DialogHeader>
+									<div className="relative w-full h-96">
+										<Cropper
+											image={currentFiles && URL.createObjectURL(currentFiles[0])}
+											crop={crop}
+											zoom={cropZoom}
+											onCropChange={c => setCrop(c)}
+											onZoomChange={setCropZoom}
+											onCropComplete={async (croppedArea, areaPixels) => {
+												setCroppedAreaPixels(areaPixels);
+											}}
+											{...cropArgs}
+										/>
 									</div>
-									<div className="flex gap-4">
+									<div className="flex gap-2">
 										<Button
-											disabled={isUploading || disabled}
-											loading={isUploading}
-											size="sm"
-											className="self-center"
-											variant="default:flat"
 											onClick={async () => {
-												const defaultErrorHandler = (msg: string) =>
-													`There was an error uploading that file: ${msg}`;
-												toast.promise(uploadFilesToServer(currentFiles), {
-													loading: toastOptions?.uploadingMsg ?? 'Uploading file...',
-													success: toastOptions?.successMsg ?? 'Successfully uploaded file!',
-													error: toastOptions?.errorHandler ?? defaultErrorHandler,
+												if (!currentFiles || !croppedAreaPixels) return;
+												const croppedImage = await getCroppedImg(
+													URL.createObjectURL(currentFiles[0]),
+													croppedAreaPixels,
+												);
+
+												if (!croppedImage) return;
+
+												const file = new File([croppedImage], currentFiles[0].name, {
+													type: currentFiles[0].type,
 												});
+
+												setCurrentFiles([file]);
+
+												// Continue upload flow
+												setShowLazyPopup(true);
+												setCropModalOpen(false);
+												await handleFileActions([file]);
 											}}
 										>
-											<CheckIcon width={16} height={16} className="mr-4" /> Upload
+											Crop Image
 										</Button>
 										<Button
-											disabled={isUploading || disabled}
-											size="sm"
-											variant="destructive:flat"
-											className="self-center"
 											onClick={() => {
+												setCropModalOpen(false);
+												setCroppedAreaPixels(undefined);
+												setCrop({ x: 0, y: 0 });
+												setCropZoom(1);
 												setCurrentFiles(undefined);
-												resetShowLazyPopup();
-												if (inputRef.current) {
-													inputRef.current.value = '';
-													inputRef.current.files = null;
-												}
-
-												if (onFileRemove) onFileRemove();
+												clearInput({ inputRef });
 											}}
+											variant="destructive:flat"
 										>
-											<XIcon width={16} height={16} className="mr-4" /> Cancel
+											Cancel Upload
 										</Button>
 									</div>
-									{isUploading && serverUploadProgress !== undefined && (
-										<Progress className="mt-4 h-2" value={serverUploadProgress} />
-									)}
-								</PopoverContent>
-							</Popover>
+								</DialogContent>
+							</Dialog>
 						)}
-					</AnimatePresence>
-				) : (
-					<Dialog open={cropModalOpen} onOpenChange={setCropModalOpen}>
-						<DialogContent>
-							<DialogHeader>
-								<DialogTitle>Crop Image</DialogTitle>
-							</DialogHeader>
-							<div className="relative w-full h-96">
-								<Cropper
-									image={currentFiles && URL.createObjectURL(currentFiles[0])}
-									crop={crop}
-									zoom={cropZoom}
-									onCropChange={c => setCrop(c)}
-									onZoomChange={setCropZoom}
-									onCropComplete={async (croppedArea, areaPixels) => {
-										setCroppedAreaPixels(areaPixels);
-									}}
-									{...cropArgs}
-								/>
-							</div>
-							<div className="flex gap-2">
-								<Button
-									onClick={async () => {
-										if (!currentFiles || !croppedAreaPixels) return;
-										const croppedImage = await getCroppedImg(
-											URL.createObjectURL(currentFiles[0]),
-											croppedAreaPixels,
-										);
-
-										if (!croppedImage) return;
-
-										const file = new File([croppedImage], currentFiles[0].name, {
-											type: currentFiles[0].type,
-										});
-
-										setCurrentFiles([file]);
-
-										// Continue upload flow
-										setShowLazyPopup(true);
-										setCropModalOpen(false);
-										await handleFileActions([file]);
-									}}
-								>
-									Crop Image
-								</Button>
-								<Button
-									onClick={() => {
-										setCropModalOpen(false);
-										setCroppedAreaPixels(undefined);
-										setCrop({ x: 0, y: 0 });
-										setCropZoom(1);
-										setCurrentFiles(undefined);
-										clearInput({ inputRef });
-									}}
-									variant="destructive:flat"
-								>
-									Cancel Upload
-								</Button>
-							</div>
-						</DialogContent>
-					</Dialog>
-				)}
 			</div>
 		</Fragment>
 	);

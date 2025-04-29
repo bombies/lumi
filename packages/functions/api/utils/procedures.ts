@@ -1,10 +1,11 @@
+import type { ProcedureBuilder } from '@trpc/server/unstable-core-do-not-import';
+import type { RequestHeaders } from 'request-ip';
+import type { t } from './trpc';
 import redis from '@lumi/core/redis/redis';
 import { createTrpcRedisLimiter } from '@trpc-limiter/redis';
 import { TRPCError } from '@trpc/server';
-import { ProcedureBuilder } from '@trpc/server/unstable-core-do-not-import';
-import requestIp, { RequestHeaders } from 'request-ip';
 
-import { t } from './trpc';
+import requestIp from 'request-ip';
 
 type RateLimiterArgs = Omit<Parameters<typeof createTrpcRedisLimiter>[0], 'fingerprint' | 'redisClient'>;
 
@@ -16,7 +17,7 @@ export const getIpAddressFromHeaders = (reqHeaders: Record<string, string | unde
 		'x-cluster-client-ip': reqHeaders['x-cluster-client-ip'] ?? undefined,
 		'x-forwarded': reqHeaders['x-forwarded'] ?? undefined,
 		'forwarded-for': reqHeaders['forwarded-for'] ?? undefined,
-		forwarded: reqHeaders['forwarded'] ?? undefined,
+		'forwarded': reqHeaders.forwarded ?? undefined,
 	};
 
 	const ipAddr = requestIp.getClientIp({

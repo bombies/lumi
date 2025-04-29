@@ -1,16 +1,16 @@
 import type { Metadata, Viewport } from 'next';
-import { Cookie } from 'next/font/google';
-import localFont from 'next/font/local';
-
 import Providers from '@/components/providers/providers';
+import ReactScan from '@/components/react-scan';
+
+import { getServerSession } from '@/lib/better-auth/auth-actions';
 import { getHydrationHelpers } from '@/lib/trpc/server';
 
-import './globals.css';
+import { Cookie } from 'next/font/google';
+
+import localFont from 'next/font/local';
 
 import Script from 'next/script';
-
-import ReactScan from '@/components/react-scan';
-import { getServerSession } from '@/lib/better-auth/auth-actions';
+import './globals.css';
 
 const sfProDisplay = localFont({
 	src: [
@@ -156,7 +156,7 @@ export default async function RootLayout({
 	return (
 		<html lang="en" className={`${sfProDisplay.variable} ${cookie.variable} antialiased`}>
 			{process.env.NODE_ENV === 'development' && <ReactScan />}
-			<body className={`antialiased`}>
+			<body className="antialiased">
 				<Providers>
 					<HydrateClient>{children}</HydrateClient>
 				</Providers>

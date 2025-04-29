@@ -1,16 +1,17 @@
 'use client';
 
-import { FC, useEffect, useState } from 'react';
-import { Moment } from '@lumi/core/moments/moment.types';
-import { User as LumiUser } from '@lumi/core/users/user.types';
-import { motion } from 'framer-motion';
-
+import type { Moment } from '@lumi/core/moments/moment.types';
+import type { User as LumiUser } from '@lumi/core/users/user.types';
+import type { FC } from 'react';
 import { WebsocketTopic } from '@/components/providers/web-sockets/topics';
 import { useWebSocket } from '@/components/providers/web-sockets/web-socket-provider';
+
 import { Separator } from '@/components/ui/separator';
 import UserAvatar from '@/components/ui/user-avatar';
 import { GetMomentTags } from '@/hooks/trpc/moment-hooks';
 import { cn } from '@/lib/utils';
+import { motion } from 'framer-motion';
+import { useEffect, useState } from 'react';
 import CommentDrawer from './comment-drawer';
 import MomentSettings from './moment-settings';
 
@@ -45,7 +46,7 @@ const MomentDetailsContainer: FC<Props> = ({ moment, uploader, currentUser: user
 						containerClassName="shrink-0"
 						hideStatus
 					/>
-					<div className="cursor-pointer" onClick={() => setExpanded(prev => !prev)}>
+					<button type="button" className="cursor-pointer" onClick={() => setExpanded(prev => !prev)}>
 						<h6 className={cn('line-clamp-2 text-sm font-bold', expanded && 'line-clamp-none max-h-[80%]')}>
 							{moment.title}
 						</h6>
@@ -57,20 +58,22 @@ const MomentDetailsContainer: FC<Props> = ({ moment, uploader, currentUser: user
 						>
 							{moment.description}
 						</p>
-						{momentTags?.length ? (
-							<>
-								<Separator className="my-1" />
-								<p
-									className={cn(
-										'text-xs line-clamp-1 whitespace-pre-wrap text-primary',
-										expanded && 'line-clamp-none',
-									)}
-								>
-									{momentTags.map(tag => `#${tag.tag}`).join(', ')}
-								</p>
-							</>
-						) : undefined}
-					</div>
+						{momentTags?.length
+							? (
+									<>
+										<Separator className="my-1" />
+										<p
+											className={cn(
+												'text-xs line-clamp-1 whitespace-pre-wrap text-primary',
+												expanded && 'line-clamp-none',
+											)}
+										>
+											{momentTags.map(tag => `#${tag.tag}`).join(', ')}
+										</p>
+									</>
+								)
+							: undefined}
+					</button>
 				</div>
 				<div className="flex flex-col tablet:flex-row gap-1">
 					<CommentDrawer moment={moment} />

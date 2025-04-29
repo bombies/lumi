@@ -1,10 +1,12 @@
 'use client';
 
-import { FC, useState } from 'react';
-import { StaticImport } from 'next/dist/shared/lib/get-img-props';
-import NextImage, { ImageProps } from 'next/image';
+import type { StaticImport } from 'next/dist/shared/lib/get-img-props';
+import type { ImageProps } from 'next/image';
+import type { FC } from 'react';
 import clsx from 'clsx';
 import { motion } from 'framer-motion';
+import NextImage from 'next/image';
+import { useState } from 'react';
 
 import { cn } from '../../lib/utils';
 

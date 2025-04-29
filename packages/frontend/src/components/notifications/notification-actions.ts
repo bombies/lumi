@@ -1,14 +1,15 @@
 'use server';
 
-import { NotificationSubscriber } from '@lumi/core/notifications/notification.types';
+import type { NotificationSubscriber } from '@lumi/core/notifications/notification.types';
+import type { PushSubscription as WebPushSubscription } from 'web-push';
+import { getServerSession } from '@/lib/better-auth/auth-actions';
+
 import {
 	createNotificationSubscription,
 	deleteNotificationSubscription,
 	getNotificationSubscriptions,
 } from '@lumi/core/notifications/notifications.service';
-import webpush, { PushSubscription as WebPushSubscription } from 'web-push';
-
-import { getServerSession } from '@/lib/better-auth/auth-actions';
+import webpush from 'web-push';
 
 webpush.setVapidDetails(
 	'mailto:contact@ajani.me',
@@ -63,21 +64,25 @@ export async function sendUserNotification({ message, title, icon = '/favicon-96
 	const subs = subscriptions[session.user.id];
 	if (!subs) return { success: false, error: 'No subscriptions found' };
 
+	const results: { success: boolean; error?: string }[] = [];
+
 	for (const sub of subs) {
 		try {
 			// TODO: Store notification for user
 			await webpush.sendNotification(
 				sub,
 				JSON.stringify({
-					title: title,
+					title,
 					body: message,
-					icon: icon,
+					icon,
 				}),
 			);
-			return { success: true };
+			results.push({ success: true });
 		} catch (error) {
 			console.error('Error sending push notification:', error);
-			return { success: false, error: 'Failed to send notification' };
+			results.push({ success: false, error: 'Failed to send notification' });
 		}
 	}
+
+	return results;
 }

@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import type { FC } from 'react';
 
 import { cn } from '@/lib/utils';
 import { Skeleton } from '../ui/skeleton';

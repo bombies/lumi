@@ -1,37 +1,38 @@
 {
 	"compilerOptions": {
+		"incremental": true,
+		"target": "ES2017",
+		"jsx": "preserve",
 		"lib": ["dom", "dom.iterable", "esnext"],
-		"allowJs": true,
-		"skipLibCheck": true,
-		"strict": true,
-		"noEmit": true,
-		"esModuleInterop": true,
 		"module": "esnext",
 		"moduleResolution": "bundler",
-		"resolveJsonModule": true,
-		"isolatedModules": true,
-		"jsx": "preserve",
-		"incremental": true,
-		"plugins": [
-			{
-				"name": "next"
-			}
-		],
 		"paths": {
 			"@/*": ["./src/*"],
 			"@lumi/core/*": ["../core/src/*"],
 			"@lumi/functions/*": ["../functions/api/*"],
 			"@lumi/emails/*": ["../emails/emails/*"]
 		},
-		"target": "ES2017"
+		"resolveJsonModule": true,
+		"allowJs": true,
+		"strict": true,
+		"noEmit": true,
+		"esModuleInterop": true,
+		"isolatedModules": true,
+		"skipLibCheck": true,
+		"plugins": [
+			{
+				"name": "next"
+			}
+		]
 	},
-	"exclude": ["node_modules"],
 	"include": [
 		"video.d.ts",
 		"next-env.d.ts",
 		"**/*.ts",
 		"**/*.tsx",
 		".next/types/**/*.ts",
-		"public/notification-worker.js"
-	]
+		"public/notification-worker.js",
+		"../../eslint.config.mjs"
+	],
+	"exclude": ["node_modules"]
 }

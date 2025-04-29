@@ -1,17 +1,18 @@
 'use client';
 
-import { FC, useCallback, useState } from 'react';
-import { Affirmation } from '@lumi/core/affirmations/affirmations.types';
-import { PencilIcon } from 'lucide-react';
-import { SubmitHandler } from 'react-hook-form';
-import { z } from 'zod';
-
+import type { Affirmation } from '@lumi/core/affirmations/affirmations.types';
+import type { FC } from 'react';
+import type { SubmitHandler } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import EasyForm from '@/components/ui/form-extras/easy-form';
+
 import EasyFormField from '@/components/ui/form-extras/easy-form-field';
 import { Textarea } from '@/components/ui/textarea';
 import { UpdateAffirmation } from '@/hooks/trpc/affirmation-hooks';
+import { PencilIcon } from 'lucide-react';
+import { useCallback, useState } from 'react';
+import { z } from 'zod';
 
 type Props = {
 	affirmation: Affirmation;
@@ -45,7 +46,7 @@ const EditAffirmationButton: FC<Props> = ({ affirmation }) => {
 				</Button>
 			</DialogTrigger>
 			<DialogContent
-				onPointerDownOutside={e => {
+				onPointerDownOutside={(e) => {
 					e.preventDefault();
 				}}
 			>

@@ -1,12 +1,13 @@
 'use client';
 
-import { FC, useCallback, useEffect, useRef, useState } from 'react';
-import { Relationship } from '@lumi/core/relationships/relationship.types';
-import { User } from '@lumi/core/users/user.types';
-import { InferredWebSocketMessage, WebSocketEventHandler } from '@lumi/core/websockets/websockets.types';
-
+import type { Relationship } from '@lumi/core/relationships/relationship.types';
+import type { User } from '@lumi/core/users/user.types';
+import type { InferredWebSocketMessage, WebSocketEventHandler } from '@lumi/core/websockets/websockets.types';
+import type { FC } from 'react';
 import { useWebSocket } from '@/components/providers/web-sockets/web-socket-provider';
+
 import { logger } from '@/lib/logger';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { WebsocketTopic } from './topics';
 
 const IDLE_TIMEOUT = 5 * 60 * 1000; // 5 minutes
@@ -104,7 +105,7 @@ export const usePresenceWatcher = (user: User, relationship: Relationship) => {
 	}, [clearTimer, emitEvent, handleUserActivity]);
 
 	useEffect(() => {
-		const handlePresence: WebSocketEventHandler<'presence'> = async payload => {
+		const handlePresence: WebSocketEventHandler<'presence'> = async (payload) => {
 			if (payload.userId === user.id) {
 				switch (payload.status) {
 					case 'online':

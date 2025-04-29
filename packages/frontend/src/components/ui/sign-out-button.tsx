@@ -1,10 +1,10 @@
 'use client';
 
-import { FC } from 'react';
-import { LogOutIcon } from 'lucide-react';
-
+import type { FC } from 'react';
 import { Button } from '@/components/ui/button';
+
 import { useSignOut } from '@/lib/hooks/useSignOut';
+import { LogOutIcon } from 'lucide-react';
 
 type Props = {
 	iconOnly?: boolean;
@@ -24,14 +24,16 @@ const SignOutButton: FC<Props> = ({ iconOnly, className, disableNotification, va
 			onClick={signOut}
 			tooltip={iconOnly ? 'Sign Out' : undefined}
 		>
-			{iconOnly ? (
-				<LogOutIcon size={18} />
-			) : (
-				<>
-					<LogOutIcon size={18} />
-					Sign Out
-				</>
-			)}
+			{iconOnly
+				? (
+						<LogOutIcon size={18} />
+					)
+				: (
+						<>
+							<LogOutIcon size={18} />
+							Sign Out
+						</>
+					)}
 		</Button>
 	);
 };

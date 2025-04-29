@@ -1,15 +1,14 @@
 'use client';
 
+import type { EmojiPickerListCategoryHeaderProps, EmojiPickerListEmojiProps, EmojiPickerListRowProps } from 'frimousse';
 import type * as React from 'react';
-import {
-	EmojiPicker as EmojiPickerPrimitive,
-	type EmojiPickerListCategoryHeaderProps,
-	type EmojiPickerListEmojiProps,
-	type EmojiPickerListRowProps,
-} from 'frimousse';
-import { LoaderIcon, SearchIcon } from 'lucide-react';
-
 import { cn } from '@/lib/utils';
+import {
+
+	EmojiPicker as EmojiPickerPrimitive,
+} from 'frimousse';
+
+import { LoaderIcon, SearchIcon } from 'lucide-react';
 
 function EmojiPicker({ className, ...props }: React.ComponentProps<typeof EmojiPickerPrimitive.Root>) {
 	return (
@@ -119,22 +118,23 @@ function EmojiPickerFooter({ className, ...props }: React.ComponentProps<'div'>)
 		>
 			<EmojiPickerPrimitive.ActiveEmoji>
 				{({ emoji }) =>
-					emoji ? (
-						<>
-							<div className="flex size-7 flex-none items-center justify-center text-lg">
-								{emoji.emoji}
-							</div>
-							<span className="text-secondary-foreground truncate text-xs">{emoji.label}</span>
-						</>
-					) : (
-						<span className="text-muted-foreground ml-1.5 flex h-7 items-center truncate text-xs">
-							Select an emoji…
-						</span>
-					)
-				}
+					emoji
+						? (
+								<>
+									<div className="flex size-7 flex-none items-center justify-center text-lg">
+										{emoji.emoji}
+									</div>
+									<span className="text-secondary-foreground truncate text-xs">{emoji.label}</span>
+								</>
+							)
+						: (
+								<span className="text-muted-foreground ml-1.5 flex h-7 items-center truncate text-xs">
+									Select an emoji…
+								</span>
+							)}
 			</EmojiPickerPrimitive.ActiveEmoji>
 		</div>
 	);
 }
 
-export { EmojiPicker, EmojiPickerSearch, EmojiPickerContent, EmojiPickerFooter };
+export { EmojiPicker, EmojiPickerContent, EmojiPickerFooter, EmojiPickerSearch };

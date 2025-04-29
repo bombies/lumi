@@ -1,15 +1,16 @@
 'use client';
 
+import type { FieldValues } from 'react-hook-form';
+import type { EasyFormFieldProps } from '../easy-form-field';
 import { format } from 'date-fns';
-import { CalendarIcon } from 'lucide-react';
-import { FieldValues } from 'react-hook-form';
 
+import { CalendarIcon } from 'lucide-react';
 import { cn } from '../../../../lib/utils';
 import { Button } from '../../button';
 import { Calendar } from '../../calendar';
 import { FormControl, FormDescription, FormItem, FormMessage } from '../../form';
 import { Popover, PopoverContent, PopoverTrigger } from '../../popover';
-import EasyFormField, { EasyFormFieldProps } from '../easy-form-field';
+import EasyFormField from '../easy-form-field';
 import EasyFormLabel from './easy-form-label';
 
 type Props<T extends FieldValues> = Pick<
@@ -43,7 +44,7 @@ export default function EasyFormDatePicker<T extends FieldValues>({
 						<PopoverTrigger asChild>
 							<FormControl>
 								<Button
-									variant={'outline'}
+									variant="outline"
 									className={cn(
 										'w-[240px] pl-3 text-left font-normal',
 										!field.value && 'text-muted-foreground',

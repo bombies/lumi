@@ -1,7 +1,31 @@
+import type {
+	DatabaseMoment,
+	DatabaseMomentMessage,
+	DatabaseMomentTag,
+	DatabaseRelationshipMomentTag,
+	Moment,
+	MomentMessage,
+	MomentTag,
+	RelationshipMomentTag,
+} from './moment.types';
+import type {
+	CreateMomentDetailsDto,
+	CreateMomentMessageDto,
+	CreateMomentTagDto,
+	CreateRelationshipMomentTagDto,
+	DeleteMomentTagDto,
+	GetInfiniteMomentMessagesDto,
+	GetInfiniteMomentsDto,
+	GetMomentsByTagDto,
+	GetMomentUploadUrlDto,
+	GetRelationshipMomentTagsDto,
+	SearchMomentsDto,
+	UpdateMomentDetailsDto,
+} from './moments.dto';
 import { TRPCError } from '@trpc/server';
+
 import mime from 'mime';
 import { Resource } from 'sst';
-
 import { buildInfiniteData } from '../types/infinite-data.dto';
 import {
 	batchGetItems,
@@ -17,30 +41,6 @@ import { DynamoKey, EntityType } from '../utils/dynamo/dynamo.types';
 import { ContentPaths, StorageClient } from '../utils/s3/s3.service';
 import { chunkArray, getUUID } from '../utils/utils';
 import { attachUrlsToMoment } from './moment.helpers';
-import {
-	DatabaseMoment,
-	DatabaseMomentMessage,
-	DatabaseMomentTag,
-	DatabaseRelationshipMomentTag,
-	Moment,
-	MomentMessage,
-	MomentTag,
-	RelationshipMomentTag,
-} from './moment.types';
-import {
-	CreateMomentDetailsDto,
-	CreateMomentMessageDto,
-	CreateMomentTagDto,
-	CreateRelationshipMomentTagDto,
-	DeleteMomentTagDto,
-	GetInfiniteMomentMessagesDto,
-	GetInfiniteMomentsDto,
-	GetMomentUploadUrlDto,
-	GetMomentsByTagDto,
-	GetRelationshipMomentTagsDto,
-	SearchMomentsDto,
-	UpdateMomentDetailsDto,
-} from './moments.dto';
 
 const cleanMomentTitle = (title: string) => {
 	return title.replace(/\s{2,}/g, ' ');
@@ -199,13 +199,13 @@ export const searchMoments = async (relationshipId: string, { query, limit, curs
 
 	// De-duplicate moments
 	const momentMap = new Map<string, Moment>();
-	moments.data.forEach(moment => {
+	moments.data.forEach((moment) => {
 		if (!momentMap.has(moment.id)) {
 			momentMap.set(moment.id, moment);
 		}
 	});
 
-	tagMoments.data.forEach(moment => {
+	tagMoments.data.forEach((moment) => {
 		if (!momentMap.has(moment.id)) {
 			momentMap.set(moment.id, moment);
 		}
@@ -507,7 +507,7 @@ export const getMomentUploadUrl = async (
 ) => {
 	const storageBucket = new StorageClient(Resource.ContentBucket.name);
 	return storageBucket.getSignedPutUrl(
-		ContentPaths.relationshipMoments(relationshipId, objectKey + '.' + fileExtension),
+		ContentPaths.relationshipMoments(relationshipId, `${objectKey}.${fileExtension}`),
 		{
 			expires: 60 * 60,
 			contentType: fileExtension && (mime.getType(fileExtension) ?? undefined),

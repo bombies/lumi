@@ -1,10 +1,10 @@
 'use client';
 
-import { FC } from 'react';
-import { useRouter } from 'next/navigation';
-import { toast } from 'sonner';
-
+import type { FC } from 'react';
 import { auth } from '@/lib/better-auth/auth-client';
+import { useRouter } from 'next/navigation';
+
+import { toast } from 'sonner';
 
 const SignOutText: FC = () => {
 	const { data: session } = auth.useSession();

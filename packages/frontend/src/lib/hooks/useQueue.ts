@@ -11,7 +11,7 @@ type UseQueueArgs<T> = {
 export function useQueue<T>({ initialValue = [], process, lazyProcess }: UseQueueArgs<T>) {
 	const [queue, setQueue] = useState(initialValue);
 	const [isProcessing, setIsProcessing] = useState(false);
-	const [allowedToProcess, setAllowedToProcess] = useState(lazyProcess ? false : true);
+	const [allowedToProcess, setAllowedToProcess] = useState(!lazyProcess);
 	const enqueue = useCallback((element: T) => {
 		setQueue(q => [...q, element]);
 	}, []);

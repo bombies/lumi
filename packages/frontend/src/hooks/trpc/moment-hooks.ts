@@ -1,10 +1,10 @@
 'use client';
 
+import { useRouteInvalidation } from '@/lib/hooks/useRouteInvalidation';
+import { trpc } from '@/lib/trpc/trpc-react';
+
 import { skipToken } from '@tanstack/react-query';
 import { toast } from 'sonner';
-
-import { useRouteInvalidation } from '@/lib/hooks/useRouteInvalidation';
-import { trpc } from '@/lib/trpc/client';
 import { useSingleMediaUploader } from './utils/media-utils';
 
 export const CreateMomentDetails = () =>
@@ -28,7 +28,7 @@ export const SearchMoments = (
 			...args,
 		},
 		{
-			getNextPageParam: lastPage => {
+			getNextPageParam: (lastPage) => {
 				const [titleCursor, tagCursor] = lastPage.nextCursor;
 				if (!titleCursor && !tagCursor) return undefined;
 				else return lastPage.nextCursor;

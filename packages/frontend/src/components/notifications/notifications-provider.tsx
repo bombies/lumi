@@ -1,12 +1,26 @@
 'use client';
 
-import { createContext, FC, PropsWithChildren, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { urlBase64ToUint8Array } from '@lumi/core/utils/utils';
-
+import type { FC, PropsWithChildren } from 'react';
+import type { SendNotificationArgs } from './notification-actions';
 import { logger } from '@/lib/logger';
+
+import { createContext, use, useCallback, useEffect, useMemo, useState } from 'react';
 import { Button } from '../ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog';
-import { SendNotificationArgs, sendUserNotification, subscribeUser, unsubscribeUser } from './notification-actions';
+import { sendUserNotification, subscribeUser, unsubscribeUser } from './notification-actions';
+
+const urlBase64ToUint8Array = (base64String: string) => {
+	const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
+	const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+
+	const rawData = window.atob(base64);
+	const outputArray = new Uint8Array(rawData.length);
+
+	for (let i = 0; i < rawData.length; ++i) {
+		outputArray[i] = rawData.charCodeAt(i);
+	}
+	return outputArray;
+};
 
 type NotificationsData = {
 	isSupported: boolean;
@@ -20,7 +34,7 @@ type NotificationsData = {
 const NotificationsContext = createContext<NotificationsData | undefined>(undefined);
 
 export const useNotifications = () => {
-	const context = useContext(NotificationsContext);
+	const context = use(NotificationsContext);
 	if (!context) throw new Error('useNotifications must be used within a NotificationsProvider');
 	return context;
 };
@@ -72,8 +86,6 @@ const NotificationsProvider: FC<NotificationsProviderProps> = ({ children }) => 
 
 	useEffect(() => {
 		try {
-			// eslint-disable-next-line @typescript-eslint/no-unused-expressions
-			Notification;
 			setBrowserAllowsNotifications(true);
 		} catch (e: any) {
 			if (e instanceof ReferenceError && e.message.includes('Notification')) setBrowserAllowsNotifications(false);
@@ -86,7 +98,7 @@ const NotificationsProvider: FC<NotificationsProviderProps> = ({ children }) => 
 		if ('serviceWorker' in navigator && 'PushManager' in window) {
 			(async () => {
 				// @ts-expect-error Type def not setup for chromium based browsers
-				if (!!window.chrome) {
+				if (window.chrome) {
 					const canNotify = await Notification.requestPermission();
 					if (canNotify === 'granted') {
 						setIsSupported(true);
@@ -117,7 +129,7 @@ const NotificationsProvider: FC<NotificationsProviderProps> = ({ children }) => 
 	);
 
 	return (
-		<NotificationsContext.Provider value={dataValue}>
+		<NotificationsContext value={dataValue}>
 			<Dialog
 				open={browserAllowsNotifications && Notification.permission === 'default' && showNotificationDialog}
 			>
@@ -145,7 +157,7 @@ const NotificationsProvider: FC<NotificationsProviderProps> = ({ children }) => 
 				</DialogContent>
 			</Dialog>
 			{children}
-		</NotificationsContext.Provider>
+		</NotificationsContext>
 	);
 };
 

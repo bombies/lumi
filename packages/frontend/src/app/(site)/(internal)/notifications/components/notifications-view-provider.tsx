@@ -1,9 +1,10 @@
 'use client';
 
-import { createContext, FC, PropsWithChildren, useContext, useMemo, useState } from 'react';
-import { StoredNotification } from '@lumi/core/notifications/notification.types';
-
+import type { StoredNotification } from '@lumi/core/notifications/notification.types';
+import type { FC, PropsWithChildren } from 'react';
 import { GetNotifications, GetUnreadNotificationCount } from '@/hooks/trpc/notification-hooks';
+
+import { createContext, use, useMemo, useState } from 'react';
 
 type NotificationsViewData = {
 	filter: {
@@ -25,7 +26,7 @@ type NotificationsViewData = {
 const NotificationsViewContext = createContext<NotificationsViewData | undefined>(undefined);
 
 export const useNotificationsView = () => {
-	const context = useContext(NotificationsViewContext);
+	const context = use(NotificationsViewContext);
 	if (!context) throw new Error('useNotificationsView must be used within a NotificationsViewProvider!');
 	return context;
 };
@@ -75,7 +76,7 @@ const NotificationsViewProvider: FC<PropsWithChildren> = ({ children }) => {
 		],
 	);
 
-	return <NotificationsViewContext.Provider value={memoizedValues}>{children}</NotificationsViewContext.Provider>;
+	return <NotificationsViewContext value={memoizedValues}>{children}</NotificationsViewContext>;
 };
 
 export default NotificationsViewProvider;

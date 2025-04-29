@@ -1,19 +1,20 @@
 'use client';
 
-import { FC, useCallback, useState } from 'react';
-import { StarIcon } from '@heroicons/react/24/solid';
-import { SongRecommendation } from '@lumi/core/song-recommendations/song-recommendation.types';
-import { SubmitHandler } from 'react-hook-form';
-import { z } from 'zod';
-
+import type { SongRecommendation } from '@lumi/core/song-recommendations/song-recommendation.types';
+import type { FC } from 'react';
+import type { SubmitHandler } from 'react-hook-form';
 import { useRelationship } from '@/components/providers/relationships/relationship-provder';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+
 import EasyForm from '@/components/ui/form-extras/easy-form';
 import EasyFormField from '@/components/ui/form-extras/easy-form-field';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { UpdateSongRecommendation } from '@/hooks/trpc/music-sharing-hooks';
+import { StarIcon } from '@heroicons/react/24/solid';
+import { useCallback, useState } from 'react';
+import { z } from 'zod';
 
 type Props = {
 	track: SongRecommendation;
@@ -33,7 +34,7 @@ const RateRecommendationButton: FC<Props> = ({ track, onRate }) => {
 	const [dialogOpen, setDialogOpen] = useState(false);
 
 	const handleSubmit = useCallback<SubmitHandler<FormSchema>>(
-		async data => {
+		async (data) => {
 			try {
 				await updateSongRec({
 					recId: track.id,
@@ -58,7 +59,9 @@ const RateRecommendationButton: FC<Props> = ({ track, onRate }) => {
 		<Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
 			<DialogTrigger asChild>
 				<Button variant="secondary">
-					<StarIcon className="size-[18px]" /> Rate Recommendation
+					<StarIcon className="size-[18px]" />
+					{' '}
+					Rate Recommendation
 				</Button>
 			</DialogTrigger>
 			<DialogContent
@@ -66,7 +69,13 @@ const RateRecommendationButton: FC<Props> = ({ track, onRate }) => {
 				hideCloseButton
 			>
 				<DialogTitle className="text-2xl mb-4">
-					Rate {track.track.name} by {track.track.artistName}
+					Rate
+					{' '}
+					{track.track.name}
+					{' '}
+					by
+					{' '}
+					{track.track.artistName}
 				</DialogTitle>
 				<EasyForm
 					schema={formSchema}
@@ -75,13 +84,14 @@ const RateRecommendationButton: FC<Props> = ({ track, onRate }) => {
 					className="space-y-6"
 				>
 					<EasyFormField<FormSchema> name="rating" label="Rating (Out of 10)" showErrorMessage>
-						{(_form, field) => (
+						{(_form, { ref, ...field }) => (
 							<div className="flex gap-2 items-center">
 								<Input
 									className="min-w-10 max-w-16 rounded-sm"
 									inputMode="decimal"
 									min={0}
 									max={10}
+									ref={ref}
 									{...field}
 								/>
 								<span className="text-foreground/50">/</span>
@@ -100,7 +110,13 @@ const RateRecommendationButton: FC<Props> = ({ track, onRate }) => {
 					>
 						<StarIcon className="size-[18px]" />
 						<span className="break-all">
-							Rate {track.track.name} by {track.track.artistName}
+							Rate
+							{' '}
+							{track.track.name}
+							{' '}
+							by
+							{' '}
+							{track.track.artistName}
 						</span>
 					</Button>
 				</EasyForm>

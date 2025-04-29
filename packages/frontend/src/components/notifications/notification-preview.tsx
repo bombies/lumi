@@ -1,23 +1,24 @@
 'use client';
 
-import { FC, useCallback, useState } from 'react';
-import Link from 'next/link';
+import type { StoredNotification } from '@lumi/core/notifications/notification.types';
+import type { FC } from 'react';
+import { UpdateNotification } from '@/hooks/trpc/notification-hooks';
+import { useIsTablet } from '@/lib/hooks/useScreenSizes';
+import { cn } from '@/lib/utils';
 import { EyeIcon, InboxArrowDownIcon, SparklesIcon } from '@heroicons/react/24/solid';
-import { StoredNotification } from '@lumi/core/notifications/notification.types';
 import { getRelativeTime } from '@lumi/core/utils/global-utils';
+
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useCallback, useState } from 'react';
 import { SwipeableList, SwipeableListItem, SwipeAction, TrailingActions, Type } from 'react-swipeable-list';
 
-import { UpdateNotification } from '@/hooks/trpc/notification-hooks';
-import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
+
 import { Button } from '../ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '../ui/dialog';
 
 import 'react-swipeable-list/dist/styles.css';
-
-import { useRouter } from 'next/navigation';
-import { toast } from 'sonner';
-
-import { useIsTablet } from '@/lib/hooks/useScreenSizes';
 
 type Props = {
 	notification: StoredNotification;
@@ -39,10 +40,10 @@ const NotificationPreview: FC<Props> = ({ notification }) => {
 			<SwipeableList type={Type.IOS} fullSwipe>
 				<SwipeableListItem
 					blockSwipe={!isTablet}
-					onSwipeProgress={progress => {
-						setSwipeVisible(progress ? true : false);
+					onSwipeProgress={(progress) => {
+						setSwipeVisible(!!progress);
 					}}
-					trailingActions={
+					trailingActions={(
 						<TrailingActions>
 							{notification.openUrl && (
 								<SwipeAction
@@ -75,7 +76,7 @@ const NotificationPreview: FC<Props> = ({ notification }) => {
 								</div>
 							</SwipeAction>
 						</TrailingActions>
-					}
+					)}
 				>
 					<button
 						onClick={() => {
@@ -113,7 +114,10 @@ const NotificationPreview: FC<Props> = ({ notification }) => {
 					<p className="whitespace-pre-wrap">{notification.content}</p>
 					<DialogFooter>
 						<Button onClick={updateReadStatus} loading={isUpdating}>
-							<InboxArrowDownIcon className="size-[18px]" /> Mark As{' '}
+							<InboxArrowDownIcon className="size-[18px]" />
+							{' '}
+							Mark As
+							{' '}
 							{notification.read ? 'Unread' : 'Read'}
 						</Button>
 						{notification.openUrl && (
@@ -125,7 +129,9 @@ const NotificationPreview: FC<Props> = ({ notification }) => {
 										if (!notification.read) await updateReadStatus();
 									}}
 								>
-									<EyeIcon className="size-[18px]" /> View
+									<EyeIcon className="size-[18px]" />
+									{' '}
+									View
 								</Button>
 							</Link>
 						)}

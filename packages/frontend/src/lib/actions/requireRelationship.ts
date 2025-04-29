@@ -1,9 +1,9 @@
 'use server';
 
-import { redirect } from 'next/navigation';
+import type { Relationship } from '@lumi/core/relationships/relationship.types';
 import { getRelationshipForUser } from '@lumi/core/relationships/relationship.service';
-import { Relationship } from '@lumi/core/relationships/relationship.types';
 import { getUserById } from '@lumi/core/users/users.service';
+import { redirect } from 'next/navigation';
 
 import { getServerSession } from '../better-auth/auth-actions';
 

@@ -1,10 +1,7 @@
 'use client';
 
-import { FC, useMemo } from 'react';
-import { FaceSmileIcon, TrashIcon } from '@heroicons/react/24/solid';
-import { MomentMessage } from '@lumi/core/moments/moment.types';
-import { formatTime } from '@lumi/core/utils/global-utils';
-
+import type { MomentMessage } from '@lumi/core/moments/moment.types';
+import type { FC } from 'react';
 import { useRelationship } from '@/components/providers/relationships/relationship-provder';
 import {
 	ContextMenu,
@@ -16,7 +13,11 @@ import {
 	ContextMenuTrigger,
 } from '@/components/ui/context-menu';
 import { EmojiPicker, EmojiPickerContent, EmojiPickerSearch } from '@/components/ui/emoji-picker';
+
 import { cn } from '@/lib/utils';
+import { FaceSmileIcon, TrashIcon } from '@heroicons/react/24/solid';
+import { formatTime } from '@lumi/core/utils/global-utils';
+import { useMemo } from 'react';
 
 type Props = {
 	message: MomentMessage;
@@ -45,7 +46,9 @@ const MomentMessageElement: FC<Props> = ({ message }) => {
 			<ContextMenuContent>
 				<ContextMenuSub>
 					<ContextMenuSubTrigger>
-						<FaceSmileIcon className="size-[18px] text-current mr-2" /> React
+						<FaceSmileIcon className="size-[18px] text-current mr-2" />
+						{' '}
+						React
 					</ContextMenuSubTrigger>
 					<ContextMenuSubContent asChild className="w-56 h-56">
 						<EmojiPicker>
@@ -55,7 +58,9 @@ const MomentMessageElement: FC<Props> = ({ message }) => {
 					</ContextMenuSubContent>
 				</ContextMenuSub>
 				<ContextMenuItem variant="destructive">
-					<TrashIcon className="size-[18px]" /> Delete
+					<TrashIcon className="size-[18px]" />
+					{' '}
+					Delete
 				</ContextMenuItem>
 			</ContextMenuContent>
 		</ContextMenu>

@@ -1,9 +1,11 @@
-import { useEffect, useState } from 'react';
-import { FieldValues } from 'react-hook-form';
+import type { FieldValues } from 'react-hook-form';
+import type { SelectProps } from '../../multiselect';
 
+import type { EasyFormFieldProps } from '../easy-form-field';
+import { useEffect, useState } from 'react';
 import { FormDescription, FormItem, FormMessage } from '../../form';
-import { Select, SelectProps } from '../../multiselect';
-import EasyFormField, { EasyFormFieldProps } from '../easy-form-field';
+import { Select } from '../../multiselect';
+import EasyFormField from '../easy-form-field';
 import { useForm } from '../easy-form-provider';
 import EasyFormLabel from './easy-form-label';
 
@@ -11,9 +13,9 @@ type Props<T extends FieldValues> = Pick<
 	EasyFormFieldProps<T>,
 	'name' | 'label' | 'labelClassName' | 'className' | 'showErrorMessage' | 'optional' | 'description'
 > &
-	Omit<SelectProps, 'onChange' | 'selected'> & {
-		defaultValue?: string[];
-	};
+Omit<SelectProps, 'onChange' | 'selected'> & {
+	defaultValue?: string[];
+};
 
 export default function EasyFormSelect<T extends FieldValues>({
 	name,

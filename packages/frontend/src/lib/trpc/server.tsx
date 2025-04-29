@@ -1,10 +1,10 @@
 'use server';
 
-import { cache } from 'react';
-import { headers } from 'next/headers';
 import { appRouter } from '@lumi/functions/router';
 import { createCallerFactory } from '@lumi/functions/utils/trpc';
 import { createHydrationHelpers } from '@trpc/react-query/rsc';
+import { headers } from 'next/headers';
+import { cache } from 'react';
 
 import { getServerSession } from '../better-auth/auth-actions';
 import { makeQueryClient } from './query-client';
@@ -23,7 +23,7 @@ const createContext = cache(async () => {
 		{} as Record<string, string>,
 	);
 
-	reqHeaders['authorization'] = `Bearer ${sessionData?.session?.token}`;
+	reqHeaders.authorization = `Bearer ${sessionData?.session?.token}`;
 	return { headers: reqHeaders };
 });
 

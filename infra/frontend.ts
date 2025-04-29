@@ -71,7 +71,7 @@ export const frontend = new sst.aws.Nextjs('Frontend', {
 		BETTER_AUTH_URL: !$dev ? `https://${webDNS}` : 'https://localhost:3000',
 
 		AUTH_SECRET: authSecret.value,
-		// @ts-ignore
+		// @ts-expect-error Complaining about the undefined.
 		AUTH_TRUST_HOST: !$dev ? 'true' : undefined,
 
 		APP_STAGE: $app.stage,

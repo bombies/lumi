@@ -1,11 +1,11 @@
-import { createRelationshipMomentTag, getRelationshipMomentTag } from '@lumi/core/moments/moment.service';
-import { RelationshipMomentTag } from '@lumi/core/moments/moment.types';
+import type { RelationshipMomentTag } from '@lumi/core/moments/moment.types';
+import type { DynamoDBStreamEvent, Handler } from 'aws-lambda';
+import { getRelationshipMomentTag } from '@lumi/core/moments/moment.service';
 import { updateItem } from '@lumi/core/utils/dynamo/dynamo.service';
 import { DynamoKey } from '@lumi/core/utils/dynamo/dynamo.types';
-import { DynamoDBStreamEvent, Handler } from 'aws-lambda';
 
 const updateRelationshipMomentTag = async (relationshipId: string, tag: string, countDelta: number) => {
-	let relationshipMomentTag = await getRelationshipMomentTag(relationshipId, tag);
+	const relationshipMomentTag = await getRelationshipMomentTag(relationshipId, tag);
 	if (!relationshipMomentTag)
 		return console.log(`Relationship tag ${relationshipId}#${tag} doesn't exist, skipping update.`);
 
@@ -24,7 +24,7 @@ const updateRelationshipMomentTag = async (relationshipId: string, tag: string, 
 	}
 };
 
-export const handler: Handler<DynamoDBStreamEvent> = async event => {
+export const handler: Handler<DynamoDBStreamEvent> = async (event) => {
 	for (const record of event.Records) {
 		if (!record.eventName || !record.dynamodb || !record.dynamodb.Keys) continue;
 

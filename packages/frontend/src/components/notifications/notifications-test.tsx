@@ -1,6 +1,6 @@
 'use client';
 
-import { FC } from 'react';
+import type { FC } from 'react';
 
 import { useNotifications } from '@/components/notifications/notifications-provider';
 import { Button } from '@/components/ui/button';
@@ -13,24 +13,26 @@ const NotificationsTest: FC = () => {
 	return (
 		browserAllowsNotifications && (
 			<div>
-				{subscription ? (
-					<>
-						<Button onClick={unsubscribe}>Unsubscribe from notifications</Button>
-						<Button
-							onClick={() => {
-								if (!user) return;
-								sendNotification({
-									message: 'This is a test notification',
-									title: 'Test notification',
-								});
-							}}
-						>
-							Send test notification
-						</Button>
-					</>
-				) : (
-					<Button onClick={subscribe}>Subscribe to notifications</Button>
-				)}
+				{subscription
+					? (
+							<>
+								<Button onClick={unsubscribe}>Unsubscribe from notifications</Button>
+								<Button
+									onClick={() => {
+										if (!user) return;
+										sendNotification({
+											message: 'This is a test notification',
+											title: 'Test notification',
+										});
+									}}
+								>
+									Send test notification
+								</Button>
+							</>
+						)
+					: (
+							<Button onClick={subscribe}>Subscribe to notifications</Button>
+						)}
 			</div>
 		)
 	);

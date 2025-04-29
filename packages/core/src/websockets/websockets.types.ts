@@ -1,6 +1,6 @@
-import { User } from '@lumi/core/users/user.types';
+import type { User } from '@lumi/core/users/user.types';
 
-import { EntityType } from '../utils/dynamo/dynamo.types';
+import type { EntityType } from '../utils/dynamo/dynamo.types';
 
 export enum WebSocketToken {
 	RELATIONSHIP_USER = 'relationship_user',

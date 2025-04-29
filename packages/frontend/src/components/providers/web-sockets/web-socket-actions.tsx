@@ -1,7 +1,8 @@
-import { createWebsocketConnection, MqttClientType } from '@lumi/core/websockets/websockets.service';
-import { ErrorWithReasonCode, IClientOptions } from 'mqtt';
-
+import type { MqttClientType } from '@lumi/core/websockets/websockets.service';
+import type { ErrorWithReasonCode, IClientOptions } from 'mqtt';
 import { logger } from '@/lib/logger';
+
+import { createWebsocketConnection } from '@lumi/core/websockets/websockets.service';
 
 type ConnectToWebsocketArgs = {
 	endpoint: string;
@@ -41,11 +42,11 @@ export const connectToWebsocket = ({
 		...clientArgs,
 	});
 
-	mqttConnection.on('packetsend', packet => {
+	mqttConnection.on('packetsend', (packet) => {
 		logger.debug(`Packet Send: (${clientId})`, packet);
 	});
 
-	mqttConnection.on('packetreceive', packet => {
+	mqttConnection.on('packetreceive', (packet) => {
 		logger.debug(`Packet Receive: (${clientId})`, packet);
 	});
 
@@ -59,7 +60,7 @@ export const connectToWebsocket = ({
 		if (cb instanceof Promise) await cb;
 	});
 
-	mqttConnection.on('error', async e => {
+	mqttConnection.on('error', async (e) => {
 		console.error('WS Error:', e);
 		const cb = onError?.(e, clientId);
 		if (cb instanceof Promise) await cb;

@@ -15,7 +15,7 @@ export default function ManagedTableVisibleColumnsDropdown<T>() {
 				{table
 					.getAllColumns()
 					.filter(column => column.getCanHide())
-					.map(column => {
+					.map((column) => {
 						return (
 							<DropdownMenuCheckboxItem
 								key={column.id}

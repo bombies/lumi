@@ -53,7 +53,7 @@ export const heartbeatSubscriber = realtimeServer.subscribe(
 		},
 	},
 	{
-		filter: notificationsTopic + '/relationship/+/heartbeat',
+		filter: `${notificationsTopic}/relationship/+/heartbeat`,
 	},
 );
 
@@ -69,7 +69,7 @@ export const momentMessageSubscriber = realtimeServer.subscribe(
 		},
 	},
 	{
-		filter: notificationsTopic + '/relationship/+/moment_chat/#',
+		filter: `${notificationsTopic}/relationship/+/moment_chat/#`,
 	},
 );
 
@@ -85,7 +85,7 @@ export const presenceSubscriber = realtimeServer.subscribe(
 		},
 	},
 	{
-		filter: notificationsTopic + '/relationship/#',
+		filter: `${notificationsTopic}/relationship/#`,
 	},
 );
 
@@ -101,6 +101,6 @@ export const notificationSubscriber = realtimeServer.subscribe(
 		},
 	},
 	{
-		filter: notificationsTopic + '/+/notifications',
+		filter: `${notificationsTopic}/+/notifications`,
 	},
 );

@@ -1,6 +1,6 @@
 'use client';
 
-import { trpc } from '@/lib/trpc/client';
+import { trpc } from '@/lib/trpc/trpc-react';
 
 export const GetRelationship = () => trpc.relationships.getRelationship.useQuery();
 export const GetRelationshipPartner = () => trpc.relationships.getRelationshipPartner.useQuery();

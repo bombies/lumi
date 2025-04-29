@@ -1,19 +1,20 @@
 'use client';
 
-import { FC, useCallback, useState } from 'react';
-import { registerUserDto } from '@lumi/core/auth/auth.dto';
-import { PASSWORD_REGEX } from '@lumi/core/users/users.dto';
-import { SubmitHandler } from 'react-hook-form';
-import { toast } from 'sonner';
-import { z } from 'zod';
-
+import type { FC } from 'react';
+import type { SubmitHandler } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
 import EasyForm from '@/components/ui/form-extras/easy-form';
 import EasyFormField from '@/components/ui/form-extras/easy-form-field';
 import { Input } from '@/components/ui/input';
 import PasswordInput from '@/components/ui/password-input';
+
 import { Separator } from '@/components/ui/separator';
 import { auth } from '@/lib/better-auth/auth-client';
+import { registerUserDto } from '@lumi/core/auth/auth.dto';
+import { PASSWORD_REGEX } from '@lumi/core/users/users.dto';
+import { useCallback, useState } from 'react';
+import { toast } from 'sonner';
+import { z } from 'zod';
 import { register } from '../actions';
 
 const registerSchema = registerUserDto.and(
@@ -33,7 +34,7 @@ const RegisterForm: FC = () => {
 	const [isAuthenticating, setIsAuthenticating] = useState(false);
 	const onSubmit = useCallback<SubmitHandler<RegisterSchema>>(async ({ confirmPassword, ...data }) => {
 		if (process.env.NEXT_PUBLIC_APP_STAGE === 'production' && !permittedEmails.includes(data.email.toLowerCase()))
-			return toast.error("You aren't permitted to register!");
+			return toast.error('You aren\'t permitted to register!');
 
 		setIsAuthenticating(true);
 

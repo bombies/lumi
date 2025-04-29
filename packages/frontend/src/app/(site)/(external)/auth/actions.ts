@@ -1,10 +1,10 @@
 'use server';
 
+import type { RegisterUserDto } from '@lumi/core/auth/auth.dto';
+import type { User as BetterAuthUser } from 'better-auth';
+import { createUser } from '@lumi/core/users/users.service';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
-import { RegisterUserDto } from '@lumi/core/auth/auth.dto';
-import { createUser } from '@lumi/core/users/users.service';
-import { User as BetterAuthUser } from 'better-auth';
 
 export const register = async (user: BetterAuthUser, dto: RegisterUserDto) => {
 	try {

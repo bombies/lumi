@@ -1,7 +1,9 @@
-import { ReactElement, useEffect } from 'react';
+import type { ReactElement } from 'react';
+import type { DefaultValues, FieldValues, SubmitHandler, UseFormReturn } from 'react-hook-form';
+import type { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { DefaultValues, FieldValues, SubmitHandler, useForm, UseFormReturn } from 'react-hook-form';
-import { z } from 'zod';
+import { useEffect } from 'react';
+import { useForm } from 'react-hook-form';
 
 import { Form as ShadForm } from '../form';
 import EasyFormProvider from './easy-form-provider';
@@ -60,8 +62,8 @@ export default function EasyForm<T extends FieldValues>({
 		<ShadForm {...form}>
 			<form
 				onSubmit={
-					onSubmit &&
-					form.handleSubmit(async (args, e) => {
+					onSubmit
+					&& form.handleSubmit(async (args, e) => {
 						e?.preventDefault();
 						const res = onSubmit(args, e);
 						if (res instanceof Promise) await res;

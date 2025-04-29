@@ -1,17 +1,15 @@
 'use client';
 
-import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ChatBubbleOvalLeftEllipsisIcon, PaperAirplaneIcon } from '@heroicons/react/24/solid';
-import { Moment, MomentMessage } from '@lumi/core/moments/moment.types';
-import { WebSocketEventHandler } from '@lumi/core/websockets/websockets.types';
-import { AnimatePresence, motion, Variants } from 'motion/react';
-import { SubmitHandler } from 'react-hook-form';
-import { z } from 'zod';
-
+import type { Moment, MomentMessage } from '@lumi/core/moments/moment.types';
+import type { WebSocketEventHandler } from '@lumi/core/websockets/websockets.types';
+import type { Variants } from 'motion/react';
+import type { FC } from 'react';
+import type { SubmitHandler } from 'react-hook-form';
 import { useRelationship } from '@/components/providers/relationships/relationship-provder';
 import { WebsocketTopic } from '@/components/providers/web-sockets/topics';
 import { useWebSocket } from '@/components/providers/web-sockets/web-socket-provider';
 import { Button } from '@/components/ui/button';
+
 import { Drawer, DrawerContent, DrawerTrigger } from '@/components/ui/drawer';
 import EasyForm from '@/components/ui/form-extras/easy-form';
 import EasyFormField from '@/components/ui/form-extras/easy-form-field';
@@ -22,6 +20,10 @@ import { Textarea } from '@/components/ui/textarea';
 import UserAvatar from '@/components/ui/user-avatar';
 import { GetMessagesForMoment } from '@/hooks/trpc/moment-hooks';
 import { logger } from '@/lib/logger';
+import { ChatBubbleOvalLeftEllipsisIcon, PaperAirplaneIcon } from '@heroicons/react/24/solid';
+import { AnimatePresence, motion } from 'motion/react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { z } from 'zod';
 import MomentMessageContainer from './moment-message-container';
 
 type Props = {
@@ -103,7 +105,7 @@ const CommentDrawer: FC<Props> = ({ moment }) => {
 	}, [fetchedMessages, newMessages, fetchedMessageIds]);
 
 	const groupedMessages = useMemo(() => {
-		const messagesByDay = Object.groupBy(allMessages, message => {
+		const messagesByDay = Object.groupBy(allMessages, (message) => {
 			const date = new Date(message.timestamp);
 			const epoch = new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
 			return epoch.toString();
@@ -138,7 +140,7 @@ const CommentDrawer: FC<Props> = ({ moment }) => {
 		return Object.entries(groupedMessages).map(([date, messageGroup]) => (
 			<div key={`datecontainer_${date}`} className="space-y-2">
 				<p className="text-center text-white/30 text-xs font-semibold">
-					{new Date(parseInt(date)).toLocaleDateString('en-US', {
+					{new Date(Number.parseInt(date)).toLocaleDateString('en-US', {
 						year: 'numeric',
 						month: 'long',
 						day: '2-digit',
@@ -159,7 +161,7 @@ const CommentDrawer: FC<Props> = ({ moment }) => {
 	}, [messageElements, scrollToBottom, partnerTyping]);
 
 	const addNewMessage = useCallback((message: MomentMessage) => {
-		setNewMessages(prev => {
+		setNewMessages((prev) => {
 			if (prev.some(m => m.id === message.id)) {
 				return prev;
 			}
@@ -169,7 +171,7 @@ const CommentDrawer: FC<Props> = ({ moment }) => {
 
 	// Handle receiving messages in real-time.
 	useEffect(() => {
-		const handleMessageReceive: WebSocketEventHandler<'momentChat'> = payload => {
+		const handleMessageReceive: WebSocketEventHandler<'momentChat'> = (payload) => {
 			// Ignore messages sent by self (already handled optimistically)
 			if (payload.senderId === self.id) return;
 
@@ -185,12 +187,12 @@ const CommentDrawer: FC<Props> = ({ moment }) => {
 			setPartnerTyping(false);
 		};
 
-		const handleTypingStart: WebSocketEventHandler<'momentTypingStart'> = payload => {
+		const handleTypingStart: WebSocketEventHandler<'momentTypingStart'> = (payload) => {
 			if (payload.senderId === self.id) return;
 			setPartnerTyping(true);
 		};
 
-		const handleTypingEnd: WebSocketEventHandler<'momentTypingEnd'> = payload => {
+		const handleTypingEnd: WebSocketEventHandler<'momentTypingEnd'> = (payload) => {
 			if (payload.senderId === self.id) return;
 			setPartnerTyping(false);
 		};
@@ -269,7 +271,7 @@ const CommentDrawer: FC<Props> = ({ moment }) => {
 	return (
 		<Drawer
 			open={drawerOpen}
-			onOpenChange={val => {
+			onOpenChange={(val) => {
 				setDrawerOpen(val);
 				if (val) {
 					selfState?.updateState?.('viewingMomentMessages', {
@@ -288,53 +290,58 @@ const CommentDrawer: FC<Props> = ({ moment }) => {
 			<DrawerContent className="h-[75vh] px-6 py-2" onWheel={e => e.stopPropagation()}>
 				<div className="h-[calc(75vh-24px-16px)] overflow-auto flex flex-col justify-between gap-2 pt-4">
 					{/* Messages container */}
-					<ScrollArea className="h-full overflow-auto flex flex-col-reverse" autoFocus ref={scrollAreaRef}>
-						{messagesLoading ? (
-							<Spinner />
-						) : (
-							<>
-								{messageElements}
-								<AnimatePresence>
-									{partnerTyping && (
-										<motion.div
-											initial={{
-												opacity: 0,
-												y: 10,
-											}}
-											animate={{
-												opacity: 1,
-												y: 0,
-											}}
-											exit={{
-												opacity: 0,
-												y: 10,
-											}}
-											className="flex items-center gap-1"
-										>
-											<UserAvatar user={partner} hideStatus className="size-8 border-2" />
-											<motion.div
-												animate="jump"
-												transition={{ staggerChildren: -0.2, staggerDirection: -1 }}
-												className="bg-secondary rounded-full h-6 w-fit px-3 flex justify-center items-center gap-1"
-											>
-												<motion.span
-													variants={dotVariants}
-													className="size-2 rounded-full bg-primary"
-												></motion.span>
-												<motion.span
-													variants={dotVariants}
-													className="size-2 rounded-full bg-primary"
-												></motion.span>
-												<motion.span
-													variants={dotVariants}
-													className="size-2 rounded-full bg-primary"
-												></motion.span>
-											</motion.div>
-										</motion.div>
-									)}
-								</AnimatePresence>
-							</>
-						)}
+					<ScrollArea className="h-full overflow-auto flex flex-col-reverse" ref={scrollAreaRef}>
+						{messagesLoading
+							? (
+									<Spinner />
+								)
+							: (
+									<>
+										{messageElements}
+										<AnimatePresence>
+											{partnerTyping && (
+												<motion.div
+													initial={{
+														opacity: 0,
+														y: 10,
+													}}
+													animate={{
+														opacity: 1,
+														y: 0,
+													}}
+													exit={{
+														opacity: 0,
+														y: 10,
+													}}
+													className="flex items-center gap-1"
+												>
+													<UserAvatar user={partner} hideStatus className="size-8 border-2" />
+													<motion.div
+														animate="jump"
+														transition={{ staggerChildren: -0.2, staggerDirection: -1 }}
+														className="bg-secondary rounded-full h-6 w-fit px-3 flex justify-center items-center gap-1"
+													>
+														<motion.span
+															variants={dotVariants}
+															className="size-2 rounded-full bg-primary"
+														>
+														</motion.span>
+														<motion.span
+															variants={dotVariants}
+															className="size-2 rounded-full bg-primary"
+														>
+														</motion.span>
+														<motion.span
+															variants={dotVariants}
+															className="size-2 rounded-full bg-primary"
+														>
+														</motion.span>
+													</motion.div>
+												</motion.div>
+											)}
+										</AnimatePresence>
+									</>
+								)}
 						<InfiniteLoader hasMore={hasNextPage} fetchMore={fetchNextPage} loading={isFetchingNextPage} />
 					</ScrollArea>
 					{/* Chat input */}
@@ -349,7 +356,7 @@ const CommentDrawer: FC<Props> = ({ moment }) => {
 										variableHeight={{
 											maxHeight: 500,
 										}}
-										onKeyDown={e => {
+										onKeyDown={(e) => {
 											if (e.ctrlKey && e.key === 'Enter') submitButtonRef.current?.click();
 										}}
 										isTyping={selfTyping}

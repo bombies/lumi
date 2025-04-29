@@ -1,18 +1,18 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef } from 'react';
 import type { AppRouter } from '@lumi/functions/types';
 import type { QueryClient } from '@tanstack/react-query';
+import type { TRPCClientError } from '@trpc/client';
+import { trpc } from '@/lib/trpc/trpc-react';
 import { QueryClientProvider } from '@tanstack/react-query';
-import { httpBatchLink, TRPCClientError } from '@trpc/client';
-import { createTRPCReact } from '@trpc/react-query';
+import { httpBatchLink } from '@trpc/client';
 
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { auth } from '../better-auth/auth-client';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { logger } from '../logger';
 import { makeQueryClient } from './query-client';
 
-export const trpc = createTRPCReact<AppRouter>();
 let clientQueryClientSingleton: QueryClient;
 function getQueryClient() {
 	if (typeof window === 'undefined') {
@@ -123,7 +123,7 @@ export function TRPCProvider(
 
 									if (!accessToken) {
 										logger.debug(
-											"The access token doesn't exist... Attempting to create a new one",
+											'The access token doesn\'t exist... Attempting to create a new one',
 										);
 										accessToken = (await setAccessToken()) ?? null;
 

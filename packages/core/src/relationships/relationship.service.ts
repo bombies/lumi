@@ -1,19 +1,19 @@
-import { TRPCError } from '@trpc/server';
+import type { Nullable } from '../types/util.types';
 
-import { buildInfiniteData } from '../types/infinite-data.dto';
-import { Nullable } from '../types/util.types';
-import { User } from '../users/user.types';
-import { getUserById } from '../users/users.service';
-import { deleteItem, dynamo, getItem, getItems, putItem, writeTransaction } from '../utils/dynamo/dynamo.service';
-import { DynamoKey, EntityType } from '../utils/dynamo/dynamo.types';
-import { chunkArray, getUUID } from '../utils/utils';
-import { GetRelationshipRequestsForUserDto } from './relationship.dto';
-import {
+import type { User } from '../users/user.types';
+import type { GetRelationshipRequestsForUserDto } from './relationship.dto';
+import type {
 	DatabaseRelationship,
 	DatabaseRelationshipRequest,
 	Relationship,
 	RelationshipRequest,
 } from './relationship.types';
+import { TRPCError } from '@trpc/server';
+import { buildInfiniteData } from '../types/infinite-data.dto';
+import { getUserById } from '../users/users.service';
+import { deleteItem, dynamo, getItem, getItems, putItem, writeTransaction } from '../utils/dynamo/dynamo.service';
+import { DynamoKey, EntityType } from '../utils/dynamo/dynamo.types';
+import { chunkArray, getUUID } from '../utils/utils';
 
 export const getRelationshipById = async (relationshipId: string) => {
 	return getItem<Relationship>(DynamoKey.relationship.pk(relationshipId), DynamoKey.relationship.sk(relationshipId));
@@ -183,7 +183,7 @@ const getRelationshipRequestsForUser = async ({
 
 	for (const batch of batchedData) {
 		const userIds = new Set<string>();
-		batch.forEach(request => {
+		batch.forEach((request) => {
 			if (request.sender !== userId) userIds.add(request.sender);
 			else userIds.add(request.receiver);
 		});
@@ -191,7 +191,7 @@ const getRelationshipRequestsForUser = async ({
 		console.log(userIds);
 
 		// Batch fetch users
-		let batchRes = await dynamo.batchGet({
+		const batchRes = await dynamo.batchGet({
 			RequestItems: {
 				[process.env.TABLE_NAME!]: {
 					Keys: userIds
@@ -209,7 +209,7 @@ const getRelationshipRequestsForUser = async ({
 		});
 
 		const resUsers = batchRes.Responses![process.env.TABLE_NAME!] as User[];
-		resUsers.forEach(user => {
+		resUsers.forEach((user) => {
 			const { id, username, firstName, lastName } = user;
 			fetchedUsers[user.id] = { id, username, firstName, lastName };
 		});

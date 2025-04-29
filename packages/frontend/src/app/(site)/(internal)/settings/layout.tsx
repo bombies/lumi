@@ -1,8 +1,8 @@
-import { FC, PropsWithChildren } from 'react';
-import { SettingsIcon } from 'lucide-react';
-
+import type { FC, PropsWithChildren } from 'react';
 import SettingsSidebar from '@/app/(site)/(internal)/settings/settings-sidebar';
+
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
+import { SettingsIcon } from 'lucide-react';
 
 const SettingsLayout: FC<PropsWithChildren> = ({ children }) => {
 	return (
@@ -10,10 +10,13 @@ const SettingsLayout: FC<PropsWithChildren> = ({ children }) => {
 			<SettingsSidebar />
 			<SidebarInset>
 				<p className="p-5 text-xs flex gap-1 text-secondary items-center">
-					<SettingsIcon size={10} /> Settings
+					<SettingsIcon size={10} />
+					{' '}
+					Settings
 				</p>
 				<div className="px-2 laptop:p-6 flex">
-					<SidebarTrigger />{' '}
+					<SidebarTrigger />
+					{' '}
 					<main className="p-0 pb-24 laptop:pl-6 laptop:max-w-[35rem] w-full space-y-6">{children}</main>
 				</div>
 			</SidebarInset>

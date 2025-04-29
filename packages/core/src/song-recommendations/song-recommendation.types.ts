@@ -1,4 +1,4 @@
-import { EntityType } from '../utils/dynamo/dynamo.types';
+import type { EntityType } from '../utils/dynamo/dynamo.types';
 
 export type SongRecommendation = {
 	id: string;

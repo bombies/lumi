@@ -1,4 +1,4 @@
-import { FC, PropsWithChildren } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 
 import { requireSpotifyLink } from '@/lib/actions/requireSpotifyLink';
 import SpotifyProvider from './components/spotify-provider';

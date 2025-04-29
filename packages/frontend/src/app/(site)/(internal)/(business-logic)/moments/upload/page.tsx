@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import type { FC } from 'react';
 
 import Title from '@/components/ui/title';
 import MomentUploadContent from './components/moment-upload-content';

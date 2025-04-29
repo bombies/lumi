@@ -1,24 +1,24 @@
 'use client';
 
-import * as React from 'react';
+import { cn } from '@/lib/utils';
 import * as TabsPrimitive from '@radix-ui/react-tabs';
 import { useControllableState } from '@radix-ui/react-use-controllable-state';
 import { motion } from 'framer-motion';
 
-import { cn } from '@/lib/utils';
+import * as React from 'react';
 
-type TabsContext = {
+type TabsContextData = {
 	value: string;
 	setValue: (value: string) => void;
 };
 
-const TabsContext = React.createContext<TabsContext>({
+const TabsContext = React.createContext<TabsContextData>({
 	value: '',
 	setValue: () => {},
 });
 
 const useTabsContext = () => {
-	const context = React.useContext(TabsContext);
+	const context = React.use(TabsContext);
 	if (!context) {
 		throw new Error('Tabs compound components cannot be rendered outside the Tabs component');
 	}
@@ -28,11 +28,11 @@ const useTabsContext = () => {
 function Tabs({ className, ...props }: React.ComponentProps<typeof TabsPrimitive.Root>) {
 	const [selectedItem = '', setSelectedItem] = useControllableState<string>({
 		prop: props.value,
-		defaultProp: props.defaultValue,
+		defaultProp: props.defaultValue ?? '',
 		onChange: props.onValueChange,
 	});
 	return (
-		<TabsContext.Provider
+		<TabsContext
 			value={React.useMemo(
 				() => ({
 					value: selectedItem,
@@ -48,7 +48,7 @@ function Tabs({ className, ...props }: React.ComponentProps<typeof TabsPrimitive
 				value={selectedItem}
 				onValueChange={setSelectedItem}
 			/>
-		</TabsContext.Provider>
+		</TabsContext>
 	);
 }
 
@@ -72,7 +72,7 @@ function TabsTrigger({ className, children, ...props }: React.ComponentProps<typ
 		<TabsPrimitive.Trigger
 			data-slot="tabs-trigger"
 			className={cn(
-				"data-[state=active]:text-foreground focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 focus-visible:outline-ring inline-flex flex-1 items-center justify-center gap-1.5 rounded-md px-2 py-3 text-sm font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:ring-[3px] focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 relative",
+				'data-[state=active]:text-foreground focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 focus-visible:outline-ring inline-flex flex-1 items-center justify-center gap-1.5 rounded-md px-2 py-3 text-sm font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:ring-[3px] focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*=\'size-\'])]:size-4 relative',
 				className,
 			)}
 			{...props}
@@ -84,7 +84,8 @@ function TabsTrigger({ className, children, ...props }: React.ComponentProps<typ
 					style={{
 						borderRadius: 'calc(.85rem - 2px)',
 					}}
-				></motion.div>
+				>
+				</motion.div>
 			)}
 			<span className="relative z-10 inline-flex gap-2 items-center">{children}</span>
 		</TabsPrimitive.Trigger>
@@ -97,4 +98,4 @@ function TabsContent({ className, ...props }: React.ComponentProps<typeof TabsPr
 	);
 }
 
-export { Tabs, TabsList, TabsTrigger, TabsContent };
+export { Tabs, TabsContent, TabsList, TabsTrigger };

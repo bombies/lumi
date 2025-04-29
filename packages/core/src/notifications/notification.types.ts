@@ -1,8 +1,8 @@
-import { PushSubscription } from 'web-push';
-import { z } from 'zod';
+import type { PushSubscription } from 'web-push';
+import type { z } from 'zod';
 
-import { notificationSchema, unreadNotificationCountSchema } from '../notifications/notification.dto';
-import { EntityType } from '../utils/dynamo/dynamo.types';
+import type { notificationSchema, unreadNotificationCountSchema } from '../notifications/notification.dto';
+import type { EntityType } from '../utils/dynamo/dynamo.types';
 
 export type NotificationSubscriber = {
 	subscriberId: string;

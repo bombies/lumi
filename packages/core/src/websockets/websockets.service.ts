@@ -1,10 +1,4 @@
-import { createId } from '@paralleldrive/cuid2';
-import { TRPCError } from '@trpc/server';
-import mqtt from 'mqtt';
-
-import { dynamo } from '../utils/dynamo/dynamo.service';
-import { DynamoKey, EntityType } from '../utils/dynamo/dynamo.types';
-import {
+import type {
 	DatabaseWebSocketHeartbeat,
 	Event,
 	InferredWebSocketMessage,
@@ -12,6 +6,12 @@ import {
 	WebSocketHeartbeat,
 	WebSocketMessage,
 } from '../websockets/websockets.types';
+import { createId } from '@paralleldrive/cuid2';
+import { TRPCError } from '@trpc/server';
+
+import mqtt from 'mqtt';
+import { dynamo } from '../utils/dynamo/dynamo.service';
+import { DynamoKey, EntityType } from '../utils/dynamo/dynamo.types';
 
 export type MqttClientType = mqtt.MqttClient;
 
@@ -29,7 +29,7 @@ export const createWebsocketConnection = ({
 	identifier,
 	...args
 }: CreateWebsocketConnectionArgs): { client: MqttClientType; clientId: string } => {
-	const clientId = `client_` + (identifier ? identifier + '_' + createId() : createId());
+	const clientId = `client_${identifier ? `${identifier}_${createId()}` : createId()}`;
 	return {
 		client: mqtt.connect(`wss://${endpoint}/mqtt?x-amz-customauthorizer-name=${authorizer}`, {
 			protocolVersion: 5,
@@ -57,7 +57,7 @@ export const createAsyncWebsocketConnection = async ({
 	identifier,
 	...args
 }: CreateAsyncWebsocketConnectionArgs) => {
-	const clientId = `client_` + (identifier ? identifier + '_' + createId() : createId());
+	const clientId = `client_${identifier ? `${identifier}_${createId()}` : createId()}`;
 	return mqtt.connectAsync(`wss://${endpoint}/mqtt?x-amz-customauthorizer-name=${authorizer}`, {
 		protocolVersion: 5,
 		username: '',

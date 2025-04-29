@@ -1,16 +1,17 @@
 'use client';
 
-import { FC, useCallback, useMemo, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { TRPCClientError } from '@trpc/client';
-import { AnimatePresence, motion } from 'motion/react';
-import { toast } from 'sonner';
-
+import type { FC } from 'react';
 import { Card, CardContent, CardDescription, CardHeader } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { FetchUsersByUsername } from '@/hooks/trpc/user-hooks';
-import { trpc } from '@/lib/trpc/client';
+import { trpc } from '@/lib/trpc/trpc-react';
+
+import { TRPCClientError } from '@trpc/client';
+import { AnimatePresence, motion } from 'motion/react';
+import { useRouter } from 'next/navigation';
+import { useCallback, useMemo, useState } from 'react';
+import { toast } from 'sonner';
 
 const SendUserRelationshipRequest = () => trpc.relationships.sendRelationshipRequest.useMutation();
 
@@ -26,7 +27,7 @@ const SendRelationshipRequestContent: FC = () => {
 		async (userId: string) => {
 			toast.promise(sendRelationshipRequest(userId), {
 				loading: 'Sending request...',
-				success: data => {
+				success: (data) => {
 					if ('partner1' in data) {
 						router.push('/home');
 						return 'Relationship request already exists! You have now created a new space.';
@@ -72,30 +73,34 @@ const SendRelationshipRequestContent: FC = () => {
 								}}
 								className="absolute w-full top-[110%] shadow-md rounded-lg bg-background border border-border z-20 p-2 space-y-2"
 							>
-								{usersFetching ? (
-									<>
-										<Skeleton className="h-8 w-full rounded-md" />
-										<Skeleton className="h-8 w-full rounded-md" />
-										<Skeleton className="h-8 w-full rounded-md" />
-										<Skeleton className="h-8 w-full rounded-md" />
-									</>
-								) : flatUsers?.length ? (
-									flatUsers?.map(user => (
-										<button
-											key={user.id}
-											disabled={isSending}
-											onClick={() => sendRequest(user.id)}
-											className="cursor-pointer w-full hover:bg-primary/10 p-2 rounded-md"
-										>
-											<p className="text-start">
-												<span className="text-xs">@</span>
-												<span className="text-primary">{user.username}</span>
-											</p>
-										</button>
-									))
-								) : (
-									<p className="p-2 text-sm text-foreground-secondary/70">No results.</p>
-								)}
+								{usersFetching
+									? (
+											<>
+												<Skeleton className="h-8 w-full rounded-md" />
+												<Skeleton className="h-8 w-full rounded-md" />
+												<Skeleton className="h-8 w-full rounded-md" />
+												<Skeleton className="h-8 w-full rounded-md" />
+											</>
+										)
+									: flatUsers?.length
+										? (
+												flatUsers?.map(user => (
+													<button
+														key={user.id}
+														disabled={isSending}
+														onClick={() => sendRequest(user.id)}
+														className="cursor-pointer w-full hover:bg-primary/10 p-2 rounded-md"
+													>
+														<p className="text-start">
+															<span className="text-xs">@</span>
+															<span className="text-primary">{user.username}</span>
+														</p>
+													</button>
+												))
+											)
+										: (
+												<p className="p-2 text-sm text-foreground-secondary/70">No results.</p>
+											)}
 							</motion.div>
 						)}
 					</AnimatePresence>

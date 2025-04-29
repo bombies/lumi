@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import type { FC } from 'react';
 
 import BreadcrumbBuilder from '@/components/ui/breadcrumb-builder';
 import Title from '@/components/ui/title';

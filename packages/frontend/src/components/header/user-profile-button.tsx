@@ -1,12 +1,12 @@
 'use client';
 
-import { FC } from 'react';
-import Link from 'next/link';
-import { HeartIcon, LockClosedIcon, PaintBrushIcon, UserCircleIcon, UserIcon } from '@heroicons/react/24/solid';
-import { LogOutIcon, MoonIcon, SunIcon, SunMoonIcon } from 'lucide-react';
-
+import type { FC } from 'react';
 import { useColorSchemeAPI } from '@/lib/hooks/useColorSchemeAPI';
 import { useSignOut } from '@/lib/hooks/useSignOut';
+import { HeartIcon, LockClosedIcon, PaintBrushIcon, UserCircleIcon, UserIcon } from '@heroicons/react/24/solid';
+
+import { LogOutIcon, MoonIcon, SunIcon, SunMoonIcon } from 'lucide-react';
+import Link from 'next/link';
 import { useRelationship } from '../providers/relationships/relationship-provder';
 import {
 	DropdownMenu,
@@ -33,11 +33,13 @@ const UserProfileButton: FC = () => {
 		<DropdownMenu>
 			<DropdownMenuTrigger asChild>
 				<button className="cursor-pointer size-[32px] flex items-center justify-center rounded-full border-2 border-primary">
-					{self.avatarUrl ? (
-						<UserAvatar user={self} className="size-full border-0" hideStatus />
-					) : (
-						<UserCircleIcon className="size-full" />
-					)}
+					{self.avatarUrl
+						? (
+								<UserAvatar user={self} className="size-full border-0" hideStatus />
+							)
+						: (
+								<UserCircleIcon className="size-full" />
+							)}
 				</button>
 			</DropdownMenuTrigger>
 			<DropdownMenuContent className="w-56">
@@ -46,54 +48,72 @@ const UserProfileButton: FC = () => {
 				<DropdownMenuGroup>
 					<DropdownMenuItem asChild>
 						<Link href="/settings">
-							<UserIcon className="size-[16px] text-current" /> Profile
+							<UserIcon className="size-[16px] text-current" />
+							{' '}
+							Profile
 						</Link>
 					</DropdownMenuItem>
 					<DropdownMenuItem asChild>
 						<Link href="/settings/security">
-							<LockClosedIcon className="size-[16px] text-current" /> Account &amp; Security
+							<LockClosedIcon className="size-[16px] text-current" />
+							{' '}
+							Account &amp; Security
 						</Link>
 					</DropdownMenuItem>
 					<DropdownMenuItem asChild>
 						<Link href="/settings/relationship">
-							<HeartIcon className="size-[16px] text-current" /> Relationship
+							<HeartIcon className="size-[16px] text-current" />
+							{' '}
+							Relationship
 						</Link>
 					</DropdownMenuItem>
 					<DropdownMenuItem asChild>
 						<Link href="/settings/apprearance">
-							<PaintBrushIcon className="size-[16px] text-current" /> Appearance
+							<PaintBrushIcon className="size-[16px] text-current" />
+							{' '}
+							Appearance
 						</Link>
 					</DropdownMenuItem>
 				</DropdownMenuGroup>
 				<DropdownMenuSeparator />
 				<DropdownMenuGroup>
 					<DropdownMenuSub>
-						<DropdownMenuSubTrigger>{schemeIcon} Colour Scheme</DropdownMenuSubTrigger>
+						<DropdownMenuSubTrigger>
+							{schemeIcon}
+							{' '}
+							Colour Scheme
+						</DropdownMenuSubTrigger>
 						<DropdownMenuPortal>
 							<DropdownMenuSubContent>
 								<DropdownMenuCheckboxItem
 									checked={currentColorScheme === 'light'}
-									onCheckedChange={checked => {
+									onCheckedChange={(checked) => {
 										if (checked) setCurrentColorScheme('light');
 									}}
 								>
-									<SunIcon /> Light
+									<SunIcon />
+									{' '}
+									Light
 								</DropdownMenuCheckboxItem>
 								<DropdownMenuCheckboxItem
 									checked={currentColorScheme === 'dark'}
-									onCheckedChange={checked => {
+									onCheckedChange={(checked) => {
 										if (checked) setCurrentColorScheme('dark');
 									}}
 								>
-									<MoonIcon /> Dark
+									<MoonIcon />
+									{' '}
+									Dark
 								</DropdownMenuCheckboxItem>
 								<DropdownMenuCheckboxItem
 									checked={currentColorScheme === undefined}
-									onCheckedChange={checked => {
+									onCheckedChange={(checked) => {
 										if (checked) setCurrentColorScheme(undefined);
 									}}
 								>
-									<SunMoonIcon /> System
+									<SunMoonIcon />
+									{' '}
+									System
 								</DropdownMenuCheckboxItem>
 							</DropdownMenuSubContent>
 						</DropdownMenuPortal>
@@ -103,7 +123,9 @@ const UserProfileButton: FC = () => {
 				<DropdownMenuGroup>
 					<DropdownMenuLabel className="text-destructive">Danger Zone</DropdownMenuLabel>
 					<DropdownMenuItem variant="destructive" onClick={signOut}>
-						<LogOutIcon className="size-[16px] text-current" /> Sign Out
+						<LogOutIcon className="size-[16px] text-current" />
+						{' '}
+						Sign Out
 					</DropdownMenuItem>
 				</DropdownMenuGroup>
 			</DropdownMenuContent>

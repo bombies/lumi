@@ -1,5 +1,5 @@
 import { sendReactEmail } from '@lumi/core/email/email.service';
-import { Button, Link, Text } from '@react-email/components';
+import { Button, Text } from '@react-email/components';
 import * as React from 'react';
 
 import EmailTemplate from '../../components/template';
@@ -9,7 +9,7 @@ export type SignUpEmailProps = {
 	email: string;
 };
 
-const SignUpEmail: React.FC<SignUpEmailProps> = ({ siteUrl, email }) => {
+const SignUpEmail: React.FC<SignUpEmailProps> = ({ siteUrl }) => {
 	return (
 		<EmailTemplate preview="Welcome to Lumi! Please confirm your account by clicking the link">
 			<Text>Hey,</Text>

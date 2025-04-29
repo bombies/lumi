@@ -1,26 +1,27 @@
 'use client';
 
-import { FC, useCallback, useMemo, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { UploadIcon, XIcon } from 'lucide-react';
-import Player from 'next-video/player';
-import MediaThemeInstaplay from 'player.style/instaplay/react';
-import { SubmitHandler } from 'react-hook-form';
-import { z } from 'zod';
-
+import type { SelectOption } from '@/components/ui/multiselect';
+import type { FC } from 'react';
+import type { SubmitHandler } from 'react-hook-form';
 import { useRelationship } from '@/components/providers/relationships/relationship-provder';
 import { Button } from '@/components/ui/button';
 import EasyForm from '@/components/ui/form-extras/easy-form';
 import EasyFormField from '@/components/ui/form-extras/easy-form-field';
 import EasyFormSelect from '@/components/ui/form-extras/fields/easy-form-select';
+
 import InfiniteLoader from '@/components/ui/infinite-loader';
 import { Input } from '@/components/ui/input';
-import { SelectOption } from '@/components/ui/multiselect';
 import { Progress } from '@/components/ui/progress';
 import { Textarea } from '@/components/ui/textarea';
 import Title from '@/components/ui/title';
 import { CreateMomentDetails, GetRelationshipMomentTags, UploadMoment } from '@/hooks/trpc/moment-hooks';
 import { handleTrpcError } from '@/lib/trpc/utils';
+import { UploadIcon, XIcon } from 'lucide-react';
+import Player from 'next-video/player';
+import { useRouter } from 'next/navigation';
+import MediaThemeInstaplay from 'player.style/instaplay/react';
+import { useCallback, useMemo, useState } from 'react';
+import { z } from 'zod';
 import CreateMomentTagButton from '../../components/create-moment-tag.button';
 
 const momentFormDetailsSchema = z.object({
@@ -67,7 +68,7 @@ const MomentUploadForm: FC<Props> = ({ momentFile, onCancel }) => {
 	);
 
 	const onSubmit = useCallback<SubmitHandler<MomentFormDetailsSchema>>(
-		async data => {
+		async (data) => {
 			setIsUploading(true);
 
 			try {
@@ -141,13 +142,13 @@ const MomentUploadForm: FC<Props> = ({ momentFile, onCancel }) => {
 							options={momentTags ?? []}
 							optionsLoading={relationshipMomentTagsLoading}
 							onSearch={setTagSearch}
-							itemsFooter={
+							itemsFooter={(
 								<InfiniteLoader
 									hasMore={hasMoreTags}
 									fetchMore={fetchMoreTags}
 									loading={isFetchingMoreTags}
 								/>
-							}
+							)}
 						/>
 						<CreateMomentTagButton />
 					</div>
@@ -166,7 +167,9 @@ const MomentUploadForm: FC<Props> = ({ momentFile, onCancel }) => {
 								variant="accent"
 								loading={isUploading || momentUploading || momentDetailsCreating}
 							>
-								<UploadIcon size={18} /> Upload Moment
+								<UploadIcon size={18} />
+								{' '}
+								Upload Moment
 							</Button>
 							{isUploading && <Progress value={momentUploadProgress} />}
 						</div>
@@ -176,7 +179,9 @@ const MomentUploadForm: FC<Props> = ({ momentFile, onCancel }) => {
 							disabled={momentUploading || isUploading || momentDetailsCreating}
 							onClick={onCancel}
 						>
-							<XIcon size={18} /> Cancel Upload
+							<XIcon size={18} />
+							{' '}
+							Cancel Upload
 						</Button>
 					</div>
 				</EasyForm>

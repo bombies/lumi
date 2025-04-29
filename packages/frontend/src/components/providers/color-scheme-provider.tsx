@@ -1,8 +1,9 @@
 'use client';
 
-import { createContext, FC, PropsWithChildren, useContext, useEffect, useState } from 'react';
-
+import type { FC, PropsWithChildren } from 'react';
 import { useLocalStorage } from '@/lib/hooks/useLocalStorage';
+
+import { createContext, use, useEffect, useState } from 'react';
 
 export type ColorScheme = 'light' | 'dark';
 
@@ -14,7 +15,7 @@ type ColorSchemeData = {
 const ColorSchemeContext = createContext<ColorSchemeData | undefined>(undefined);
 
 export const useColorScheme = () => {
-	const context = useContext(ColorSchemeContext);
+	const context = use(ColorSchemeContext);
 	if (!context) throw new Error('useColorScheme must be used within a ColorSchemeProvider');
 	return context;
 };
@@ -45,8 +46,8 @@ const ColorSchemeProvider: FC<PropsWithChildren> = ({ children }) => {
 	useEffect(() => {
 		document.documentElement.classList.toggle(
 			'dark',
-			currentColorScheme === 'dark' ||
-				(!localStorage?.hasKey('colorScheme') && window.matchMedia('(prefers-color-scheme: dark)').matches),
+			currentColorScheme === 'dark'
+			|| (!localStorage?.hasKey('colorScheme') && window.matchMedia('(prefers-color-scheme: dark)').matches),
 		);
 	}, [currentColorScheme, localStorage]);
 
@@ -67,14 +68,14 @@ const ColorSchemeProvider: FC<PropsWithChildren> = ({ children }) => {
 	}, [currentColorScheme, localStorage]);
 
 	return (
-		<ColorSchemeContext.Provider
+		<ColorSchemeContext
 			value={{
 				currentColorScheme,
 				setCurrentColorScheme,
 			}}
 		>
 			{children}
-		</ColorSchemeContext.Provider>
+		</ColorSchemeContext>
 	);
 };
 

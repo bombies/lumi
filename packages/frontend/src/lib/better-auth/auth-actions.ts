@@ -1,8 +1,8 @@
 'use server';
 
-import { headers } from 'next/headers';
-
 import { auth } from '@/auth';
+
+import { headers } from 'next/headers';
 
 export type Session = Awaited<ReturnType<typeof auth.api.getSession>>;
 

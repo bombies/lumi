@@ -1,5 +1,7 @@
-import { TRPCClientError, TRPCClientErrorLike } from '@trpc/client';
-import { AnyTRPCClientTypes, TRPCError } from '@trpc/server';
+import type { TRPCClientErrorLike } from '@trpc/client';
+import type { AnyTRPCClientTypes } from '@trpc/server';
+import { TRPCClientError } from '@trpc/client';
+import { TRPCError } from '@trpc/server';
 import { toast } from 'sonner';
 
 type GetErrorMessageArgs = {

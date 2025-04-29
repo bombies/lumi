@@ -1,20 +1,24 @@
 'use client';
 
-import { createContext, FC, PropsWithChildren, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { User } from '@lumi/core/users/user.types';
-import { emitAsyncWebsocketEvent, MqttClientType } from '@lumi/core/websockets/websockets.service';
-import {
+import type { User } from '@lumi/core/users/user.types';
+import type { MqttClientType } from '@lumi/core/websockets/websockets.service';
+import type {
 	Event,
-	events,
 	InferredWebSocketMessage,
 	WebSocketEventHandler,
-	WebSocketToken,
 } from '@lumi/core/websockets/websockets.types';
-
+import type { FC, PropsWithChildren } from 'react';
 import { connectToWebsocket } from '@/components/providers/web-sockets/web-socket-actions';
 import { UpdateUser } from '@/hooks/trpc/user-hooks';
 import { useQueue } from '@/lib/hooks/useQueue';
+
 import { logger } from '@/lib/logger';
+import { emitAsyncWebsocketEvent } from '@lumi/core/websockets/websockets.service';
+import {
+	events,
+	WebSocketToken,
+} from '@lumi/core/websockets/websockets.types';
+import { createContext, use, useCallback, useEffect, useMemo, useState } from 'react';
 import { WebsocketTopic } from './topics';
 
 type WebSocketProviderProps = PropsWithChildren<{
@@ -42,7 +46,7 @@ type WebSocketProviderData = {
 const WebSocketContext = createContext<WebSocketProviderData | undefined>(undefined);
 
 export const useWebSocket = () => {
-	const context = useContext(WebSocketContext);
+	const context = use(WebSocketContext);
 	if (context === undefined) throw new Error('useWebSocket must be used within a WebSocketProvider');
 
 	return context;
@@ -58,12 +62,12 @@ const WebSocketProvider: FC<WebSocketProviderProps> = ({ children, user, endpoin
 		{} as Record<Event, WebSocketEventHandler<Event>[]>,
 	);
 	const { enqueue: enqueueEvent } = useQueue<InferredWebSocketMessage<Event>>({
-		process: async message => {
+		process: async (message) => {
 			logger.debug('processing event', message);
 			const handlers = eventHandlers[message.type];
 			logger.debug('handlers', handlers);
 			if ('payload' in message && handlers)
-				handlers.forEach(async handler => {
+				handlers.forEach(async (handler) => {
 					const cb = handler(message.payload as InferredWebSocketMessage<Event>['payload']);
 					if (cb instanceof Promise) await cb;
 				});
@@ -72,14 +76,14 @@ const WebSocketProvider: FC<WebSocketProviderProps> = ({ children, user, endpoin
 	const { enqueue: enqueuePostConnectionAction, startProcessing: processPostConnectionActions } = useQueue<
 		() => any | Promise<any>
 	>({
-		process: async fn => {
-			await fn();
-		},
-		lazyProcess: true,
-	});
+				process: async (fn) => {
+					await fn();
+				},
+				lazyProcess: true,
+			});
 
 	const addEventHandler = useCallback(<T extends Event>(event: T, handler: WebSocketEventHandler<T>) => {
-		setEventHandlers(prev => {
+		setEventHandlers((prev) => {
 			const handlers = prev[event] || [];
 
 			// Ensure the handler is not already in the list
@@ -91,7 +95,7 @@ const WebSocketProvider: FC<WebSocketProviderProps> = ({ children, user, endpoin
 	}, []);
 
 	const removeEventHandler = useCallback(<T extends Event>(event: T, handler: WebSocketEventHandler<T>) => {
-		setEventHandlers(prev => {
+		setEventHandlers((prev) => {
 			const handlers = prev[event] || [];
 			const index = handlers.indexOf(handler);
 			if (index !== -1) handlers.splice(index, 1);
@@ -124,7 +128,6 @@ const WebSocketProvider: FC<WebSocketProviderProps> = ({ children, user, endpoin
 		async (topic: string) => {
 			enqueuePostConnectionAction(() => mqttConnection?.subscribeAsync({ [topic]: { qos: 1 } }));
 		},
-		// eslint-disable-next-line react-hooks/exhaustive-deps
 		[mqttConnection],
 	);
 
@@ -134,7 +137,7 @@ const WebSocketProvider: FC<WebSocketProviderProps> = ({ children, user, endpoin
 		const connection = connectToWebsocket({
 			endpoint,
 			authorizer,
-			identifier: 'user:' + user.id,
+			identifier: `user:${user.id}`,
 			token: `${WebSocketToken.RELATIONSHIP_USER}::${relationshipId}`,
 			keepalive: 600,
 			async onConnect(_, clientId) {
@@ -176,11 +179,11 @@ const WebSocketProvider: FC<WebSocketProviderProps> = ({ children, user, endpoin
 			},
 			async onMessage(message, clientId) {
 				if (
-					message &&
-					typeof message === 'object' &&
-					'type' in message &&
-					typeof message.type === 'string' &&
-					events.includes(message.type as Event)
+					message
+					&& typeof message === 'object'
+					&& 'type' in message
+					&& typeof message.type === 'string'
+					&& events.includes(message.type as Event)
 				) {
 					logger.debug(`Callback handling messge (${clientId})`, message);
 					enqueueEvent(message as InferredWebSocketMessage<Event>);
@@ -234,7 +237,7 @@ const WebSocketProvider: FC<WebSocketProviderProps> = ({ children, user, endpoin
 		[addEventHandler, connectionStatus, emitEvent, mqttConnection, removeEventHandler, subscribeToTopic],
 	);
 
-	return <WebSocketContext.Provider value={memoizedValues}>{children}</WebSocketContext.Provider>;
+	return <WebSocketContext value={memoizedValues}>{children}</WebSocketContext>;
 };
 
 export default WebSocketProvider;

@@ -1,8 +1,8 @@
 'use client';
 
-import { cloneElement, ComponentPropsWithoutRef, ReactElement, useEffect } from 'react';
-import { Slot } from '@radix-ui/react-slot';
-import {
+import type { Slot } from '@radix-ui/react-slot';
+import type { ComponentPropsWithoutRef, ReactElement } from 'react';
+import type {
 	ControllerFieldState,
 	ControllerRenderProps,
 	FieldValues,
@@ -11,6 +11,7 @@ import {
 	UseFormReturn,
 	UseFormStateReturn,
 } from 'react-hook-form';
+import { cloneElement, useEffect } from 'react';
 
 import { FormControl, FormDescription, FormItem, FormLabel, FormMessage, FormField as ShadFormField } from '../form';
 import { useForm } from './easy-form-provider';
@@ -21,9 +22,9 @@ export type EasyFormFieldProps<T extends FieldValues> = Readonly<{
 	children?:
 		| ReactElement<ComponentPropsWithoutRef<typeof Slot>, typeof Slot>
 		| ((
-				form: UseFormReturn<T>,
-				field: ControllerRenderProps<T, Path<T>>,
-		  ) => ReactElement<ComponentPropsWithoutRef<typeof Slot>, typeof Slot>);
+			form: UseFormReturn<T>,
+			field: ControllerRenderProps<T, Path<T>>,
+		) => ReactElement<ComponentPropsWithoutRef<typeof Slot>, typeof Slot>);
 	showErrorMessage?: boolean;
 	description?: string;
 	className?: string;
@@ -62,7 +63,6 @@ export default function EasyFormField<T extends FieldValues = FieldValues>({
 
 	useEffect(() => {
 		if (defaultValue) form.setValue(name, defaultValue);
-		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
 	return (
@@ -75,12 +75,15 @@ export default function EasyFormField<T extends FieldValues = FieldValues>({
 					<FormItem className={className}>
 						{label && (
 							<FormLabel className={labelClassName}>
-								{label}{' '}
-								{optional ? (
-									<span className="italic text-neutral-400 text-xs">(optional)</span>
-								) : (
-									requiredAsterisk && <span className="text-xs text-red-500">*</span>
-								)}
+								{label}
+								{' '}
+								{optional
+									? (
+											<span className="italic text-neutral-400 text-xs">(optional)</span>
+										)
+									: (
+											requiredAsterisk && <span className="text-xs text-red-500">*</span>
+										)}
 							</FormLabel>
 						)}
 						<FormControl defaultValue={defaultValue}>
@@ -93,8 +96,7 @@ export default function EasyFormField<T extends FieldValues = FieldValues>({
 						{description && <FormDescription>{description}</FormDescription>}
 						{showErrorMessage && <FormMessage />}
 					</FormItem>
-				)
-			}
+				)}
 		/>
 	);
 }
