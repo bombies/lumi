@@ -6,8 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import EasyForm from '@/components/ui/form-extras/easy-form';
 
-import EasyFormField from '@/components/ui/form-extras/easy-form-field';
-import PasswordInput from '@/components/ui/password-input';
+import EasyFormInput from '@/components/ui/form-extras/fields/easy-form-input';
 import { auth } from '@/lib/better-auth/auth-client';
 import { useCallback, useState } from 'react';
 import { toast } from 'sonner';
@@ -70,15 +69,9 @@ const ResetPasswordButton: FC = () => {
 					clearOnSubmit
 					className="space-y-6"
 				>
-					<EasyFormField<ResetPasswordFormValues> name="oldPassword" label="Old Password">
-						<PasswordInput />
-					</EasyFormField>
-					<EasyFormField<ResetPasswordFormValues> name="newPassword" label="New Password">
-						<PasswordInput />
-					</EasyFormField>
-					<EasyFormField<ResetPasswordFormValues> name="confirmPassword" label="Confirm Password">
-						<PasswordInput />
-					</EasyFormField>
+					<EasyFormInput<ResetPasswordFormValues> type="password" name="oldPassword" label="Old Password" />
+					<EasyFormInput<ResetPasswordFormValues> type="password" name="newPassword" label="New Password" />
+					<EasyFormInput<ResetPasswordFormValues> type="password" name="confirmPassword" label="Confirm Password" />
 					<Button type="submit" loading={isChangingPassword}>
 						Change Password
 					</Button>

@@ -7,8 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import EasyForm from '@/components/ui/form-extras/easy-form';
 
-import EasyFormField from '@/components/ui/form-extras/easy-form-field';
-import { Textarea } from '@/components/ui/textarea';
+import EasyFormInput from '@/components/ui/form-extras/fields/easy-form-input';
 import { UpdateAffirmation } from '@/hooks/trpc/affirmation-hooks';
 import { PencilIcon } from 'lucide-react';
 import { useCallback, useState } from 'react';
@@ -54,14 +53,17 @@ const EditAffirmationButton: FC<Props> = ({ affirmation }) => {
 					<DialogTitle>Edit Affirmation</DialogTitle>
 				</DialogHeader>
 				<EasyForm schema={formSchema} onSubmit={onSubmit} disabled={isUpdating} className="space-y-6">
-					<EasyFormField<FormSchema> name="affirmation" label="Affirmation">
-						<Textarea
-							maxLength={150}
-							defaultValue={affirmation.affirmation}
-							className="resize-none"
-							rows={3}
-						/>
-					</EasyFormField>
+					<EasyFormInput
+						type="textarea"
+						name="affirmation"
+						label="Affirmation"
+						inputProps={{
+							maxLength: 150,
+							placeholder: 'Enter your affirmation',
+							className: 'resize-none',
+							rows: 3,
+						}}
+					/>
 					<Button type="submit" loading={isUpdating}>
 						Submit
 					</Button>

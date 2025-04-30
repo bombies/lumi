@@ -11,7 +11,7 @@ import type {
 	UseFormReturn,
 	UseFormStateReturn,
 } from 'react-hook-form';
-import { cloneElement, useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 
 import { FormControl, FormDescription, FormItem, FormLabel, FormMessage, FormField as ShadFormField } from '../form';
 import { useForm } from './easy-form-provider';
@@ -19,12 +19,10 @@ import { useForm } from './easy-form-provider';
 export type EasyFormFieldProps<T extends FieldValues> = Readonly<{
 	name: Path<T>;
 	label?: string;
-	children?:
-		| ReactElement<ComponentPropsWithoutRef<typeof Slot>, typeof Slot>
-		| ((
-			form: UseFormReturn<T>,
-			field: ControllerRenderProps<T, Path<T>>,
-		) => ReactElement<ComponentPropsWithoutRef<typeof Slot>, typeof Slot>);
+	children?:((
+		form: UseFormReturn<T>,
+		field: ControllerRenderProps<T, Path<T>>,
+	) => ReactElement<ComponentPropsWithoutRef<typeof Slot>, typeof Slot>);
 	showErrorMessage?: boolean;
 	description?: string;
 	className?: string;
@@ -65,6 +63,10 @@ export default function EasyFormField<T extends FieldValues = FieldValues>({
 		if (defaultValue) form.setValue(name, defaultValue);
 	}, []);
 
+	const renderItem = useCallback((form: UseFormReturn<T>, field: ControllerRenderProps<T, Path<T>>) => {
+		return children?.(form, field);
+	}, [children]);
+
 	return (
 		<ShadFormField
 			control={form.control}
@@ -87,11 +89,7 @@ export default function EasyFormField<T extends FieldValues = FieldValues>({
 							</FormLabel>
 						)}
 						<FormControl defaultValue={defaultValue}>
-							{cloneElement(typeof children === 'function' ? children(form, field) : children!, {
-								...field,
-								// @ts-expect-error cloneElement props types are weird.
-								value: field.value ?? '',
-							})}
+							{renderItem(form, field)}
 						</FormControl>
 						{description && <FormDescription>{description}</FormDescription>}
 						{showErrorMessage && <FormMessage />}

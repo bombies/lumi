@@ -337,10 +337,12 @@ const CommentDrawer: FC<Props> = ({ moment }) => {
 					<div className="flex gap-2 shrink-0 p-2">
 						<EasyForm schema={formSchema} onSubmit={sendMessage} className="w-full" clearOnSubmit>
 							<EasyFormField<FormSchema> name="messageContent">
-								{(form, field) => (
+								{(_form, field) => (
 									<Textarea
-										className="rounded-2xl w-full h-fit"
-										inputClassName="resize-none h-fit"
+										{...field}
+										value={field.value ?? ''}
+										className="rounded-2xl w-full"
+										inputClassName="resize-none"
 										placeholder="Send a message"
 										variableHeight={{
 											maxHeight: 500,

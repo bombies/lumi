@@ -27,7 +27,7 @@ export default function EasyFormProvider<T extends FieldValues>({
 	submitting,
 	requiredAsterisk = false,
 }: Props<T>) {
-	const value = useMemo(
+	const value = useMemo<ContextValues<T>>(
 		() => ({
 			form,
 			submitting,
@@ -37,7 +37,7 @@ export default function EasyFormProvider<T extends FieldValues>({
 		[form, formDisabled, requiredAsterisk, submitting],
 	);
 
-	return <FormContext.Provider value={value}>{children}</FormContext.Provider>;
+	return <FormContext value={value}>{children}</FormContext>;
 }
 
 export const useForm = <T extends FieldValues>() => {

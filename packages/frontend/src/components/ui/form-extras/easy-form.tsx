@@ -1,10 +1,13 @@
+'use client';
+
 import type { ReactElement } from 'react';
 import type { DefaultValues, FieldValues, SubmitHandler, UseFormReturn } from 'react-hook-form';
 import type { z } from 'zod';
+import { logger } from '@/lib/logger';
+
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-
 import { Form as ShadForm } from '../form';
 import EasyFormProvider from './easy-form-provider';
 
@@ -62,13 +65,19 @@ export default function EasyForm<T extends FieldValues>({
 		<ShadForm {...form}>
 			<form
 				onSubmit={
-					onSubmit
-					&& form.handleSubmit(async (args, e) => {
-						e?.preventDefault();
+					form.handleSubmit(async (args, e) => {
+						if (!onSubmit) {
+							logger.debug('No onSubmit handler provided, skipping form submission!');
+							return;
+						}
+
+						logger.debug('Form submitted!', form.getValues());
 						const res = onSubmit(args, e);
 						if (res instanceof Promise) await res;
+
 						if (clearOnSubmit) {
 							form.reset(initialValues);
+							logger.debug('Form cleared after submission!', form.getValues());
 						}
 					})
 				}

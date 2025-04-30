@@ -6,11 +6,9 @@ import type { FC } from 'react';
 import type { SubmitHandler } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
 import EasyForm from '@/components/ui/form-extras/easy-form';
-import EasyFormField from '@/components/ui/form-extras/easy-form-field';
+import EasyFormInput from '@/components/ui/form-extras/fields/easy-form-input';
 import EasyFormSelect from '@/components/ui/form-extras/fields/easy-form-select';
 import InfiniteLoader from '@/components/ui/infinite-loader';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 
 import Title from '@/components/ui/title';
 import { GetMomentTags, GetRelationshipMomentTags, UpdateMomentDetails } from '@/hooks/trpc/moment-hooks';
@@ -98,14 +96,16 @@ const MomentEditForm: FC<Props> = ({ moment }) => {
 					className="space-y-6"
 					submitting={isUpdatingDetails}
 				>
-					<EasyFormField<MomentFormDetailsSchema>
+					<EasyFormInput<MomentFormDetailsSchema>
 						name="title"
 						label="Title"
 						defaultValue={moment.title}
 						showErrorMessage
-					>
-						<Input maxLength={90} placeholder="Enter a title for your moment" />
-					</EasyFormField>
+						inputProps={{
+							maxLength: 90,
+							placeholder: 'Enter a title for your moment',
+						}}
+					/>
 					<div className="flex flex-col tablet:flex-row gap-2 items-end">
 						<EasyFormSelect<MomentFormDetailsSchema>
 							name="tags"
@@ -126,19 +126,19 @@ const MomentEditForm: FC<Props> = ({ moment }) => {
 						/>
 						<CreateMomentTagButton disabled={currentTagsLoading} />
 					</div>
-					<EasyFormField<MomentFormDetailsSchema>
+					<EasyFormInput<MomentFormDetailsSchema>
+						type="textarea"
 						name="description"
 						label="Description"
 						defaultValue={moment.description}
 						showErrorMessage
-					>
-						<Textarea
-							maxLength={1024}
-							className="h-96"
-							placeholder="Enter a description for your moment"
-							rows={10}
-						/>
-					</EasyFormField>
+						inputProps={{
+							maxLength: 1024,
+							placeholder: 'Enter a description for your moment',
+							className: 'h-96',
+							rows: 10,
+						}}
+					/>
 					<div className="flex gap-4">
 						<div className="space-x-2">
 							<Button

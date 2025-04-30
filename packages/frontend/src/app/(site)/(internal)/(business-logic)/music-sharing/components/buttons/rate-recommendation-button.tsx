@@ -9,8 +9,8 @@ import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '@/components/
 
 import EasyForm from '@/components/ui/form-extras/easy-form';
 import EasyFormField from '@/components/ui/form-extras/easy-form-field';
+import EasyFormInput from '@/components/ui/form-extras/fields/easy-form-input';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { UpdateSongRecommendation } from '@/hooks/trpc/music-sharing-hooks';
 import { StarIcon } from '@heroicons/react/24/solid';
 import { useCallback, useState } from 'react';
@@ -99,9 +99,16 @@ const RateRecommendationButton: FC<Props> = ({ track, onRate }) => {
 							</div>
 						)}
 					</EasyFormField>
-					<EasyFormField<FormSchema> name="comments" label="Comments" optional>
-						<Textarea rows={20} className="min-h-24 resize-none" />
-					</EasyFormField>
+					<EasyFormInput<FormSchema>
+						type="textarea"
+						name="comments"
+						label="Comments"
+						optional
+						inputProps={{
+							rows: 20,
+							className: 'min-h-24 resize-none',
+						}}
+					/>
 					<Button
 						type="submit"
 						variant="accent"

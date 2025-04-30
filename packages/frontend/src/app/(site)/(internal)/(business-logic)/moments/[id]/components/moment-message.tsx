@@ -226,7 +226,7 @@ const MomentMessageElement: FC<Props> = ({ message }) => {
 												<CheckCheckIcon className="size-[12px]" strokeWidth="2.125px" />
 											)
 										: (
-												<CheckIcon className="size-[12px]" />
+												<CheckIcon className="size-[12px]" strokeWidth="2.125px" />
 											)}
 								</span>
 							)}

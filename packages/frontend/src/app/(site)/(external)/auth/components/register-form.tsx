@@ -4,9 +4,7 @@ import type { FC } from 'react';
 import type { SubmitHandler } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
 import EasyForm from '@/components/ui/form-extras/easy-form';
-import EasyFormField from '@/components/ui/form-extras/easy-form-field';
-import { Input } from '@/components/ui/input';
-import PasswordInput from '@/components/ui/password-input';
+import EasyFormInput from '@/components/ui/form-extras/fields/easy-form-input';
 
 import { Separator } from '@/components/ui/separator';
 import { auth } from '@/lib/better-auth/auth-client';
@@ -26,7 +24,7 @@ const registerSchema = registerUserDto.and(
 type RegisterSchema = z.infer<typeof registerSchema>;
 
 /**
- * This is the array of emails allowed to register on the app. For now, it's just me an Sarah <3
+ * This is the array of emails allowed to register on the app. For now, it's just me and Sarah <3
  */
 const permittedEmails = ['ajani.green@outlook.com', 'juzsarahx@gmail.com'];
 
@@ -73,26 +71,22 @@ const RegisterForm: FC = () => {
 		>
 			<h3 className="text-center font-cursive text-4xl mb-2">Register</h3>
 			<Separator className="mb-9" />
-			<EasyFormField<RegisterSchema> name="username" label="Username" showErrorMessage>
-				<Input />
-			</EasyFormField>
-			<EasyFormField<RegisterSchema> name="email" label="Email Address" showErrorMessage>
-				<Input type="email" />
-			</EasyFormField>
-			<div className="flex gap-6">
-				<EasyFormField<RegisterSchema> name="firstName" label="First Name" showErrorMessage>
-					<Input />
-				</EasyFormField>
-				<EasyFormField<RegisterSchema> name="lastName" label="Last Name" showErrorMessage>
-					<Input />
-				</EasyFormField>
-			</div>
-			<EasyFormField<RegisterSchema> name="password" label="Password" showErrorMessage>
-				<PasswordInput />
-			</EasyFormField>
-			<EasyFormField<RegisterSchema> name="confirmPassword" label="Confirm Password" showErrorMessage>
-				<PasswordInput />
-			</EasyFormField>
+			<EasyFormInput<RegisterSchema> name="username" label="Username" showErrorMessage />
+			<EasyFormInput<RegisterSchema> name="email" label="Email Address" showErrorMessage />
+			<EasyFormInput<RegisterSchema> name="firstName" label="First Name" showErrorMessage />
+			<EasyFormInput<RegisterSchema> name="lastName" label="Last Name" showErrorMessage />
+			<EasyFormInput<RegisterSchema>
+				type="password"
+				name="password"
+				label="Password"
+				showErrorMessage
+			/>
+			<EasyFormInput<RegisterSchema>
+				type="password"
+				name="confirmPassword"
+				label="Confirm Password"
+				showErrorMessage
+			/>
 			<Button type="submit" loading={isAuthenticating}>
 				Register
 			</Button>

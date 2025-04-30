@@ -14,8 +14,7 @@ import {
 } from '@/components/ui/dialog';
 import EasyForm from '@/components/ui/form-extras/easy-form';
 
-import EasyFormField from '@/components/ui/form-extras/easy-form-field';
-import { Textarea } from '@/components/ui/textarea';
+import EasyFormInput from '@/components/ui/form-extras/fields/easy-form-input';
 import { SendCustomAffirmation } from '@/hooks/trpc/affirmation-hooks';
 import { PaperAirplaneIcon } from '@heroicons/react/24/solid';
 import { sendCustomAffirmationDto } from '@lumi/core/affirmations/affirmations.dto';
@@ -66,14 +65,17 @@ const SendCustomAffirmationButton: FC = () => {
 					disabled={isSending}
 					className="space-y-6"
 				>
-					<EasyFormField<CustomAffirmationFormSchema> name="affirmation" label="Affirmation">
-						<Textarea
-							maxLength={150}
-							placeholder="Enter your affirmation"
-							className="resize-none"
-							rows={3}
-						/>
-					</EasyFormField>
+					<EasyFormInput<CustomAffirmationFormSchema>
+						type="textarea"
+						name="affirmation"
+						label="Affirmation"
+						inputProps={{
+							maxLength: 150,
+							placeholder: 'Enter your affirmation',
+							className: 'resize-none',
+							rows: 3,
+						}}
+					/>
 					<Button type="submit" loading={isSending}>
 						<PaperAirplaneIcon className="size-[18px]" />
 						{' '}

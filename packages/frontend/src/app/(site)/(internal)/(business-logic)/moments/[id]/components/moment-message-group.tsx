@@ -98,7 +98,7 @@ const MomentMessageGroup: FC<Props> = ({ date, messageContainers }) => {
 			<p
 				ref={dateRef}
 				className={cn(
-					'text-center text-white/30 text-xs w-fit font-semibold sticky top-0 mx-auto transition-all duration-200 rounded-sm px-2 py-1',
+					'text-center text-white/30 text-xs w-fit font-semibold z-20 sticky top-0 mx-auto transition-all duration-200 rounded-sm px-2 py-1',
 					!dateIsSticky && 'bg-background border border-border text-foreground',
 					!dateIsSticky && !dateVisible && 'opacity-0',
 				)}

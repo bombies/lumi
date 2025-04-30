@@ -5,9 +5,8 @@ import type { SubmitHandler } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import EasyForm from '@/components/ui/form-extras/easy-form';
-import EasyFormField from '@/components/ui/form-extras/easy-form-field';
 
-import { Input } from '@/components/ui/input';
+import EasyFormInput from '@/components/ui/form-extras/fields/easy-form-input';
 import { CreateRelationshipMomentTag } from '@/hooks/trpc/moment-hooks';
 import { TagIcon } from '@heroicons/react/24/solid';
 import { useCallback, useState } from 'react';
@@ -57,9 +56,14 @@ const CreateMomentTagButton: FC<Props> = ({ disabled }) => {
 				<EasyForm schema={momentTagCreationFormSchema} className="space-y-6" submitting={isCreatingMomentTag}>
 					{form => (
 						<>
-							<EasyFormField<MomentTagCreationFormSchema> name="tag" label="Tag">
-								<Input max={50} placeholder="Enter the name of your tag" />
-							</EasyFormField>
+							<EasyFormInput<MomentTagCreationFormSchema>
+								name="tag"
+								label="Tag"
+								inputProps={{
+									max: 50,
+									placeholder: 'Enter the name of your tag',
+								}}
+							/>
 							<Button
 								type="button"
 								loading={isCreatingMomentTag}

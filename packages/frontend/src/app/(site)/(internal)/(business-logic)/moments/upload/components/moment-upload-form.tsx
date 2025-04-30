@@ -6,13 +6,11 @@ import type { SubmitHandler } from 'react-hook-form';
 import { useRelationship } from '@/components/providers/relationships/relationship-provder';
 import { Button } from '@/components/ui/button';
 import EasyForm from '@/components/ui/form-extras/easy-form';
-import EasyFormField from '@/components/ui/form-extras/easy-form-field';
-import EasyFormSelect from '@/components/ui/form-extras/fields/easy-form-select';
+import EasyFormInput from '@/components/ui/form-extras/fields/easy-form-input';
 
+import EasyFormSelect from '@/components/ui/form-extras/fields/easy-form-select';
 import InfiniteLoader from '@/components/ui/infinite-loader';
-import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
-import { Textarea } from '@/components/ui/textarea';
 import Title from '@/components/ui/title';
 import { CreateMomentDetails, GetRelationshipMomentTags, UploadMoment } from '@/hooks/trpc/moment-hooks';
 import { handleTrpcError } from '@/lib/trpc/utils';
@@ -131,9 +129,15 @@ const MomentUploadForm: FC<Props> = ({ momentFile, onCancel }) => {
 					className="space-y-6"
 					submitting={momentUploading || isUploading || momentDetailsCreating}
 				>
-					<EasyFormField<MomentFormDetailsSchema> name="title" label="Title" showErrorMessage>
-						<Input maxLength={90} placeholder="Enter a title for your moment" />
-					</EasyFormField>
+					<EasyFormInput<MomentFormDetailsSchema>
+						name="title"
+						label="Title"
+						showErrorMessage
+						inputProps={{
+							maxLength: 90,
+							placeholder: 'Enter a title for your moment',
+						}}
+					/>
 					<div className="flex flex-col tablet:flex-row gap-2 items-end">
 						<EasyFormSelect<MomentFormDetailsSchema>
 							name="tags"
@@ -152,14 +156,18 @@ const MomentUploadForm: FC<Props> = ({ momentFile, onCancel }) => {
 						/>
 						<CreateMomentTagButton />
 					</div>
-					<EasyFormField<MomentFormDetailsSchema> name="description" label="Description" showErrorMessage>
-						<Textarea
-							maxLength={1024}
-							className="h-96"
-							placeholder="Enter a description for your moment"
-							rows={10}
-						/>
-					</EasyFormField>
+					<EasyFormInput<MomentFormDetailsSchema>
+						type="textarea"
+						name="description"
+						label="Description"
+						showErrorMessage
+						inputProps={{
+							maxLength: 1024,
+							placeholder: 'Enter a description for your moment',
+							className: 'h-96',
+							rows: 10,
+						}}
+					/>
 					<div className="flex gap-4">
 						<div className="flex flex-col gap-y-2">
 							<Button

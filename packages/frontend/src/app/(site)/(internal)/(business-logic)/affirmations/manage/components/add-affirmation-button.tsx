@@ -5,8 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 
 import EasyForm from '@/components/ui/form-extras/easy-form';
-import EasyFormField from '@/components/ui/form-extras/easy-form-field';
-import { Textarea } from '@/components/ui/textarea';
+import EasyFormInput from '@/components/ui/form-extras/fields/easy-form-input';
 import { CreateAffirmation } from '@/hooks/trpc/affirmation-hooks';
 import { useCallback, useState } from 'react';
 import { z } from 'zod';
@@ -50,14 +49,17 @@ const AddAffirmationButton = () => {
 					disabled={isCreating}
 					className="space-y-6"
 				>
-					<EasyFormField<AffirmationFormSchema> name="affirmation" label="Affirmation">
-						<Textarea
-							maxLength={150}
-							placeholder="Enter your affirmation"
-							className="resize-none"
-							rows={3}
-						/>
-					</EasyFormField>
+					<EasyFormInput<AffirmationFormSchema>
+						type="textarea"
+						name="affirmation"
+						label="Affirmation"
+						inputProps={{
+							maxLength: 150,
+							placeholder: 'Enter your affirmation',
+							className: 'resize-none',
+							rows: 3,
+						}}
+					/>
 					<Button type="submit" loading={isCreating}>
 						Submit
 					</Button>

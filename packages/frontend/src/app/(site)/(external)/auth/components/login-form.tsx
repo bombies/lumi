@@ -4,9 +4,7 @@ import type { FC } from 'react';
 import type { SubmitHandler } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
 import EasyForm from '@/components/ui/form-extras/easy-form';
-import EasyFormField from '@/components/ui/form-extras/easy-form-field';
-import { Input } from '@/components/ui/input';
-import PasswordInput from '@/components/ui/password-input';
+import EasyFormInput from '@/components/ui/form-extras/fields/easy-form-input';
 
 import { Separator } from '@/components/ui/separator';
 import { auth } from '@/lib/better-auth/auth-client';
@@ -71,12 +69,13 @@ const LoginForm: FC = () => {
 		>
 			<h3 className="text-center font-cursive text-4xl mb-2">Login</h3>
 			<Separator className="mb-9" />
-			<EasyFormField<LoginSchema> name="usernameOrEmail" label="Username or Email" showErrorMessage>
-				<Input />
-			</EasyFormField>
-			<EasyFormField<LoginSchema> name="password" label="Password" showErrorMessage>
-				<PasswordInput />
-			</EasyFormField>
+			<EasyFormInput<LoginSchema> name="usernameOrEmail" label="Username or Email" showErrorMessage />
+			<EasyFormInput<LoginSchema>
+				type="password"
+				name="password"
+				label="Password"
+				showErrorMessage
+			/>
 			<Link href="/auth/register" className="block text-xs">
 				Don't have an account?
 				{' '}
