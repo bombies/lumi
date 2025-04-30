@@ -36,7 +36,7 @@ const MomentMessageElement: FC<Props> = ({ message }) => {
 	const { mutateAsync: addMomentReaction } = SetMomentMessageReaction();
 	const { mutateAsync: deleteMomentMessage } = DeleteMomentMessage();
 
-	const { self, partner, relationship } = useRelationship();
+	const { self, partner, relationship, sendNotificationToPartner } = useRelationship();
 	const { emitEvent, addEventHandler, removeEventHandler } = useWebSocket();
 	const [reactionPickerOpen, setReactionPickerOpen] = useState(false);
 	const [optimisticMessage, setOptimisticMessage] = useState(message);
@@ -68,11 +68,20 @@ const MomentMessageElement: FC<Props> = ({ message }) => {
 			}, {
 				topic: WebsocketTopic.momentChatTopic(relationship.id, message.momentId),
 			});
+
+			sendNotificationToPartner({
+				content: `${reaction} reacted to: "${message.content}"`,
+				title: `${self.firstName} Reacted to your moment message`,
+				openUrl: `/moments/${message.momentId}`,
+				metadata: {
+					momentId: message.momentId,
+				},
+			});
 		} catch (e) {
 			updateMessage(oldMsg);
 			handleTrpcError(e);
 		}
-	}, [addMomentReaction, emitEvent, message.id, message.momentId, optimisticMessage, relationship.id, self.id, updateMessage]);
+	}, [addMomentReaction, emitEvent, message.content, message.id, message.momentId, optimisticMessage, relationship.id, self.firstName, self.id, sendNotificationToPartner, updateMessage]);
 
 	const deleteMessage = useCallback(async () => {
 		const oldMsg = optimisticMessage;
