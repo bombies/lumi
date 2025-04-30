@@ -46,7 +46,7 @@ const MomentDetailsContainer: FC<Props> = ({ moment, uploader, currentUser: user
 						containerClassName="shrink-0"
 						hideStatus
 					/>
-					<button type="button" className="cursor-pointer" onClick={() => setExpanded(prev => !prev)}>
+					<button type="button" className="text-left cursor-pointer" onClick={() => setExpanded(prev => !prev)}>
 						<h6 className={cn('line-clamp-2 text-sm font-bold', expanded && 'line-clamp-none max-h-[80%]')}>
 							{moment.title}
 						</h6>

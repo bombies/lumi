@@ -38,9 +38,14 @@ export const getRelativeTime = (d1: Date, d2: Date = new Date()) => {
 			return rtf.format(Math.round(elapsed / v), k as Intl.RelativeTimeFormatUnit);
 };
 
-export const formatTime = (date: Date) => {
+export const formatTime = (date: Date, opts?: {
+	noDate?: boolean;
+}) => {
 	const now = new Date();
 	const diff = date.getTime() - now.getTime();
+
+	if (opts?.noDate)
+		return timeFormat.format(date);
 
 	if (Math.abs(diff) < 1000 * 60 * 60 * 24) {
 		return timeFormat.format(date);

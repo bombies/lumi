@@ -94,7 +94,6 @@ const NotificationsProvider: FC<NotificationsProviderProps> = ({ children }) => 
 	}, []);
 
 	useEffect(() => {
-		logger.debug('effect 1');
 		if ('serviceWorker' in navigator && 'PushManager' in window) {
 			(async () => {
 				// @ts-expect-error Type def not setup for chromium based browsers

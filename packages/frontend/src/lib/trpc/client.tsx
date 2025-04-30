@@ -7,6 +7,7 @@ import { trpc } from '@/lib/trpc/trpc-react';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { httpBatchLink } from '@trpc/client';
 
+import axios from 'axios';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { auth } from '../better-auth/auth-client';
 import { useLocalStorage } from '../hooks/useLocalStorage';
@@ -52,13 +53,17 @@ export function TRPCProvider(
 			return;
 		}
 
-		const response = await fetch('/api/auth/token', {
+		logger.debug('Attempting to get auth token using session data:', session.data.session);
+
+		const response = await axios.get<{ token: string }>('/api/auth/token', {
 			headers: {
-				Authorization: `Bearer ${session.data?.session.token}`,
+				Authorization: `Bearer ${session.data!.session.token}`,
 			},
 		});
 
-		const token = (await response.json()).token;
+		logger.debug('Fetched a new auth token!', response.data.token);
+
+		const token = response.data.token;
 		if (token) localStorage.setItemRaw('auth-jwt', token);
 		return token as string | undefined;
 	}, [localStorage]);

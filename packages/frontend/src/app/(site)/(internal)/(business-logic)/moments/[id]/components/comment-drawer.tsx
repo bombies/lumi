@@ -5,11 +5,12 @@ import type { WebSocketEventHandler } from '@lumi/core/websockets/websockets.typ
 import type { Variants } from 'motion/react';
 import type { FC } from 'react';
 import type { SubmitHandler } from 'react-hook-form';
+import MomentMessageGroup from '@/app/(site)/(internal)/(business-logic)/moments/[id]/components/moment-message-group';
 import { useRelationship } from '@/components/providers/relationships/relationship-provder';
 import { WebsocketTopic } from '@/components/providers/web-sockets/topics';
 import { useWebSocket } from '@/components/providers/web-sockets/web-socket-provider';
-import { Button } from '@/components/ui/button';
 
+import { Button } from '@/components/ui/button';
 import { Drawer, DrawerContent, DrawerTrigger } from '@/components/ui/drawer';
 import EasyForm from '@/components/ui/form-extras/easy-form';
 import EasyFormField from '@/components/ui/form-extras/easy-form-field';
@@ -24,7 +25,6 @@ import { ChatBubbleOvalLeftEllipsisIcon, PaperAirplaneIcon } from '@heroicons/re
 import { AnimatePresence, motion } from 'motion/react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { z } from 'zod';
-import MomentMessageContainer from './moment-message-container';
 
 type Props = {
 	moment: Moment;
@@ -138,21 +138,7 @@ const CommentDrawer: FC<Props> = ({ moment }) => {
 		// Use stable message ID for keys if possible within MomentMessageContainer
 		// The group key remains less stable but necessary for grouping render
 		return Object.entries(groupedMessages).map(([date, messageGroup]) => (
-			<div key={`datecontainer_${date}`} className="space-y-2">
-				<p className="text-center text-white/30 text-xs font-semibold">
-					{new Date(Number.parseInt(date)).toLocaleDateString('en-US', {
-						year: 'numeric',
-						month: 'long',
-						day: '2-digit',
-					})}
-				</p>
-				{messageGroup.map(([senderId, messagesInGroup], groupIndex) => (
-					<MomentMessageContainer
-						key={`messagecontainer_${senderId}_${messagesInGroup[0]?.id ?? groupIndex}`}
-						messages={messagesInGroup}
-					/>
-				))}
-			</div>
+			<MomentMessageGroup key={`datecontainer_${date}`} scrollAreaRef={scrollAreaRef} date={date} messageContainers={messageGroup} />
 		));
 	}, [groupedMessages]);
 

@@ -21,6 +21,8 @@ export default antfu(
 		formatters: true,
 
 		ignores: [
+			'.sst',
+			'.turbo',
 			'**/.next',
 			'**/.open-next',
 			'**/.turbo',

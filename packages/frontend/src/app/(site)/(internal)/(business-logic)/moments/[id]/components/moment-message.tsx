@@ -31,15 +31,18 @@ const MomentMessageElement: FC<Props> = ({ message }) => {
 		<ContextMenu>
 			<ContextMenuTrigger disabled={!userIsSelf} asChild>
 				<button
+					type="button"
 					id={message.id}
 					className={cn(
-						'flex rounded-md bg-primary px-3 py-1 w-fit max-w-full self-end break-words gap-2',
+						'flex text-left rounded-md bg-primary px-3 py-1 w-fit max-w-full self-end break-words gap-2',
 						!userIsSelf && 'self-start bg-secondary',
 					)}
 				>
 					<p className="text-white whitespace-pre-wrap">{message.content}</p>
 					<p className={cn('text-[10px] phone:text-[8px] shrink-0 w-fit text-white/20 text-right self-end')}>
-						{formatTime(new Date(message.timestamp))}
+						{formatTime(new Date(message.timestamp), {
+							noDate: true,
+						})}
 					</p>
 				</button>
 			</ContextMenuTrigger>
