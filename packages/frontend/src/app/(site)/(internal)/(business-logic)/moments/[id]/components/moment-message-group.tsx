@@ -3,7 +3,6 @@
 import type { MomentMessage } from '@lumi/core/moments/moment.types';
 import type { FC, RefObject } from 'react';
 import MomentMessageContainer from '@/app/(site)/(internal)/(business-logic)/moments/[id]/components/moment-message-container';
-import { logger } from '@/lib/logger';
 import { cn } from '@/lib/utils';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
@@ -70,13 +69,12 @@ const MomentMessageGroup: FC<Props> = ({ date, messageContainers, scrollAreaRef 
 					return isSticky;
 				});
 
-				// For debugging
-				logger.debug('scroll!', {
-					dateTop: containerRect.top,
-					scrollAreaTop: scrollAreaRect.top,
-					offset: offsetFromScrollAreaTop,
-					isSticky,
-				});
+				// logger.debug('scroll!', {
+				// 	dateTop: containerRect.top,
+				// 	scrollAreaTop: scrollAreaRect.top,
+				// 	offset: offsetFromScrollAreaTop,
+				// 	isSticky,
+				// });
 			}
 		};
 

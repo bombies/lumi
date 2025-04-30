@@ -20,6 +20,7 @@ import type {
 	GetMomentUploadUrlDto,
 	GetRelationshipMomentTagsDto,
 	SearchMomentsDto,
+	SetMomentMessageReactionDto,
 	UpdateMomentDetailsDto,
 } from './moments.dto';
 import { TRPCError } from '@trpc/server';
@@ -322,7 +323,28 @@ export const getMessagesForMoment = async ({ momentId, limit, cursor, order }: G
 	});
 };
 
+export const setMomentMessageReaction = ({ messageId: id, reaction }: SetMomentMessageReactionDto) => {
+	return updateItem<MomentMessage>({
+		pk: DynamoKey.momentMessage.pk(id),
+		sk: DynamoKey.momentMessage.sk(id),
+		update: {
+			reaction,
+		},
+	});
+};
+
 export const deleteMomentMessage = async (id: string) => {
+	return updateItem<MomentMessage>({
+		pk: DynamoKey.momentMessage.pk(id),
+		sk: DynamoKey.momentMessage.sk(id),
+		update: {
+			content: '[deleted]',
+			isDeleted: true,
+		},
+	});
+};
+
+export const hardDeleteMomentMessage = async (id: string) => {
 	return deleteItem(DynamoKey.momentMessage.pk(id), DynamoKey.momentMessage.sk(id));
 };
 

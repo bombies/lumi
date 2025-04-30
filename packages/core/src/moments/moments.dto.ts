@@ -59,6 +59,11 @@ export const createMomentMessageDto = momentMessageSchema
 		}),
 	);
 
+export const setMomentMessageReactionDto = z.object({
+	messageId: z.uuid(),
+	reaction: z.emoji(),
+});
+
 export const getMomentUploadUrlDto = getUploadUrlDto;
 
 export const searchMomentsDto = createInfiniteDataDto({
@@ -115,3 +120,4 @@ export type CreateRelationshipMomentTagDto = z.infer<typeof createRelationshipMo
 export type CreateMomentTagDto = z.infer<typeof createMomentTagDto>;
 export type GetMomentsByTagDto = z.infer<typeof getMomentsByTagDto>;
 export type DeleteMomentTagDto = z.infer<typeof deleteMomentTagDto>;
+export type SetMomentMessageReactionDto = z.infer<typeof setMomentMessageReactionDto>;

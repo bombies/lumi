@@ -53,8 +53,10 @@ export type WebSocketMessageMap = {
 	>;
 	momentTypingStart: WebSocketMessage<'momentTypingStart', { senderId: string; timestamp: string }>;
 	momentTypingEnd: WebSocketMessage<'momentTypingEnd', { senderId: string; timestamp: string }>;
+	momentMessageReact: WebSocketMessage<'momentMessageReact', { senderId: string; timestamp: string; messageId: string; reaction: string }>;
+	momentMessageDelete: WebSocketMessage<'momentMessageDelete', { senderId: string; timestamp: string; messageId: string }>;
 
-	// Specific user notifications
+	// Spe1cific user notifications
 	notification: WebSocketMessage<
 		'notification',
 		{
@@ -79,6 +81,8 @@ export const events = [
 	'momentChat',
 	'momentTypingStart',
 	'momentTypingEnd',
+	'momentMessageReact',
+	'momentMessageDelete',
 ] as (keyof WebSocketMessageMap)[];
 
 export type Event = (typeof events)[number];

@@ -57,6 +57,8 @@ export type DatabaseMomentTag = MomentTag & {
 export type MomentMessage = z.infer<typeof momentMessageSchema> & {
 	id: string;
 	timestamp: string;
+	reaction?: string;
+	isDeleted?: boolean;
 };
 
 export type DatabaseMomentMessage = MomentMessage & {

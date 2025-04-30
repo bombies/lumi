@@ -41,13 +41,13 @@ function EmojiPickerSearch({ className, ...props }: React.ComponentProps<typeof 
 
 function EmojiPickerRow({ children, ...props }: EmojiPickerListRowProps) {
 	return (
-		<div {...props} className="scroll-my-1 px-1" data-slot="emoji-picker-row">
+		<div {...props} className="scroll-my-1 px-1 w-fit flex-wrap" data-slot="emoji-picker-row">
 			{children}
 		</div>
 	);
 }
 
-function EmojiPickerEmoji({ emoji, className, ...props }: EmojiPickerListEmojiProps) {
+export function EmojiPickerEmoji({ emoji, className, ...props }: EmojiPickerListEmojiProps) {
 	return (
 		<button
 			{...props}
@@ -74,7 +74,9 @@ function EmojiPickerCategoryHeader({ category, ...props }: EmojiPickerListCatego
 	);
 }
 
-function EmojiPickerContent({ className, ...props }: React.ComponentProps<typeof EmojiPickerPrimitive.Viewport>) {
+function EmojiPickerContent({ className, Emoji, ...props }: React.ComponentProps<typeof EmojiPickerPrimitive.Viewport> & {
+	Emoji?: React.ComponentType<EmojiPickerListEmojiProps> | undefined;
+}) {
 	return (
 		<EmojiPickerPrimitive.Viewport
 			className={cn('outline-hidden relative flex-1', className)}
@@ -97,7 +99,7 @@ function EmojiPickerContent({ className, ...props }: React.ComponentProps<typeof
 				className="select-none pb-1"
 				components={{
 					Row: EmojiPickerRow,
-					Emoji: EmojiPickerEmoji,
+					Emoji: Emoji ?? EmojiPickerEmoji,
 					CategoryHeader: EmojiPickerCategoryHeader,
 				}}
 				data-slot="emoji-picker-list"
