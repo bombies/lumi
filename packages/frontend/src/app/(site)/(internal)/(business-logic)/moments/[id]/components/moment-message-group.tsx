@@ -1,18 +1,19 @@
 'use client';
 
 import type { MomentMessage } from '@lumi/core/moments/moment.types';
-import type { FC, RefObject } from 'react';
+import type { FC } from 'react';
 import MomentMessageContainer from '@/app/(site)/(internal)/(business-logic)/moments/[id]/components/moment-message-container';
+import { useMomentMessageGroupData } from '@/app/(site)/(internal)/(business-logic)/moments/[id]/components/moment-message-group-provider';
 import { cn } from '@/lib/utils';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 type Props = {
 	date: string;
 	messageContainers: [string, MomentMessage[]][];
-	scrollAreaRef: RefObject<HTMLDivElement | null>;
 };
 
-const MomentMessageGroup: FC<Props> = ({ date, messageContainers, scrollAreaRef }) => {
+const MomentMessageGroup: FC<Props> = ({ date, messageContainers }) => {
+	const { getScrollViewport } = useMomentMessageGroupData();
 	const [dateIsSticky, setDateIsSticky] = useState(false);
 	const [dateVisible, setDateVisisble] = useState(true);
 	const [dateTimeout, setDateTimeout] = useState<NodeJS.Timeout | undefined>(undefined);
@@ -37,7 +38,7 @@ const MomentMessageGroup: FC<Props> = ({ date, messageContainers, scrollAreaRef 
 	}, []);
 
 	useEffect(() => {
-		const scrollViewport = scrollAreaRef.current?.querySelector('[data-radix-scroll-area-viewport]');
+		const scrollViewport = getScrollViewport();
 
 		const handleScroll = () => {
 			if (containerRef.current && scrollViewport) {
@@ -90,7 +91,7 @@ const MomentMessageGroup: FC<Props> = ({ date, messageContainers, scrollAreaRef 
 
 			clearDateTimeout();
 		};
-	}, [clearDateTimeout, createDateTimeout, dateTimeout, scrollAreaRef]);
+	}, [clearDateTimeout, createDateTimeout, dateTimeout, getScrollViewport]);
 
 	return (
 		<div ref={containerRef} className="space-y-2">

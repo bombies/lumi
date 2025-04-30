@@ -16,6 +16,7 @@
 		"allowJs": true,
 		"strict": true,
 		"noEmit": true,
+		"sourceMap": true,
 		"esModuleInterop": true,
 		"isolatedModules": true,
 		"skipLibCheck": true,

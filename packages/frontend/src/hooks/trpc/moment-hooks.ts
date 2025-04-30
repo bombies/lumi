@@ -82,6 +82,13 @@ export const SetMomentMessageReaction = () => {
 	});
 };
 
+export const EditMomentMessage = () => {
+	const invalidateRoutes = useRouteInvalidation([trpc.moments.getMessagesForMoment]);
+	return trpc.moments.editMessage.useMutation({
+		onSuccess: () => invalidateRoutes(),
+	});
+};
+
 export const DeleteMomentMessage = () => {
 	const invalidateRoutes = useRouteInvalidation([trpc.moments.getMessagesForMoment]);
 	return trpc.moments.deleteMomentMessage.useMutation({

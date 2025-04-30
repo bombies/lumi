@@ -19,8 +19,8 @@ import {
 	getTagForMoment,
 	getTagsForMoment,
 	searchMoments,
-	setMomentMessageReaction,
 	updateMomentDetails,
+	updateMomentMessage,
 } from '@lumi/core/moments/moment.service';
 import {
 	createMomentDetailsDto,
@@ -34,7 +34,6 @@ import {
 	getMomentUploadUrlDto,
 	getRelationshipMomentTagsDto,
 	searchMomentsDto,
-	setMomentMessageReactionDto,
 	updateMomentDetailsDto,
 } from '@lumi/core/moments/moments.dto';
 import { extractPartnerIdFromRelationship } from '@lumi/core/utils/global-utils';
@@ -147,7 +146,10 @@ export const momentsRouter = router({
 			return getMessagesForMoment(input);
 		}),
 
-	reactToMessage: relationshipProcedure.input(setMomentMessageReactionDto)
+	reactToMessage: relationshipProcedure.input(z.object({
+		messageId: z.uuid(),
+		reaction: z.emoji(),
+	}))
 		.mutation(async ({ input, ctx: { user } }) => {
 			const message = await getMomentMessageById(input.messageId);
 			if (message?.senderId === user.id)
@@ -156,8 +158,22 @@ export const momentsRouter = router({
 					message: 'You are not authorized to react to this message!',
 				});
 
-			return setMomentMessageReaction(input);
+			return updateMomentMessage(input);
 		}),
+
+	editMessage: relationshipProcedure.input(z.object({
+		messageId: z.uuid(),
+		content: z.string().min(0).max(1024),
+	})).mutation(async ({ input, ctx: { user } }) => {
+		const message = await getMomentMessageById(input.messageId);
+		if (message?.senderId !== user.id)
+			throw new TRPCError({
+				code: 'UNAUTHORIZED',
+				message: 'You are not authorized to edit this message!',
+			});
+
+		return updateMomentMessage(input);
+	}),
 
 	deleteMomentMessage: relationshipProcedure.input(z.string()).mutation(async ({ input, ctx: { user } }) => {
 		const message = await getMomentMessageById(input);

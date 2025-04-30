@@ -20,8 +20,8 @@ import type {
 	GetMomentUploadUrlDto,
 	GetRelationshipMomentTagsDto,
 	SearchMomentsDto,
-	SetMomentMessageReactionDto,
 	UpdateMomentDetailsDto,
+	UpdateMomentMessageDto,
 } from './moments.dto';
 import { TRPCError } from '@trpc/server';
 
@@ -300,6 +300,7 @@ export const createMomentMessage = async (userId: string, { id: messageId, ...dt
 		gsi1pk: DynamoKey.momentMessage.gsi1pk(dto.momentId),
 		gsi1sk: DynamoKey.momentMessage.gsi1sk(timestamp),
 		...message,
+		state: 'delivered',
 		entityType: EntityType.MOMENT_MESSAGE,
 	});
 };
@@ -323,13 +324,11 @@ export const getMessagesForMoment = async ({ momentId, limit, cursor, order }: G
 	});
 };
 
-export const setMomentMessageReaction = ({ messageId: id, reaction }: SetMomentMessageReactionDto) => {
+export const updateMomentMessage = ({ messageId: id, ...dto }: UpdateMomentMessageDto) => {
 	return updateItem<MomentMessage>({
 		pk: DynamoKey.momentMessage.pk(id),
 		sk: DynamoKey.momentMessage.sk(id),
-		update: {
-			reaction,
-		},
+		update: { ...dto, updatedAt: dto.content ? new Date().toISOString() : undefined },
 	});
 };
 

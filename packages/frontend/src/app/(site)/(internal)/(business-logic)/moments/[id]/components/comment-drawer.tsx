@@ -6,10 +6,11 @@ import type { Variants } from 'motion/react';
 import type { FC } from 'react';
 import type { SubmitHandler } from 'react-hook-form';
 import MomentMessageGroup from '@/app/(site)/(internal)/(business-logic)/moments/[id]/components/moment-message-group';
+import MomentMessageGroupProvider from '@/app/(site)/(internal)/(business-logic)/moments/[id]/components/moment-message-group-provider';
 import { useRelationship } from '@/components/providers/relationships/relationship-provder';
 import { WebsocketTopic } from '@/components/providers/web-sockets/topics';
-import { useWebSocket } from '@/components/providers/web-sockets/web-socket-provider';
 
+import { useWebSocket } from '@/components/providers/web-sockets/web-socket-provider';
 import { Button } from '@/components/ui/button';
 import { Drawer, DrawerContent, DrawerTrigger } from '@/components/ui/drawer';
 import EasyForm from '@/components/ui/form-extras/easy-form';
@@ -138,7 +139,9 @@ const CommentDrawer: FC<Props> = ({ moment }) => {
 		// Use stable message ID for keys if possible within MomentMessageContainer
 		// The group key remains less stable but necessary for grouping render
 		return Object.entries(groupedMessages).map(([date, messageGroup]) => (
-			<MomentMessageGroup key={`datecontainer_${date}`} scrollAreaRef={scrollAreaRef} date={date} messageContainers={messageGroup} />
+			<MomentMessageGroupProvider key={`datecontainer_${date}`} scrollAreaRef={scrollAreaRef}>
+				<MomentMessageGroup date={date} messageContainers={messageGroup} />
+			</MomentMessageGroupProvider>
 		));
 	}, [groupedMessages]);
 

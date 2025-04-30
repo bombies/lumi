@@ -59,10 +59,13 @@ export const createMomentMessageDto = momentMessageSchema
 		}),
 	);
 
-export const setMomentMessageReactionDto = z.object({
-	messageId: z.uuid(),
+export const updateMomentMessageDto = z.object({
+	content: z.string().min(0).max(1024),
 	reaction: z.emoji(),
-});
+	state: z.enum(['sent', 'delivered', 'read']),
+}).partial().and(z.object({
+	messageId: z.uuid(),
+}));
 
 export const getMomentUploadUrlDto = getUploadUrlDto;
 
@@ -120,4 +123,4 @@ export type CreateRelationshipMomentTagDto = z.infer<typeof createRelationshipMo
 export type CreateMomentTagDto = z.infer<typeof createMomentTagDto>;
 export type GetMomentsByTagDto = z.infer<typeof getMomentsByTagDto>;
 export type DeleteMomentTagDto = z.infer<typeof deleteMomentTagDto>;
-export type SetMomentMessageReactionDto = z.infer<typeof setMomentMessageReactionDto>;
+export type UpdateMomentMessageDto = z.infer<typeof updateMomentMessageDto>;

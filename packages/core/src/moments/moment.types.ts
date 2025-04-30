@@ -59,6 +59,8 @@ export type MomentMessage = z.infer<typeof momentMessageSchema> & {
 	timestamp: string;
 	reaction?: string;
 	isDeleted?: boolean;
+	state?: 'sent' | 'delivered' | 'read';
+	updatedAt?: string;
 };
 
 export type DatabaseMomentMessage = MomentMessage & {
