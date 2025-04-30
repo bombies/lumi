@@ -70,7 +70,7 @@ const MomentMessageElement: FC<Props> = ({ message }) => {
 			});
 
 			sendNotificationToPartner({
-				content: `${reaction} reacted to: "${message.content}"`,
+				content: `${reaction} reaction to: "${message.content}"`,
 				title: `${self.firstName} Reacted to your moment message`,
 				openUrl: `/moments/${message.momentId}`,
 				metadata: {
