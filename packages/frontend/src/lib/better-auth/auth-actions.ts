@@ -1,6 +1,6 @@
 'use server';
 
-import { BetterAuthDatabaseUser } from '@lumi/core/auth/better-auth.types';
+import type { BetterAuthDatabaseUser } from '@lumi/core/auth/better-auth.types';
 
 import { auth, db } from '@/auth';
 

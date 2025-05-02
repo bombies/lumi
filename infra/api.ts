@@ -26,7 +26,7 @@ export const trpc = new sst.aws.Function('Trpc', {
 		: {
 				router: router && {
 					instance: router,
-					domain: apiDNS
+					domain: apiDNS,
 				},
 				cors: {
 					allowOrigins: [`https://${webDNS}`],

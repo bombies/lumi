@@ -1,11 +1,7 @@
 {
 	"name": "@lumi/emails",
-	"version": "0.0.0",
 	"type": "module",
-	"scripts": {
-		"dev": "sst shell email dev",
-		"typecheck": "tsc --noEmit"
-	},
+	"version": "0.0.0",
 	"exports": {
 		"./*": [
 			"./emails/*.ts",
@@ -13,6 +9,10 @@
 			"./emails/*/*.ts",
 			"./emails/*/*.tsx"
 		]
+	},
+	"scripts": {
+		"dev": "sst shell email dev",
+		"typecheck": "tsc --noEmit"
 	},
 	"dependencies": {
 		"@lumi/core": "*",

@@ -1,7 +1,7 @@
 {
 	"name": "@lumi/functions",
-	"version": "0.0.0",
 	"type": "module",
+	"version": "0.0.0",
 	"exports": [
 		"./api/types/*.ts",
 		"./api/router.ts",
