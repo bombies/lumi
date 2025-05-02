@@ -25,7 +25,7 @@ const MomentMessageContainer: FC<Props> = ({ messages }) => {
 				))}
 			</div>
 
-			<UserAvatar user={messageUser} className="size-8 border-2" hideStatus />
+			{!userIsSelf && <UserAvatar user={messageUser} className="size-8 border-2" statusClassName="size-2 p-0 border-1" />}
 		</div>
 	);
 };

@@ -7,9 +7,10 @@ import type { FC } from 'react';
 import type { SubmitHandler } from 'react-hook-form';
 import MomentMessageGroup from '@/app/(site)/(internal)/(business-logic)/moments/[id]/components/moment-message-group';
 import MomentMessageGroupProvider from '@/app/(site)/(internal)/(business-logic)/moments/[id]/components/moment-message-group-provider';
+import MomentMessageGroupSkeleton from '@/app/(site)/(internal)/(business-logic)/moments/[id]/components/moment-message-group-skeleton';
 import { useRelationship } from '@/components/providers/relationships/relationship-provder';
-import { WebsocketTopic } from '@/components/providers/web-sockets/topics';
 
+import { WebsocketTopic } from '@/components/providers/web-sockets/topics';
 import { useWebSocket } from '@/components/providers/web-sockets/web-socket-provider';
 import { Button } from '@/components/ui/button';
 import { Drawer, DrawerContent, DrawerTrigger } from '@/components/ui/drawer';
@@ -17,7 +18,6 @@ import EasyForm from '@/components/ui/form-extras/easy-form';
 import EasyFormField from '@/components/ui/form-extras/easy-form-field';
 import InfiniteLoader from '@/components/ui/infinite-loader';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import Spinner from '@/components/ui/spinner';
 import { Textarea } from '@/components/ui/textarea';
 import UserAvatar from '@/components/ui/user-avatar';
 import { GetMessagesForMoment } from '@/hooks/trpc/moment-hooks';
@@ -282,7 +282,7 @@ const CommentDrawer: FC<Props> = ({ moment }) => {
 					<ScrollArea className="h-full overflow-auto flex flex-col-reverse" ref={scrollAreaRef}>
 						{messagesLoading
 							? (
-									<Spinner />
+									<MomentMessageGroupSkeleton />
 								)
 							: (
 									<>

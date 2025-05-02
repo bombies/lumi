@@ -32,7 +32,7 @@ const UserAvatar: FC<Props> = ({
 				<Skeleton className={cn('size-32 rounded-full', className)} />
 			)
 		: (
-				<div className={cn('relative overflow-hidden', containerClassName)}>
+				<div className={cn('relative overflow-hidden w-fit h-fit', containerClassName)}>
 					<Avatar className={cn('size-32', className)} {...args}>
 						<AvatarImage src={srcOverride || user?.avatarUrl} alt={`@${user?.username}`} className="object-cover" />
 						<AvatarFallback>{user?.firstName.charAt(0) || '?'}</AvatarFallback>
