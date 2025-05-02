@@ -1,5 +1,6 @@
-import { NextRequest, NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
 import { getSessionCookie } from 'better-auth/cookies';
+import { NextResponse } from 'next/server';
 
 const AUTH_WALLED_MATHCERS: string[] = [
 	'/auth/verify',

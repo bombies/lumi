@@ -1,27 +1,26 @@
 'use client';
 
-import { FC, useCallback, useMemo, useState } from 'react';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { Moment } from '@lumi/core/moments/moment.types';
-import { UploadIcon, XIcon } from 'lucide-react';
-import Player from 'next-video/player';
-import MediaThemeInstaplay from 'player.style/instaplay/react';
-import { SubmitHandler } from 'react-hook-form';
-import { toast } from 'sonner';
-import { z } from 'zod';
-
+import type { SelectOption } from '@/components/ui/multiselect';
+import type { Moment } from '@lumi/core/moments/moment.types';
+import type { FC } from 'react';
+import type { SubmitHandler } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
 import EasyForm from '@/components/ui/form-extras/easy-form';
-import EasyFormField from '@/components/ui/form-extras/easy-form-field';
+import EasyFormInput from '@/components/ui/form-extras/fields/easy-form-input';
 import EasyFormSelect from '@/components/ui/form-extras/fields/easy-form-select';
 import InfiniteLoader from '@/components/ui/infinite-loader';
-import { Input } from '@/components/ui/input';
-import { SelectOption } from '@/components/ui/multiselect';
-import { Textarea } from '@/components/ui/textarea';
+
 import Title from '@/components/ui/title';
 import { GetMomentTags, GetRelationshipMomentTags, UpdateMomentDetails } from '@/hooks/trpc/moment-hooks';
 import { handleTrpcError } from '@/lib/trpc/utils';
+import { UploadIcon, XIcon } from 'lucide-react';
+import Player from 'next-video/player';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import MediaThemeInstaplay from 'player.style/instaplay/react';
+import { useCallback, useMemo, useState } from 'react';
+import { toast } from 'sonner';
+import { z } from 'zod';
 import CreateMomentTagButton from '../../../components/create-moment-tag.button';
 
 const momentFormDetailsSchema = z.object({
@@ -61,7 +60,7 @@ const MomentEditForm: FC<Props> = ({ moment }) => {
 	);
 
 	const onSubmit = useCallback<SubmitHandler<MomentFormDetailsSchema>>(
-		async data => {
+		async (data) => {
 			try {
 				await updateDetails({ momentId: moment.id, ...data });
 
@@ -97,14 +96,16 @@ const MomentEditForm: FC<Props> = ({ moment }) => {
 					className="space-y-6"
 					submitting={isUpdatingDetails}
 				>
-					<EasyFormField<MomentFormDetailsSchema>
+					<EasyFormInput<MomentFormDetailsSchema>
 						name="title"
 						label="Title"
 						defaultValue={moment.title}
 						showErrorMessage
-					>
-						<Input maxLength={90} placeholder="Enter a title for your moment" />
-					</EasyFormField>
+						inputProps={{
+							maxLength: 90,
+							placeholder: 'Enter a title for your moment',
+						}}
+					/>
 					<div className="flex flex-col tablet:flex-row gap-2 items-end">
 						<EasyFormSelect<MomentFormDetailsSchema>
 							name="tags"
@@ -115,29 +116,29 @@ const MomentEditForm: FC<Props> = ({ moment }) => {
 							defaultValue={currentTags?.map(tag => tag.tag) ?? undefined}
 							disabled={currentTagsLoading}
 							onSearch={setTagSearch}
-							itemsFooter={
+							itemsFooter={(
 								<InfiniteLoader
 									hasMore={hasMoreTags}
 									fetchMore={fetchMoreTags}
 									loading={isFetchingMoreTags}
 								/>
-							}
+							)}
 						/>
 						<CreateMomentTagButton disabled={currentTagsLoading} />
 					</div>
-					<EasyFormField<MomentFormDetailsSchema>
+					<EasyFormInput<MomentFormDetailsSchema>
+						type="textarea"
 						name="description"
 						label="Description"
 						defaultValue={moment.description}
 						showErrorMessage
-					>
-						<Textarea
-							maxLength={1024}
-							className="h-96"
-							placeholder="Enter a description for your moment"
-							rows={10}
-						/>
-					</EasyFormField>
+						inputProps={{
+							maxLength: 1024,
+							placeholder: 'Enter a description for your moment',
+							className: 'h-96',
+							rows: 10,
+						}}
+					/>
 					<div className="flex gap-4">
 						<div className="space-x-2">
 							<Button
@@ -146,12 +147,16 @@ const MomentEditForm: FC<Props> = ({ moment }) => {
 								loading={isUpdatingDetails}
 								disabled={currentTagsLoading}
 							>
-								<UploadIcon size={18} /> Update Moment
+								<UploadIcon size={18} />
+								{' '}
+								Update Moment
 							</Button>
 						</div>
 						<Link href={`/moments/${moment.id}`}>
 							<Button variant="destructive:flat" disabled={isUpdatingDetails}>
-								<XIcon size={18} /> Go back
+								<XIcon size={18} />
+								{' '}
+								Go back
 							</Button>
 						</Link>
 					</div>

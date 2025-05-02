@@ -1,6 +1,6 @@
 'use client';
 
-import { FC } from 'react';
+import type { FC } from 'react';
 
 import { useRelationship } from '@/components/providers/relationships/relationship-provder';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -17,7 +17,9 @@ const RelationshipSettingsContent: FC = () => {
 				<UserAvatar user={partner} />
 				<div className="space-y-1">
 					<h3 className="text-xl font-medium text-center tablet:text-left">
-						{partner.firstName} {partner.lastName}
+						{partner.firstName}
+						{' '}
+						{partner.lastName}
 					</h3>
 					<p className="text-center tablet:text-left">{partner.email}</p>
 				</div>

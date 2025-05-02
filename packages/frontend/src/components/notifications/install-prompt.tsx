@@ -1,8 +1,9 @@
 'use client';
 
-import { FC, useEffect, useState } from 'react';
-
+import type { FC } from 'react';
 import { useLocalStorage } from '@/lib/hooks/useLocalStorage';
+
+import { useEffect, useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog';
 
 const InstallPrompt: FC = () => {
@@ -26,7 +27,7 @@ const InstallPrompt: FC = () => {
 	return (
 		<Dialog
 			open={modalOpen}
-			onOpenChange={val => {
+			onOpenChange={(val) => {
 				if (!val) storage?.setItem('iosModalDismissed', true);
 				setModalOpen(val);
 			}}

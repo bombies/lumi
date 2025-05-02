@@ -1,9 +1,8 @@
 'use client';
 
-import { FC, PropsWithChildren } from 'react';
-import { MoonIcon, SunIcon, SunMoonIcon } from 'lucide-react';
-
+import type { FC, PropsWithChildren } from 'react';
 import { Button } from '@/components/ui/button';
+
 import {
 	DropdownMenu,
 	DropdownMenuCheckboxItem,
@@ -11,6 +10,7 @@ import {
 	DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useColorSchemeAPI } from '@/lib/hooks/useColorSchemeAPI';
+import { MoonIcon, SunIcon, SunMoonIcon } from 'lucide-react';
 
 const ColorSchemeToggle: FC<PropsWithChildren> = ({ children }) => {
 	const { currentColorScheme, setCurrentColorScheme, schemeIcon } = useColorSchemeAPI();
@@ -27,27 +27,33 @@ const ColorSchemeToggle: FC<PropsWithChildren> = ({ children }) => {
 			<DropdownMenuContent className="w-32">
 				<DropdownMenuCheckboxItem
 					checked={currentColorScheme === 'light'}
-					onCheckedChange={checked => {
+					onCheckedChange={(checked) => {
 						if (checked) setCurrentColorScheme('light');
 					}}
 				>
-					<SunIcon /> Light
+					<SunIcon />
+					{' '}
+					Light
 				</DropdownMenuCheckboxItem>
 				<DropdownMenuCheckboxItem
 					checked={currentColorScheme === 'dark'}
-					onCheckedChange={checked => {
+					onCheckedChange={(checked) => {
 						if (checked) setCurrentColorScheme('dark');
 					}}
 				>
-					<MoonIcon /> Dark
+					<MoonIcon />
+					{' '}
+					Dark
 				</DropdownMenuCheckboxItem>
 				<DropdownMenuCheckboxItem
 					checked={currentColorScheme === undefined}
-					onCheckedChange={checked => {
+					onCheckedChange={(checked) => {
 						if (checked) setCurrentColorScheme(undefined);
 					}}
 				>
-					<SunMoonIcon /> System
+					<SunMoonIcon />
+					{' '}
+					System
 				</DropdownMenuCheckboxItem>
 			</DropdownMenuContent>
 		</DropdownMenu>

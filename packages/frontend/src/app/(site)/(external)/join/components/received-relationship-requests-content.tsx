@@ -1,18 +1,19 @@
 'use client';
 
-import { FC, useMemo } from 'react';
-import { useRouter } from 'next/navigation';
-import { RelationshipRequest } from '@lumi/core/relationships/relationship.types';
-import { User } from '@lumi/core/users/user.types';
-import { CheckIcon, XIcon } from 'lucide-react';
-import { toast } from 'sonner';
-
+import type { RelationshipRequest } from '@lumi/core/relationships/relationship.types';
+import type { User } from '@lumi/core/users/user.types';
+import type { FC } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useRouteInvalidation } from '@/lib/hooks/useRouteInvalidation';
-import { trpc } from '@/lib/trpc/client';
+
+import { trpc } from '@/lib/trpc/trpc-react';
 import { getErrorMessage } from '@/lib/trpc/utils';
+import { CheckIcon, XIcon } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useMemo } from 'react';
+import { toast } from 'sonner';
 
 const FetchReceivedRequests = () =>
 	trpc.relationships.getReceivedRelationshipRequests.useInfiniteQuery(
@@ -101,7 +102,7 @@ const ReceivedRelationshipRequestsContent: FC = () => {
 					request={req}
 					sender={otherUser}
 					disabled={isAccepting || isRejecting}
-					onAccept={elReq => {
+					onAccept={(elReq) => {
 						toast.promise(acceptRequest(elReq.id), {
 							loading: 'Accepting request...',
 							success() {
@@ -112,7 +113,7 @@ const ReceivedRelationshipRequestsContent: FC = () => {
 							},
 						});
 					}}
-					onReject={async elReq => {
+					onReject={async (elReq) => {
 						toast.promise(rejectRequest(elReq.id), {
 							loading: 'Rejecting request...',
 							success() {
@@ -131,17 +132,19 @@ const ReceivedRelationshipRequestsContent: FC = () => {
 	return (
 		<Card>
 			<CardContent className="space-y-4">
-				{isFetchingRequests ? (
-					<>
-						<Skeleton className="w-full h-12 rounded-md" />
-						<Skeleton className="w-full h-12 rounded-md" />
-						<Skeleton className="w-full h-12 rounded-md" />
-						<Skeleton className="w-full h-12 rounded-md" />
-						<Skeleton className="w-full h-12 rounded-md" />
-					</>
-				) : (
-					<>{requestElements?.length ? requestElements : <p>You have no requests.</p>}</>
-				)}
+				{isFetchingRequests
+					? (
+							<>
+								<Skeleton className="w-full h-12 rounded-md" />
+								<Skeleton className="w-full h-12 rounded-md" />
+								<Skeleton className="w-full h-12 rounded-md" />
+								<Skeleton className="w-full h-12 rounded-md" />
+								<Skeleton className="w-full h-12 rounded-md" />
+							</>
+						)
+					: (
+							<>{requestElements?.length ? requestElements : <p>You have no requests.</p>}</>
+						)}
 			</CardContent>
 		</Card>
 	);

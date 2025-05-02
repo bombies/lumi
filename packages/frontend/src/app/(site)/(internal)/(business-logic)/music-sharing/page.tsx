@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import type { FC } from 'react';
 
 import { Card, CardHeader, CardTitle } from '@/components/ui/card';
 import Title from '@/components/ui/title';

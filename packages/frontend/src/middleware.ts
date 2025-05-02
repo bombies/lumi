@@ -1,4 +1,4 @@
-import { NextRequest } from 'next/server';
+import type { NextRequest } from 'next/server';
 
 import { updateSession } from './lib/better-auth/middleware';
 
@@ -14,7 +14,7 @@ type Middleware = (
 	ctx: { params?: Record<string, string | string[]> },
 ) => void | Response | Promise<void | Response>;
 
-const middleware: Middleware = async request => {
+const middleware: Middleware = async (request) => {
 	return await updateSession(request);
 };
 

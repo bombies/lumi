@@ -1,13 +1,14 @@
 'use client';
 
-import { FC, Fragment, useMemo } from 'react';
-import Link from 'next/link';
-import { HeartIcon } from '@heroicons/react/24/solid';
-
+import type { FC } from 'react';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
+
 import { GetTodaysAffirmations } from '@/hooks/trpc/affirmation-hooks';
+import { HeartIcon } from '@heroicons/react/24/solid';
+import Link from 'next/link';
+import { Fragment, useMemo } from 'react';
 
 const AffirmationWidget: FC = () => {
 	const { data: todaysAffirmations, isLoading: affirmationsLoading } = GetTodaysAffirmations();
@@ -16,7 +17,11 @@ const AffirmationWidget: FC = () => {
 		() =>
 			todaysAffirmations?.data.map(affirmationData => (
 				<Fragment key={`affirmation#${affirmationData.timestamp}`}>
-					<p className="break-words">&ldquo;{affirmationData.affirmation}&rdquo;</p>
+					<p className="break-words">
+						&ldquo;
+						{affirmationData.affirmation}
+						&rdquo;
+					</p>
 					<Separator className="mt-2" />
 				</Fragment>
 			)),
@@ -26,31 +31,36 @@ const AffirmationWidget: FC = () => {
 	return (
 		<div className="max-w-[45rem] rounded-md bg-primary text-primary-foreground p-6 space-y-4">
 			<h3 className="font-bold text-2xl">
-				Today&apos;s Affirmation{(affirmationElements?.length ?? 0 > 1) ? 's' : ''}
+				Today&apos;s Affirmation
+				{(affirmationElements?.length ?? 0 > 1) ? 's' : ''}
 			</h3>
-			{affirmationsLoading ? (
-				<>
-					<div className="space-y-1">
-						<Skeleton className="h-4 w-full" />
-						<Skeleton className="h-4 w-3/4" />
-					</div>
-					<Skeleton className="h-8 w-40" />
-				</>
-			) : affirmationElements?.length ? (
-				<>
-					{affirmationElements}
-					<Link href="/affirmations">
-						<Button className="bg-background text-foreground">
-							<HeartIcon className="size-[18px]" />
-							View more affirmations
-						</Button>
-					</Link>
-				</>
-			) : (
-				<>
-					<p>You have not received any affirmations yet.</p>
-				</>
-			)}
+			{affirmationsLoading
+				? (
+						<>
+							<div className="space-y-1">
+								<Skeleton className="h-4 w-full" />
+								<Skeleton className="h-4 w-3/4" />
+							</div>
+							<Skeleton className="h-8 w-40" />
+						</>
+					)
+				: affirmationElements?.length
+					? (
+							<>
+								{affirmationElements}
+								<Link href="/affirmations">
+									<Button className="bg-background text-foreground">
+										<HeartIcon className="size-[18px]" />
+										View more affirmations
+									</Button>
+								</Link>
+							</>
+						)
+					: (
+							<>
+								<p>You have not received any affirmations yet.</p>
+							</>
+						)}
 		</div>
 	);
 };

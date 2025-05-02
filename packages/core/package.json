@@ -2,15 +2,15 @@
 	"name": "@lumi/core",
 	"type": "module",
 	"version": "0.0.0",
-	"scripts": {
-		"test": "sst shell vitest",
-		"typecheck": "tsc --noEmit"
-	},
 	"exports": {
 		"./*": [
 			"./src/*.ts",
 			"./src/*.tsx"
 		]
+	},
+	"scripts": {
+		"test": "sst shell vitest",
+		"typecheck": "tsc --noEmit"
 	},
 	"dependencies": {
 		"@aws-sdk/client-dynamodb": "^3.787.0",
@@ -41,7 +41,7 @@
 	"devDependencies": {
 		"@types/nodemailer": "^6.4.17",
 		"@types/otp-generator": "^4.0.2",
-		"@types/react": "^19.1.1",
+		"@types/react": "^19.1.2",
 		"@types/request-ip": "^0.0.41",
 		"vitest": "^3.1.1"
 	}

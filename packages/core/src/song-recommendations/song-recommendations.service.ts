@@ -1,14 +1,14 @@
-import { TRPCError } from '@trpc/server';
+import type { DatabaseSongRecommendation, SongRecommendation } from './song-recommendation.types';
 
-import { batchWrite, deleteItem, dynamo, getItem, getItems, putItem, updateItem } from '../utils/dynamo/dynamo.service';
-import { DynamoKey, EntityType } from '../utils/dynamo/dynamo.types';
-import { chunkArray, getUUID } from '../utils/utils';
-import { DatabaseSongRecommendation, SongRecommendation } from './song-recommendation.types';
-import {
+import type {
 	CreateSongRecommendationDto,
 	GetSongRecommendationsDto,
 	UpdateSongRecommendationDto,
 } from './song-recommendations.dto';
+import { TRPCError } from '@trpc/server';
+import { batchWrite, deleteItem, getItem, getItems, putItem, updateItem } from '../utils/dynamo/dynamo.service';
+import { DynamoKey, EntityType } from '../utils/dynamo/dynamo.types';
+import { chunkArray, getUUID } from '../utils/utils';
 
 export const getSongRecommendationByTrackIdForUser = async (
 	userId: string,
@@ -85,7 +85,7 @@ export const getSongRecommendations = async (
 
 export const getSongRecommendationsByRelationshipId = async (
 	relationshipId: string,
-	{ limit, cursor, order, ...dto }: GetSongRecommendationsDto,
+	{ limit, cursor, order }: GetSongRecommendationsDto,
 ) => {
 	return getItems<SongRecommendation>({
 		index: 'GSI3',

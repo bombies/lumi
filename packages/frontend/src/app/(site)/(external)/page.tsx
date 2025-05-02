@@ -1,9 +1,9 @@
-import Link from 'next/link';
-import { redirect } from 'next/navigation';
-import { ArrowRight } from 'lucide-react';
-
 import { Button } from '@/components/ui/button';
 import { getServerSession } from '@/lib/better-auth/auth-actions';
+import { ArrowRight } from 'lucide-react';
+
+import Link from 'next/link';
+import { redirect } from 'next/navigation';
 
 export default async function Home() {
 	const session = await getServerSession();
@@ -18,7 +18,9 @@ export default async function Home() {
 			<h1 className="font-cursive text-8xl">Lumi.</h1>
 			<Link href="/auth/login">
 				<Button>
-					<ArrowRight size={18} /> let's go
+					<ArrowRight size={18} />
+					{' '}
+					let's go
 				</Button>
 			</Link>
 		</main>

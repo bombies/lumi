@@ -1,14 +1,15 @@
 'use client';
 
-import { FC, useMemo } from 'react';
-import { RefreshCwIcon } from 'lucide-react';
-
+import type { FC } from 'react';
 import { Button } from '@/components/ui/button';
 import InfiniteLoader from '@/components/ui/infinite-loader';
+
 import { Separator } from '@/components/ui/separator';
 import { GetSongRecommendations } from '@/hooks/trpc/music-sharing-hooks';
 import { useRouteInvalidation } from '@/lib/hooks/useRouteInvalidation';
-import { trpc } from '@/lib/trpc/client';
+import { trpc } from '@/lib/trpc/trpc-react';
+import { RefreshCwIcon } from 'lucide-react';
+import { useMemo } from 'react';
 import RecommendedTrack from '../tracks/recommended-track';
 import TrackSearchResultSkeleton from '../tracks/track-search-result-skeleton';
 
@@ -44,24 +45,28 @@ const PartnerRecommendationsContainer: FC = () => {
 					<RefreshCwIcon size={18} />
 				</Button>
 			</div>
-			{songRecsLoading ? (
-				<div>
-					<div className="space-y-3">
-						<TrackSearchResultSkeleton />
-						<TrackSearchResultSkeleton />
-						<TrackSearchResultSkeleton />
-						<TrackSearchResultSkeleton />
-						<TrackSearchResultSkeleton />
-					</div>
-				</div>
-			) : recElems?.length ? (
-				<div className="space-y-3">
-					{recElems}
-					<InfiniteLoader hasMore={hasNextPage} fetchMore={fetchNextPage} loading={isFetchingNextPage} />
-				</div>
-			) : (
-				<p className="text-lg">You have not received any new song recommendations...</p>
-			)}
+			{songRecsLoading
+				? (
+						<div>
+							<div className="space-y-3">
+								<TrackSearchResultSkeleton />
+								<TrackSearchResultSkeleton />
+								<TrackSearchResultSkeleton />
+								<TrackSearchResultSkeleton />
+								<TrackSearchResultSkeleton />
+							</div>
+						</div>
+					)
+				: recElems?.length
+					? (
+							<div className="space-y-3">
+								{recElems}
+								<InfiniteLoader hasMore={hasNextPage} fetchMore={fetchNextPage} loading={isFetchingNextPage} />
+							</div>
+						)
+					: (
+							<p className="text-lg">You have not received any new song recommendations...</p>
+						)}
 		</div>
 	);
 };

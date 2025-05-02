@@ -1,10 +1,10 @@
 'use client';
 
-import { toast } from 'sonner';
-
 import { useRouteInvalidation } from '@/lib/hooks/useRouteInvalidation';
-import { trpc } from '@/lib/trpc/client';
+
+import { trpc } from '@/lib/trpc/trpc-react';
 import { handleTrpcError } from '@/lib/trpc/utils';
+import { toast } from 'sonner';
 
 export const CreateSongRecommendation = () => {
 	const invalidateRoutes = useRouteInvalidation([trpc.musicSharing.createSongRecommendation]);

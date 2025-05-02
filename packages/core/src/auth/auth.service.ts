@@ -1,10 +1,11 @@
-import { TRPCError } from '@trpc/server';
 import type { User as BetterAuthUser } from 'better-auth';
-import { JWTPayload, SignJWT, createRemoteJWKSet, jwtVerify } from 'jose';
-import { JWSInvalid, JWTExpired } from 'jose/errors';
+import type { JWTPayload } from 'jose';
+import type { RegisterUserDto } from './auth.dto';
+import { TRPCError } from '@trpc/server';
+import { createRemoteJWKSet, jwtVerify, SignJWT } from 'jose';
 
+import { JWSInvalid, JWTExpired } from 'jose/errors';
 import { createUser, getUserByEmail } from '../users/users.service';
-import { RegisterUserDto } from './auth.dto';
 
 export const registerUser = async (dto: RegisterUserDto) => {
 	let existingUser = await getUserByEmail(dto.email);

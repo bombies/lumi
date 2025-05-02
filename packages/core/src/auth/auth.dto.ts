@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { PASSWORD_REGEX, createUserDto } from '../users/users.dto';
+import { createUserDto, PASSWORD_REGEX } from '../users/users.dto';
 
 export const registerUserDto = createUserDto.and(
 	z.object({

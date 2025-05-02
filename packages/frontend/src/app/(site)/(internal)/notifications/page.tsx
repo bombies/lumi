@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import type { FC } from 'react';
 
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import NotificationsSidebar from './components/notifications-sidebar';

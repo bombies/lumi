@@ -1,5 +1,5 @@
 import type { NextConfig } from 'next';
-import { RemotePattern } from 'next/dist/shared/lib/image-config';
+import type { RemotePattern } from 'next/dist/shared/lib/image-config';
 import { withSentryConfig } from '@sentry/nextjs';
 import { withNextVideo } from 'next-video/process';
 
@@ -9,6 +9,7 @@ const remotePatterns: RemotePattern[] = [
 		hostname: 'i.scdn.co',
 	},
 ];
+
 if (process.env.CDN_URL) {
 	remotePatterns.push({
 		protocol: 'https',
@@ -18,9 +19,17 @@ if (process.env.CDN_URL) {
 
 const nextConfig: NextConfig = {
 	images: {
-		remotePatterns: remotePatterns,
+		remotePatterns,
+	},
+	poweredByHeader: false,
+	reactStrictMode: true,
+	eslint: {
+		dirs: ['.'],
 	},
 	transpilePackages: ['@lumi/core', '@lumi/emails'],
+	experimental: {
+		reactCompiler: true,
+	},
 	async headers() {
 		return [
 			{
@@ -53,7 +62,7 @@ const nextConfig: NextConfig = {
 					},
 					{
 						key: 'Content-Security-Policy',
-						value: "default-src 'self'; script-src 'self'",
+						value: 'default-src \'self\'; script-src \'self\'',
 					},
 				],
 			},
@@ -66,7 +75,7 @@ export default withSentryConfig(
 		provider: 'amazon-s3',
 		providerConfig: {
 			'amazon-s3': {
-				endpoint: 'https://' + process.env.CONTENT_BUCKET_ENDPOINT!,
+				endpoint: `https://${process.env.CONTENT_BUCKET_ENDPOINT!}`,
 				bucket: process.env.CONTENT_BUCKET_NAME!,
 				accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
 				secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,

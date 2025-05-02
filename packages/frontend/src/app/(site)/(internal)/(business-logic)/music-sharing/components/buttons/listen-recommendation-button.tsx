@@ -1,14 +1,15 @@
 'use client';
 
-import { FC, useState } from 'react';
-import Link from 'next/link';
-import { PlayIcon } from '@heroicons/react/24/solid';
-import { SiSpotify } from '@icons-pack/react-simple-icons';
-import { SongRecommendation } from '@lumi/core/song-recommendations/song-recommendation.types';
-
+import type { SongRecommendation } from '@lumi/core/song-recommendations/song-recommendation.types';
+import type { FC } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import Image from '@/components/ui/image';
+import { PlayIcon } from '@heroicons/react/24/solid';
+
+import { SiSpotify } from '@icons-pack/react-simple-icons';
+import Link from 'next/link';
+import { useState } from 'react';
 import RateRecommendationButton from './rate-recommendation-button';
 
 type Props = {
@@ -26,7 +27,13 @@ const ListenRecommendationButton: FC<Props> = ({ track }) => {
 			</DialogTrigger>
 			<DialogContent className="p-2 flex tablet:!max-w-fit bg-background/20 backdrop-blur-lg" hideCloseButton>
 				<DialogTitle hidden>
-					Listen to {track.track.name} by {track.track.artistName}
+					Listen to
+					{' '}
+					{track.track.name}
+					{' '}
+					by
+					{' '}
+					{track.track.artistName}
 				</DialogTitle>
 				<div className="flex flex-col w-full tablet:flex-row gap-4 tablet:gap-8">
 					<Image
@@ -45,7 +52,9 @@ const ListenRecommendationButton: FC<Props> = ({ track }) => {
 							className="block"
 						>
 							<Button variant="accent">
-								<SiSpotify size={18} /> Listen on Spotify
+								<SiSpotify size={18} />
+								{' '}
+								Listen on Spotify
 							</Button>
 						</Link>
 						<RateRecommendationButton track={track} onRate={() => setDialogOpen(false)} />

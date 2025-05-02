@@ -1,4 +1,4 @@
-import { AbstractDbKeys } from "../../utils/dynamo/abstract.keys";
+import { AbstractDbKeys } from '../../utils/dynamo/abstract.keys';
 
 export class MomentMessageDbKeys extends AbstractDbKeys {
 	constructor() {

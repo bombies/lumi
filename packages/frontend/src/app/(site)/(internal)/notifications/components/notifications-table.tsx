@@ -1,7 +1,7 @@
 'use client';
 
-import { FC } from 'react';
-import { StoredNotification } from '@lumi/core/notifications/notification.types';
+import type { StoredNotification } from '@lumi/core/notifications/notification.types';
+import type { FC } from 'react';
 
 import { Badge } from '@/components/ui/badge';
 import InfiniteLoader from '@/components/ui/infinite-loader';
@@ -24,21 +24,23 @@ const NotificationsTable: FC = () => {
 			items={notifications ?? []}
 			allowRowSelection
 			className="w-full tablet:max-w-[45rem] border border-border rounded-lg"
-			rowClassName={row => {
+			rowClassName={(row) => {
 				const data = row.original;
 				if (data.read) return undefined;
 				return 'bg-primary/20';
 			}}
-			header={
+			header={(
 				<>
 					<SelectedNotificationsFloater />
 					{isRefetching && (
 						<Badge variant="outline">
-							<Spinner className="size-[12px]" /> Syncing...
+							<Spinner className="size-[12px]" />
+							{' '}
+							Syncing...
 						</Badge>
 					)}
 				</>
-			}
+			)}
 			columns={[
 				{
 					id: 'Description',

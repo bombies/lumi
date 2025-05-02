@@ -1,17 +1,17 @@
 'use client';
 
-import { FC, useCallback, useState } from 'react';
-import { Affirmation } from '@lumi/core/affirmations/affirmations.types';
-import { PencilIcon } from 'lucide-react';
-import { SubmitHandler } from 'react-hook-form';
-import { z } from 'zod';
-
+import type { Affirmation } from '@lumi/core/affirmations/affirmations.types';
+import type { FC } from 'react';
+import type { SubmitHandler } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import EasyForm from '@/components/ui/form-extras/easy-form';
-import EasyFormField from '@/components/ui/form-extras/easy-form-field';
-import { Textarea } from '@/components/ui/textarea';
+
+import EasyFormInput from '@/components/ui/form-extras/fields/easy-form-input';
 import { UpdateAffirmation } from '@/hooks/trpc/affirmation-hooks';
+import { PencilIcon } from 'lucide-react';
+import { useCallback, useState } from 'react';
+import { z } from 'zod';
 
 type Props = {
 	affirmation: Affirmation;
@@ -45,7 +45,7 @@ const EditAffirmationButton: FC<Props> = ({ affirmation }) => {
 				</Button>
 			</DialogTrigger>
 			<DialogContent
-				onPointerDownOutside={e => {
+				onPointerDownOutside={(e) => {
 					e.preventDefault();
 				}}
 			>
@@ -53,14 +53,17 @@ const EditAffirmationButton: FC<Props> = ({ affirmation }) => {
 					<DialogTitle>Edit Affirmation</DialogTitle>
 				</DialogHeader>
 				<EasyForm schema={formSchema} onSubmit={onSubmit} disabled={isUpdating} className="space-y-6">
-					<EasyFormField<FormSchema> name="affirmation" label="Affirmation">
-						<Textarea
-							maxLength={150}
-							defaultValue={affirmation.affirmation}
-							className="resize-none"
-							rows={3}
-						/>
-					</EasyFormField>
+					<EasyFormInput
+						type="textarea"
+						name="affirmation"
+						label="Affirmation"
+						inputProps={{
+							maxLength: 150,
+							placeholder: 'Enter your affirmation',
+							className: 'resize-none',
+							rows: 3,
+						}}
+					/>
 					<Button type="submit" loading={isUpdating}>
 						Submit
 					</Button>

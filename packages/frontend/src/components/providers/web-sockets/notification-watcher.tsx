@@ -1,11 +1,12 @@
 'use client';
 
-import { FC, useEffect } from 'react';
-import { InferredWebSocketMessagePayload } from '@lumi/core/websockets/websockets.types';
-import { toast } from 'sonner';
-
+import type { InferredWebSocketMessagePayload } from '@lumi/core/websockets/websockets.types';
+import type { FC } from 'react';
 import { StoreNotification } from '@/hooks/trpc/notification-hooks';
 import { GetSelfUserOnDemand } from '@/hooks/trpc/user-hooks';
+
+import { useEffect } from 'react';
+import { toast } from 'sonner';
 import { useRelationship } from '../relationships/relationship-provder';
 import { useWebSocket } from './web-socket-provider';
 
@@ -23,9 +24,9 @@ const NotificationWatcher: FC = () => {
 			if (self.status === 'online') {
 				// Handle notification ignores
 				if (
-					payload.message.title.includes('New Moment Message') &&
-					selfState?.state?.state === 'viewingMomentMessages' &&
-					selfState.state.payload.momentId === payload.metadata?.momentId
+					payload.message.title.includes('New Moment Message')
+					&& selfState?.state?.state === 'viewingMomentMessages'
+					&& selfState.state.payload.momentId === payload.metadata?.momentId
 				) {
 					return;
 				}

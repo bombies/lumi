@@ -1,9 +1,6 @@
 'use client';
 
-import { FC } from 'react';
-import { NoSymbolIcon, UserMinusIcon } from '@heroicons/react/24/solid';
-import { toast } from 'sonner';
-
+import type { FC } from 'react';
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -16,8 +13,11 @@ import {
 	AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
+
 import { GetSelfUser } from '@/hooks/trpc/user-hooks';
 import { auth } from '@/lib/better-auth/auth-client';
+import { NoSymbolIcon, UserMinusIcon } from '@heroicons/react/24/solid';
+import { toast } from 'sonner';
 
 const DeleteAccountButton: FC = () => {
 	const { data: self } = GetSelfUser();
@@ -26,14 +26,20 @@ const DeleteAccountButton: FC = () => {
 		<AlertDialog>
 			<AlertDialogTrigger asChild>
 				<Button variant="destructive" disabled={!self}>
-					<UserMinusIcon className="size-[18px]" /> Delete Account
+					<UserMinusIcon className="size-[18px]" />
+					{' '}
+					Delete Account
 				</Button>
 			</AlertDialogTrigger>
 			<AlertDialogContent>
 				<AlertDialogHeader>
 					<AlertDialogTitle>Delete Account</AlertDialogTitle>
 					<AlertDialogDescription>
-						Are you sure you want to delete your account? This will delete <b>ALL</b> data related to your
+						Are you sure you want to delete your account? This will delete
+						{' '}
+						<b>ALL</b>
+						{' '}
+						data related to your
 						account. This includes your relationship, affirmations, moments and music recommendations. Of
 						course, your account information will be deleted as well.
 						<br />
@@ -60,10 +66,14 @@ const DeleteAccountButton: FC = () => {
 							);
 						}}
 					>
-						<UserMinusIcon className="size-[18px]" /> Delete Account
+						<UserMinusIcon className="size-[18px]" />
+						{' '}
+						Delete Account
 					</AlertDialogAction>
 					<AlertDialogCancel>
-						<NoSymbolIcon className="size-[18px]" /> Cancel
+						<NoSymbolIcon className="size-[18px]" />
+						{' '}
+						Cancel
 					</AlertDialogCancel>
 				</AlertDialogFooter>
 			</AlertDialogContent>

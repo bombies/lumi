@@ -1,4 +1,4 @@
-import { QueryCommandOutput } from '@aws-sdk/lib-dynamodb';
+import type { QueryCommandOutput } from '@aws-sdk/lib-dynamodb';
 import { z } from 'zod';
 
 export const infiniteDataDto = z
@@ -50,8 +50,8 @@ export const getInfiniteData = async <T = unknown>(
 	itemMapper?: (item: T) => T | Promise<T>,
 ) => {
 	let data: T[] = [];
-	let intermediateData =
-		(itemMapper ? queryResult?.Items?.map(item => itemMapper(item as T)) : (queryResult.Items as T[])) ?? [];
+	const intermediateData
+		= (itemMapper ? queryResult?.Items?.map(item => itemMapper(item as T)) : (queryResult.Items as T[])) ?? [];
 
 	if (intermediateData.length && intermediateData[0] instanceof Promise) {
 		data = await Promise.all(intermediateData);

@@ -1,7 +1,7 @@
 'use client';
 
-import { ReactElement } from 'react';
-import { Table } from '@tanstack/react-table';
+import type { Table } from '@tanstack/react-table';
+import type { ReactElement } from 'react';
 
 import { useManagedTableGlobals } from './managed-table-provider';
 

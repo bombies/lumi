@@ -1,18 +1,7 @@
 'use client';
 
-import { FC, useCallback, useMemo } from 'react';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { HeartIcon, LockClosedIcon, PaintBrushIcon, UserCircleIcon as UserIcon } from '@heroicons/react/24/outline';
-import {
-	HeartIcon as HeartFilledIcon,
-	HomeIcon,
-	LockClosedIcon as LockClosedFilledIcon,
-	PaintBrushIcon as PaintBrushFilledIcon,
-	UserCircleIcon as UserFilledIcon,
-} from '@heroicons/react/24/solid';
-import { IconType } from '@icons-pack/react-simple-icons';
-
+import type { IconType } from '@icons-pack/react-simple-icons';
+import type { FC } from 'react';
 import { Button } from '@/components/ui/button';
 import {
 	Sidebar,
@@ -29,6 +18,18 @@ import {
 } from '@/components/ui/sidebar';
 import SignOutButton from '@/components/ui/sign-out-button';
 import { GetRelationship } from '@/hooks/trpc/relationship-hooks';
+import { HeartIcon, LockClosedIcon, PaintBrushIcon, UserCircleIcon as UserIcon } from '@heroicons/react/24/outline';
+
+import {
+	HeartIcon as HeartFilledIcon,
+	HomeIcon,
+	LockClosedIcon as LockClosedFilledIcon,
+	PaintBrushIcon as PaintBrushFilledIcon,
+	UserCircleIcon as UserFilledIcon,
+} from '@heroicons/react/24/solid';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { useCallback, useMemo } from 'react';
 
 type SidebarItem = {
 	groupLabel: string;
@@ -44,7 +45,7 @@ type GetItemsArgs = {
 	withRelationship?: boolean;
 };
 
-const items: (args?: GetItemsArgs) => SidebarItem[] = args => {
+const items: (args?: GetItemsArgs) => SidebarItem[] = (args) => {
 	const res: SidebarItem[] = [
 		{
 			groupLabel: 'Account Settings',
@@ -105,7 +106,7 @@ const SettingsSidebar: FC = () => {
 
 	const itemElements = useMemo(
 		() =>
-			items({ withRelationship: !!relationship }).map(group => {
+			items({ withRelationship: !!relationship }).map((group) => {
 				return (
 					<SidebarGroup key={group.groupLabel}>
 						<SidebarGroupLabel>{group.groupLabel}</SidebarGroupLabel>
@@ -119,11 +120,13 @@ const SettingsSidebar: FC = () => {
 											className="hover:bg-accent/50"
 										>
 											<Link href={item.url}>
-												{itemIsActive(item.url) && item.filledIcon ? (
-													<item.filledIcon />
-												) : (
-													<item.icon />
-												)}
+												{itemIsActive(item.url) && item.filledIcon
+													? (
+															<item.filledIcon />
+														)
+													: (
+															<item.icon />
+														)}
 												<span>{item.title}</span>
 											</Link>
 										</SidebarMenuButton>
@@ -148,7 +151,9 @@ const SettingsSidebar: FC = () => {
 			<SidebarFooter>
 				<Link href="/home">
 					<Button className="w-full">
-						<HomeIcon className="size-[18px]" /> Go Home
+						<HomeIcon className="size-[18px]" />
+						{' '}
+						Go Home
 					</Button>
 				</Link>
 				<SignOutButton iconOnly={!open} />

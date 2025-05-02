@@ -1,13 +1,14 @@
 'use client';
 
-import { FC, useState } from 'react';
-import Link from 'next/link';
-import { TagIcon } from '@heroicons/react/24/solid';
-import { SearchIcon } from 'lucide-react';
-
+import type { FC } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { GetMoments } from '@/hooks/trpc/moment-hooks';
+import { TagIcon } from '@heroicons/react/24/solid';
+
+import { SearchIcon } from 'lucide-react';
+import Link from 'next/link';
+import { useState } from 'react';
 import MomentsGridContent from './moments-grid-content';
 
 const MomentsGrid: FC = () => {
@@ -28,7 +29,7 @@ const MomentsGrid: FC = () => {
 					onValueChange={() => {
 						setIsSearching(true);
 					}}
-					onTypingEnd={val => {
+					onTypingEnd={(val) => {
 						setSearch(val);
 						setIsSearching(false);
 					}}
@@ -39,7 +40,9 @@ const MomentsGrid: FC = () => {
 				/>
 				<Link href="/moments/tagged">
 					<Button variant="default:flat">
-						<TagIcon className="size-[18px]" /> Tags
+						<TagIcon className="size-[18px]" />
+						{' '}
+						Tags
 					</Button>
 				</Link>
 			</div>

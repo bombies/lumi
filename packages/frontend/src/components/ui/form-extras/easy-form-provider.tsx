@@ -1,7 +1,8 @@
 'use client';
 
-import { createContext, PropsWithChildren, useContext, useMemo } from 'react';
-import { FieldValues, UseFormReturn } from 'react-hook-form';
+import type { PropsWithChildren } from 'react';
+import type { FieldValues, UseFormReturn } from 'react-hook-form';
+import { createContext, use, useMemo } from 'react';
 
 type ContextValues<T extends FieldValues = any> = {
 	form: UseFormReturn<T>;
@@ -26,7 +27,7 @@ export default function EasyFormProvider<T extends FieldValues>({
 	submitting,
 	requiredAsterisk = false,
 }: Props<T>) {
-	const value = useMemo(
+	const value = useMemo<ContextValues<T>>(
 		() => ({
 			form,
 			submitting,
@@ -36,11 +37,11 @@ export default function EasyFormProvider<T extends FieldValues>({
 		[form, formDisabled, requiredAsterisk, submitting],
 	);
 
-	return <FormContext.Provider value={value}>{children}</FormContext.Provider>;
+	return <FormContext value={value}>{children}</FormContext>;
 }
 
 export const useForm = <T extends FieldValues>() => {
-	const context = useContext(FormContext) as ContextValues<T> | undefined;
+	const context = use(FormContext) as ContextValues<T> | undefined;
 	if (!context) throw new Error('useForm must be used within a FormProvider');
 	return context;
 };

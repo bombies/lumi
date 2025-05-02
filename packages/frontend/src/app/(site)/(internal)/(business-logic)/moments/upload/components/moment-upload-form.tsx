@@ -1,26 +1,25 @@
 'use client';
 
-import { FC, useCallback, useMemo, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { UploadIcon, XIcon } from 'lucide-react';
-import Player from 'next-video/player';
-import MediaThemeInstaplay from 'player.style/instaplay/react';
-import { SubmitHandler } from 'react-hook-form';
-import { z } from 'zod';
-
+import type { SelectOption } from '@/components/ui/multiselect';
+import type { FC } from 'react';
+import type { SubmitHandler } from 'react-hook-form';
 import { useRelationship } from '@/components/providers/relationships/relationship-provder';
 import { Button } from '@/components/ui/button';
 import EasyForm from '@/components/ui/form-extras/easy-form';
-import EasyFormField from '@/components/ui/form-extras/easy-form-field';
+import EasyFormInput from '@/components/ui/form-extras/fields/easy-form-input';
+
 import EasyFormSelect from '@/components/ui/form-extras/fields/easy-form-select';
 import InfiniteLoader from '@/components/ui/infinite-loader';
-import { Input } from '@/components/ui/input';
-import { SelectOption } from '@/components/ui/multiselect';
 import { Progress } from '@/components/ui/progress';
-import { Textarea } from '@/components/ui/textarea';
 import Title from '@/components/ui/title';
 import { CreateMomentDetails, GetRelationshipMomentTags, UploadMoment } from '@/hooks/trpc/moment-hooks';
 import { handleTrpcError } from '@/lib/trpc/utils';
+import { UploadIcon, XIcon } from 'lucide-react';
+import Player from 'next-video/player';
+import { useRouter } from 'next/navigation';
+import MediaThemeInstaplay from 'player.style/instaplay/react';
+import { useCallback, useMemo, useState } from 'react';
+import { z } from 'zod';
 import CreateMomentTagButton from '../../components/create-moment-tag.button';
 
 const momentFormDetailsSchema = z.object({
@@ -67,7 +66,7 @@ const MomentUploadForm: FC<Props> = ({ momentFile, onCancel }) => {
 	);
 
 	const onSubmit = useCallback<SubmitHandler<MomentFormDetailsSchema>>(
-		async data => {
+		async (data) => {
 			setIsUploading(true);
 
 			try {
@@ -130,9 +129,15 @@ const MomentUploadForm: FC<Props> = ({ momentFile, onCancel }) => {
 					className="space-y-6"
 					submitting={momentUploading || isUploading || momentDetailsCreating}
 				>
-					<EasyFormField<MomentFormDetailsSchema> name="title" label="Title" showErrorMessage>
-						<Input maxLength={90} placeholder="Enter a title for your moment" />
-					</EasyFormField>
+					<EasyFormInput<MomentFormDetailsSchema>
+						name="title"
+						label="Title"
+						showErrorMessage
+						inputProps={{
+							maxLength: 90,
+							placeholder: 'Enter a title for your moment',
+						}}
+					/>
 					<div className="flex flex-col tablet:flex-row gap-2 items-end">
 						<EasyFormSelect<MomentFormDetailsSchema>
 							name="tags"
@@ -141,24 +146,28 @@ const MomentUploadForm: FC<Props> = ({ momentFile, onCancel }) => {
 							options={momentTags ?? []}
 							optionsLoading={relationshipMomentTagsLoading}
 							onSearch={setTagSearch}
-							itemsFooter={
+							itemsFooter={(
 								<InfiniteLoader
 									hasMore={hasMoreTags}
 									fetchMore={fetchMoreTags}
 									loading={isFetchingMoreTags}
 								/>
-							}
+							)}
 						/>
 						<CreateMomentTagButton />
 					</div>
-					<EasyFormField<MomentFormDetailsSchema> name="description" label="Description" showErrorMessage>
-						<Textarea
-							maxLength={1024}
-							className="h-96"
-							placeholder="Enter a description for your moment"
-							rows={10}
-						/>
-					</EasyFormField>
+					<EasyFormInput<MomentFormDetailsSchema>
+						type="textarea"
+						name="description"
+						label="Description"
+						showErrorMessage
+						inputProps={{
+							maxLength: 1024,
+							placeholder: 'Enter a description for your moment',
+							className: 'h-96',
+							rows: 10,
+						}}
+					/>
 					<div className="flex gap-4">
 						<div className="flex flex-col gap-y-2">
 							<Button
@@ -166,7 +175,9 @@ const MomentUploadForm: FC<Props> = ({ momentFile, onCancel }) => {
 								variant="accent"
 								loading={isUploading || momentUploading || momentDetailsCreating}
 							>
-								<UploadIcon size={18} /> Upload Moment
+								<UploadIcon size={18} />
+								{' '}
+								Upload Moment
 							</Button>
 							{isUploading && <Progress value={momentUploadProgress} />}
 						</div>
@@ -176,7 +187,9 @@ const MomentUploadForm: FC<Props> = ({ momentFile, onCancel }) => {
 							disabled={momentUploading || isUploading || momentDetailsCreating}
 							onClick={onCancel}
 						>
-							<XIcon size={18} /> Cancel Upload
+							<XIcon size={18} />
+							{' '}
+							Cancel Upload
 						</Button>
 					</div>
 				</EasyForm>

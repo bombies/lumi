@@ -1,4 +1,3 @@
-import { getRelationshipRequestsForUserDto } from '@lumi/core/relationships/relationship.dto';
 import {
 	acceptRelationshipRequest,
 	deleteRelationshipRequestById,

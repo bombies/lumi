@@ -1,10 +1,7 @@
 'use client';
 
-import { FC, useMemo } from 'react';
-import { ChatBubbleLeftIcon, ClockIcon, StarIcon } from '@heroicons/react/24/solid';
-import { SongRecommendation } from '@lumi/core/song-recommendations/song-recommendation.types';
-import moment from 'moment';
-
+import type { SongRecommendation } from '@lumi/core/song-recommendations/song-recommendation.types';
+import type { FC } from 'react';
 import { useRelationship } from '@/components/providers/relationships/relationship-provder';
 import {
 	Dialog,
@@ -15,9 +12,13 @@ import {
 	DialogTrigger,
 } from '@/components/ui/dialog';
 import Image from '@/components/ui/image';
+
 import { Separator } from '@/components/ui/separator';
 import UserAvatar from '@/components/ui/user-avatar';
 import { cn } from '@/lib/utils';
+import { ChatBubbleLeftIcon, ClockIcon, StarIcon } from '@heroicons/react/24/solid';
+import moment from 'moment';
+import { useMemo } from 'react';
 import DeleteRecommendationButton from '../buttons/delete-recommendation-button';
 import ListenRecommendationButton from '../buttons/listen-recommendation-button';
 
@@ -65,7 +66,8 @@ const RecommendedTrack: FC<Props> = ({ track: { track: trackDetails, ...track },
 				/>
 				<div>
 					<p className="font-semibold inline-flex items-center gap-2">
-						<span className="line-clamp-1 inline">{trackDetails.name}</span>{' '}
+						<span className="line-clamp-1 inline">{trackDetails.name}</span>
+						{' '}
 						{type !== 'listened' && (
 							<span className="text-xs text-foreground/60 inline-flex items-center gap-1">
 								<ClockIcon className="size-3" />
@@ -78,78 +80,91 @@ const RecommendedTrack: FC<Props> = ({ track: { track: trackDetails, ...track },
 				</div>
 			</div>
 			<div className="flex flex-col gap-2 items-end">
-				{type === 'sender' ? (
-					<>
-						<DeleteRecommendationButton track={{ ...track, track: trackDetails }} />
-					</>
-				) : type === 'receiver' ? (
-					<>
-						<ListenRecommendationButton track={{ ...track, track: trackDetails }} />
-					</>
-				) : (
-					<>
-						<p className="inline-flex items-center gap-2">
-							<StarIcon className="size-3 text-amber-400" />
-							<span>
-								<span
-									className={cn(
-										trackRating === 10 && 'text-amber-400',
-										trackRating < 10 && trackRating >= 7 && 'text-green-500',
-										trackRating < 7 && trackRating >= 4 && 'text-yellow-200',
-										trackRating < 4 && trackRating >= 0 && 'text-red-500',
-									)}
-								>
-									{track.rating ?? '?'}
-								</span>
-								/10
-							</span>
-						</p>
-						<Dialog>
-							<DialogTrigger asChild>
-								<button className="flex gap-1 items-center text-xs text-neutral-500 cursor-pointer">
-									<ChatBubbleLeftIcon className="size-3" />
-									Details
-								</button>
-							</DialogTrigger>
-							<DialogContent>
-								<DialogHeader>
-									<DialogTitle>
-										{trackDetails.name} by {trackDetails.artistName}
-									</DialogTitle>
-									<DialogDescription className="flex flex-col text-xs">
+				{type === 'sender'
+					? (
+							<>
+								<DeleteRecommendationButton track={{ ...track, track: trackDetails }} />
+							</>
+						)
+					: type === 'receiver'
+						? (
+								<>
+									<ListenRecommendationButton track={{ ...track, track: trackDetails }} />
+								</>
+							)
+						: (
+								<>
+									<p className="inline-flex items-center gap-2">
+										<StarIcon className="size-3 text-amber-400" />
 										<span>
-											Recommended on{' '}
-											{new Date(track.createdAt).toLocaleDateString('en-US', {
-												dateStyle: 'medium',
-											})}{' '}
-											at{' '}
-											{new Date(track.createdAt).toLocaleTimeString('en-US', {
-												timeStyle: 'short',
-											})}
+											<span
+												className={cn(
+													trackRating === 10 && 'text-amber-400',
+													trackRating < 10 && trackRating >= 7 && 'text-green-500',
+													trackRating < 7 && trackRating >= 4 && 'text-yellow-200',
+													trackRating < 4 && trackRating >= 0 && 'text-red-500',
+												)}
+											>
+												{track.rating ?? '?'}
+											</span>
+											/10
 										</span>
-										<span>
-											Rated on{' '}
-											{track.updatedAt
-												? new Date(track.updatedAt).toLocaleDateString('en-US', {
-														dateStyle: 'medium',
-													}) +
-													' at ' +
-													new Date(track.updatedAt).toLocaleTimeString('en-US', {
-														timeStyle: 'short',
-													})
-												: 'unknown'}
-										</span>
-									</DialogDescription>
-								</DialogHeader>
-								<h3 className="text-2xl text-primary font-bold mt-6">
-									Comments from {receiver.firstName}
-								</h3>
-								<Separator className="my-4" />
-								<p className="whitespace-pre-wrap break-words">{track.comments}</p>
-							</DialogContent>
-						</Dialog>
-					</>
-				)}
+									</p>
+									<Dialog>
+										<DialogTrigger asChild>
+											<button className="flex gap-1 items-center text-xs text-neutral-500 cursor-pointer">
+												<ChatBubbleLeftIcon className="size-3" />
+												Details
+											</button>
+										</DialogTrigger>
+										<DialogContent>
+											<DialogHeader>
+												<DialogTitle>
+													{trackDetails.name}
+													{' '}
+													by
+													{trackDetails.artistName}
+												</DialogTitle>
+												<DialogDescription className="flex flex-col text-xs">
+													<span>
+														Recommended on
+														{' '}
+														{new Date(track.createdAt).toLocaleDateString('en-US', {
+															dateStyle: 'medium',
+														})}
+														{' '}
+														at
+														{' '}
+														{new Date(track.createdAt).toLocaleTimeString('en-US', {
+															timeStyle: 'short',
+														})}
+													</span>
+													<span>
+														Rated on
+														{' '}
+														{track.updatedAt
+															? `${new Date(track.updatedAt).toLocaleDateString('en-US', {
+																dateStyle: 'medium',
+															})
+															} at ${
+																new Date(track.updatedAt).toLocaleTimeString('en-US', {
+																	timeStyle: 'short',
+																})}`
+															: 'unknown'}
+													</span>
+												</DialogDescription>
+											</DialogHeader>
+											<h3 className="text-2xl text-primary font-bold mt-6">
+												Comments from
+												{' '}
+												{receiver.firstName}
+											</h3>
+											<Separator className="my-4" />
+											<p className="whitespace-pre-wrap break-words">{track.comments}</p>
+										</DialogContent>
+									</Dialog>
+								</>
+							)}
 			</div>
 		</div>
 	);

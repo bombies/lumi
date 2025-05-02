@@ -1,9 +1,6 @@
 'use client';
 
-import { FC, useState } from 'react';
-import { TrashIcon } from '@heroicons/react/24/solid';
-import { toast } from 'sonner';
-
+import type { FC } from 'react';
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -18,6 +15,10 @@ import {
 import { Button } from '@/components/ui/button';
 import { DeleteRelationshipMomentTag } from '@/hooks/trpc/moment-hooks';
 
+import { TrashIcon } from '@heroicons/react/24/solid';
+import { useState } from 'react';
+import { toast } from 'sonner';
+
 type Props = {
 	tag: string;
 	onDelete?: () => void;
@@ -31,14 +32,23 @@ const DeleteTagButton: FC<Props> = ({ tag, onDelete }) => {
 		<AlertDialog open={dialogOpen} onOpenChange={setDialogOpen}>
 			<AlertDialogTrigger asChild>
 				<Button variant="destructive:flat">
-					<TrashIcon className="size-[18px]" /> Delete #{tag}
+					<TrashIcon className="size-[18px]" />
+					{' '}
+					Delete #
+					{tag}
 				</Button>
 			</AlertDialogTrigger>
 			<AlertDialogContent>
 				<AlertDialogHeader>
-					<AlertDialogTitle>Are you sure you want to delete #{tag}</AlertDialogTitle>
+					<AlertDialogTitle>
+						Are you sure you want to delete #
+						{tag}
+					</AlertDialogTitle>
 					<AlertDialogDescription>
-						Deleting #{tag} will also remove the tag from all videos associated with it. This action is
+						Deleting #
+						{tag}
+						{' '}
+						will also remove the tag from all videos associated with it. This action is
 						irreversible.
 					</AlertDialogDescription>
 				</AlertDialogHeader>

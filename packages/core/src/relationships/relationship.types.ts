@@ -1,5 +1,5 @@
-import { User } from '../users/user.types';
-import { EntityType } from '../utils/dynamo/dynamo.types';
+import type { User } from '../users/user.types';
+import type { EntityType } from '../utils/dynamo/dynamo.types';
 
 export type RelationshipRequest = {
 	id: string;

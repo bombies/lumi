@@ -43,6 +43,7 @@ export const affirmationSenderJob = new sst.aws.Cron('AffirmationAggregatorJob',
 	},
 });
 
+// eslint-disable-next-line import/no-mutable-exports
 export let lambdaWarmer: sst.aws.Cron;
 
 if ($app.stage === 'production') {

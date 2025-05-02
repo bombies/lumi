@@ -1,21 +1,19 @@
-/** eslint-disable @typescript-eslint/no-use-before-define */
 'use client';
 
-import * as React from 'react';
-import * as LabelPrimitive from '@radix-ui/react-label';
+import type * as LabelPrimitive from '@radix-ui/react-label';
+import type { ControllerProps, FieldPath, FieldValues } from 'react-hook-form';
+import { Label } from '@/components/ui/label';
+import { cn } from '@/lib/utils';
+
 import { Slot } from '@radix-ui/react-slot';
+import * as React from 'react';
 import {
 	Controller,
+
 	FormProvider,
 	useFormContext,
 	useFormState,
-	type ControllerProps,
-	type FieldPath,
-	type FieldValues,
 } from 'react-hook-form';
-
-import { Label } from '@/components/ui/label';
-import { cn } from '@/lib/utils';
 
 const Form = FormProvider;
 
@@ -42,8 +40,8 @@ const FormField = <
 };
 
 const useFormField = () => {
-	const fieldContext = React.useContext(FormFieldContext);
-	const itemContext = React.useContext(FormItemContext);
+	const fieldContext = React.use(FormFieldContext);
+	const itemContext = React.use(FormItemContext);
 	const { getFieldState } = useFormContext();
 	const formState = useFormState({ name: fieldContext.name });
 	const fieldState = getFieldState(fieldContext.name, formState);
@@ -141,4 +139,4 @@ function FormMessage({ className, ...props }: React.ComponentProps<'p'>) {
 	);
 }
 
-export { useFormField, Form, FormItem, FormLabel, FormControl, FormDescription, FormMessage, FormField };
+export { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage, useFormField };

@@ -1,10 +1,10 @@
 'use server';
 
-import { getRelationshipForUser } from '@lumi/core/relationships/relationship.service';
-import { updateUser } from '@lumi/core/users/users.service';
-
 import { WebsocketTopic } from '@/components/providers/web-sockets/topics';
 import { sendServerWebsocketMessage } from '@/components/providers/web-sockets/web-socket-server-actions';
+
+import { getRelationshipForUser } from '@lumi/core/relationships/relationship.service';
+import { updateUser } from '@lumi/core/users/users.service';
 import { logger } from '../logger';
 
 export const getRelationshipByUserId = async (userId: string) => {
@@ -17,8 +17,8 @@ export const sendSignOutNotification = async (userId: string, username: string) 
 	if (relationship) {
 		await sendServerWebsocketMessage('presence', WebsocketTopic.relationshipWSTopic(relationship.id), {
 			status: 'offline',
-			userId: userId,
-			username: username,
+			userId,
+			username,
 		});
 	}
 

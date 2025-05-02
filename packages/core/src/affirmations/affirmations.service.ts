@@ -1,28 +1,29 @@
-import { TRPCError } from '@trpc/server';
-import { Resource } from 'sst';
+import type { Relationship } from '../relationships/relationship.types';
+import type { User } from '../users/user.types';
 
-import { sendNotification } from '../notifications/notifications.service';
-import { getPartnerForUser, getRelationshipForUser } from '../relationships/relationship.service';
-import { Relationship } from '../relationships/relationship.types';
-import { User } from '../users/user.types';
-import { batchWrite, deleteItem, dynamo, getItem, getItems, putItem, updateItem } from '../utils/dynamo/dynamo.service';
-import { DynamoKey, EntityType } from '../utils/dynamo/dynamo.types';
-import { extractPartnerIdFromRelationship } from '../utils/global-utils';
-import { chunkArray, getUUID } from '../utils/utils';
-import { MqttClientType, createAsyncWebsocketConnection } from '../websockets/websockets.service';
-import { WebSocketToken } from '../websockets/websockets.types';
-import {
+import type { MqttClientType } from '../websockets/websockets.service';
+import type {
 	CreateAffirmationDto,
 	GetReceivedAffirmationsDto,
 	SendCustomAffirmationDto,
 	UpdateAffirmationDto,
 } from './affirmations.dto';
-import {
+import type {
 	Affirmation,
 	DatabaseAffirmation,
 	DatabaseReceivedAffirmation,
 	ReceivedAffirmation,
 } from './affirmations.types';
+import { TRPCError } from '@trpc/server';
+import { Resource } from 'sst';
+import { sendNotification } from '../notifications/notifications.service';
+import { getPartnerForUser, getRelationshipForUser } from '../relationships/relationship.service';
+import { batchWrite, deleteItem, getItem, getItems, putItem, updateItem } from '../utils/dynamo/dynamo.service';
+import { DynamoKey, EntityType } from '../utils/dynamo/dynamo.types';
+import { extractPartnerIdFromRelationship } from '../utils/global-utils';
+import { chunkArray, getUUID } from '../utils/utils';
+import { createAsyncWebsocketConnection } from '../websockets/websockets.service';
+import { WebSocketToken } from '../websockets/websockets.types';
 
 export const createAffirmation = async (dto: CreateAffirmationDto) => {
 	const affirmationId = getUUID();
@@ -234,13 +235,13 @@ export const sendAffirmationToUser = async (
 			message: 'You are not in a relationship!',
 		});
 
-	const mqttConnection =
-		dto.mqttClient ??
-		(await createAsyncWebsocketConnection({
-			endpoint: Resource.RealtimeServer.endpoint,
-			authorizer: Resource.RealtimeServer.authorizer,
-			token: WebSocketToken.GLOBAL,
-		}));
+	const mqttConnection
+		= dto.mqttClient
+			?? (await createAsyncWebsocketConnection({
+				endpoint: Resource.RealtimeServer.endpoint,
+				authorizer: Resource.RealtimeServer.authorizer,
+				token: WebSocketToken.GLOBAL,
+			}));
 
 	await sendNotification({
 		user,

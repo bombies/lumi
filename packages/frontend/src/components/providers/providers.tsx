@@ -1,14 +1,14 @@
 'use client';
 
-import { FC, PropsWithChildren } from 'react';
-import { ProgressProvider } from '@bprogress/next/app';
-import { Toaster } from 'sonner';
-
+import type { FC, PropsWithChildren } from 'react';
 import InstallPrompt from '@/components/notifications/install-prompt';
 import NotificationsProvider from '@/components/notifications/notifications-provider';
+
 import ColorSchemeProvider from '@/components/providers/color-scheme-provider';
 import { PullRefresh } from '@/components/pull-refresh';
 import { TRPCProvider } from '@/lib/trpc/client';
+import { ProgressProvider } from '@bprogress/next/app';
+import { Toaster } from 'sonner';
 import { buttonVariants } from '../ui/button';
 
 type ProvidersProps = PropsWithChildren;

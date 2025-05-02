@@ -1,6 +1,7 @@
 'use client';
 
-import { FC, Fragment, useMemo } from 'react';
+import type { FC } from 'react';
+import { Fragment, useMemo } from 'react';
 
 import {
 	Breadcrumb,
@@ -58,25 +59,27 @@ const BreadcrumbBuilder: FC<Props> = ({ breadcrumbs, maxVisibleCrumbs = 3 }) => 
 					</BreadcrumbItem>
 					<BreadcrumbSeparator />
 					{/* Hidden crumbs */}
-					{hiddenCrumbs.length ? (
-						<BreadcrumbItem>
-							<DropdownMenu>
-								<DropdownMenuTrigger className="flex items-center gap-1">
-									<BreadcrumbEllipsis className="h-4 w-4" />
-									<span className="sr-only">Toggle menu</span>
-								</DropdownMenuTrigger>
-								<DropdownMenuContent>
-									{hiddenCrumbs.map((crumb, idx) => (
-										<DropdownMenuItem key={`breadcrumb#${crumb.href}#${idx}`} asChild>
-											<BreadcrumbItem>
-												<BreadcrumbLink href={crumb.href}>{crumb.label}</BreadcrumbLink>
-											</BreadcrumbItem>
-										</DropdownMenuItem>
-									))}
-								</DropdownMenuContent>
-							</DropdownMenu>
-						</BreadcrumbItem>
-					) : undefined}
+					{hiddenCrumbs.length
+						? (
+								<BreadcrumbItem>
+									<DropdownMenu>
+										<DropdownMenuTrigger className="flex items-center gap-1">
+											<BreadcrumbEllipsis className="h-4 w-4" />
+											<span className="sr-only">Toggle menu</span>
+										</DropdownMenuTrigger>
+										<DropdownMenuContent>
+											{hiddenCrumbs.map((crumb, idx) => (
+												<DropdownMenuItem key={`breadcrumb#${crumb.href}#${idx}`} asChild>
+													<BreadcrumbItem>
+														<BreadcrumbLink href={crumb.href}>{crumb.label}</BreadcrumbLink>
+													</BreadcrumbItem>
+												</DropdownMenuItem>
+											))}
+										</DropdownMenuContent>
+									</DropdownMenu>
+								</BreadcrumbItem>
+							)
+						: undefined}
 
 					{/* Last 2 crumbs */}
 					{visibleCrumbsButFirstandLast}

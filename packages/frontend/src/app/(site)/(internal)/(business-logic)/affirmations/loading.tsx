@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import type { FC } from 'react';
 
 import { Skeleton } from '@/components/ui/skeleton';
 import AffirmationGroupSkeleton from './components/affirmation-group-skeleton';

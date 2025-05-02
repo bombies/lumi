@@ -1,10 +1,12 @@
 'use client';
 
-import { FC, useMemo } from 'react';
+import type { SelectOption } from '@/components/ui/multiselect';
+import type { FC } from 'react';
 
 import InfiniteLoader from '@/components/ui/infinite-loader';
-import { Select, SelectOption } from '@/components/ui/multiselect';
+import { Select } from '@/components/ui/multiselect';
 import { Separator } from '@/components/ui/separator';
+import { useMemo } from 'react';
 import CreateMomentTagButton from '../../components/create-moment-tag.button';
 import MomentsGridContent from '../../components/moments-grid-content';
 import DeleteTagButton from './delete-tag-button';
@@ -35,7 +37,9 @@ export const CompactTaggedMomentsView: FC = () => {
 			tags.map<SelectOption>(tag => ({
 				label: (
 					<p>
-						#{tag.tag}{' '}
+						#
+						{tag.tag}
+						{' '}
 						<span className="bg-secondary text-secondary-foreground rounded-md py-1 px-2 text-xs border border-border">
 							{tag.associationCount}
 						</span>
@@ -70,26 +74,30 @@ export const CompactTaggedMomentsView: FC = () => {
 				)}
 				<CreateMomentTagButton />
 			</div>
-			{selectedTag ? (
-				<MomentsGridContent
-					moments={moments}
-					momentsLoading={momentsLoading}
-					infiniteOpts={{
-						hasNextPage: hasMoreMoments,
-						fetchNextPage: fetchMoreMoments,
-						isFetchingNextPage: isFetchingMoreMoments,
-					}}
-				/>
-			) : (
-				<div className="p-6 max-w-sm border border-primary bg-primary/10 rounded-md border-dashed">
-					<p className="text-lg font-medium">You have not selected any tags...</p>
-					<Separator className="my-2" />
-					<p className="text-sm">
-						<span className="text-primary font-bold">Tip:</span> Select a tag to view all moments for that
-						tag.
-					</p>
-				</div>
-			)}
+			{selectedTag
+				? (
+						<MomentsGridContent
+							moments={moments}
+							momentsLoading={momentsLoading}
+							infiniteOpts={{
+								hasNextPage: hasMoreMoments,
+								fetchNextPage: fetchMoreMoments,
+								isFetchingNextPage: isFetchingMoreMoments,
+							}}
+						/>
+					)
+				: (
+						<div className="p-6 max-w-sm border border-primary bg-primary/10 rounded-md border-dashed">
+							<p className="text-lg font-medium">You have not selected any tags...</p>
+							<Separator className="my-2" />
+							<p className="text-sm">
+								<span className="text-primary font-bold">Tip:</span>
+								{' '}
+								Select a tag to view all moments for that
+								tag.
+							</p>
+						</div>
+					)}
 		</>
 	);
 };

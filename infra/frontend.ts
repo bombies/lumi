@@ -32,7 +32,7 @@ import { contentBucket, contentCdn, contentCdnPublicKey } from './storage';
 export const frontend = new sst.aws.Nextjs('Frontend', {
 	path: 'packages/frontend',
 	dev: {
-		command: 'bun run dev',
+		command: process.env.NEXT_SCAN === 'true' ? 'bun run dev:scan' : 'bun run dev',
 	},
 	server: {
 		runtime: 'nodejs22.x',
@@ -71,7 +71,7 @@ export const frontend = new sst.aws.Nextjs('Frontend', {
 		BETTER_AUTH_URL: !$dev ? `https://${webDNS}` : 'https://localhost:3000',
 
 		AUTH_SECRET: authSecret.value,
-		// @ts-ignore
+		// @ts-expect-error Complaining about the undefined.
 		AUTH_TRUST_HOST: !$dev ? 'true' : undefined,
 
 		APP_STAGE: $app.stage,

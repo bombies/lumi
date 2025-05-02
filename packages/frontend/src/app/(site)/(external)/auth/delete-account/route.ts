@@ -1,6 +1,6 @@
-import { redirect } from 'next/navigation';
-import { NextRequest } from 'next/server';
+import type { NextRequest } from 'next/server';
 import { deleteUser } from '@lumi/core/users/users.service';
+import { redirect } from 'next/navigation';
 
 export async function GET(request: NextRequest) {
 	const { searchParams } = new URL(request.url);

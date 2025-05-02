@@ -1,9 +1,10 @@
 'use client';
 
-import { createContext, FC, PropsWithChildren, useContext, useMemo, useState } from 'react';
-import { Moment, RelationshipMomentTag } from '@lumi/core/moments/moment.types';
-
+import type { Moment, RelationshipMomentTag } from '@lumi/core/moments/moment.types';
+import type { FC, PropsWithChildren } from 'react';
 import { GetMomentsForRelationshipTag, GetRelationshipMomentTags } from '@/hooks/trpc/moment-hooks';
+
+import { createContext, use, useMemo, useState } from 'react';
 
 type TaggedMomentsProviderData = {
 	search: {
@@ -33,7 +34,7 @@ type TaggedMomentsProviderData = {
 const TaggedMomentsContext = createContext<TaggedMomentsProviderData | undefined>(undefined);
 
 export const useTaggedMomentsData = () => {
-	const context = useContext(TaggedMomentsContext);
+	const context = use(TaggedMomentsContext);
 	if (!context) throw new Error('useTaggedMomentsData must be used within a TaggedMomentsProvider');
 	return context;
 };

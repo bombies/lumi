@@ -1,8 +1,8 @@
 'use client';
 
-import { useCallback, useState } from 'react';
-import { DefaultError, UseMutateAsyncFunction } from '@tanstack/react-query';
+import type { DefaultError, UseMutateAsyncFunction } from '@tanstack/react-query';
 import axios from 'axios';
+import { useCallback, useState } from 'react';
 
 export const useSingleMediaUploader = <
 	TData = unknown,
@@ -38,7 +38,7 @@ export const useSingleMediaUploader = <
 
 				await axios
 					.put(uploadUrl, file, {
-						onUploadProgress: progressEvent => {
+						onUploadProgress: (progressEvent) => {
 							if (!progressEvent.total) return;
 							const progress = Math.round((progressEvent.loaded / progressEvent.total) * 100);
 							setCurrentProgress(progress);
@@ -47,8 +47,6 @@ export const useSingleMediaUploader = <
 					.finally(() => setIsUploading(false));
 
 				return `${objectKey}.${fileExtension}`;
-			} catch (error) {
-				throw error;
 			} finally {
 				setIsUploading(false);
 			}

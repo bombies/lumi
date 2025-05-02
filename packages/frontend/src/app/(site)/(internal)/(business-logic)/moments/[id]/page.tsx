@@ -1,12 +1,12 @@
-import { FC } from 'react';
-import { notFound } from 'next/navigation';
+import type { AsyncParams } from '@/lib/types';
+import type { FC } from 'react';
+import { getServerSession } from '@/lib/better-auth/auth-actions';
 import { getMomentDetailsById } from '@lumi/core/moments/moment.service';
 import { getUserById } from '@lumi/core/users/users.service';
 import Player from 'next-video/player';
-import MediaThemeInstaplay from 'player.style/instaplay/react';
 
-import { getServerSession } from '@/lib/better-auth/auth-actions';
-import { AsyncParams } from '@/lib/types';
+import { notFound } from 'next/navigation';
+import MediaThemeInstaplay from 'player.style/instaplay/react';
 import MomentDetailsContainer from './components/moment-details-container';
 
 type Props = AsyncParams<{ id: string }>;
@@ -28,7 +28,6 @@ const MomentViewerPage: FC<Props> = async ({ params }) => {
 						className="aspect-[9/16] h-[calc(100vh-60px-70.4px)]"
 						autoPlay
 						theme={MediaThemeInstaplay}
-						autoFocus={false}
 						loop
 						playsInline
 					/>

@@ -1,10 +1,11 @@
 'use client';
 
-import { FC, useMemo } from 'react';
-import { Track } from '@spotify/web-api-ts-sdk';
+import type { Track } from '@spotify/web-api-ts-sdk';
+import type { FC } from 'react';
+import Image from '@/components/ui/image';
 import moment from 'moment';
 
-import Image from '@/components/ui/image';
+import { useMemo } from 'react';
 
 type Props = {
 	track: Track;
@@ -27,7 +28,8 @@ const TrackSearchResult: FC<Props> = ({ track, onClick }) => {
 		};
 	}, [track.album.images, track.album.name, track.artists, track.duration_ms, track.name]);
 	return (
-		<div
+		<button
+			type="button"
 			onClick={onClick}
 			className="flex w-full justify-between gap-x-3 items-center hover:bg-white/20 p-2 rounded-md cursor-pointer"
 		>
@@ -53,7 +55,7 @@ const TrackSearchResult: FC<Props> = ({ track, onClick }) => {
 				</div>
 			</div>
 			<p className="text-xs">{moment(track.duration_ms).format('mm:ss')}</p>
-		</div>
+		</button>
 	);
 };
 
