@@ -25,13 +25,13 @@ export const trpc = new sst.aws.Function('Trpc', {
 	url: $dev
 		? true
 		: {
-				route: router && {
-					router,
-					domain: apiDNS,
+				router: router && {
+					instance: router,
+					domain: apiDNS
 				},
-				// cors: {
-				// 	allowOrigins: [`https://${webDNS}`],
-				// },
+				cors: {
+					allowOrigins: [`https://${webDNS}`],
+				},
 			},
 	runtime: 'nodejs22.x',
 	nodejs: {

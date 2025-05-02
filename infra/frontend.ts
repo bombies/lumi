@@ -38,12 +38,9 @@ export const frontend = new sst.aws.Nextjs('Frontend', {
 		runtime: 'nodejs22.x',
 		install: ['sharp'],
 	},
-	route:
-		!$dev && router
-			? {
-					router,
-				}
-			: undefined,
+	router: router && {
+		instance: router,
+	},
 	openNextVersion: '3.5.6',
 	warm: $app.stage === 'production' ? 5 : 0,
 	link: [
