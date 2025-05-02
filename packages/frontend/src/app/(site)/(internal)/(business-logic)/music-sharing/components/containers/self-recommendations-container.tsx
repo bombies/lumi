@@ -1,10 +1,11 @@
 'use client';
 
-import { FC, useMemo } from 'react';
-
+import type { FC } from 'react';
 import InfiniteLoader from '@/components/ui/infinite-loader';
+
 import { Separator } from '@/components/ui/separator';
 import { GetSongRecommendations } from '@/hooks/trpc/music-sharing-hooks';
+import { useMemo } from 'react';
 import RecommendedTrack from '../tracks/recommended-track';
 import TrackSearchResultSkeleton from '../tracks/track-search-result-skeleton';
 
@@ -28,24 +29,28 @@ const SelfRecommendationsContainer: FC = () => {
 	return (
 		<div className="space-y-6">
 			<Separator />
-			{songRecsLoading ? (
-				<div>
-					<div className="space-y-3">
-						<TrackSearchResultSkeleton />
-						<TrackSearchResultSkeleton />
-						<TrackSearchResultSkeleton />
-						<TrackSearchResultSkeleton />
-						<TrackSearchResultSkeleton />
-					</div>
-				</div>
-			) : recElems?.length ? (
-				<div className="space-y-3">
-					{recElems}
-					<InfiniteLoader hasMore={hasNextPage} fetchMore={fetchNextPage} loading={isFetchingNextPage} />
-				</div>
-			) : (
-				<p className="text-lg">You have not recommended new any songs...</p>
-			)}
+			{songRecsLoading
+				? (
+						<div>
+							<div className="space-y-3">
+								<TrackSearchResultSkeleton />
+								<TrackSearchResultSkeleton />
+								<TrackSearchResultSkeleton />
+								<TrackSearchResultSkeleton />
+								<TrackSearchResultSkeleton />
+							</div>
+						</div>
+					)
+				: recElems?.length
+					? (
+							<div className="space-y-3">
+								{recElems}
+								<InfiniteLoader hasMore={hasNextPage} fetchMore={fetchNextPage} loading={isFetchingNextPage} />
+							</div>
+						)
+					: (
+							<p className="text-lg">You have not recommended new any songs...</p>
+						)}
 		</div>
 	);
 };

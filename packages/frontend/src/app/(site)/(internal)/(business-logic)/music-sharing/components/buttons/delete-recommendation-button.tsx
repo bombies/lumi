@@ -1,13 +1,13 @@
 'use client';
 
-import { FC } from 'react';
-import TrashIcon from '@heroicons/react/24/solid/TrashIcon';
-import { SongRecommendation } from '@lumi/core/song-recommendations/song-recommendation.types';
-import { toast } from 'sonner';
-
+import type { SongRecommendation } from '@lumi/core/song-recommendations/song-recommendation.types';
+import type { FC } from 'react';
 import { Button } from '@/components/ui/button';
 import { DeleteSongRecommendation } from '@/hooks/trpc/music-sharing-hooks';
+
 import { getErrorMessage } from '@/lib/trpc/utils';
+import TrashIcon from '@heroicons/react/24/solid/TrashIcon';
+import { toast } from 'sonner';
 
 type Props = {
 	track: SongRecommendation;

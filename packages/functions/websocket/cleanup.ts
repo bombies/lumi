@@ -1,10 +1,11 @@
-import { User } from '@lumi/core/users/user.types';
+import type { User } from '@lumi/core/users/user.types';
+import type { DatabaseWebSocketHeartbeat } from '@lumi/core/websockets/websockets.types';
+import type { APIGatewayProxyEvent, Handler } from 'aws-lambda';
+import type { ISubscriptionMap } from 'mqtt';
 import { dynamo, updateItem } from '@lumi/core/utils/dynamo/dynamo.service';
 import { DynamoKey } from '@lumi/core/utils/dynamo/dynamo.types';
 import { createAsyncWebsocketConnection, emitAsyncWebsocketEvent } from '@lumi/core/websockets/websockets.service';
-import { DatabaseWebSocketHeartbeat, WebSocketSubTopic, WebSocketToken } from '@lumi/core/websockets/websockets.types';
-import { APIGatewayProxyEvent, Handler } from 'aws-lambda';
-import { ISubscriptionMap } from 'mqtt';
+import { WebSocketSubTopic, WebSocketToken } from '@lumi/core/websockets/websockets.types';
 import { Resource } from 'sst';
 
 const CONNECTION_TTL = 60 * 1000; // 1 minute

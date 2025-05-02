@@ -1,10 +1,9 @@
 'use client';
 
-import { FC, useState } from 'react';
-import { ContentPaths } from '@lumi/core/utils/s3/s3.service';
-
+import type { FC } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { MegaBytes } from '@/components/ui/file-upload/file-size';
+
 import FileUpload from '@/components/ui/file-upload/file-upload';
 import { DefaultImageMediaTypes } from '@/components/ui/file-upload/media-type';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -12,6 +11,8 @@ import UserAvatar from '@/components/ui/user-avatar';
 import { GetSelfUser, UpdateUser, UploadUserAvatar } from '@/hooks/trpc/user-hooks';
 import { deleteS3Object } from '@/lib/actions/s3-actions';
 import { cn } from '@/lib/utils';
+import { ContentPaths } from '@lumi/core/utils/s3/s3.service';
+import { useState } from 'react';
 
 const UserProfileSettings: FC = () => {
 	const { data: user, isLoading: userLoading } = GetSelfUser();
@@ -44,13 +45,13 @@ const UserProfileSettings: FC = () => {
 					maxFileSize={MegaBytes.from(25)}
 					isUploading={avatarUploading || isUpdatingUser}
 					serverUploadProgress={avatarUploadProgress}
-					onLocalUploadSuccess={file => {
+					onLocalUploadSuccess={(file) => {
 						setOptimisticAvatar(URL.createObjectURL(file));
 					}}
 					onFileRemove={() => {
 						setOptimisticAvatar(undefined);
 					}}
-					handleServerUpload={async file => {
+					handleServerUpload={async (file) => {
 						try {
 							const objectKey = await uploadAvatar(file, {});
 
@@ -84,19 +85,23 @@ const UserProfileSettings: FC = () => {
 				</FileUpload>
 
 				<div className="space-y-1">
-					{userLoading ? (
-						<>
-							<Skeleton className="w-36 h-6" />
-							<Skeleton className="w-48 h-4" />
-						</>
-					) : (
-						<>
-							<h3 className="text-xl font-medium text-center tablet:text-left">
-								{user!.firstName} {user!.lastName}
-							</h3>
-							<p className="text-center tablet:text-left">{user!.email}</p>
-						</>
-					)}
+					{userLoading
+						? (
+								<>
+									<Skeleton className="w-36 h-6" />
+									<Skeleton className="w-48 h-4" />
+								</>
+							)
+						: (
+								<>
+									<h3 className="text-xl font-medium text-center tablet:text-left">
+										{user!.firstName}
+										{' '}
+										{user!.lastName}
+									</h3>
+									<p className="text-center tablet:text-left">{user!.email}</p>
+								</>
+							)}
 				</div>
 			</CardContent>
 		</Card>

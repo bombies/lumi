@@ -1,7 +1,32 @@
+import type {
+	DatabaseMoment,
+	DatabaseMomentMessage,
+	DatabaseMomentTag,
+	DatabaseRelationshipMomentTag,
+	Moment,
+	MomentMessage,
+	MomentTag,
+	RelationshipMomentTag,
+} from './moment.types';
+import type {
+	CreateMomentDetailsDto,
+	CreateMomentMessageDto,
+	CreateMomentTagDto,
+	CreateRelationshipMomentTagDto,
+	DeleteMomentTagDto,
+	GetInfiniteMomentMessagesDto,
+	GetInfiniteMomentsDto,
+	GetMomentsByTagDto,
+	GetMomentUploadUrlDto,
+	GetRelationshipMomentTagsDto,
+	SearchMomentsDto,
+	UpdateMomentDetailsDto,
+	UpdateMomentMessageDto,
+} from './moments.dto';
 import { TRPCError } from '@trpc/server';
+
 import mime from 'mime';
 import { Resource } from 'sst';
-
 import { buildInfiniteData } from '../types/infinite-data.dto';
 import {
 	batchGetItems,
@@ -17,30 +42,6 @@ import { DynamoKey, EntityType } from '../utils/dynamo/dynamo.types';
 import { ContentPaths, StorageClient } from '../utils/s3/s3.service';
 import { chunkArray, getUUID } from '../utils/utils';
 import { attachUrlsToMoment } from './moment.helpers';
-import {
-	DatabaseMoment,
-	DatabaseMomentMessage,
-	DatabaseMomentTag,
-	DatabaseRelationshipMomentTag,
-	Moment,
-	MomentMessage,
-	MomentTag,
-	RelationshipMomentTag,
-} from './moment.types';
-import {
-	CreateMomentDetailsDto,
-	CreateMomentMessageDto,
-	CreateMomentTagDto,
-	CreateRelationshipMomentTagDto,
-	DeleteMomentTagDto,
-	GetInfiniteMomentMessagesDto,
-	GetInfiniteMomentsDto,
-	GetMomentUploadUrlDto,
-	GetMomentsByTagDto,
-	GetRelationshipMomentTagsDto,
-	SearchMomentsDto,
-	UpdateMomentDetailsDto,
-} from './moments.dto';
 
 const cleanMomentTitle = (title: string) => {
 	return title.replace(/\s{2,}/g, ' ');
@@ -199,13 +200,13 @@ export const searchMoments = async (relationshipId: string, { query, limit, curs
 
 	// De-duplicate moments
 	const momentMap = new Map<string, Moment>();
-	moments.data.forEach(moment => {
+	moments.data.forEach((moment) => {
 		if (!momentMap.has(moment.id)) {
 			momentMap.set(moment.id, moment);
 		}
 	});
 
-	tagMoments.data.forEach(moment => {
+	tagMoments.data.forEach((moment) => {
 		if (!momentMap.has(moment.id)) {
 			momentMap.set(moment.id, moment);
 		}
@@ -283,8 +284,8 @@ export const deleteMomentDetails = async (id: string) => {
 	return deleteItem(DynamoKey.moment.pk(id), DynamoKey.moment.sk(id));
 };
 
-export const createMomentMessage = async (userId: string, dto: CreateMomentMessageDto) => {
-	const id = getUUID();
+export const createMomentMessage = async (userId: string, { id: messageId, ...dto }: CreateMomentMessageDto) => {
+	const id = messageId ?? getUUID();
 	const timestamp = dto.timestamp ?? new Date().toISOString();
 	const message: MomentMessage = {
 		id,
@@ -299,6 +300,7 @@ export const createMomentMessage = async (userId: string, dto: CreateMomentMessa
 		gsi1pk: DynamoKey.momentMessage.gsi1pk(dto.momentId),
 		gsi1sk: DynamoKey.momentMessage.gsi1sk(timestamp),
 		...message,
+		state: 'delivered',
 		entityType: EntityType.MOMENT_MESSAGE,
 	});
 };
@@ -322,7 +324,26 @@ export const getMessagesForMoment = async ({ momentId, limit, cursor, order }: G
 	});
 };
 
+export const updateMomentMessage = ({ messageId: id, ...dto }: UpdateMomentMessageDto) => {
+	return updateItem<MomentMessage>({
+		pk: DynamoKey.momentMessage.pk(id),
+		sk: DynamoKey.momentMessage.sk(id),
+		update: { ...dto, updatedAt: dto.content ? new Date().toISOString() : undefined },
+	});
+};
+
 export const deleteMomentMessage = async (id: string) => {
+	return updateItem<MomentMessage>({
+		pk: DynamoKey.momentMessage.pk(id),
+		sk: DynamoKey.momentMessage.sk(id),
+		update: {
+			content: '[deleted]',
+			isDeleted: true,
+		},
+	});
+};
+
+export const hardDeleteMomentMessage = async (id: string) => {
 	return deleteItem(DynamoKey.momentMessage.pk(id), DynamoKey.momentMessage.sk(id));
 };
 
@@ -507,7 +528,7 @@ export const getMomentUploadUrl = async (
 ) => {
 	const storageBucket = new StorageClient(Resource.ContentBucket.name);
 	return storageBucket.getSignedPutUrl(
-		ContentPaths.relationshipMoments(relationshipId, objectKey + '.' + fileExtension),
+		ContentPaths.relationshipMoments(relationshipId, `${objectKey}.${fileExtension}`),
 		{
 			expires: 60 * 60,
 			contentType: fileExtension && (mime.getType(fileExtension) ?? undefined),

@@ -1,9 +1,10 @@
 'use server';
 
-import { headers } from 'next/headers';
 import { BetterAuthDatabaseUser } from '@lumi/core/auth/better-auth.types';
 
 import { auth, db } from '@/auth';
+
+import { headers } from 'next/headers';
 
 export type Session = Awaited<ReturnType<typeof auth.api.getSession>>;
 

@@ -1,20 +1,20 @@
-import { TRPCError } from '@trpc/server';
-import mime from 'mime';
-import { Resource } from 'sst';
-
-import { deleteUserRelationship, getRelationshipForUser } from '../relationships/relationship.service';
-import { deleteItem, getItem, getItems, putItem, updateItem } from '../utils/dynamo/dynamo.service';
-import { DynamoKey, EntityType } from '../utils/dynamo/dynamo.types';
-import { ContentPaths, StorageClient } from '../utils/s3/s3.service';
-import { getUUID } from '../utils/utils';
-import { DatabaseUser, User } from './user.types';
-import {
+import type { DatabaseUser, User } from './user.types';
+import type {
 	CreateUserDto,
 	GetUserAvatarUploadUrlDto,
 	GetUsersByEmailDto,
 	GetUsersByUsernameDto,
 	UpdateUserDto,
 } from './users.dto';
+import { TRPCError } from '@trpc/server';
+
+import mime from 'mime';
+import { Resource } from 'sst';
+import { deleteUserRelationship } from '../relationships/relationship.service';
+import { deleteItem, getItem, getItems, putItem, updateItem } from '../utils/dynamo/dynamo.service';
+import { DynamoKey, EntityType } from '../utils/dynamo/dynamo.types';
+import { ContentPaths, StorageClient } from '../utils/s3/s3.service';
+import { getUUID } from '../utils/utils';
 
 type CreateUserArgs = {
 	sendOTP?: boolean;
@@ -197,7 +197,7 @@ export const getUserAvatarUploadUrl = async ({
 	userId: string;
 }) => {
 	const storageBucket = new StorageClient(Resource.ContentBucket.name);
-	return storageBucket.getSignedPutUrl(ContentPaths.userAvatar(userId, objectKey + '.' + fileExtension), {
+	return storageBucket.getSignedPutUrl(ContentPaths.userAvatar(userId, `${objectKey}.${fileExtension}`), {
 		expires: 5 * 60,
 		contentType: fileExtension && (mime.getType(fileExtension) ?? undefined),
 	});

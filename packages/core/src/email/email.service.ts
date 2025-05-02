@@ -1,11 +1,11 @@
+import type { ReactElement } from 'react';
 import { render } from '@react-email/components';
 import nodemailer from 'nodemailer';
-import { ReactElement } from 'react';
 import { Resource } from 'sst';
 
 export const mailTransporter = nodemailer.createTransport({
 	host: Resource.MailerHost.value,
-	port: parseInt(Resource.MailerPort.value),
+	port: Number.parseInt(Resource.MailerPort.value),
 	secure: true,
 	auth: {
 		user: Resource.MailerUser.value,

@@ -6,7 +6,7 @@ import { usePullToRefresh } from 'use-pull-to-refresh';
 import { useIsStandalone } from '../lib/hooks/useIsStandalone';
 
 const MAXIMUM_PULL_LENGTH = 240;
-const REFRESH_THRESHOLD = 80;
+const REFRESH_THRESHOLD = 60;
 
 export const PullRefresh = () => {
 	const isStandalone = useIsStandalone();

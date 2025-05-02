@@ -1,22 +1,25 @@
 'use client';
 
-import { createContext, PropsWithChildren, useContext, useEffect, useState } from 'react';
-import {
+import type {
 	ColumnDef,
 	ColumnFiltersState,
-	getCoreRowModel,
-	getFilteredRowModel,
-	getPaginationRowModel,
-	getSortedRowModel,
 	PaginationState,
 	Row,
 	RowData,
 	RowSelectionState,
 	SortingState,
 	Table,
-	useReactTable,
 	VisibilityState,
 } from '@tanstack/react-table';
+import type { PropsWithChildren } from 'react';
+import {
+	getCoreRowModel,
+	getFilteredRowModel,
+	getPaginationRowModel,
+	getSortedRowModel,
+	useReactTable,
+} from '@tanstack/react-table';
+import { createContext, use, useEffect, useState } from 'react';
 
 import { Checkbox } from '../checkbox';
 
@@ -34,7 +37,7 @@ type ManagedTableGlobals<T> = {
 const ManagedTableContext = createContext<ManagedTableGlobals<any> | undefined>(undefined);
 
 export const useManagedTableGlobals = <T,>() => {
-	const context = useContext(ManagedTableContext);
+	const context = use(ManagedTableContext);
 	if (context === undefined) throw new Error('useEasyTableGlobals must be used within a EasyTableProvider');
 	return context as ManagedTableGlobals<T>;
 };
@@ -93,8 +96,8 @@ export default function ManagedTableProvider<T extends { id: string }>({
 						return (
 							<Checkbox
 								checked={
-									table.getIsAllPageRowsSelected() ||
-									(table.getIsSomePageRowsSelected() && 'indeterminate')
+									table.getIsAllPageRowsSelected()
+									|| (table.getIsSomePageRowsSelected() && 'indeterminate')
 								}
 								onCheckedChange={value => table.toggleAllPageRowsSelected(!!value)}
 								aria-label="Select all"
@@ -145,7 +148,7 @@ export default function ManagedTableProvider<T extends { id: string }>({
 	});
 
 	return (
-		<ManagedTableContext.Provider
+		<ManagedTableContext
 			value={{
 				data,
 				table,
@@ -158,6 +161,6 @@ export default function ManagedTableProvider<T extends { id: string }>({
 			}}
 		>
 			{children}
-		</ManagedTableContext.Provider>
+		</ManagedTableContext>
 	);
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { FC } from 'react';
+import type { FC } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { useRelationship } from '../relationship-provder';

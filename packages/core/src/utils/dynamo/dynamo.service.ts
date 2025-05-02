@@ -1,14 +1,17 @@
-import { DynamoDBClient, DynamoDBClientConfig, TransactWriteItemsInput, Update } from '@aws-sdk/client-dynamodb';
-import {
+import type { DynamoDBClientConfig, TransactWriteItemsInput, Update } from '@aws-sdk/client-dynamodb';
+import type {
 	BatchWriteCommandInput,
-	DynamoDBDocument,
 	QueryCommandInput,
 	TransactWriteCommandInput,
 	UpdateCommandInput,
 } from '@aws-sdk/lib-dynamodb';
-import { TRPCError } from '@trpc/server';
+import type { Nullable, ValueType } from '../../types/util.types';
+import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
+import {
+	DynamoDBDocument,
+} from '@aws-sdk/lib-dynamodb';
 
-import { Nullable, ValueType } from '../../types/util.types';
+import { TRPCError } from '@trpc/server';
 import { chunkArray } from '../utils';
 
 const client = new DynamoDBClient();
@@ -37,10 +40,10 @@ export const buildDynamo = (args?: DynamoDBClientConfig) =>
 export function getDynamicUpdateStatements<T extends object = any>(attributes: Partial<Nullable<T>>) {
 	const setStatements: string[] = [];
 	const removeStatements: string[] = [];
-	let expressionAttributeValues: Record<string, unknown> | undefined = undefined;
-	let expressionAttributeNames: Record<string, string> | undefined = undefined;
+	let expressionAttributeValues: Record<string, unknown> | undefined;
+	let expressionAttributeNames: Record<string, string> | undefined;
 
-	for (let [key, value] of Object.entries(attributes)) {
+	for (const [key, value] of Object.entries(attributes)) {
 		if (value !== undefined && value !== null) {
 			setStatements.push(`${setStatements.length === 0 ? 'SET ' : ''}#${key} = :${key}`);
 
@@ -79,7 +82,7 @@ export async function queryWithPaginationExhaustion<T>(params: QueryCommandInput
 	return results;
 }
 
-export function useProjection<T>(fields: (keyof T)[]) {
+export function getProjectionFields<T>(fields: (keyof T)[]) {
 	return {
 		projectionExpression: getProjectExpression(fields),
 		projectionExpressionNames: getProjectionExpressionNames(fields),
@@ -94,7 +97,7 @@ export function getProjectExpression<T>(fields: (keyof T)[]) {
 
 export function getProjectionExpressionNames<T>(fields: (keyof T)[]) {
 	const expressionAttributeNames: Record<string, string> = {};
-	fields.forEach(field => {
+	fields.forEach((field) => {
 		expressionAttributeNames[`#${String(field)}`] = field as string;
 	});
 
@@ -219,7 +222,7 @@ export async function getItems<T extends Record<string, any>>({
 }: GetItemsParams<T>) {
 	const keyNames = queryExpression.expression.match(/#(\w+)/g)?.map(key => key.slice(1));
 	const filterKeyNames = queryExpression.filter?.expression.match(/#(\w+)/g)?.map(key => key.slice(1));
-	const { projectionExpression, projectionExpressionNames } = useProjection(projectedAttributes ?? []);
+	const { projectionExpression, projectionExpressionNames } = getProjectionFields(projectedAttributes ?? []);
 	const params: QueryCommandInput = {
 		TableName: table ?? process.env.TABLE_NAME,
 		IndexName: index,
@@ -263,8 +266,8 @@ type UpdateItemParams<T> = {
 };
 
 function getUpdateParams<T extends Record<string, any>>({ pk, sk, update }: UpdateItemParams<T>): UpdateCommandInput {
-	const { updateStatements, expressionAttributeValues, expressionAttributeNames } =
-		getDynamicUpdateStatements<T>(update);
+	const { updateStatements, expressionAttributeValues, expressionAttributeNames }
+		= getDynamicUpdateStatements<T>(update);
 
 	return {
 		TableName: process.env.TABLE_NAME,
@@ -289,7 +292,7 @@ export async function updateItem<T extends Record<string, any>>({ pk, sk, update
 }
 
 export async function updateMany<T extends Record<string, any>>(items: UpdateItemParams<T>[]) {
-	const requestParams = items.map<NonNullable<TransactWriteItemsInput['TransactItems']>[0]>(item => {
+	const requestParams = items.map<NonNullable<TransactWriteItemsInput['TransactItems']>[0]>((item) => {
 		const params = getUpdateParams(item);
 		return { Update: params as Update };
 	});
@@ -322,7 +325,7 @@ export async function deleteItem(pk: string, sk: string) {
 
 export async function deleteManyItems(items: { pk: string; sk: string }[]) {
 	return Promise.all(
-		chunkArray(items, 25).map(async chunk => {
+		chunkArray(items, 25).map(async (chunk) => {
 			return await dynamo.batchWrite({
 				RequestItems: {
 					[process.env.TABLE_NAME!]: chunk.map(record => ({
@@ -341,23 +344,23 @@ export async function deleteManyItems(items: { pk: string; sk: string }[]) {
 
 type TransactionParams = { table?: string } & (
 	| {
-			put: {
-				item: Record<string, any>;
-			};
-	  }
+		put: {
+			item: Record<string, any>;
+		};
+	}
 	| {
-			deleteItem: {
-				pk: string;
-				sk: string;
-			};
-	  }
+		deleteItem: {
+			pk: string;
+			sk: string;
+		};
+	}
 	| {
-			update: {
-				pk: string;
-				sk: string;
-				update: Partial<Record<string, any>>;
-			};
-	  }
+		update: {
+			pk: string;
+			sk: string;
+			update: Partial<Record<string, any>>;
+		};
+	}
 );
 
 export async function writeTransaction(...params: TransactionParams[]) {
@@ -384,8 +387,8 @@ export async function writeTransaction(...params: TransactionParams[]) {
 						},
 					});
 				} else if ('update' in param) {
-					const { updateStatements, expressionAttributeValues, expressionAttributeNames } =
-						getDynamicUpdateStatements(param.update.update);
+					const { updateStatements, expressionAttributeValues, expressionAttributeNames }
+						= getDynamicUpdateStatements(param.update.update);
 
 					acc.push({
 						Update: {
@@ -421,16 +424,16 @@ type BatchWriteParams = {
 	table?: string;
 } & (
 	| {
-			deleteItem: {
-				pk: string;
-				sk: string;
-			};
-	  }
+		deleteItem: {
+			pk: string;
+			sk: string;
+		};
+	}
 	| {
-			put: {
-				item: Record<string, any>;
-			};
-	  }
+		put: {
+			item: Record<string, any>;
+		};
+	}
 );
 
 export async function batchWrite(...params: BatchWriteParams[]) {

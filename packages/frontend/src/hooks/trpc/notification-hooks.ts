@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouteInvalidation } from '@/lib/hooks/useRouteInvalidation';
-import { trpc } from '@/lib/trpc/client';
+import { trpc } from '@/lib/trpc/trpc-react';
 
 export const GetNotifications = (opts?: { filter?: 'read' | 'unread'; limit?: number }) =>
 	opts?.filter

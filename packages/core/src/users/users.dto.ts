@@ -4,7 +4,7 @@ import { createInfiniteDataDto } from '../types/infinite-data.dto';
 import { getUploadUrlDto } from '../types/upload.dto';
 
 export const USERNAME_REGEX = /^[a-z][a-z0-9_]{2,31}/g;
-export const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_])[A-Za-z\d\W_]{8,255}$/g;
+export const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_])[\s\S]{8,255}$/g;
 export const FIRST_NAME_REGEX = /^\p{L}[\p{L}\p{M}'-]{0,49}$/u;
 export const LAST_NAME_REGEX = /^\p{L}[\p{L}\p{M}.'\-\s]{0,79}$/u;
 

@@ -38,7 +38,7 @@ export const notificationsRouter = router({
 				}),
 			),
 		)
-		.mutation(({ input: { notificationId, ...input }, ctx: { user } }) =>
+		.mutation(({ input: { notificationId, ...input } }) =>
 			updateNotification(notificationId, input),
 		),
 

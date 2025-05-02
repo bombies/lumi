@@ -1,3 +1,4 @@
+import type { StreamingBlobPayloadInputTypes } from '@smithy/types';
 import {
 	DeleteObjectCommand,
 	DeleteObjectsCommand,
@@ -7,7 +8,6 @@ import {
 } from '@aws-sdk/client-s3';
 import { Upload } from '@aws-sdk/lib-storage';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
-import { StreamingBlobPayloadInputTypes } from '@smithy/types';
 
 import { substituteVariables } from '../utils';
 
@@ -26,7 +26,7 @@ export class StorageClient {
 			},
 		});
 
-		uploadClient.on('httpUploadProgress', progress => {
+		uploadClient.on('httpUploadProgress', (progress) => {
 			console.log(`Uploaded ${progress.loaded} of ${progress.total} bytes for ${key}`);
 		});
 
@@ -163,7 +163,7 @@ export class ContentPaths {
 
 	private static replaceVariables(path: string, variables: Record<string, string>, args?: ReplaceVariablesArgs) {
 		const val = substituteVariables(path, variables);
-		return `${args?.withHost ? process.env.CDN_URL + '/' : ''}${val}`;
+		return `${args?.withHost ? `${process.env.CDN_URL}/` : ''}${val}`;
 	}
 
 	static userAvatar(userId: string, file: string, args?: ReplaceVariablesArgs) {

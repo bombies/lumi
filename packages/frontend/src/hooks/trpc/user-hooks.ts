@@ -1,9 +1,9 @@
 'use client';
 
-import { skipToken } from '@tanstack/react-query';
-
 import { useRouteInvalidation } from '@/lib/hooks/useRouteInvalidation';
-import { trpc } from '@/lib/trpc/client';
+
+import { trpc } from '@/lib/trpc/trpc-react';
+import { skipToken } from '@tanstack/react-query';
 import { useSingleMediaUploader } from './utils/media-utils';
 
 export const UpdateUser = () => {

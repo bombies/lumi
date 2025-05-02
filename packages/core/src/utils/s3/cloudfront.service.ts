@@ -1,12 +1,11 @@
+import type { SignatureOptions } from 'aws-cloudfront-sign/dist/cjs/types';
 import cfSign from 'aws-cloudfront-sign';
-import { SignatureOptions } from 'aws-cloudfront-sign/dist/cjs/types';
-import { Resource } from 'sst';
 
 type SignCdnUrlArgs = Omit<SignatureOptions, 'keypairId' | 'privateKeyString' | 'privateKeyPath' | 'expireTime'> & {
 	/**
-	* The time in milliseconds the signed URL should last for.
+	 * The time in milliseconds the signed URL should last for.
 	@default 30 minutes.
-	*/
+	 */
 	expiresIn?: number;
 };
 

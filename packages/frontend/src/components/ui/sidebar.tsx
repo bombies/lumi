@@ -1,18 +1,19 @@
 'use client';
 
-import * as React from 'react';
-import { Slot } from '@radix-ui/react-slot';
-import { cva, VariantProps } from 'class-variance-authority';
-import { PanelLeftIcon } from 'lucide-react';
-
+import type { VariantProps } from 'class-variance-authority';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
+
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
+import { Slot } from '@radix-ui/react-slot';
+import { cva } from 'class-variance-authority';
+import { PanelLeftIcon } from 'lucide-react';
+import * as React from 'react';
 
 const SIDEBAR_COOKIE_NAME = 'sidebar_state';
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
@@ -21,7 +22,7 @@ const SIDEBAR_WIDTH_MOBILE = '18rem';
 const SIDEBAR_WIDTH_ICON = '3rem';
 const SIDEBAR_KEYBOARD_SHORTCUT = 'b';
 
-type SidebarContext = {
+type SidebarContextData = {
 	state: 'expanded' | 'collapsed';
 	open: boolean;
 	setOpen: (open: boolean) => void;
@@ -31,10 +32,10 @@ type SidebarContext = {
 	toggleSidebar: () => void;
 };
 
-const SidebarContext = React.createContext<SidebarContext | null>(null);
+const SidebarContext = React.createContext<SidebarContextData | null>(null);
 
 function useSidebar() {
-	const context = React.useContext(SidebarContext);
+	const context = React.use(SidebarContext);
 	if (!context) {
 		throw new Error('useSidebar must be used within a SidebarProvider.');
 	}
@@ -72,6 +73,7 @@ function SidebarProvider({
 			}
 
 			// This sets the cookie to keep the sidebar state.
+			// eslint-disable-next-line react-hooks/react-compiler
 			document.cookie = `${SIDEBAR_COOKIE_NAME}=${openState}; path=/; max-age=${SIDEBAR_COOKIE_MAX_AGE}`;
 		},
 		[setOpenProp, open],
@@ -99,7 +101,7 @@ function SidebarProvider({
 	// This makes it easier to style the sidebar with Tailwind classes.
 	const state = open ? 'expanded' : 'collapsed';
 
-	const contextValue = React.useMemo<SidebarContext>(
+	const contextValue = React.useMemo<SidebarContextData>(
 		() => ({
 			state,
 			open,
@@ -113,7 +115,7 @@ function SidebarProvider({
 	);
 
 	return (
-		<SidebarContext.Provider value={contextValue}>
+		<SidebarContext value={contextValue}>
 			<TooltipProvider delayDuration={0}>
 				<div
 					data-slot="sidebar-wrapper"
@@ -133,7 +135,7 @@ function SidebarProvider({
 					{children}
 				</div>
 			</TooltipProvider>
-		</SidebarContext.Provider>
+		</SidebarContext>
 	);
 }
 
@@ -243,7 +245,7 @@ function SidebarTrigger({ className, onClick, ...props }: React.ComponentProps<t
 			variant="ghost"
 			size="icon"
 			className={cn('h-7 w-7', className)}
-			onClick={event => {
+			onClick={(event) => {
 				onClick?.(event);
 				toggleSidebar();
 			}}
@@ -530,8 +532,8 @@ function SidebarMenuAction({
 				'peer-data-[size=default]/menu-button:top-1.5',
 				'peer-data-[size=lg]/menu-button:top-2.5',
 				'group-data-[collapsible=icon]:hidden',
-				showOnHover &&
-					'peer-data-[active=true]/menu-button:text-sidebar-accent-foreground group-focus-within/menu-item:opacity-100 group-hover/menu-item:opacity-100 data-[state=open]:opacity-100 md:opacity-0',
+				showOnHover
+				&& 'peer-data-[active=true]/menu-button:text-sidebar-accent-foreground group-focus-within/menu-item:opacity-100 group-hover/menu-item:opacity-100 data-[state=open]:opacity-100 md:opacity-0',
 				className,
 			)}
 			{...props}

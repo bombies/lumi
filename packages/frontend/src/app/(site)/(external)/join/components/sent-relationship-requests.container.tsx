@@ -1,17 +1,18 @@
 'use client';
 
-import { FC, useMemo } from 'react';
-import { TrashIcon } from '@heroicons/react/24/solid';
-import { RelationshipRequest } from '@lumi/core/relationships/relationship.types';
-import { User } from '@lumi/core/users/user.types';
-import { toast } from 'sonner';
-
+import type { RelationshipRequest } from '@lumi/core/relationships/relationship.types';
+import type { User } from '@lumi/core/users/user.types';
+import type { FC } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+
 import { useRouteInvalidation } from '@/lib/hooks/useRouteInvalidation';
-import { trpc } from '@/lib/trpc/client';
+import { trpc } from '@/lib/trpc/trpc-react';
 import { getErrorMessage } from '@/lib/trpc/utils';
+import { TrashIcon } from '@heroicons/react/24/solid';
+import { useMemo } from 'react';
+import { toast } from 'sonner';
 
 const FetchSentRequests = () =>
 	trpc.relationships.getSentRelationshipRequests.useInfiniteQuery(
@@ -83,7 +84,7 @@ const SentRelationshipRequestsContainer: FC = () => {
 					request={req}
 					sender={otherUser}
 					disabled={isDeleting}
-					onDelete={async elReq => {
+					onDelete={async (elReq) => {
 						toast.promise(deleteRequest(elReq.id), {
 							loading: 'Deleting request...',
 							success() {
@@ -102,17 +103,19 @@ const SentRelationshipRequestsContainer: FC = () => {
 	return (
 		<Card>
 			<CardContent className="space-y-4">
-				{isFetchingRequests ? (
-					<>
-						<Skeleton className="w-full h-12 rounded-md" />
-						<Skeleton className="w-full h-12 rounded-md" />
-						<Skeleton className="w-full h-12 rounded-md" />
-						<Skeleton className="w-full h-12 rounded-md" />
-						<Skeleton className="w-full h-12 rounded-md" />
-					</>
-				) : (
-					<>{requestElements?.length ? requestElements : <p>You have sent no requests.</p>}</>
-				)}
+				{isFetchingRequests
+					? (
+							<>
+								<Skeleton className="w-full h-12 rounded-md" />
+								<Skeleton className="w-full h-12 rounded-md" />
+								<Skeleton className="w-full h-12 rounded-md" />
+								<Skeleton className="w-full h-12 rounded-md" />
+								<Skeleton className="w-full h-12 rounded-md" />
+							</>
+						)
+					: (
+							<>{requestElements?.length ? requestElements : <p>You have sent no requests.</p>}</>
+						)}
 			</CardContent>
 		</Card>
 	);

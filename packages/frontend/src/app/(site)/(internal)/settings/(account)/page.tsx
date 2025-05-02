@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import type { FC } from 'react';
 
 import SettingsSection from '../components/settings-section';
 import UserProfileSettings from './components/user-profile-settings';

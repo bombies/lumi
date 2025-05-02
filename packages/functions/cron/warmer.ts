@@ -1,6 +1,5 @@
+import type { APIGatewayProxyEvent, Handler } from 'aws-lambda';
 import { Lambda } from '@aws-sdk/client-lambda';
-import { APIGatewayProxyEvent, Handler } from 'aws-lambda';
-import { Resource } from 'sst';
 
 const lambda = new Lambda({
 	region: 'us-east-1',

@@ -1,11 +1,11 @@
 'use client';
 
-import * as React from 'react';
-import { Check, ChevronsUpDown } from 'lucide-react';
-
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+
 import { cn } from '@/lib/utils';
+import { Check, ChevronsUpDown } from 'lucide-react';
+import * as React from 'react';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from './command';
 import { Skeleton } from './skeleton';
 
@@ -64,10 +64,10 @@ export const Select: React.FC<SelectProps> = ({
 				.map((value, idx, arr) => {
 					const option = options.find(option => option.value === value);
 					return (
-						<>
+						<React.Fragment key={`${value}#${idx}`}>
 							{option?.display ?? option?.label ?? value}
 							{idx < arr.length - 1 && ', '}
-						</>
+						</React.Fragment>
 					);
 				})
 				.filter(Boolean),
@@ -102,38 +102,40 @@ export const Select: React.FC<SelectProps> = ({
 						typingEndDelay={300}
 					/>
 					<CommandList>
-						{optionsLoading ? (
-							<div className="space-y-2 p-2">
-								<Skeleton className="h-6 w-full" />
-								<Skeleton className="h-6 w-full" />
-								<Skeleton className="h-6 w-full" />
-								<Skeleton className="h-6 w-full" />
-								<Skeleton className="h-6 w-full" />
-							</div>
-						) : (
-							<>
-								<CommandEmpty>{emptyText}</CommandEmpty>
-								<CommandGroup>
-									{options.map(option => (
-										<CommandItem
-											key={option.value}
-											value={option.value}
-											onSelect={() => handleSelect(option.value)}
-										>
-											{option.label}
-											<Check
-												className={cn(
-													'ml-auto h-4 w-4',
-													selected.includes(option.value) ? 'opacity-100' : 'opacity-0',
-												)}
-											/>
-										</CommandItem>
-									))}
-									{itemsFooter}
-								</CommandGroup>
-								{listFooter && <div className="border-t border-t-border px-2 py-2">{listFooter}</div>}
-							</>
-						)}
+						{optionsLoading
+							? (
+									<div className="space-y-2 p-2">
+										<Skeleton className="h-6 w-full" />
+										<Skeleton className="h-6 w-full" />
+										<Skeleton className="h-6 w-full" />
+										<Skeleton className="h-6 w-full" />
+										<Skeleton className="h-6 w-full" />
+									</div>
+								)
+							: (
+									<>
+										<CommandEmpty>{emptyText}</CommandEmpty>
+										<CommandGroup>
+											{options.map(option => (
+												<CommandItem
+													key={option.value}
+													value={option.value}
+													onSelect={() => handleSelect(option.value)}
+												>
+													{option.label}
+													<Check
+														className={cn(
+															'ml-auto h-4 w-4',
+															selected.includes(option.value) ? 'opacity-100' : 'opacity-0',
+														)}
+													/>
+												</CommandItem>
+											))}
+											{itemsFooter}
+										</CommandGroup>
+										{listFooter && <div className="border-t border-t-border px-2 py-2">{listFooter}</div>}
+									</>
+								)}
 					</CommandList>
 				</Command>
 			</PopoverContent>

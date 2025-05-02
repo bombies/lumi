@@ -1,15 +1,15 @@
+import type { DynamoDBStreamEvent, Handler } from 'aws-lambda';
+import { spawnSync } from 'node:child_process';
+import { promises as fs } from 'node:fs';
+import path from 'node:path';
 import { updateMomentDetails } from '@lumi/core/moments/moment.service';
 import { ContentPaths, StorageClient } from '@lumi/core/utils/s3/s3.service';
-import { DynamoDBStreamEvent, Handler } from 'aws-lambda';
-import { spawnSync } from 'child_process';
 import ffmpeg from 'ffmpeg-static';
-import { promises as fs } from 'fs';
-import path from 'path';
 import { Resource } from 'sst';
 
 const storageBucket = new StorageClient(Resource.ContentBucket.name);
 
-export const handler: Handler<DynamoDBStreamEvent> = async event => {
+export const handler: Handler<DynamoDBStreamEvent> = async (event) => {
 	for (const record of event.Records) {
 		console.log('Received INSERT event for moment details record!');
 		if (!ffmpeg) {

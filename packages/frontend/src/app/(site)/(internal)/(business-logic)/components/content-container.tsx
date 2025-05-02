@@ -1,16 +1,17 @@
 'use client';
 
-import { FC, PropsWithChildren, useMemo } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import { cn } from '@/lib/utils';
 import { usePathname } from 'next/navigation';
 
-import { cn } from '@/lib/utils';
+import { useMemo } from 'react';
 
 const ContentContainer: FC<PropsWithChildren> = ({ children }) => {
 	const pathname = usePathname();
 	const isMomentView = useMemo(
 		() =>
-			!!pathname &&
-			new RegExp(/^\/moments\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/g).test(pathname),
+			!!pathname
+			&& /^\/moments\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(pathname),
 		[pathname],
 	);
 	return (

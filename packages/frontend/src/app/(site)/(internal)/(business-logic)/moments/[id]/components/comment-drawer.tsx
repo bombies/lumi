@@ -1,14 +1,15 @@
 'use client';
 
-import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ChatBubbleOvalLeftEllipsisIcon, PaperAirplaneIcon } from '@heroicons/react/24/solid';
-import { Moment, MomentMessage } from '@lumi/core/moments/moment.types';
-import { WebSocketEventHandler } from '@lumi/core/websockets/websockets.types';
-import { AnimatePresence, motion, Variants } from 'motion/react';
-import { SubmitHandler } from 'react-hook-form';
-import { z } from 'zod';
-
+import type { Moment, MomentMessage } from '@lumi/core/moments/moment.types';
+import type { WebSocketEventHandler } from '@lumi/core/websockets/websockets.types';
+import type { Variants } from 'motion/react';
+import type { FC } from 'react';
+import type { SubmitHandler } from 'react-hook-form';
+import MomentMessageGroup from '@/app/(site)/(internal)/(business-logic)/moments/[id]/components/moment-message-group';
+import MomentMessageGroupProvider from '@/app/(site)/(internal)/(business-logic)/moments/[id]/components/moment-message-group-provider';
+import MomentMessageGroupSkeleton from '@/app/(site)/(internal)/(business-logic)/moments/[id]/components/moment-message-group-skeleton';
 import { useRelationship } from '@/components/providers/relationships/relationship-provder';
+
 import { WebsocketTopic } from '@/components/providers/web-sockets/topics';
 import { useWebSocket } from '@/components/providers/web-sockets/web-socket-provider';
 import { Button } from '@/components/ui/button';
@@ -16,11 +17,15 @@ import { Drawer, DrawerContent, DrawerTrigger } from '@/components/ui/drawer';
 import EasyForm from '@/components/ui/form-extras/easy-form';
 import EasyFormField from '@/components/ui/form-extras/easy-form-field';
 import InfiniteLoader from '@/components/ui/infinite-loader';
-import Spinner from '@/components/ui/spinner';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { Textarea } from '@/components/ui/textarea';
 import UserAvatar from '@/components/ui/user-avatar';
 import { GetMessagesForMoment } from '@/hooks/trpc/moment-hooks';
-import MomentMessageContainer from './moment-message-container';
+import { logger } from '@/lib/logger';
+import { ChatBubbleOvalLeftEllipsisIcon, PaperAirplaneIcon } from '@heroicons/react/24/solid';
+import { AnimatePresence, motion } from 'motion/react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { z } from 'zod';
 
 type Props = {
 	moment: Moment;
@@ -55,67 +60,128 @@ const CommentDrawer: FC<Props> = ({ moment }) => {
 	const { self, partner, sendNotificationToPartner, selfState } = useRelationship();
 	const { addEventHandler, removeEventHandler, emitEvent } = useWebSocket();
 	const [drawerOpen, setDrawerOpen] = useState(false);
-	const [messages, setMessages] = useState<MomentMessage[]>([]);
+	const [newMessages, setNewMessages] = useState<MomentMessage[]>([]);
 	const [partnerTyping, setPartnerTyping] = useState(false);
+	const [selfTyping, setSelfTyping] = useState(false);
 	const submitButtonRef = useRef<HTMLButtonElement>(null);
 
-	const addMessage = useCallback((message: MomentMessage) => {
-		setMessages(prev => [...prev, message]);
-	}, []);
-
-	const addMessasgeHistory = useCallback((messages: MomentMessage[]) => {
-		setMessages(prev => [...messages, ...prev]);
+	const scrollAreaRef = useRef<HTMLDivElement>(null);
+	const scrollToBottom = useCallback((onSuccess?: () => void) => {
+		const viewport = scrollAreaRef.current?.querySelector('[data-radix-scroll-area-viewport]');
+		if (viewport) {
+			logger.debug('Viewport found, scrolling to bottom!');
+			viewport.scrollTop = viewport.scrollHeight;
+			onSuccess?.();
+		}
 	}, []);
 
 	useEffect(() => {
-		if (!messagePages) return;
-		const mostRecentPage = messagePages.pages[messagePages.pages.length - 1];
-		addMessasgeHistory(mostRecentPage.data.toReversed());
-	}, [addMessasgeHistory, messagePages]);
+		if (!drawerOpen) return;
 
-	const messageElements = useMemo(() => {
-		const groupedMessages: [string, MomentMessage[]][] = [];
+		const observer = new MutationObserver(() => {
+			scrollToBottom(() => {
+				observer.disconnect(); // Stop observing once done
+				logger.debug('Scroll area viewport was found and scroll was completed!');
+			});
+		});
 
-		for (let idx = 0; idx < messages.length; idx++) {
-			const latestGroup: [string, MomentMessage[]] | undefined = groupedMessages[groupedMessages.length - 1];
+		logger.debug('Observing for scroll area changes...');
+		observer.observe(document.body, { childList: true, subtree: true });
 
-			if (!latestGroup) {
-				groupedMessages.push([messages[idx].senderId, [messages[idx]]]);
-				continue;
+		return () => observer.disconnect();
+	}, [drawerOpen, scrollToBottom]);
+
+	const fetchedMessages = useMemo(() => {
+		if (!messagePages) return [];
+		return messagePages.pages.flatMap(page => page.data).reverse();
+	}, [messagePages]);
+
+	const fetchedMessageIds = useMemo(() => {
+		return new Set(fetchedMessages.map(msg => msg.id));
+	}, [fetchedMessages]);
+
+	const allMessages = useMemo(() => {
+		const uniqueNewMessages = newMessages.filter(newMsg => !fetchedMessageIds.has(newMsg.id));
+		return [...fetchedMessages, ...uniqueNewMessages];
+	}, [fetchedMessages, newMessages, fetchedMessageIds]);
+
+	const groupedMessages = useMemo(() => {
+		const messagesByDay = Object.groupBy(allMessages, (message) => {
+			const date = new Date(message.timestamp);
+			const epoch = new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
+			return epoch.toString();
+		});
+
+		const finalGroups: Record<string, [string, MomentMessage[]][]> = {};
+		for (const [date, messages] of Object.entries(messagesByDay)) {
+			if (!messages) return;
+			const groupedMessages: [string, MomentMessage[]][] = [];
+
+			for (const message of messages) {
+				// Iterate over combined list
+				const latestGroup = groupedMessages[groupedMessages.length - 1];
+
+				if (!latestGroup || latestGroup[0] !== message.senderId) {
+					groupedMessages.push([message.senderId, [message]]);
+				} else {
+					latestGroup[1].push(message);
+				}
 			}
 
-			if (latestGroup[0] === messages[idx].senderId) {
-				latestGroup[1].push(messages[idx]);
-			} else {
-				groupedMessages.push([messages[idx].senderId, [messages[idx]]]);
-			}
+			finalGroups[date] = groupedMessages;
 		}
 
-		return groupedMessages.map(([senderId, messages], idx) => (
-			<MomentMessageContainer key={`messagecontainer_${senderId}_${idx}`} messages={messages} />
+		return finalGroups;
+	}, [allMessages]);
+
+	const messageElements = useMemo(() => {
+		if (!groupedMessages) return undefined;
+		// Use stable message ID for keys if possible within MomentMessageContainer
+		// The group key remains less stable but necessary for grouping render
+		return Object.entries(groupedMessages).map(([date, messageGroup]) => (
+			<MomentMessageGroupProvider key={`datecontainer_${date}`} scrollAreaRef={scrollAreaRef}>
+				<MomentMessageGroup date={date} messageContainers={messageGroup} />
+			</MomentMessageGroupProvider>
 		));
-	}, [messages]);
+	}, [groupedMessages]);
+
+	useEffect(() => {
+		scrollToBottom();
+	}, [messageElements, scrollToBottom, partnerTyping]);
+
+	const addNewMessage = useCallback((message: MomentMessage) => {
+		setNewMessages((prev) => {
+			if (prev.some(m => m.id === message.id)) {
+				return prev;
+			}
+			return [...prev, message];
+		});
+	}, []);
 
 	// Handle receiving messages in real-time.
 	useEffect(() => {
-		const handleMessageReceive: WebSocketEventHandler<'momentChat'> = payload => {
+		const handleMessageReceive: WebSocketEventHandler<'momentChat'> = (payload) => {
+			// Ignore messages sent by self (already handled optimistically)
 			if (payload.senderId === self.id) return;
+
 			const message = {
-				id: crypto.randomUUID(),
+				id: payload.messageId ?? crypto.randomUUID(),
 				senderId: payload.senderId,
 				momentId: moment.id,
 				content: payload.message,
 				timestamp: payload.timestamp,
 			} satisfies MomentMessage;
-			addMessage(message);
+
+			addNewMessage(message);
+			setPartnerTyping(false);
 		};
 
-		const handleTypingStart: WebSocketEventHandler<'momentTypingStart'> = payload => {
+		const handleTypingStart: WebSocketEventHandler<'momentTypingStart'> = (payload) => {
 			if (payload.senderId === self.id) return;
 			setPartnerTyping(true);
 		};
 
-		const handleTypingEnd: WebSocketEventHandler<'momentTypingEnd'> = payload => {
+		const handleTypingEnd: WebSocketEventHandler<'momentTypingEnd'> = (payload) => {
 			if (payload.senderId === self.id) return;
 			setPartnerTyping(false);
 		};
@@ -129,7 +195,7 @@ const CommentDrawer: FC<Props> = ({ moment }) => {
 			removeEventHandler('momentTypingStart', handleTypingStart);
 			removeEventHandler('momentTypingEnd', handleTypingEnd);
 		};
-	}, [addEventHandler, addMessage, moment.id, removeEventHandler, self.id]);
+	}, [addEventHandler, removeEventHandler, self.id, moment.id, addNewMessage]);
 
 	const sendMessage = useCallback<SubmitHandler<FormSchema>>(
 		async ({ messageContent }) => {
@@ -141,7 +207,8 @@ const CommentDrawer: FC<Props> = ({ moment }) => {
 				timestamp: new Date().toISOString(),
 			} satisfies MomentMessage;
 
-			addMessage(optimisticMessage);
+			addNewMessage(optimisticMessage);
+			scrollToBottom();
 
 			await emitEvent(
 				'momentTypingEnd',
@@ -153,12 +220,14 @@ const CommentDrawer: FC<Props> = ({ moment }) => {
 					topic: WebsocketTopic.momentChatTopic(moment.relationshipId, moment.id),
 				},
 			);
+			setSelfTyping(false);
 
 			await emitEvent(
 				'momentChat',
 				{
 					senderId: self.id,
 					message: messageContent,
+					messageId: optimisticMessage.id,
 					timestamp: optimisticMessage.timestamp,
 					momentId: moment.id,
 				},
@@ -176,13 +245,22 @@ const CommentDrawer: FC<Props> = ({ moment }) => {
 				},
 			});
 		},
-		[addMessage, emitEvent, moment.id, moment.relationshipId, self.firstName, self.id, sendNotificationToPartner],
+		[
+			addNewMessage,
+			emitEvent,
+			moment.id,
+			moment.relationshipId,
+			scrollToBottom,
+			self.firstName,
+			self.id,
+			sendNotificationToPartner,
+		],
 	);
 
 	return (
 		<Drawer
 			open={drawerOpen}
-			onOpenChange={val => {
+			onOpenChange={(val) => {
 				setDrawerOpen(val);
 				if (val) {
 					selfState?.updateState?.('viewingMomentMessages', {
@@ -201,70 +279,79 @@ const CommentDrawer: FC<Props> = ({ moment }) => {
 			<DrawerContent className="h-[75vh] px-6 py-2" onWheel={e => e.stopPropagation()}>
 				<div className="h-[calc(75vh-24px-16px)] overflow-auto flex flex-col justify-between gap-2 pt-4">
 					{/* Messages container */}
-					<div className="overflow-auto flex flex-col-reverse" autoFocus>
-						{messagesLoading ? (
-							<Spinner />
-						) : (
-							<>
-								<AnimatePresence>
-									{partnerTyping && (
-										<motion.div
-											initial={{
-												opacity: 0,
-												y: 10,
-											}}
-											animate={{
-												opacity: 1,
-												y: 0,
-											}}
-											exit={{
-												opacity: 0,
-												y: 10,
-											}}
-											className="flex items-center gap-1"
-										>
-											<UserAvatar user={partner} hideStatus className="size-8 border-2" />
-											<motion.div
-												animate="jump"
-												transition={{ staggerChildren: -0.2, staggerDirection: -1 }}
-												className="bg-secondary rounded-full h-6 w-fit px-3 flex justify-center items-center gap-1"
-											>
-												<motion.span
-													variants={dotVariants}
-													className="size-2 rounded-full bg-primary"
-												></motion.span>
-												<motion.span
-													variants={dotVariants}
-													className="size-2 rounded-full bg-primary"
-												></motion.span>
-												<motion.span
-													variants={dotVariants}
-													className="size-2 rounded-full bg-primary"
-												></motion.span>
-											</motion.div>
-										</motion.div>
-									)}
-								</AnimatePresence>
-								<div className="space-y-1 flex flex-col">{messageElements}</div>
-							</>
-						)}
+					<ScrollArea className="h-full overflow-auto flex flex-col-reverse" ref={scrollAreaRef}>
+						{messagesLoading
+							? (
+									<MomentMessageGroupSkeleton />
+								)
+							: (
+									<>
+										{messageElements}
+										<AnimatePresence>
+											{partnerTyping && (
+												<motion.div
+													initial={{
+														opacity: 0,
+														y: 10,
+													}}
+													animate={{
+														opacity: 1,
+														y: 0,
+													}}
+													exit={{
+														opacity: 0,
+														y: 10,
+													}}
+													className="flex items-center gap-1"
+												>
+													<UserAvatar user={partner} hideStatus className="size-8 border-2" />
+													<motion.div
+														animate="jump"
+														transition={{ staggerChildren: -0.2, staggerDirection: -1 }}
+														className="bg-secondary rounded-full h-6 w-fit px-3 flex justify-center items-center gap-1"
+													>
+														<motion.span
+															variants={dotVariants}
+															className="size-2 rounded-full bg-primary"
+														>
+														</motion.span>
+														<motion.span
+															variants={dotVariants}
+															className="size-2 rounded-full bg-primary"
+														>
+														</motion.span>
+														<motion.span
+															variants={dotVariants}
+															className="size-2 rounded-full bg-primary"
+														>
+														</motion.span>
+													</motion.div>
+												</motion.div>
+											)}
+										</AnimatePresence>
+									</>
+								)}
 						<InfiniteLoader hasMore={hasNextPage} fetchMore={fetchNextPage} loading={isFetchingNextPage} />
-					</div>
+					</ScrollArea>
 					{/* Chat input */}
 					<div className="flex gap-2 shrink-0 p-2">
 						<EasyForm schema={formSchema} onSubmit={sendMessage} className="w-full" clearOnSubmit>
 							<EasyFormField<FormSchema> name="messageContent">
-								{(form, field) => (
+								{(_form, field) => (
 									<Textarea
-										className="rounded-2xl w-full h-fit"
-										inputClassName="resize-none h-fit"
+										{...field}
+										value={field.value ?? ''}
+										className="rounded-2xl w-full"
+										inputClassName="resize-none"
 										placeholder="Send a message"
 										variableHeight={{
 											maxHeight: 500,
 										}}
-										onKeyDown={e => {
+										onKeyDown={(e) => {
 											if (e.ctrlKey && e.key === 'Enter') submitButtonRef.current?.click();
 										}}
+										isTyping={selfTyping}
+										setIsTyping={setSelfTyping}
 										onTypingStart={async () => {
 											await emitEvent(
 												'momentTypingStart',

@@ -1,12 +1,13 @@
 'use client';
 
-import { FC, useCallback } from 'react';
-import { EnvelopeIcon, EnvelopeOpenIcon } from '@heroicons/react/24/solid';
-import { StoredNotification } from '@lumi/core/notifications/notification.types';
-import { toast } from 'sonner';
-
+import type { StoredNotification } from '@lumi/core/notifications/notification.types';
+import type { FC } from 'react';
 import { Button } from '@/components/ui/button';
 import { UpdateNotification } from '@/hooks/trpc/notification-hooks';
+import { EnvelopeIcon, EnvelopeOpenIcon } from '@heroicons/react/24/solid';
+
+import { useCallback } from 'react';
+import { toast } from 'sonner';
 
 type Props = {
 	notification: StoredNotification;

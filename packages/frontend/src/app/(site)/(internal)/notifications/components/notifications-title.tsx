@@ -1,6 +1,6 @@
 'use client';
 
-import { FC } from 'react';
+import type { FC } from 'react';
 
 import { Badge } from '@/components/ui/badge';
 import Spinner from '@/components/ui/spinner';
@@ -13,8 +13,13 @@ const NotificationsTitle: FC = () => {
 	} = useNotificationsView();
 	return (
 		<Title className="flex flex-wrap break-words items-center gap-4">
-			Notifications{' '}
-			<Badge variant="outline">{unreadCountLoading ? <Spinner size={10} /> : (unreadCount ?? '0')} Unread</Badge>
+			Notifications
+			{' '}
+			<Badge variant="outline">
+				{unreadCountLoading ? <Spinner size={10} /> : (unreadCount ?? '0')}
+				{' '}
+				Unread
+			</Badge>
 		</Title>
 	);
 };

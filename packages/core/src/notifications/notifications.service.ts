@@ -1,9 +1,24 @@
-import { DynamoDB } from '@aws-sdk/client-dynamodb';
+import type { PushSubscription } from 'web-push';
+import type { User } from '../users/user.types';
+import type { MqttClientType } from '../websockets/websockets.service';
+import type {
+	CreateNotificationDto,
+	GetFilteredNotificationsDto,
+	GetNotificationsDto,
+	UpdateNotificationDto,
+} from './notification.dto';
+
+import type {
+	DatabaseNotificationSubscriber,
+	DatabaseStoredNotification,
+	DatabaseUnreadNotificationCount,
+	NotificationSubscriber,
+	StoredNotification,
+	UnreadNotificationCount,
+} from './notification.types';
 import { TRPCError } from '@trpc/server';
 import { Resource } from 'sst';
-import webpush, { PushSubscription } from 'web-push';
-
-import { User } from '../users/user.types';
+import webpush from 'web-push';
 import {
 	batchWrite,
 	deleteItem,
@@ -15,21 +30,7 @@ import {
 } from '../utils/dynamo/dynamo.service';
 import { DynamoKey, EntityType } from '../utils/dynamo/dynamo.types';
 import { chunkArray, getUUID } from '../utils/utils';
-import { MqttClientType, emitAsyncWebsocketEvent } from '../websockets/websockets.service';
-import {
-	CreateNotificationDto,
-	GetFilteredNotificationsDto,
-	GetNotificationsDto,
-	UpdateNotificationDto,
-} from './notification.dto';
-import {
-	DatabaseNotificationSubscriber,
-	DatabaseStoredNotification,
-	DatabaseUnreadNotificationCount,
-	NotificationSubscriber,
-	StoredNotification,
-	UnreadNotificationCount,
-} from './notification.types';
+import { emitAsyncWebsocketEvent } from '../websockets/websockets.service';
 
 export const createNotificationSubscription = async (userId: string, subscription: PushSubscription) => {
 	const sub: NotificationSubscriber = {

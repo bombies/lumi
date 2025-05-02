@@ -1,10 +1,11 @@
 'use client';
 
-import { FC, useMemo } from 'react';
-import { Moment } from '@lumi/core/moments/moment.types';
+import type { Moment } from '@lumi/core/moments/moment.types';
+import type { FC } from 'react';
+import InfiniteLoader from '@/components/ui/infinite-loader';
 import { Separator } from '@radix-ui/react-separator';
 
-import InfiniteLoader from '@/components/ui/infinite-loader';
+import { useMemo } from 'react';
 import MomentCard from './moment-card';
 import MomentCardSkeleton from './moment-card-skeleton';
 
@@ -52,28 +53,34 @@ const MomentsGridContent: FC<Props> = ({
 		<div>
 			<Separator className="my-6" />
 			<div className="grid phone-big:grid-cols-2 tablet:grid-cols-3 laptop:grid-cols-4 desktop:grid-cols-5 gap-4">
-				{isSearching || momentsLoading ? (
-					<>
-						<MomentCardSkeleton />
-						<MomentCardSkeleton />
-						<MomentCardSkeleton />
-						<MomentCardSkeleton />
-						<MomentCardSkeleton />
-						<MomentCardSkeleton />
-					</>
-				) : momentElements?.length ? (
-					momentElements
-				) : (
-					<div className="tablet:pt-6 tablet:pl-6">
-						<p className="text-3xl font-semibold mb-3">
-							{searchActive ? 'No results.' : "There's nothing here yet..."}
-						</p>
-						<p>
-							<span className="font-bold text-primary">Tip:</span> Start sharing memories by clicking the
-							"Upload Moment" button!
-						</p>
-					</div>
-				)}
+				{isSearching || momentsLoading
+					? (
+							<>
+								<MomentCardSkeleton />
+								<MomentCardSkeleton />
+								<MomentCardSkeleton />
+								<MomentCardSkeleton />
+								<MomentCardSkeleton />
+								<MomentCardSkeleton />
+							</>
+						)
+					: momentElements?.length
+						? (
+								momentElements
+							)
+						: (
+								<div className="tablet:pt-6 tablet:pl-6">
+									<p className="text-3xl font-semibold mb-3">
+										{searchActive ? 'No results.' : 'There\'s nothing here yet...'}
+									</p>
+									<p>
+										<span className="font-bold text-primary">Tip:</span>
+										{' '}
+										Start sharing memories by clicking the
+										"Upload Moment" button!
+									</p>
+								</div>
+							)}
 			</div>
 			{infiniteOpts && (
 				<InfiniteLoader

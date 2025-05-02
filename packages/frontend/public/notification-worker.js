@@ -1,4 +1,5 @@
-self.addEventListener('push', function (event) {
+/* eslint-disable no-restricted-globals */
+self.addEventListener('push', (event) => {
 	if (event.data) {
 		const data = event.data.json();
 		console.log('Received push data', data);
@@ -17,12 +18,13 @@ self.addEventListener('push', function (event) {
 	}
 });
 
-self.addEventListener('notificationclick', function (event) {
+self.addEventListener('notificationclick', (event) => {
 	console.debug('Notification click received.');
 	event.notification.close();
 
 	const { openUrl } = event.notification.data;
 	event.waitUntil(
+		// eslint-disable-next-line no-undef
 		clients.openWindow(
 			`${process.env.NODE_ENV === 'development' ? 'https://localhost:3000' : process.env.NEXT_PUBLIC_CANONICAL_URL}${openUrl || ''}`,
 		),

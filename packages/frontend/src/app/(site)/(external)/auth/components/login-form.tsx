@@ -1,19 +1,18 @@
 'use client';
 
-import { FC, useCallback, useState } from 'react';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { SubmitHandler } from 'react-hook-form';
-import { toast } from 'sonner';
-import { z } from 'zod';
-
+import type { FC } from 'react';
+import type { SubmitHandler } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
 import EasyForm from '@/components/ui/form-extras/easy-form';
-import EasyFormField from '@/components/ui/form-extras/easy-form-field';
-import { Input } from '@/components/ui/input';
-import PasswordInput from '@/components/ui/password-input';
+import EasyFormInput from '@/components/ui/form-extras/fields/easy-form-input';
+
 import { Separator } from '@/components/ui/separator';
 import { auth } from '@/lib/better-auth/auth-client';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useCallback, useState } from 'react';
+import { toast } from 'sonner';
+import { z } from 'zod';
 
 const loginSchema = z.object({
 	usernameOrEmail: z.string().nonempty(),
@@ -29,23 +28,19 @@ const LoginForm: FC = () => {
 		async ({ usernameOrEmail, password }) => {
 			setIsAuthenticating(true);
 
-			let data: any | null | undefined;
 			let error: any | null | undefined;
 			if (usernameOrEmail.includes('@')) {
-				const { data: _data, error: _error } = await auth.signIn.email({
+				const { error: _error } = await auth.signIn.email({
 					email: usernameOrEmail,
 					password,
 					callbackURL: '/home',
 				});
-				data = _data;
 				error = _error;
 			} else {
-				const { data: _data, error: _error } = await auth.signIn.username({
+				const { error: _error } = await auth.signIn.username({
 					username: usernameOrEmail,
 					password,
 				});
-				// eslint-disable-next-line @typescript-eslint/no-unused-vars
-				data = _data;
 				error = _error;
 			}
 
@@ -74,14 +69,17 @@ const LoginForm: FC = () => {
 		>
 			<h3 className="text-center font-cursive text-4xl mb-2">Login</h3>
 			<Separator className="mb-9" />
-			<EasyFormField<LoginSchema> name="usernameOrEmail" label="Username or Email" showErrorMessage>
-				<Input />
-			</EasyFormField>
-			<EasyFormField<LoginSchema> name="password" label="Password" showErrorMessage>
-				<PasswordInput />
-			</EasyFormField>
+			<EasyFormInput<LoginSchema> name="usernameOrEmail" label="Username or Email" showErrorMessage />
+			<EasyFormInput<LoginSchema>
+				type="password"
+				name="password"
+				label="Password"
+				showErrorMessage
+			/>
 			<Link href="/auth/register" className="block text-xs">
-				Don't have an account? <span className="text-secondary dark:text-accent">Create an account</span>
+				Don't have an account?
+				{' '}
+				<span className="text-secondary dark:text-accent">Create an account</span>
 			</Link>
 			<Button type="submit" loading={isAuthenticating}>
 				Login

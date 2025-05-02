@@ -1,8 +1,9 @@
-import { FC, ReactElement } from 'react';
-import { Column, ColumnDef, Row, RowSelectionState, Updater } from '@tanstack/react-table';
+import type { Column, ColumnDef, Row, RowSelectionState, Updater } from '@tanstack/react-table';
+import type { FC, ReactElement } from 'react';
 
+import type { ManagedTablePaginationProps } from './managed-table-pagination';
 import ManagedTableDisplay from './managed-table-display';
-import ManagedTablePagination, { ManagedTablePaginationProps } from './managed-table-pagination';
+import ManagedTablePagination from './managed-table-pagination';
 import ManagedTableProvider from './managed-table-provider';
 
 type Props<T> = {

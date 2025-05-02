@@ -1,5 +1,6 @@
+import type { ClassValue } from 'clsx';
 import { Heading } from '@react-email/components';
-import clsx, { ClassValue } from 'clsx';
+import clsx from 'clsx';
 import * as React from 'react';
 import { twMerge } from 'tailwind-merge';
 

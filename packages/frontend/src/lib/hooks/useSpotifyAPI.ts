@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { SpotifyApi } from '@spotify/web-api-ts-sdk';
+import { useEffect, useState } from 'react';
 
 import { auth } from '../better-auth/auth-client';
 import { logger } from '../logger';

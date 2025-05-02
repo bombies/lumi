@@ -1,11 +1,12 @@
 'use client';
 
-import { FC, useEffect } from 'react';
-
+import type { FC } from 'react';
 import { useRelationship } from '@/components/providers/relationships/relationship-provder';
+
 import { Card, CardContent, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { GetSongRecommendations } from '@/hooks/trpc/music-sharing-hooks';
+import { useEffect } from 'react';
 import RecommendSongButton from '../recommend-song-button';
 import PartnerRecommendationsContainer from './partner-recommendations-container';
 import RecommendationHistoryContainer from './recommendation-history-container';
@@ -45,7 +46,10 @@ const ShareMusicContainer: FC = () => {
 				<RecommendSongButton />
 				<Tabs defaultValue="partner-recs">
 					<TabsList className="grid w-full grid-cols-2 tablet:grid-cols-3">
-						<TabsTrigger value="partner-recs">{partner.firstName}&apos;s</TabsTrigger>
+						<TabsTrigger value="partner-recs">
+							{partner.firstName}
+							&apos;s
+						</TabsTrigger>
 						<TabsTrigger value="self-recs">Yours</TabsTrigger>
 						<TabsTrigger value="history" className="col-span-2 tablet:col-span-1">
 							Recommendation History

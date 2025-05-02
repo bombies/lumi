@@ -1,12 +1,11 @@
 'use client';
 
-import { Fragment, useMemo, useState } from 'react';
-import { ReceivedAffirmation } from '@lumi/core/affirmations/affirmations.types';
-
 import InfiniteLoader from '@/components/ui/infinite-loader';
+
 import { Separator } from '@/components/ui/separator';
 import { GetReceivedAffirmations } from '@/hooks/trpc/affirmation-hooks';
 import { flattenPages } from '@/lib/utils';
+import { useMemo } from 'react';
 import AffirmationGroupSkeleton from './affirmation-group-skeleton';
 import MostRecentAffirmationSkeleton from './most-recent-affirmation-skeleton';
 
@@ -18,18 +17,20 @@ const ReceivedAffirmationsContainer = () => {
 		fetchNextPage,
 		isFetchingNextPage,
 	} = GetReceivedAffirmations();
-	const [todaysAffirmation, setTodaysAffirmation] = useState<ReceivedAffirmation>();
 
 	const flatPages = useMemo(() => {
 		const data = flattenPages(pages?.pages);
+
+		return Object.groupBy(data, ({ timestamp }) => timestamp.split('T')[0]);
+	}, [pages?.pages]);
+
+	const todaysAffirmation = useMemo(() => {
+		const data = flattenPages(pages?.pages);
 		const today = new Date().toISOString().split('T')[0];
-		const todaysAffirmation = data.splice(
+		return data.splice(
 			data.findLastIndex(affirmation => affirmation.timestamp === today),
 			1,
 		)[0];
-		setTodaysAffirmation(todaysAffirmation);
-
-		return Object.groupBy(data, ({ timestamp }) => timestamp.split('T')[0]);
 	}, [pages?.pages]);
 
 	const affirmationElements = useMemo(
@@ -38,11 +39,11 @@ const ReceivedAffirmationsContainer = () => {
 				if (!affirmations) return undefined;
 				const timestampDatetime = new Date(timestamp).toISOString();
 				const timestampDate = timestampDatetime.split('T')[0];
-				const header =
-					timestampDate === new Date().toISOString().split('T')[0]
+				const header
+					= timestampDate === new Date().toISOString().split('T')[0]
 						? 'Today'
-						: timestampDate ===
-							  new Date(new Date().setDate(new Date().getDate() - 1)).toISOString().split('T')[0]
+						: timestampDate
+							=== new Date(new Date().setDate(new Date().getDate() - 1)).toISOString().split('T')[0]
 							? 'Yesterday'
 							: new Date(timestamp).toLocaleDateString('en-US', {
 									dateStyle: 'full',
@@ -59,7 +60,11 @@ const ReceivedAffirmationsContainer = () => {
 										timeStyle: 'short',
 									})}
 								</p>
-								<p className="text-lg">&ldquo;{affirmationData.affirmation}&rdquo;</p>
+								<p className="text-lg">
+									&ldquo;
+									{affirmationData.affirmation}
+									&rdquo;
+								</p>
 							</div>
 						))}
 					</div>
@@ -70,30 +75,38 @@ const ReceivedAffirmationsContainer = () => {
 
 	return (
 		<div className="space-y-6 max-w-full tablet:max-w-[45rem]">
-			{dataLoading ? (
-				<>
-					<MostRecentAffirmationSkeleton />
-					<div className="space-y-8">
-						<AffirmationGroupSkeleton />
-						<AffirmationGroupSkeleton />
-						<AffirmationGroupSkeleton />
-					</div>
-				</>
-			) : todaysAffirmation || affirmationElements.length > 0 ? (
-				<>
-					{todaysAffirmation && (
-						<div className="w-full rounded-xl bg-primary text-primary-foreground p-6 tablet:w-96 space-y-4">
-							<h3 className="text-xl font-bold">Most Recent Affirmation</h3>
-							<p className="text-lg">&ldquo;{todaysAffirmation.affirmation}&rdquo;</p>
-						</div>
-					)}
-					<div className="space-y-3">{affirmationElements}</div>
-				</>
-			) : (
-				<p className="p-6 rounded-lg border border-border border-dashed font-mono w-fit font-semibold">
-					No affirmations received...
-				</p>
-			)}
+			{dataLoading
+				? (
+						<>
+							<MostRecentAffirmationSkeleton />
+							<div className="space-y-8">
+								<AffirmationGroupSkeleton />
+								<AffirmationGroupSkeleton />
+								<AffirmationGroupSkeleton />
+							</div>
+						</>
+					)
+				: todaysAffirmation || affirmationElements.length > 0
+					? (
+							<>
+								{todaysAffirmation && (
+									<div className="w-full rounded-xl bg-primary text-primary-foreground p-6 tablet:w-96 space-y-4">
+										<h3 className="text-xl font-bold">Most Recent Affirmation</h3>
+										<p className="text-lg">
+											&ldquo;
+											{todaysAffirmation.affirmation}
+											&rdquo;
+										</p>
+									</div>
+								)}
+								<div className="space-y-3">{affirmationElements}</div>
+							</>
+						)
+					: (
+							<p className="p-6 rounded-lg border border-border border-dashed font-mono w-fit font-semibold">
+								No affirmations received...
+							</p>
+						)}
 			<InfiniteLoader loading={isFetchingNextPage} hasMore={hasNextPage} fetchMore={fetchNextPage} />
 		</div>
 	);

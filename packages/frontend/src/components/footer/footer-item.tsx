@@ -1,11 +1,12 @@
 'use client';
 
-import { FC, useMemo } from 'react';
+import type { IconType } from '@icons-pack/react-simple-icons';
+import type { FC } from 'react';
+import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { IconType } from '@icons-pack/react-simple-icons';
 
-import { cn } from '@/lib/utils';
+import { useMemo } from 'react';
 
 type FooterItemProps = {
 	label: string;

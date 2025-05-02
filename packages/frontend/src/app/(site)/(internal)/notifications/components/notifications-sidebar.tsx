@@ -1,10 +1,7 @@
 'use client';
 
-import { FC, useMemo } from 'react';
-import Link from 'next/link';
-import { HomeIcon } from '@heroicons/react/24/solid';
-import { IconType } from '@icons-pack/react-simple-icons';
-
+import type { IconType } from '@icons-pack/react-simple-icons';
+import type { FC } from 'react';
 import { Button } from '@/components/ui/button';
 import {
 	Sidebar,
@@ -18,6 +15,10 @@ import {
 	SidebarMenuButton,
 	SidebarMenuItem,
 } from '@/components/ui/sidebar';
+import { HomeIcon } from '@heroicons/react/24/solid';
+
+import Link from 'next/link';
+import { useMemo } from 'react';
 import { useNotificationsView } from './notifications-view-provider';
 
 type SidebarItem = {
@@ -63,7 +64,7 @@ const NotificationsSidebar: FC = () => {
 
 	const itemElements = useMemo(
 		() =>
-			items.map(group => {
+			items.map((group) => {
 				return (
 					<SidebarGroup key={group.groupLabel}>
 						<SidebarGroupLabel>{group.groupLabel}</SidebarGroupLabel>
@@ -103,7 +104,9 @@ const NotificationsSidebar: FC = () => {
 			<SidebarFooter>
 				<Link href="/home">
 					<Button className="w-full">
-						<HomeIcon className="size-[18px]" /> Go Home
+						<HomeIcon className="size-[18px]" />
+						{' '}
+						Go Home
 					</Button>
 				</Link>
 			</SidebarFooter>

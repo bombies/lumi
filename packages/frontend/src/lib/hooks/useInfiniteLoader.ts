@@ -16,7 +16,7 @@ export const useInfiniteLoader = ({
 			if (loading || !hasMoreData) return;
 			if (interactionObserver.current) interactionObserver.current.disconnect();
 
-			interactionObserver.current = new IntersectionObserver(entries => {
+			interactionObserver.current = new IntersectionObserver((entries) => {
 				if (entries[0].isIntersecting) loadMoreData();
 			});
 

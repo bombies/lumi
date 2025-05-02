@@ -1,5 +1,5 @@
+import type { SpotifyProviderDatabaseAccount } from '@lumi/core/auth/better-auth.types';
 import { spotifyApiScopes } from '@lumi/core/auth/auth.const';
-import { SpotifyProviderDatabaseAccount } from '@lumi/core/auth/better-auth.types';
 import redis from '@lumi/core/redis/redis';
 import { sendAccountDeletionEmail } from '@lumi/emails/auth/delete-account-email';
 import { sendSignUpEmail } from '@lumi/emails/auth/sign-up-email';
@@ -21,22 +21,22 @@ export const db = new Pool(
 				password: Resource.PostgresPassword.value,
 				database: Resource.PostgresDatabase.value,
 				host: Resource.PostgresHost.value,
-				port: parseInt(Resource.PostgresPort.value),
+				port: Number.parseInt(Resource.PostgresPort.value),
 			},
 );
 
 export const auth = betterAuth({
 	database: db,
 	secondaryStorage: {
-		get: async key => {
+		get: async (key) => {
 			const value = await redis.get(key);
-			return value ? value : null;
+			return value || null;
 		},
 		set: async (key, value, ttl) => {
 			if (ttl) await redis.set(key, value, 'EX', ttl);
 			else await redis.set(key, value);
 		},
-		delete: async key => {
+		delete: async (key) => {
 			await redis.del(key);
 		},
 	},
@@ -75,7 +75,7 @@ export const auth = betterAuth({
 		autoSignIn: true,
 	},
 	emailVerification: {
-		sendVerificationEmail: async data => {
+		sendVerificationEmail: async (data) => {
 			try {
 				logger.debug('Attempting to send sign up email...');
 				const details = await sendSignUpEmail({ email: data.user.email, siteUrl: data.url });

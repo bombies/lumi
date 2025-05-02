@@ -1,6 +1,6 @@
 'use client';
 
-import { FC } from 'react';
+import type { FC } from 'react';
 
 import { useInfiniteLoader } from '@/lib/hooks/useInfiniteLoader';
 import Spinner from './spinner';
@@ -18,11 +18,13 @@ const InfiniteLoader: FC<Props> = ({ loading, hasMore, fetchMore }) => {
 		loadMoreData: fetchMore,
 	});
 
-	return hasMore ? (
-		<div className="w-full flex justify-center" ref={loaderRef}>
-			<Spinner />
-		</div>
-	) : undefined;
+	return hasMore
+		? (
+				<div className="w-full flex justify-center" ref={loaderRef}>
+					<Spinner />
+				</div>
+			)
+		: undefined;
 };
 
 export default InfiniteLoader;

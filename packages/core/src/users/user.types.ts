@@ -1,7 +1,7 @@
-import { z } from 'zod';
+import type { z } from 'zod';
 
-import { userDto } from '../users/users.dto';
-import { EntityType } from '../utils/dynamo/dynamo.types';
+import type { userDto } from '../users/users.dto';
+import type { EntityType } from '../utils/dynamo/dynamo.types';
 
 export type User = z.infer<typeof userDto> & UserExtras;
 export type UserExtras = Partial<{

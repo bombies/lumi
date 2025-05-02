@@ -1,9 +1,10 @@
 'use client';
 
-import { FC, useState } from 'react';
+import type { FC } from 'react';
+import { Button } from '@/components/ui/button';
 import { Grid2X2Icon, Grid3X3Icon } from 'lucide-react';
 
-import { Button } from '@/components/ui/button';
+import { useState } from 'react';
 import CompactTaggedMomentsView from './compact-tagged-moments-view';
 import SpaciousTaggedMomentsView from './spacious-tagged-moments-view';
 import TaggedMomentsProvider from './tagged-moments-provider';
@@ -18,13 +19,17 @@ export const TaggedMomentsContent: FC = () => {
 					variant={selectedView === 'spacious' ? 'accent' : 'default:flat'}
 					onClick={() => setSelectedView('spacious')}
 				>
-					<Grid2X2Icon className="size-[18px]" /> Spacious View
+					<Grid2X2Icon className="size-[18px]" />
+					{' '}
+					Spacious View
 				</Button>
 				<Button
 					variant={selectedView === 'compact' ? 'accent' : 'default:flat'}
 					onClick={() => setSelectedView('compact')}
 				>
-					<Grid3X3Icon className="size-[18px]" /> Compact View
+					<Grid3X3Icon className="size-[18px]" />
+					{' '}
+					Compact View
 				</Button>
 			</div>
 			{selectedView === 'spacious' ? <SpaciousTaggedMomentsView /> : <CompactTaggedMomentsView />}

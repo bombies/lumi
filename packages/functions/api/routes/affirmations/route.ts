@@ -7,7 +7,6 @@ import {
 import {
 	createAffirmation,
 	deleteAffirmation,
-	getAffirmationById,
 	getOwnedAffirmationsForUser,
 	getReceivedAffirmations,
 	getTodaysReceivedAffirmations,

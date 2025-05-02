@@ -14,7 +14,6 @@ import {
 	redisPassword,
 	redisPort,
 	redisUser,
-	sentryAuthToken,
 	vapidPrivateKey,
 	vapidPublicKey,
 	websocketToken,
@@ -62,7 +61,8 @@ export const trpc = new sst.aws.Function('Trpc', {
 		KEY_PAIR_ID: contentCdnPublicKey.id,
 		CDN_URL: $interpolate`${contentCdn.domainUrl.apply(domainUrl => domainUrl ?? contentCdn.url)}`,
 		FRONTEND_URL: !$dev ? `https://${webDNS}` : 'https://localhost:3000',
-		// @ts-ignore
+		// @ts-expect-error It's complaining about the undefined but, but it works fine. Just some weird typings with
+		// pulumi's Input type.
 		NODE_TLS_REJECT_UNAUTHORIZED: $dev ? '0' : undefined,
 
 		...defaultSentryEnvironmentVariables,

@@ -1,18 +1,19 @@
 'use client';
 
-import { FC, useState } from 'react';
-import { MusicalNoteIcon } from '@heroicons/react/24/solid';
-import { SearchIcon } from 'lucide-react';
-import { toast } from 'sonner';
-
+import type { FC } from 'react';
 import { useRelationship } from '@/components/providers/relationships/relationship-provder';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
+
 import { Separator } from '@/components/ui/separator';
 import { CreateSongRecommendation } from '@/hooks/trpc/music-sharing-hooks';
 import useSpotifyQuery from '@/lib/hooks/spotify/useSpotifyQuery';
 import { getErrorMessage } from '@/lib/trpc/utils';
+import { MusicalNoteIcon } from '@heroicons/react/24/solid';
+import { SearchIcon } from 'lucide-react';
+import { useState } from 'react';
+import { toast } from 'sonner';
 import TrackSearchResult from './tracks/track-search-result';
 import TrackSearchResultSkeleton from './tracks/track-search-result-skeleton';
 
@@ -67,7 +68,9 @@ const RecommendSongButton: FC = () => {
 		<Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
 			<DialogTrigger asChild>
 				<Button disabled={isRecommending} variant="accent">
-					<MusicalNoteIcon className="size-[18px] mr-2" /> Recommend Song
+					<MusicalNoteIcon className="size-[18px] mr-2" />
+					{' '}
+					Recommend Song
 				</Button>
 			</DialogTrigger>
 			<DialogContent
@@ -83,21 +86,25 @@ const RecommendSongButton: FC = () => {
 					typingEndDelay={300}
 					onTypingEnd={val => setQuery(val)}
 				/>
-				{tracksLoading ? (
-					<>
-						<Separator className="my-1" />
-						<TrackSearchResultSkeleton />
-						<TrackSearchResultSkeleton />
-						<TrackSearchResultSkeleton />
-						<TrackSearchResultSkeleton />
-						<TrackSearchResultSkeleton />
-					</>
-				) : query?.length && trackElements?.length ? (
-					<>
-						<Separator className="my-1" />
-						{trackElements}
-					</>
-				) : undefined}
+				{tracksLoading
+					? (
+							<>
+								<Separator className="my-1" />
+								<TrackSearchResultSkeleton />
+								<TrackSearchResultSkeleton />
+								<TrackSearchResultSkeleton />
+								<TrackSearchResultSkeleton />
+								<TrackSearchResultSkeleton />
+							</>
+						)
+					: query?.length && trackElements?.length
+						? (
+								<>
+									<Separator className="my-1" />
+									{trackElements}
+								</>
+							)
+						: undefined}
 			</DialogContent>
 		</Dialog>
 	);

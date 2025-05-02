@@ -1,9 +1,7 @@
 'use client';
 
-import { FC, useCallback, useState } from 'react';
-import { Affirmation } from '@lumi/core/affirmations/affirmations.types';
-import { TrashIcon } from 'lucide-react';
-
+import type { Affirmation } from '@lumi/core/affirmations/affirmations.types';
+import type { FC } from 'react';
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -16,7 +14,10 @@ import {
 	AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
+
 import { DeleteAffirmation } from '@/hooks/trpc/affirmation-hooks';
+import { TrashIcon } from 'lucide-react';
+import { useCallback, useState } from 'react';
 
 type Props = {
 	affirmation: Affirmation;

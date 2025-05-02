@@ -1,10 +1,10 @@
+import type { DynamoDBStreamEvent, Handler } from 'aws-lambda';
 import { deleteAffirmationsForRelationship } from '@lumi/core/affirmations/affirmations.service';
 import { deleteMomentDetailsForRelationship } from '@lumi/core/moments/moment.service';
 import { deleteNotificationsForUser } from '@lumi/core/notifications/notifications.service';
 import { deleteSongRecommendationsByRelationshipId } from '@lumi/core/song-recommendations/song-recommendations.service';
-import { DynamoDBStreamEvent, Handler } from 'aws-lambda';
 
-export const handler: Handler<DynamoDBStreamEvent> = async event => {
+export const handler: Handler<DynamoDBStreamEvent> = async (event) => {
 	for (const record of event.Records) {
 		if (!record.eventName || !record.dynamodb || !record.dynamodb.Keys) continue;
 

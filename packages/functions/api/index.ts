@@ -11,7 +11,7 @@ export const handler = Sentry.wrapHandler(
 	awsLambdaRequestHandler({
 		router: appRouter,
 		createContext,
-		onError({ error, type, path, input, ctx, req }) {
+		onError({ error, type, path, input }) {
 			if (error.code === 'INTERNAL_SERVER_ERROR') {
 				Sentry.captureException(error);
 				console.error('Error:', error);

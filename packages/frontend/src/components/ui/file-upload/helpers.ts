@@ -1,11 +1,11 @@
 'use client';
 
-import { RefObject } from 'react';
+import type { RefObject } from 'react';
+import type { Area } from 'react-easy-crop';
+import type { FileUploadToastOptions } from './file-upload';
 import mime from 'mime';
-import { Area } from 'react-easy-crop';
-import { toast } from 'sonner';
 
-import { FileUploadToastOptions } from './file-upload';
+import { toast } from 'sonner';
 
 export const isVideoFile = (file: File): boolean => {
 	return mime.getType(file.name)?.startsWith('video') ?? false;
@@ -88,8 +88,8 @@ export const processFiles = async (
 	if (type === 'single') {
 		const file = allFiles[0];
 		if (
-			!file ||
-			!(await validateFile(file, {
+			!file
+			|| !(await validateFile(file, {
 				validateFileSize,
 				validateVideoDuration,
 				onFileSizeError,
@@ -137,15 +137,15 @@ export const handleLocalUpload = (
 		clearInput,
 	}:
 		| {
-				type: 'single';
-				onLocalUploadSuccess?: (file: File, clearInput: () => void) => void;
-				clearInput: () => void;
-		  }
+			type: 'single';
+			onLocalUploadSuccess?: (file: File, clearInput: () => void) => void;
+			clearInput: () => void;
+		}
 		| {
-				type: 'multiple';
-				onLocalUploadSuccess?: (file: File[], clearInput: () => void) => void;
-				clearInput: () => void;
-		  },
+			type: 'multiple';
+			onLocalUploadSuccess?: (file: File[], clearInput: () => void) => void;
+			clearInput: () => void;
+		},
 ) => {
 	return type === 'single' ? onLocalUploadSuccess?.(files[0], clearInput) : onLocalUploadSuccess?.(files, clearInput);
 };
@@ -266,7 +266,7 @@ export default async function getCroppedImg(
 
 	// As a blob
 	return new Promise<Blob>((resolve, reject) => {
-		croppedCanvas.toBlob(file => {
+		croppedCanvas.toBlob((file) => {
 			if (!file) {
 				reject(new Error('Failed to create blob'));
 				return;

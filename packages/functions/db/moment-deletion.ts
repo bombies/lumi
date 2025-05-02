@@ -1,12 +1,12 @@
-import { DatabaseMomentMessage, DatabaseRelationshipMomentTag } from '@lumi/core/moments/moment.types';
+import type { DatabaseMomentMessage, DatabaseRelationshipMomentTag } from '@lumi/core/moments/moment.types';
+import type { DynamoDBStreamEvent, Handler } from 'aws-lambda';
 import { dynamo, getItems } from '@lumi/core/utils/dynamo/dynamo.service';
 import { DynamoKey } from '@lumi/core/utils/dynamo/dynamo.types';
 import { ContentPaths, StorageClient } from '@lumi/core/utils/s3/s3.service';
 import { chunkArray } from '@lumi/core/utils/utils';
-import { DynamoDBStreamEvent, Handler } from 'aws-lambda';
 import { Resource } from 'sst';
 
-export const handler: Handler<DynamoDBStreamEvent> = async event => {
+export const handler: Handler<DynamoDBStreamEvent> = async (event) => {
 	for (const record of event.Records) {
 		if (!record.eventName || !record.dynamodb || !record.dynamodb.Keys) continue;
 

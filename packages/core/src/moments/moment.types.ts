@@ -1,7 +1,7 @@
-import { z } from 'zod';
+import type { z } from 'zod';
 
-import { momentMessageSchema, momentSchema } from '../moments/moments.dto';
-import { EntityType } from '../utils/dynamo/dynamo.types';
+import type { momentMessageSchema, momentSchema } from '../moments/moments.dto';
+import type { EntityType } from '../utils/dynamo/dynamo.types';
 
 export type Moment = z.infer<typeof momentSchema> & {
 	id: string;
@@ -57,6 +57,10 @@ export type DatabaseMomentTag = MomentTag & {
 export type MomentMessage = z.infer<typeof momentMessageSchema> & {
 	id: string;
 	timestamp: string;
+	reaction?: string;
+	isDeleted?: boolean;
+	state?: 'sent' | 'delivered' | 'read';
+	updatedAt?: string;
 };
 
 export type DatabaseMomentMessage = MomentMessage & {

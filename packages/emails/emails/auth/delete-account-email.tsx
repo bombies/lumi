@@ -1,5 +1,5 @@
 import { sendReactEmail } from '@lumi/core/email/email.service';
-import { Button, Link, Text } from '@react-email/components';
+import { Button, Text } from '@react-email/components';
 import * as React from 'react';
 
 import EmailTemplate from '../../components/template';

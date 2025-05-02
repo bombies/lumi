@@ -1,13 +1,13 @@
+import type { User } from '@lumi/core/users/user.types';
+import type { Handler, SQSEvent } from 'aws-lambda';
 import { selectAffirmation, sendAffirmationToUser } from '@lumi/core/affirmations/affirmations.service';
 import { getRelationshipById } from '@lumi/core/relationships/relationship.service';
-import { User } from '@lumi/core/users/user.types';
 import { getUserById } from '@lumi/core/users/users.service';
 import { createAsyncWebsocketConnection } from '@lumi/core/websockets/websockets.service';
 import { WebSocketToken } from '@lumi/core/websockets/websockets.types';
-import { Handler, SQSEvent } from 'aws-lambda';
 import { Resource } from 'sst';
 
-export const handler: Handler<SQSEvent> = async event => {
+export const handler: Handler<SQSEvent> = async (event) => {
 	console.log('Processing affirmation notification event...');
 
 	const relationshipId = JSON.parse(event.Records[0].body) as string;

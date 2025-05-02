@@ -1,9 +1,11 @@
 'use client';
 
-import { createContext, FC, PropsWithChildren, useContext, useMemo } from 'react';
-import { ProviderAccount } from '@lumi/core/auth/better-auth.types';
+import type { UseSpotifyAPIReturnType } from '@/lib/hooks/useSpotifyAPI';
+import type { ProviderAccount } from '@lumi/core/auth/better-auth.types';
+import type { FC, PropsWithChildren } from 'react';
 
-import { useSpotifyAPI, UseSpotifyAPIReturnType } from '@/lib/hooks/useSpotifyAPI';
+import { useSpotifyAPI } from '@/lib/hooks/useSpotifyAPI';
+import { createContext, use, useMemo } from 'react';
 
 type SpotifyProviderData = {
 	isLinked: boolean;
@@ -18,7 +20,7 @@ type SpotifyProviderProps = PropsWithChildren<{
 const SpotifyContext = createContext<SpotifyProviderData | undefined>(undefined);
 
 export const useSpotifyData = () => {
-	const context = useContext(SpotifyContext);
+	const context = use(SpotifyContext);
 	if (!context) throw new Error('useSpotifyData must be used within a SpotifyProvider');
 	return context;
 };
@@ -35,7 +37,7 @@ const SpotifyProvider: FC<SpotifyProviderProps> = ({ identity, children }) => {
 		[identity, spotifyAPIData],
 	);
 
-	return <SpotifyContext.Provider value={memoizedValues}>{children}</SpotifyContext.Provider>;
+	return <SpotifyContext value={memoizedValues}>{children}</SpotifyContext>;
 };
 
 export default SpotifyProvider;

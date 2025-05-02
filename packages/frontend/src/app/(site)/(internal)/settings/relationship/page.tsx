@@ -1,4 +1,5 @@
-import { FC, Suspense } from 'react';
+import type { FC } from 'react';
+import { Suspense } from 'react';
 
 import SettingsSection from '../components/settings-section';
 import LeaveRelationshipButton from './components/leave-relationship-button';

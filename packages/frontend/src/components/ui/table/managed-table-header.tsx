@@ -1,7 +1,7 @@
 'use client';
 
-import { HTMLAttributes } from 'react';
-import { Column } from '@tanstack/react-table';
+import type { Column } from '@tanstack/react-table';
+import type { HTMLAttributes } from 'react';
 import { ArrowDownIcon, ArrowUpIcon, EllipsisVerticalIcon, EyeOffIcon } from 'lucide-react';
 
 import { cn } from '../../../lib/utils';
@@ -38,13 +38,17 @@ export default function ManagedTableHeader<TData, TValue>({
 				<DropdownMenuTrigger asChild>
 					<Button variant="ghost" size="sm" className="-ml-3 h-8 data-[state=open]:bg-accent/20">
 						<span>{title}</span>
-						{column.getIsSorted() === 'desc' ? (
-							<ArrowDownIcon className="ml-2 h-4 w-4" />
-						) : column.getIsSorted() === 'asc' ? (
-							<ArrowUpIcon className="ml-2 h-4 w-4" />
-						) : (
-							<EllipsisVerticalIcon className="ml-2 h-4 w-4" />
-						)}
+						{column.getIsSorted() === 'desc'
+							? (
+									<ArrowDownIcon className="ml-2 h-4 w-4" />
+								)
+							: column.getIsSorted() === 'asc'
+								? (
+										<ArrowUpIcon className="ml-2 h-4 w-4" />
+									)
+								: (
+										<EllipsisVerticalIcon className="ml-2 h-4 w-4" />
+									)}
 					</Button>
 				</DropdownMenuTrigger>
 				<DropdownMenuContent align="start" className="p-2">

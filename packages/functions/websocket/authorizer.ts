@@ -2,7 +2,7 @@ import { getRelationshipById } from '@lumi/core/relationships/relationship.servi
 import { WebSocketSubTopic, WebSocketToken } from '@lumi/core/websockets/websockets.types';
 import { realtime } from 'sst/aws/realtime';
 
-export const handler = realtime.authorizer(async token => {
+export const handler = realtime.authorizer(async (token) => {
 	// Validate the token
 	const [client_id, identifier, args] = token.split('::');
 
@@ -42,8 +42,8 @@ export const handler = realtime.authorizer(async token => {
 			break;
 		case WebSocketToken.GLOBAL:
 			allowedPaths = {
-				subscribe: [process.env.NOTIFICATIONS_TOPIC! + '/*'],
-				publish: [process.env.NOTIFICATIONS_TOPIC! + '/*'],
+				subscribe: [`${process.env.NOTIFICATIONS_TOPIC!}/*`],
+				publish: [`${process.env.NOTIFICATIONS_TOPIC!}/*`],
 			};
 			break;
 		default:
