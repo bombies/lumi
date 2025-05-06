@@ -1,9 +1,16 @@
 {
 	"extends": "@tsconfig/node22/tsconfig.json",
 	"compilerOptions": {
-		"lib": ["ESNext"],
+		"lib": [
+			"ESNext"
+		],
 		"jsx": "react",
 		"module": "ESNext",
-		"moduleResolution": "Bundler"
+		"moduleResolution": "Bundler",
+		"paths": {
+			"@lumi/functions/*": [
+				"../core/functions/*"
+			],
+		}
 	}
 }

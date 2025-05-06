@@ -14,7 +14,8 @@ import {
 import { TRPCError } from '@trpc/server';
 import { chunkArray } from '../utils';
 
-const client = new DynamoDBClient();
+// eslint-disable-next-line import/no-mutable-exports, prefer-const
+export let client = new DynamoDBClient();
 export const dynamo = DynamoDBDocument.from(client, {
 	marshallOptions: {
 		convertEmptyValues: true,
@@ -423,18 +424,18 @@ export async function writeTransaction(...params: TransactionParams[]) {
 type BatchWriteParams = {
 	table?: string;
 } & (
-	| {
-		deleteItem: {
-			pk: string;
-			sk: string;
-		};
-	}
-	| {
-		put: {
-			item: Record<string, any>;
-		};
-	}
-);
+		{
+			deleteItem: {
+				pk: string;
+				sk: string;
+			};
+		}
+		| {
+			put: {
+				item: Record<string, any>;
+			};
+		}
+	);
 
 export async function batchWrite(...params: BatchWriteParams[]) {
 	const groupedParams = Object.groupBy(params, param => param.table ?? process.env.TABLE_NAME!);

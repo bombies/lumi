@@ -100,7 +100,11 @@ export const sendRelationshipRequest = async (senderId: string, receiverId: stri
 		});
 
 	const requestFromReceiver = await getRelationshipRequestBySenderAndReceiver(receiverId, senderId);
-	if (requestFromReceiver) return await acceptRelationshipRequest(receiverId, requestFromReceiver.id);
+	if (requestFromReceiver)
+		throw new TRPCError({
+			code: 'BAD_REQUEST',
+			message: 'That user has already sent you a relationship request! Accept the request they sent.',
+		});
 
 	const id = getUUID();
 	const request: RelationshipRequest = {

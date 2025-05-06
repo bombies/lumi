@@ -25,12 +25,12 @@ import { chunkArray, getUUID } from '../utils/utils';
 import { createAsyncWebsocketConnection } from '../websockets/websockets.service';
 import { WebSocketToken } from '../websockets/websockets.types';
 
-export const createAffirmation = async (dto: CreateAffirmationDto) => {
+export const createAffirmation = async (dto: CreateAffirmationDto & { selectedCount?: number }) => {
 	const affirmationId = getUUID();
 	const affirmation: Affirmation = {
 		id: affirmationId,
 		...dto,
-		selectedCount: 0,
+		selectedCount: dto.selectedCount ?? 0,
 	};
 
 	return putItem<Affirmation, DatabaseAffirmation>({
@@ -236,12 +236,11 @@ export const sendAffirmationToUser = async (
 		});
 
 	const mqttConnection
-		= dto.mqttClient
-			?? (await createAsyncWebsocketConnection({
-				endpoint: Resource.RealtimeServer.endpoint,
-				authorizer: Resource.RealtimeServer.authorizer,
-				token: WebSocketToken.GLOBAL,
-			}));
+		= dto.mqttClient ?? (await createAsyncWebsocketConnection({
+			endpoint: Resource.RealtimeServer.endpoint,
+			authorizer: Resource.RealtimeServer.authorizer,
+			token: WebSocketToken.GLOBAL,
+		}));
 
 	await sendNotification({
 		user,
