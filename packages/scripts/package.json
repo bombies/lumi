@@ -7,6 +7,6 @@
 	},
 	"dependencies": {
 		"@lumi/core": "*",
-		"sst": "^3.13.9"
+		"sst": "^3.14.11"
 	}
 }

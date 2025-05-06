@@ -21,7 +21,7 @@ import {
 	redisPort,
 	redisUser,
 	sentryAuthToken,
-	sentryDsn,
+	sentryFrontendDsn,
 	spotifyClientId,
 	spotifyClientSecret,
 	vapidPrivateKey,
@@ -32,14 +32,16 @@ import { contentBucket, contentCdn, contentCdnPublicKey } from './storage';
 export const frontend = new sst.aws.Nextjs('Frontend', {
 	path: 'packages/frontend',
 	dev: {
-		command: process.env.NEXT_SCAN === 'true' ? 'bun run dev:scan' : 'bun run dev',
+		command:
+			process.env.NEXT_SCAN === 'true' ? 'bun run dev:scan' : 'bun run dev',
 	},
 	server: {
 		runtime: 'nodejs22.x',
 		install: ['sharp'],
 	},
-	cachePolicy: $app.stage !== 'staging' ? frontendCdnCachePolicyId.value : undefined,
-	openNextVersion: '3.5.6',
+	cachePolicy:
+		$app.stage !== 'staging' ? frontendCdnCachePolicyId.value : undefined,
+	openNextVersion: '3.6.0',
 	warm: $app.stage === 'production' ? 5 : 0,
 	link: [
 		trpc,
@@ -77,14 +79,17 @@ export const frontend = new sst.aws.Nextjs('Frontend', {
 		APP_STAGE: $app.stage,
 		NEXT_PUBLIC_APP_STAGE: $app.stage,
 		NEXT_PUBLIC_TRPC_URL: !$dev ? `https://${apiDNS}` : trpc.url,
-		NEXT_PUBLIC_CANONICAL_URL: !$dev ? `https://${webDNS}` : 'https://localhost:3000',
+		NEXT_PUBLIC_CANONICAL_URL: !$dev
+			? `https://${webDNS}`
+			: 'https://localhost:3000',
 		TABLE_NAME: db.name,
 		NEXT_PUBLIC_VAPID_PUBLIC_KEY: vapidPublicKey.value,
 		VAPID_PRIVATE_KEY: vapidPrivateKey.value,
 		NEXT_PUBLIC_NOTIFICATIONS_TOPIC: notificationsTopic,
 		NEXT_PUBLIC_DEV_MODE: $app.stage === 'development' ? 'true' : 'false',
 		CONTENT_BUCKET_NAME: contentBucket.name,
-		CONTENT_BUCKET_ENDPOINT: contentBucket.nodes.bucket.bucketRegionalDomainName,
+		CONTENT_BUCKET_ENDPOINT:
+			contentBucket.nodes.bucket.bucketRegionalDomainName,
 		CDN_PRIVATE_KEY: cdnPrivateKey,
 		KEY_PAIR_ID: contentCdnPublicKey.id,
 		CDN_URL: $interpolate`${contentCdn.domainUrl.apply(domainUrl => domainUrl ?? contentCdn.url)}`,
@@ -92,7 +97,7 @@ export const frontend = new sst.aws.Nextjs('Frontend', {
 		SPOTIFY_CLIENT_SECRET: spotifyClientSecret.value,
 
 		SENTRY_AUTH_TOKEN: sentryAuthToken.value,
-		NEXT_PUBLIC_SENTRY_DSN: sentryDsn.value,
+		NEXT_PUBLIC_SENTRY_DSN: sentryFrontendDsn.value,
 	},
 	permissions: [
 		{

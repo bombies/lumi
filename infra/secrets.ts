@@ -7,7 +7,9 @@ export const postgresDatabase = new sst.Secret('PostgresDatabase');
 export const postgresUsername = new sst.Secret('PostgresUsername');
 export const postgresPassword = new sst.Secret('PostgresPassword');
 export const postgresPort = new sst.Secret('PostgresPort');
-export const postgresConnectionString = new sst.Secret('PostgresConnectionString');
+export const postgresConnectionString = new sst.Secret(
+	'PostgresConnectionString',
+);
 
 export const mailerHostSecret = new sst.Secret('MailerHost');
 export const mailerPortSecret = new sst.Secret('MailerPort');
@@ -24,13 +26,17 @@ export const vapidPrivateKey = new sst.Secret('VapidPrivateKey');
 
 export const websocketToken = new sst.Secret('WebSocketToken');
 
-export const cdnPrivateKey = fs.readFileSync(`${process.cwd()}/cdn-keys/${$app.stage}.private_key.pem`, 'utf8');
+export const cdnPrivateKey = fs.readFileSync(
+	`${process.cwd()}/cdn-keys/${$app.stage}.private_key.pem`,
+	'utf8',
+);
 
 export const spotifyClientId = new sst.Secret('SpotifyClientId');
 export const spotifyClientSecret = new sst.Secret('SpotifyClientSecret');
 
 export const sentryAuthToken = new sst.Secret('SentryAuthToken');
 export const sentryDsn = new sst.Secret('SentryDsn');
+export const sentryFrontendDsn = new sst.Secret('SentryFrontendDsn');
 
 export const defaultSentryEnvironmentVariables = {
 	SENTRY_DSN: sentryDsn.value,
@@ -41,4 +47,6 @@ export const defaultSentryEnvironmentVariables = {
 
 export const contentCdnPublicKeyId = new sst.Secret('ContentCdnPublicKeyId');
 export const contentCdnKeyGroupId = new sst.Secret('ContentCdnKeyGroupId');
-export const frontendCdnCachePolicyId = new sst.Secret('FrontendCdnCachePolicyId');
+export const frontendCdnCachePolicyId = new sst.Secret(
+	'FrontendCdnCachePolicyId',
+);

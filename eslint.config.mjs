@@ -28,6 +28,7 @@ export default antfu(
 			'**/.turbo',
 			'node_modules',
 			'**/node_modules',
+			'packages/frontend/videos/*',
 		],
 	},
 	// --- Next.js Specific Rules ---

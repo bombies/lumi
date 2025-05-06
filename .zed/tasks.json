@@ -1,0 +1,29 @@
+[
+	{
+		"label": "Lint",
+		"command": "bun run lint"
+	},
+	{
+		"label": "Lint & Fix",
+		"command": "bun run lint:fix"
+	},
+	{
+		"label": "Check Types",
+		"command": "bun run typecheck"
+	},
+	{
+		"label": "Build",
+		"command": "bun run build",
+		"env": {
+			"STAGE": "ajani"
+		}
+	},
+	{
+		"label": "Deploy (Staging)",
+		"command": "bunx sst deploy --stage staging"
+	},
+	{
+		"label": "Deploy (Production)",
+		"command": "bunx sst deploy --stage production"
+	}
+]
