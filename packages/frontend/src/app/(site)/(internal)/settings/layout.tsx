@@ -17,7 +17,7 @@ const SettingsLayout: FC<PropsWithChildren> = ({ children }) => {
 				<div className="px-2 laptop:p-6 flex">
 					<SidebarTrigger />
 					{' '}
-					<main className="p-0 pb-24 laptop:pl-6 laptop:max-w-[35rem] w-full space-y-6">{children}</main>
+					<main className="p-0 pb-24 laptop:pl-6 laptop:max-w-[55rem] w-full space-y-6">{children}</main>
 				</div>
 			</SidebarInset>
 		</SidebarProvider>

@@ -1,3 +1,4 @@
+import { updateRelationshipDto } from '@lumi/core/relationships/relationship.dto';
 import {
 	acceptRelationshipRequest,
 	deleteRelationshipRequestById,
@@ -5,11 +6,12 @@ import {
 	getReceivedRelationshipRequestsForUser,
 	getSentRelationshipRequestsForUser,
 	sendRelationshipRequest,
+	updateRelationship as updateRelationshipService,
 } from '@lumi/core/relationships/relationship.service';
 import { createInfiniteDataDto } from '@lumi/core/types/infinite-data.dto';
+
 import { getUserById } from '@lumi/core/users/users.service';
 import { z } from 'zod';
-
 import { protectedProcedure, relationshipProcedure, router } from '../../utils/trpc';
 
 export const relationshipsRouter = router({
@@ -18,13 +20,13 @@ export const relationshipsRouter = router({
 	}),
 
 	acceptRelationshipRequest: protectedProcedure
-		.input(z.string().uuid('Invalid relationship request ID!'))
+		.input(z.uuid('Invalid relationship request ID!'))
 		.mutation(({ input, ctx: { user } }) => {
 			return acceptRelationshipRequest(user.id, input);
 		}),
 
 	removeRelationshipRequest: protectedProcedure
-		.input(z.string().uuid('Invalid relationship request ID!'))
+		.input(z.uuid('Invalid relationship request ID!'))
 		.mutation(({ input, ctx: { user } }) => {
 			return deleteRelationshipRequestById(user.id, input);
 		}),
@@ -64,4 +66,11 @@ export const relationshipsRouter = router({
 	}),
 
 	leaveRelationship: relationshipProcedure.mutation(({ ctx: { user } }) => deleteUserRelationship(user.id)),
+
+	updateRelationship: relationshipProcedure
+		.input(updateRelationshipDto)
+		.mutation(({ ctx: { relationship }, input }) => updateRelationshipService({
+			relationshipId: relationship.id,
+			...input,
+		})),
 });
