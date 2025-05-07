@@ -17,5 +17,7 @@ export default defineConfig({
 			],
 		},
 		testTimeout: 30000,
+		printConsoleTrace: true,
+		silent: false,
 	},
 });

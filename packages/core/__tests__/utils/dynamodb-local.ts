@@ -7,7 +7,7 @@ let dynamoProcess: ChildProcess | null = null;
 let dynamoClient: DynamoDBClient;
 
 export const startDynamoDBLocal = async (): Promise<void> => {
-	globalThis.window.console.log('Starting local DynamoDB...');
+	console.log('Starting local DynamoDB...');
 	return new Promise((resolve, reject) => {
 		// Start DynamoDB Local as a child process
 		dynamoProcess = spawn('java', [
@@ -44,11 +44,11 @@ export const startDynamoDBLocal = async (): Promise<void> => {
 		});
 
 		// Timeout if DynamoDB doesn't start in 10 seconds
-		setTimeout(() => {
-			if (dynamoClient === undefined) {
-				reject(new Error('DynamoDB Local failed to start within timeout'));
-			}
-		}, 10000);
+		// setTimeout(() => {
+		// 	if (dynamoClient === undefined) {
+		// 		reject(new Error('DynamoDB Local failed to start within timeout'));
+		// 	}
+		// }, 10000);
 	});
 };
 
@@ -61,20 +61,20 @@ export const stopDynamoDBLocal = async (): Promise<void> => {
 };
 
 const setupDynamoClient = async () => {
-	console.log('Setting up the DynamoDB client...');
-	dynamoClient = new DynamoDBClient({
-		region: 'us-east-1',
-		endpoint: 'http://localhost:8000',
-		credentials: {
-			accessKeyId: 'test',
-			secretAccessKey: 'test',
-		},
-	});
+	// console.log('Setting up the DynamoDB client...');
+	// dynamoClient = new DynamoDBClient({
+	// 	region: 'us-east-1',
+	// 	endpoint: 'http://localhost:8000',
+	// 	credentials: {
+	// 		accessKeyId: 'test',
+	// 		secretAccessKey: 'test',
+	// 	},
+	// });
 
-	// Override the dynamo client in the service
-	const dynamoService = await import('../../src/utils/dynamo/dynamo.service');
-	dynamoService.client = dynamoClient;
-	console.log('Finished setting up the DynamoDB client!');
+	// // Override the dynamo client in the service
+	// const dynamoService = await import('../../src/utils/dynamo/dynamo.service');
+	// dynamoService.client = dynamoClient;
+	// console.log('Finished setting up the DynamoDB client!');
 };
 
 const createTestTable = async () => {

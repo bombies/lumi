@@ -14,8 +14,10 @@ import {
 import { TRPCError } from '@trpc/server';
 import { chunkArray } from '../utils';
 
-// eslint-disable-next-line import/no-mutable-exports, prefer-const
-export let client = new DynamoDBClient();
+const client = new DynamoDBClient({
+	region: 'us-east-1',
+});
+console.log('test dynamo!', client.config.region);
 export const dynamo = DynamoDBDocument.from(client, {
 	marshallOptions: {
 		convertEmptyValues: true,
