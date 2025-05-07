@@ -45,6 +45,7 @@ export type Relationship = {
 	partner1: string;
 	partner2: string;
 	createdAt: string;
+	anniversary?: string;
 } & RelationshipExtras;
 
 export type RelationshipExtras = Partial<{

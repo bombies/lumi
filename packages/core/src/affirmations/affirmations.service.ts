@@ -236,12 +236,11 @@ export const sendAffirmationToUser = async (
 		});
 
 	const mqttConnection
-		= dto.mqttClient
-			?? (await createAsyncWebsocketConnection({
-				endpoint: Resource.RealtimeServer.endpoint,
-				authorizer: Resource.RealtimeServer.authorizer,
-				token: WebSocketToken.GLOBAL,
-			}));
+		= dto.mqttClient ?? (await createAsyncWebsocketConnection({
+			endpoint: Resource.RealtimeServer.endpoint,
+			authorizer: Resource.RealtimeServer.authorizer,
+			token: WebSocketToken.GLOBAL,
+		}));
 
 	await sendNotification({
 		user,
@@ -251,7 +250,7 @@ export const sendAffirmationToUser = async (
 			openUrl: '/affirmations',
 		},
 		opts: {
-			offlineWebSocketMessage: {
+			onlineWebSocketMessage: {
 				mqttConnection,
 				topic: `${process.env.NOTIFICATIONS_TOPIC}/${user.id}/notifications`,
 			},

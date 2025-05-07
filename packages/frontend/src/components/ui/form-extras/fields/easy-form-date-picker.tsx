@@ -1,9 +1,10 @@
 'use client';
 
 import type { FieldValues } from 'react-hook-form';
+import type { CalendarProps } from '../../calendar';
 import type { EasyFormFieldProps } from '../easy-form-field';
-import { format } from 'date-fns';
 
+import { format } from 'date-fns';
 import { CalendarIcon } from 'lucide-react';
 import { cn } from '../../../../lib/utils';
 import { Button } from '../../button';
@@ -18,7 +19,7 @@ type Props<T extends FieldValues> = Pick<
 	'name' | 'label' | 'labelClassName' | 'className' | 'showErrorMessage' | 'optional' | 'description'
 > & {
 	disabled?: (date: Date) => boolean;
-};
+} & CalendarProps;
 
 export default function EasyFormDatePicker<T extends FieldValues>({
 	name,
@@ -29,6 +30,7 @@ export default function EasyFormDatePicker<T extends FieldValues>({
 	showErrorMessage,
 	optional,
 	disabled,
+	...calendarProps
 }: Props<T>) {
 	return (
 		<EasyFormField
@@ -47,7 +49,7 @@ export default function EasyFormDatePicker<T extends FieldValues>({
 									variant="outline"
 									className={cn(
 										'w-[240px] pl-3 text-left font-normal',
-										!field.value && 'text-muted-foreground',
+										!field.value && 'text-muted',
 									)}
 								>
 									{field.value ? format(field.value, 'PPP') : <span>Pick a date</span>}
@@ -61,6 +63,7 @@ export default function EasyFormDatePicker<T extends FieldValues>({
 								selected={field.value}
 								onSelect={field.onChange}
 								disabled={disabled}
+								{...calendarProps}
 							/>
 						</PopoverContent>
 					</Popover>
