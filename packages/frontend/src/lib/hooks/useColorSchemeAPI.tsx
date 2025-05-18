@@ -1,9 +1,9 @@
 'use client';
 
-import { useColorScheme } from '@/components/providers/color-scheme-provider';
 import { MoonIcon, SunIcon, SunMoonIcon } from 'lucide-react';
-
 import { useMemo } from 'react';
+
+import { useColorScheme } from '@/components/providers/color-scheme-provider';
 
 export const useColorSchemeAPI = () => {
 	const { currentColorScheme, setCurrentColorScheme } = useColorScheme();

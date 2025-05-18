@@ -3,15 +3,15 @@
 import type { Affirmation } from '@lumi/core/affirmations/affirmations.types';
 import type { FC } from 'react';
 import type { SubmitHandler } from 'react-hook-form';
-import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import EasyForm from '@/components/ui/form-extras/easy-form';
-
-import EasyFormInput from '@/components/ui/form-extras/fields/easy-form-input';
-import { UpdateAffirmation } from '@/hooks/trpc/affirmation-hooks';
 import { PencilIcon } from 'lucide-react';
 import { useCallback, useState } from 'react';
 import { z } from 'zod';
+
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import EasyForm from '@/components/ui/form-extras/easy-form';
+import EasyFormInput from '@/components/ui/form-extras/fields/easy-form-input';
+import { UpdateAffirmation } from '@/hooks/trpc/affirmation-hooks';
 
 type Props = {
 	affirmation: Affirmation;

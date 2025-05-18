@@ -1,14 +1,14 @@
 'use client';
 
-import type { buttonVariants } from '@/components/ui/button';
 import type { StoredNotification } from '@lumi/core/notifications/notification.types';
 import type { VariantProps } from 'class-variance-authority';
 import type { FC } from 'react';
-import { Button } from '@/components/ui/button';
-import { UpdateNotification } from '@/hooks/trpc/notification-hooks';
-
+import type { buttonVariants } from '@/components/ui/button';
 import { LinkIcon } from '@heroicons/react/24/solid';
 import Link from 'next/link';
+
+import { Button } from '@/components/ui/button';
+import { UpdateNotification } from '@/hooks/trpc/notification-hooks';
 
 type Props = {
 	notification: StoredNotification;

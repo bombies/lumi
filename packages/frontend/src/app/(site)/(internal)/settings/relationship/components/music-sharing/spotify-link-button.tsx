@@ -1,11 +1,11 @@
 'use client';
 
 import type { FC } from 'react';
-import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
 
+import { Button } from '@/components/ui/button';
 import { auth } from '@/lib/better-auth/auth-client';
 import { logger } from '@/lib/logger';
-import { toast } from 'sonner';
 
 type Props = {
 	next?: string;

@@ -2,13 +2,13 @@
 
 import type { FC } from 'react';
 
-import { useRelationship } from '@/components/providers/relationships/relationship-provder';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import UserAvatar from '@/components/ui/user-avatar';
 import { HeartIcon } from '@heroicons/react/24/solid';
 import { convertDate, formatDuration } from '@lumi/core/utils/global-utils';
 import { CalendarHeartIcon } from 'lucide-react';
 import { useMemo } from 'react';
+import { useRelationship } from '@/components/providers/relationships/relationship-provder';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import UserAvatar from '@/components/ui/user-avatar';
 import ChangeAnniversaryDateButton from './change-anniversary-date-button';
 
 const RelationshipSettingsContent: FC = () => {

@@ -2,17 +2,17 @@
 
 import type { FC } from 'react';
 import type { SubmitHandler } from 'react-hook-form';
-import { Button } from '@/components/ui/button';
-import EasyForm from '@/components/ui/form-extras/easy-form';
-import EasyFormInput from '@/components/ui/form-extras/fields/easy-form-input';
-
-import { Separator } from '@/components/ui/separator';
-import { auth } from '@/lib/better-auth/auth-client';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useCallback, useState } from 'react';
+
 import { toast } from 'sonner';
 import { z } from 'zod';
+import { Button } from '@/components/ui/button';
+import EasyForm from '@/components/ui/form-extras/easy-form';
+import EasyFormInput from '@/components/ui/form-extras/fields/easy-form-input';
+import { Separator } from '@/components/ui/separator';
+import { auth } from '@/lib/better-auth/auth-client';
 
 const loginSchema = z.object({
 	usernameOrEmail: z.string().nonempty(),

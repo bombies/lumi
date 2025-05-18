@@ -1,12 +1,12 @@
 'use client';
 
 import type { FC } from 'react';
-import { useRelationship } from '@/components/providers/relationships/relationship-provder';
+import { useEffect } from 'react';
 
+import { useRelationship } from '@/components/providers/relationships/relationship-provder';
 import { Card, CardContent, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { GetSongRecommendations } from '@/hooks/trpc/music-sharing-hooks';
-import { useEffect } from 'react';
 import RecommendSongButton from '../recommend-song-button';
 import PartnerRecommendationsContainer from './partner-recommendations-container';
 import RecommendationHistoryContainer from './recommendation-history-container';

@@ -1,25 +1,25 @@
 'use client';
 
-import type { SelectOption } from '@/components/ui/multiselect';
 import type { FC } from 'react';
 import type { SubmitHandler } from 'react-hook-form';
+import type { SelectOption } from '@/components/ui/multiselect';
+import { UploadIcon, XIcon } from 'lucide-react';
+import Player from 'next-video/player';
+import { useRouter } from 'next/navigation';
+import MediaThemeInstaplay from 'player.style/instaplay/react';
+
+import { useCallback, useMemo, useState } from 'react';
+import { z } from 'zod';
 import { useRelationship } from '@/components/providers/relationships/relationship-provder';
 import { Button } from '@/components/ui/button';
 import EasyForm from '@/components/ui/form-extras/easy-form';
 import EasyFormInput from '@/components/ui/form-extras/fields/easy-form-input';
-
 import EasyFormSelect from '@/components/ui/form-extras/fields/easy-form-select';
 import InfiniteLoader from '@/components/ui/infinite-loader';
 import { Progress } from '@/components/ui/progress';
 import Title from '@/components/ui/title';
 import { CreateMomentDetails, GetRelationshipMomentTags, UploadMoment } from '@/hooks/trpc/moment-hooks';
 import { handleTrpcError } from '@/lib/trpc/utils';
-import { UploadIcon, XIcon } from 'lucide-react';
-import Player from 'next-video/player';
-import { useRouter } from 'next/navigation';
-import MediaThemeInstaplay from 'player.style/instaplay/react';
-import { useCallback, useMemo, useState } from 'react';
-import { z } from 'zod';
 import CreateMomentTagButton from '../../components/create-moment-tag.button';
 
 const momentFormDetailsSchema = z.object({

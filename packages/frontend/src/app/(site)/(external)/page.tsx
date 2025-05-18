@@ -1,9 +1,9 @@
-import { Button } from '@/components/ui/button';
-import { getServerSession } from '@/lib/better-auth/auth-actions';
 import { ArrowRight } from 'lucide-react';
-
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
+
+import { Button } from '@/components/ui/button';
+import { getServerSession } from '@/lib/better-auth/auth-actions';
 
 export default async function Home() {
 	const session = await getServerSession();

@@ -2,15 +2,15 @@
 
 import type { StoredNotification } from '@lumi/core/notifications/notification.types';
 import type { FC } from 'react';
-import { Button } from '@/components/ui/button';
-import { useManagedTableGlobals } from '@/components/ui/table/managed-table-provider';
-import { MarkAllNotificationsAsRead, MarkNotificationsAsRead } from '@/hooks/trpc/notification-hooks';
 import { EnvelopeIcon } from '@heroicons/react/24/solid';
 import { AnimatePresence, motion } from 'motion/react';
-
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { toast } from 'sonner';
+
+import { Button } from '@/components/ui/button';
+import { useManagedTableGlobals } from '@/components/ui/table/managed-table-provider';
+import { MarkAllNotificationsAsRead, MarkNotificationsAsRead } from '@/hooks/trpc/notification-hooks';
 import NotificationVisitButton from './notification-visit-button';
 
 const SelectedNotificationsFloater: FC = () => {

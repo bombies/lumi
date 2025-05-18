@@ -1,14 +1,14 @@
 import type { FC } from 'react';
-import ReceivedRelationshipRequestsContent from '@/app/(site)/(external)/join/components/received-relationship-requests-content';
-import SendRelationshipRequestContent from '@/app/(site)/(external)/join/components/send-relationship-request-content';
-import SignOutButton from '@/components/ui/sign-out-button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-
-import { getServerSession } from '@/lib/better-auth/auth-actions';
 import { EnvelopeIcon, InboxArrowDownIcon, PaperAirplaneIcon } from '@heroicons/react/24/solid';
 import { getRelationshipForUser } from '@lumi/core/relationships/relationship.service';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
+
+import ReceivedRelationshipRequestsContent from '@/app/(site)/(external)/join/components/received-relationship-requests-content';
+import SendRelationshipRequestContent from '@/app/(site)/(external)/join/components/send-relationship-request-content';
+import SignOutButton from '@/components/ui/sign-out-button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { getServerSession } from '@/lib/better-auth/auth-actions';
 import SentRelationshipRequestsContainer from './components/sent-relationship-requests.container';
 
 const JoinPage: FC = async () => {

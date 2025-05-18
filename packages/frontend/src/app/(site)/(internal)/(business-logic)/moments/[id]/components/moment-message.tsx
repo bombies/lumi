@@ -5,6 +5,12 @@ import type { DeepPartial } from '@lumi/core/utils/utils';
 import type { WebSocketEventHandler } from '@lumi/core/websockets/websockets.types';
 import type { FC } from 'react';
 
+import { FaceSmileIcon, TrashIcon } from '@heroicons/react/24/solid';
+import { formatTime } from '@lumi/core/utils/global-utils';
+import { deepMerge } from '@lumi/core/utils/utils';
+import { CheckCheckIcon, CheckIcon } from 'lucide-react';
+import { AnimatePresence, motion } from 'motion/react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useMomentMessageGroupData } from '@/app/(site)/(internal)/(business-logic)/moments/[id]/components/moment-message-group-provider';
 import { useRelationship } from '@/components/providers/relationships/relationship-provder';
 import { WebsocketTopic } from '@/components/providers/web-sockets/topics';
@@ -23,12 +29,6 @@ import { DeleteMomentMessage } from '@/hooks/trpc/moment-hooks';
 import { logger } from '@/lib/logger';
 import { handleTrpcError } from '@/lib/trpc/utils';
 import { cn } from '@/lib/utils';
-import { FaceSmileIcon, TrashIcon } from '@heroicons/react/24/solid';
-import { formatTime } from '@lumi/core/utils/global-utils';
-import { deepMerge } from '@lumi/core/utils/utils';
-import { CheckCheckIcon, CheckIcon } from 'lucide-react';
-import { AnimatePresence, motion } from 'motion/react';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 type Props = {
 	message: MomentMessage;

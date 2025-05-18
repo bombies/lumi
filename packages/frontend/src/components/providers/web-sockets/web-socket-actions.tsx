@@ -1,8 +1,8 @@
 import type { MqttClientType } from '@lumi/core/websockets/websockets.service';
 import type { ErrorWithReasonCode, IClientOptions } from 'mqtt';
-import { logger } from '@/lib/logger';
-
 import { createWebsocketConnection } from '@lumi/core/websockets/websockets.service';
+
+import { logger } from '@/lib/logger';
 
 type ConnectToWebsocketArgs = {
 	endpoint: string;

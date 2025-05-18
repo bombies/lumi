@@ -2,17 +2,17 @@
 
 import type { FC } from 'react';
 import type { SubmitHandler } from 'react-hook-form';
-import { Button } from '@/components/ui/button';
-import EasyForm from '@/components/ui/form-extras/easy-form';
-import EasyFormInput from '@/components/ui/form-extras/fields/easy-form-input';
-
-import { Separator } from '@/components/ui/separator';
-import { auth } from '@/lib/better-auth/auth-client';
 import { registerUserDto } from '@lumi/core/auth/auth.dto';
 import { PASSWORD_REGEX } from '@lumi/core/users/users.dto';
 import { useCallback, useState } from 'react';
+
 import { toast } from 'sonner';
 import { z } from 'zod';
+import { Button } from '@/components/ui/button';
+import EasyForm from '@/components/ui/form-extras/easy-form';
+import EasyFormInput from '@/components/ui/form-extras/fields/easy-form-input';
+import { Separator } from '@/components/ui/separator';
+import { auth } from '@/lib/better-auth/auth-client';
 import { register } from '../actions';
 
 const registerSchema = registerUserDto.and(

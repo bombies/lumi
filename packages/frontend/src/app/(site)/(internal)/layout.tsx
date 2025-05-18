@@ -1,12 +1,12 @@
 import type { FC, PropsWithChildren } from 'react';
+import { redirect } from 'next/navigation';
+import { Resource } from 'sst';
+
 import RelationshipProvider from '@/components/providers/relationships/relationship-provder';
 import NotificationWatcher from '@/components/providers/web-sockets/notification-watcher';
-
 import { PresenceWatcher } from '@/components/providers/web-sockets/presence-watcher';
 import WebSocketProvider from '@/components/providers/web-sockets/web-socket-provider';
 import { requireRelationship } from '@/lib/actions/requireRelationship';
-import { redirect } from 'next/navigation';
-import { Resource } from 'sst';
 
 const InternalLayout: FC<PropsWithChildren> = async ({ children }) => {
 	const { partner, self: user, ...relationship } = await requireRelationship({ withPartner: true, withSelf: true });

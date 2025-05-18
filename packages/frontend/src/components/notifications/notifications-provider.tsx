@@ -2,9 +2,9 @@
 
 import type { FC, PropsWithChildren } from 'react';
 import type { SendNotificationArgs } from './notification-actions';
-import { logger } from '@/lib/logger';
-
 import { createContext, use, useCallback, useEffect, useMemo, useState } from 'react';
+
+import { logger } from '@/lib/logger';
 import { Button } from '../ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog';
 import { sendUserNotification, subscribeUser, unsubscribeUser } from './notification-actions';

@@ -2,11 +2,11 @@
 
 import type { IconType } from '@icons-pack/react-simple-icons';
 import type { FC } from 'react';
-import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-
 import { useMemo } from 'react';
+
+import { cn } from '@/lib/utils';
 
 type FooterItemProps = {
 	label: string;

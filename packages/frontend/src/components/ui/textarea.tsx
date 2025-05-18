@@ -1,9 +1,9 @@
 'use client';
 
-import { logger } from '@/lib/logger';
-import { cn } from '@/lib/utils';
 import * as React from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { logger } from '@/lib/logger';
+import { cn } from '@/lib/utils';
 
 export type TextareaProps = {
 	startContent?: React.ReactNode;

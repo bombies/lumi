@@ -2,10 +2,10 @@
 
 import type { MomentMessage } from '@lumi/core/moments/moment.types';
 import type { FC } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import MomentMessageContainer from '@/app/(site)/(internal)/(business-logic)/moments/[id]/components/moment-message-container';
 import { useMomentMessageGroupData } from '@/app/(site)/(internal)/(business-logic)/moments/[id]/components/moment-message-group-provider';
 import { cn } from '@/lib/utils';
-import { useCallback, useEffect, useRef, useState } from 'react';
 
 type Props = {
 	date: string;

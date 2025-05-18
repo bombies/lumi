@@ -1,6 +1,9 @@
 'use client';
 
 import type { FC } from 'react';
+import { NoSymbolIcon, UserMinusIcon } from '@heroicons/react/24/solid';
+import { toast } from 'sonner';
+
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -13,11 +16,8 @@ import {
 	AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
-
 import { GetSelfUser } from '@/hooks/trpc/user-hooks';
 import { auth } from '@/lib/better-auth/auth-client';
-import { NoSymbolIcon, UserMinusIcon } from '@heroicons/react/24/solid';
-import { toast } from 'sonner';
 
 const DeleteAccountButton: FC = () => {
 	const { data: self } = GetSelfUser();

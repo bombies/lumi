@@ -1,11 +1,11 @@
 'use client';
 
 import type { FC } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { GetUserAccounts } from '@/lib/better-auth/auth-hooks';
-
 import { SiSpotify } from '@icons-pack/react-simple-icons';
 import { useMemo } from 'react';
+
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { GetUserAccounts } from '@/lib/better-auth/auth-hooks';
 import SpotifyLinkButton from './spotify-link-button';
 import SpotifyUnlinkButton from './spotify-unlink-button';
 

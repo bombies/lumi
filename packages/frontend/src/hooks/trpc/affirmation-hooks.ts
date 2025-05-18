@@ -1,8 +1,8 @@
-import { useRouteInvalidation } from '@/lib/hooks/useRouteInvalidation';
+import { toast } from 'sonner';
 
+import { useRouteInvalidation } from '@/lib/hooks/useRouteInvalidation';
 import { trpc } from '@/lib/trpc/trpc-react';
 import { handleTrpcError } from '@/lib/trpc/utils';
-import { toast } from 'sonner';
 
 export const GetReceivedAffirmations = () =>
 	trpc.affirmations.getReceivedAffirmations.useInfiniteQuery(

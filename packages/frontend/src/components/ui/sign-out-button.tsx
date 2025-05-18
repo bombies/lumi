@@ -1,10 +1,10 @@
 'use client';
 
 import type { FC } from 'react';
-import { Button } from '@/components/ui/button';
-
-import { useSignOut } from '@/lib/hooks/useSignOut';
 import { LogOutIcon } from 'lucide-react';
+
+import { Button } from '@/components/ui/button';
+import { useSignOut } from '@/lib/hooks/useSignOut';
 
 type Props = {
 	iconOnly?: boolean;

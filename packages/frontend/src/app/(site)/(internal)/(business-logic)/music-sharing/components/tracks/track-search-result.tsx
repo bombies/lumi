@@ -2,10 +2,10 @@
 
 import type { Track } from '@spotify/web-api-ts-sdk';
 import type { FC } from 'react';
-import Image from '@/components/ui/image';
 import moment from 'moment';
-
 import { useMemo } from 'react';
+
+import Image from '@/components/ui/image';
 
 type Props = {
 	track: Track;

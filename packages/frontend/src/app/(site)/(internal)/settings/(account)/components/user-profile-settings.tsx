@@ -1,9 +1,11 @@
 'use client';
 
 import type { FC } from 'react';
+import { ContentPaths } from '@lumi/core/utils/s3/s3.service';
+import { useState } from 'react';
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { MegaBytes } from '@/components/ui/file-upload/file-size';
-
 import FileUpload from '@/components/ui/file-upload/file-upload';
 import { DefaultImageMediaTypes } from '@/components/ui/file-upload/media-type';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -11,8 +13,6 @@ import UserAvatar from '@/components/ui/user-avatar';
 import { GetSelfUser, UpdateUser, UploadUserAvatar } from '@/hooks/trpc/user-hooks';
 import { deleteS3Object } from '@/lib/actions/s3-actions';
 import { cn } from '@/lib/utils';
-import { ContentPaths } from '@lumi/core/utils/s3/s3.service';
-import { useState } from 'react';
 
 const UserProfileSettings: FC = () => {
 	const { data: user, isLoading: userLoading } = GetSelfUser();

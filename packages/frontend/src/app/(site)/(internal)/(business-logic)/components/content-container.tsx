@@ -1,10 +1,10 @@
 'use client';
 
 import type { FC, PropsWithChildren } from 'react';
-import { cn } from '@/lib/utils';
 import { usePathname } from 'next/navigation';
-
 import { useMemo } from 'react';
+
+import { cn } from '@/lib/utils';
 
 const ContentContainer: FC<PropsWithChildren> = ({ children }) => {
 	const pathname = usePathname();

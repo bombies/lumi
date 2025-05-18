@@ -1,8 +1,8 @@
 'use server';
 
-import { auth } from '@/auth';
-
 import { redirect } from 'next/navigation';
+
+import { auth } from '@/auth';
 import { getServerSession } from '../better-auth/auth-actions';
 
 export const requireSpotifyLink = async () => {

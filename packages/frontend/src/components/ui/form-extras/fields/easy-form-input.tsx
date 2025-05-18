@@ -1,15 +1,15 @@
 'use client';
 
+import type { JSX } from 'react';
+import type { FieldValues } from 'react-hook-form';
 import type { EasyFormFieldProps } from '@/components/ui/form-extras/easy-form-field';
 import type { InputProps } from '@/components/ui/input';
 import type { TextareaProps } from '@/components/ui/textarea';
-import type { JSX } from 'react';
-import type { FieldValues } from 'react-hook-form';
+import { useMemo } from 'react';
 import EasyFormField from '@/components/ui/form-extras/easy-form-field';
 import { Input } from '@/components/ui/input';
 import PasswordInput from '@/components/ui/password-input';
 import { Textarea } from '@/components/ui/textarea';
-import { useMemo } from 'react';
 
 type GlobalProps<T extends FieldValues> = Omit<EasyFormFieldProps<T>, 'children'>;
 

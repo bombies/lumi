@@ -1,15 +1,15 @@
 'use client';
 
 import type { FC } from 'react';
+import { XIcon } from 'lucide-react';
+import { useMemo } from 'react';
+
 import { Button } from '@/components/ui/button';
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-
 import InfiniteLoader from '@/components/ui/infinite-loader';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
-import { XIcon } from 'lucide-react';
-import { useMemo } from 'react';
 import CreateMomentTagButton from '../../components/create-moment-tag.button';
 import MomentsGridContent from '../../components/moments-grid-content';
 import DeleteTagButton from './delete-tag-button';

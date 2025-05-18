@@ -1,8 +1,9 @@
 'use client';
 
 import type { FC, PropsWithChildren } from 'react';
-import { Button } from '@/components/ui/button';
+import { MoonIcon, SunIcon, SunMoonIcon } from 'lucide-react';
 
+import { Button } from '@/components/ui/button';
 import {
 	DropdownMenu,
 	DropdownMenuCheckboxItem,
@@ -10,7 +11,6 @@ import {
 	DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useColorSchemeAPI } from '@/lib/hooks/useColorSchemeAPI';
-import { MoonIcon, SunIcon, SunMoonIcon } from 'lucide-react';
 
 const ColorSchemeToggle: FC<PropsWithChildren> = ({ children }) => {
 	const { currentColorScheme, setCurrentColorScheme, schemeIcon } = useColorSchemeAPI();

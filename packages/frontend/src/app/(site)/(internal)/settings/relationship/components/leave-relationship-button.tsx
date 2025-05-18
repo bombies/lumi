@@ -1,6 +1,10 @@
 'use client';
 
 import type { FC } from 'react';
+import { HeartOffIcon } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
+
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -14,10 +18,6 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { LeaveRelationship } from '@/hooks/trpc/relationship-hooks';
-
-import { HeartOffIcon } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import { toast } from 'sonner';
 
 const LeaveRelationshipButton: FC = () => {
 	const { mutateAsync: leaveRelationship } = LeaveRelationship();

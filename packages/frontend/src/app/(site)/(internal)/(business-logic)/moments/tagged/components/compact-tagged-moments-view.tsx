@@ -1,12 +1,12 @@
 'use client';
 
-import type { SelectOption } from '@/components/ui/multiselect';
 import type { FC } from 'react';
+import type { SelectOption } from '@/components/ui/multiselect';
 
+import { useMemo } from 'react';
 import InfiniteLoader from '@/components/ui/infinite-loader';
 import { Select } from '@/components/ui/multiselect';
 import { Separator } from '@/components/ui/separator';
-import { useMemo } from 'react';
 import CreateMomentTagButton from '../../components/create-moment-tag.button';
 import MomentsGridContent from '../../components/moments-grid-content';
 import DeleteTagButton from './delete-tag-button';

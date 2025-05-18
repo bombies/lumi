@@ -1,11 +1,11 @@
 'use client';
 
 import type { FC } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-
 import { EyeIcon, EyeOffIcon } from 'lucide-react';
 import { useState } from 'react';
+
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 
 type Props = Omit<React.InputHTMLAttributes<HTMLInputElement>, 'type'>;
 

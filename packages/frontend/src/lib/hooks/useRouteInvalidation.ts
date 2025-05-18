@@ -1,8 +1,8 @@
 'use client';
 
-import { trpc } from '@/lib/trpc/trpc-react';
-
 import { getQueryKey } from '@trpc/react-query';
+
+import { trpc } from '@/lib/trpc/trpc-react';
 
 export const useRouteInvalidation = (procedureOrRouters: Parameters<typeof getQueryKey>[0][]) => {
 	const utils = trpc.useUtils();

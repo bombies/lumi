@@ -1,26 +1,26 @@
 'use client';
 
-import type { SelectOption } from '@/components/ui/multiselect';
 import type { Moment } from '@lumi/core/moments/moment.types';
 import type { FC } from 'react';
 import type { SubmitHandler } from 'react-hook-form';
-import { Button } from '@/components/ui/button';
-import EasyForm from '@/components/ui/form-extras/easy-form';
-import EasyFormInput from '@/components/ui/form-extras/fields/easy-form-input';
-import EasyFormSelect from '@/components/ui/form-extras/fields/easy-form-select';
-import InfiniteLoader from '@/components/ui/infinite-loader';
-
-import Title from '@/components/ui/title';
-import { GetMomentTags, GetRelationshipMomentTags, UpdateMomentDetails } from '@/hooks/trpc/moment-hooks';
-import { handleTrpcError } from '@/lib/trpc/utils';
+import type { SelectOption } from '@/components/ui/multiselect';
 import { UploadIcon, XIcon } from 'lucide-react';
 import Player from 'next-video/player';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import MediaThemeInstaplay from 'player.style/instaplay/react';
+
 import { useCallback, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { z } from 'zod';
+import { Button } from '@/components/ui/button';
+import EasyForm from '@/components/ui/form-extras/easy-form';
+import EasyFormInput from '@/components/ui/form-extras/fields/easy-form-input';
+import EasyFormSelect from '@/components/ui/form-extras/fields/easy-form-select';
+import InfiniteLoader from '@/components/ui/infinite-loader';
+import Title from '@/components/ui/title';
+import { GetMomentTags, GetRelationshipMomentTags, UpdateMomentDetails } from '@/hooks/trpc/moment-hooks';
+import { handleTrpcError } from '@/lib/trpc/utils';
 import CreateMomentTagButton from '../../../components/create-moment-tag.button';
 
 const momentFormDetailsSchema = z.object({

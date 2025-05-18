@@ -2,12 +2,12 @@
 
 import type { ProviderAccount } from '@lumi/core/auth/better-auth.types';
 import type { FC } from 'react';
-import { Button } from '@/components/ui/button';
-import { auth } from '@/lib/better-auth/auth-client';
-
-import { logger } from '@/lib/logger';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
+
+import { Button } from '@/components/ui/button';
+import { auth } from '@/lib/better-auth/auth-client';
+import { logger } from '@/lib/logger';
 
 type Props = {
 	spotifyIdentity: ProviderAccount;

@@ -2,6 +2,10 @@
 
 import type { IconType } from '@icons-pack/react-simple-icons';
 import type { FC } from 'react';
+import { HomeIcon } from '@heroicons/react/24/solid';
+import Link from 'next/link';
+import { useMemo } from 'react';
+
 import { Button } from '@/components/ui/button';
 import {
 	Sidebar,
@@ -15,10 +19,6 @@ import {
 	SidebarMenuButton,
 	SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { HomeIcon } from '@heroicons/react/24/solid';
-
-import Link from 'next/link';
-import { useMemo } from 'react';
 import { useNotificationsView } from './notifications-view-provider';
 
 type SidebarItem = {

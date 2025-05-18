@@ -2,9 +2,9 @@
 
 import type { StoredNotification } from '@lumi/core/notifications/notification.types';
 import type { FC, PropsWithChildren } from 'react';
-import { GetNotifications, GetUnreadNotificationCount } from '@/hooks/trpc/notification-hooks';
-
 import { createContext, use, useMemo, useState } from 'react';
+
+import { GetNotifications, GetUnreadNotificationCount } from '@/hooks/trpc/notification-hooks';
 
 type NotificationsViewData = {
 	filter: {

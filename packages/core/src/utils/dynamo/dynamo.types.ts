@@ -79,6 +79,14 @@ class RelationshipDbKeys extends AbstractDbKeys {
 	sk(relationshipId: string) {
 		return this.buildKey(relationshipId);
 	}
+
+	gsi1pk() {
+		return this.buildKey('anniversary');
+	}
+
+	gsi1sk(anniversaryMMDD: string, relationshipId: string) {
+		return this.buildKey(anniversaryMMDD, relationshipId);
+	}
 }
 
 class AffirmationDbKeys extends AbstractDbKeys {
@@ -220,7 +228,7 @@ class WebSocketHeartbeatDbKeys extends AbstractDbKeys {
 }
 
 export class DynamoKey {
-	private constructor() {}
+	private constructor() { }
 
 	static user = new UserDbKeys('user#');
 

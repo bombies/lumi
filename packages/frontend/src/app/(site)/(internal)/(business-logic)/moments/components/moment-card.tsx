@@ -1,7 +1,8 @@
 import type { Moment } from '@lumi/core/moments/moment.types';
 import type { FC } from 'react';
-import { Card, CardContent, CardTitle } from '@/components/ui/card';
+import Link from 'next/link';
 
+import { Card, CardContent, CardTitle } from '@/components/ui/card';
 import Image from '@/components/ui/image';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -9,7 +10,6 @@ import UserAvatar from '@/components/ui/user-avatar';
 import { GetMomentTags } from '@/hooks/trpc/moment-hooks';
 import { GetUserByIdSafe } from '@/hooks/trpc/user-hooks';
 import { cn } from '@/lib/utils';
-import Link from 'next/link';
 
 type Props = {
 	moment: Moment;

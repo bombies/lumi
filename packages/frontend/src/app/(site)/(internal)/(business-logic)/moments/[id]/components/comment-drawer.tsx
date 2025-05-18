@@ -5,11 +5,15 @@ import type { WebSocketEventHandler } from '@lumi/core/websockets/websockets.typ
 import type { Variants } from 'motion/react';
 import type { FC } from 'react';
 import type { SubmitHandler } from 'react-hook-form';
+import { ChatBubbleOvalLeftEllipsisIcon, PaperAirplaneIcon } from '@heroicons/react/24/solid';
+import { AnimatePresence, motion } from 'motion/react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { z } from 'zod';
+
 import MomentMessageGroup from '@/app/(site)/(internal)/(business-logic)/moments/[id]/components/moment-message-group';
 import MomentMessageGroupProvider from '@/app/(site)/(internal)/(business-logic)/moments/[id]/components/moment-message-group-provider';
 import MomentMessageGroupSkeleton from '@/app/(site)/(internal)/(business-logic)/moments/[id]/components/moment-message-group-skeleton';
 import { useRelationship } from '@/components/providers/relationships/relationship-provder';
-
 import { WebsocketTopic } from '@/components/providers/web-sockets/topics';
 import { useWebSocket } from '@/components/providers/web-sockets/web-socket-provider';
 import { Button } from '@/components/ui/button';
@@ -22,10 +26,6 @@ import { Textarea } from '@/components/ui/textarea';
 import UserAvatar from '@/components/ui/user-avatar';
 import { GetMessagesForMoment } from '@/hooks/trpc/moment-hooks';
 import { logger } from '@/lib/logger';
-import { ChatBubbleOvalLeftEllipsisIcon, PaperAirplaneIcon } from '@heroicons/react/24/solid';
-import { AnimatePresence, motion } from 'motion/react';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { z } from 'zod';
 
 type Props = {
 	moment: Moment;

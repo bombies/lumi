@@ -1,9 +1,9 @@
 'use client';
 
 import type { FC } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-
 import { SiSpotify } from '@icons-pack/react-simple-icons';
+
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import SpotifyLinkButton from '../../../../settings/relationship/components/music-sharing/spotify-link-button';
 import { useSpotifyData } from '../spotify-provider';
 import ShareMusicContainer from './share-music-container';

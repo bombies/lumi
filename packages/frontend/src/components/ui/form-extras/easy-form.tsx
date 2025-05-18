@@ -3,11 +3,11 @@
 import type { ReactElement } from 'react';
 import type { DefaultValues, FieldValues, SubmitHandler, UseFormReturn } from 'react-hook-form';
 import type { z } from 'zod';
-import { logger } from '@/lib/logger';
-
 import { zodResolver } from '@hookform/resolvers/zod';
+
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
+import { logger } from '@/lib/logger';
 import { Form as ShadForm } from '../form';
 import EasyFormProvider from './easy-form-provider';
 

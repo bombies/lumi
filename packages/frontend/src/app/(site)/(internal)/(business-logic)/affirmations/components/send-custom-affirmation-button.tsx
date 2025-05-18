@@ -3,6 +3,10 @@
 import type { FC } from 'react';
 import type { SubmitHandler } from 'react-hook-form';
 import type { z } from 'zod';
+import { PaperAirplaneIcon } from '@heroicons/react/24/solid';
+import { sendCustomAffirmationDto } from '@lumi/core/affirmations/affirmations.dto';
+import { useCallback, useState } from 'react';
+
 import { Button } from '@/components/ui/button';
 import {
 	Dialog,
@@ -13,12 +17,8 @@ import {
 	DialogTrigger,
 } from '@/components/ui/dialog';
 import EasyForm from '@/components/ui/form-extras/easy-form';
-
 import EasyFormInput from '@/components/ui/form-extras/fields/easy-form-input';
 import { SendCustomAffirmation } from '@/hooks/trpc/affirmation-hooks';
-import { PaperAirplaneIcon } from '@heroicons/react/24/solid';
-import { sendCustomAffirmationDto } from '@lumi/core/affirmations/affirmations.dto';
-import { useCallback, useState } from 'react';
 
 const customAffirmationFormSchema = sendCustomAffirmationDto;
 type CustomAffirmationFormSchema = z.infer<typeof customAffirmationFormSchema>;

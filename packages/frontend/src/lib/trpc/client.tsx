@@ -3,12 +3,12 @@
 import type { AppRouter } from '@lumi/functions/types';
 import type { QueryClient } from '@tanstack/react-query';
 import type { TRPCClientError } from '@trpc/client';
-import { trpc } from '@/lib/trpc/trpc-react';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { httpBatchLink } from '@trpc/client';
-
 import axios from 'axios';
+
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { trpc } from '@/lib/trpc/trpc-react';
 import { auth } from '../better-auth/auth-client';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { logger } from '../logger';
