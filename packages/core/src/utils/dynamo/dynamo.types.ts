@@ -1,3 +1,4 @@
+import { ImportantDateDbKeys } from '../../calendar/calendar.keys';
 import { MomentMessageDbKeys } from '../../moments/keys/moment-message.keys';
 import { MomentTagDbKeys } from '../../moments/keys/moment-tag.keys';
 import { MomentDbKeys } from '../../moments/keys/moment.keys';
@@ -250,6 +251,8 @@ export class DynamoKey {
 	static songRecommendation = new SongRecommendationDbKeys('songrec#');
 
 	static webSocketHeartbeat = new WebSocketHeartbeatDbKeys('ws::heartbeat#');
+
+	static importantDate = new ImportantDateDbKeys('rship_date#');
 }
 
 export enum EntityType {
@@ -272,4 +275,6 @@ export enum EntityType {
 	WEBSOCKET_HEARTBEAT = 'WEBSOCKET_HEARTBEAT',
 
 	SONG_RECOMMENDATION = 'SONG_RECOMMENDATION',
+
+	IMPORTANT_DATE = 'IMPORTANT_DATE',
 }

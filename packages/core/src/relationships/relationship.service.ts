@@ -10,6 +10,7 @@ import type {
 import { TRPCError } from '@trpc/server';
 import { buildInfiniteData } from '../types/infinite-data.dto';
 import { getUserById } from '../users/users.service';
+import { dateToMMDD } from '../utils/datetime';
 import { deleteItem, dynamo, getItem, getItems, putItem, updateItem, writeTransaction } from '../utils/dynamo/dynamo.service';
 import { DynamoKey, EntityType } from '../utils/dynamo/dynamo.types';
 import { chunkArray, getUUID } from '../utils/utils';
@@ -383,7 +384,7 @@ export const updateRelationship = async ({ relationshipId, ...dto }: UpdateRelat
 
 	if (dto.anniversary) {
 		const date = new Date(dto.anniversary);
-		const mmDD = `${date.getMonth() + 1}-${date.getDate()}`;
+		const mmDD = dateToMMDD(date);
 		update.anniversary = date.toISOString();
 		update.anniversaryMMDD = mmDD;
 
@@ -399,7 +400,7 @@ export const updateRelationship = async ({ relationshipId, ...dto }: UpdateRelat
 };
 
 export const getAnniversaryRelationships = async (anniversary: Date = new Date()) => {
-	const mmDD = `${anniversary.getMonth() + 1}-${anniversary.getDate()}`;
+	const mmDD = dateToMMDD(anniversary);
 
 	return getItems<Relationship>({
 		index: 'GSI1',
