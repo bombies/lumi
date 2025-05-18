@@ -66,3 +66,41 @@ if ($app.stage === 'production') {
 		},
 	});
 }
+
+const anniversarySenderDLQ = new sst.aws.Queue('AnniversarySenderDLQ');
+
+export const anniversarySenderQueue = new sst.aws.Queue('AnniversarySenderQueue', {
+	dlq: {
+		queue: anniversarySenderDLQ.arn,
+		retry: 3,
+	},
+});
+
+anniversarySenderQueue.subscribe({
+	name: appify('AnniversarySenderHandler'),
+	handler: 'packages/functions/cron/anniversaries.aggregator',
+	link: [realtimeServer, vapidPublicKey, vapidPrivateKey, db],
+	runtime: 'nodejs22.x',
+	environment: {
+		NOTIFICATIONS_TOPIC: notificationsTopic,
+		TABLE_NAME: db.name,
+	},
+	copyFiles: [
+		{
+			from: 'packages/frontend/public/favicon-96x96.png',
+		},
+	],
+});
+
+export const anniversarySenderJob = new sst.aws.Cron('AnniversaryAggregatorJob', {
+	schedule: $dev ? 'rate(30 minutes)' : 'cron(0 14 * * ? *)',
+	function: {
+		handler: 'packages/functions/cron/anniversaries.sender',
+		runtime: 'nodejs22.x',
+		link: [db, anniversarySenderQueue],
+		environment: {
+			TABLE_NAME: db.name,
+			SENTRY_AUTH_TOKEN: sentryAuthToken.value,
+		},
+	},
+});

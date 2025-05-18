@@ -1,7 +1,8 @@
-import type { Nullable } from '../types/util.types';
+import type { ScanCommandInput, ScanCommandOutput } from '@aws-sdk/lib-dynamodb';
 
+import type { Nullable } from '../types/util.types';
 import type { User } from '../users/user.types';
-import type { GetRelationshipRequestsForUserDto } from './relationship.dto';
+import type { GetRelationshipRequestsForUserDto, UpdateRelationshipDto } from './relationship.dto';
 import type {
 	DatabaseRelationship,
 	DatabaseRelationshipRequest,
@@ -11,7 +12,7 @@ import type {
 import { TRPCError } from '@trpc/server';
 import { buildInfiniteData } from '../types/infinite-data.dto';
 import { getUserById } from '../users/users.service';
-import { deleteItem, dynamo, getItem, getItems, putItem, writeTransaction } from '../utils/dynamo/dynamo.service';
+import { deleteItem, dynamo, getItem, getItems, putItem, updateItem, writeTransaction } from '../utils/dynamo/dynamo.service';
 import { DynamoKey, EntityType } from '../utils/dynamo/dynamo.types';
 import { chunkArray, getUUID } from '../utils/utils';
 
@@ -375,4 +376,43 @@ export const deleteUserRelationship = async (
 			cause: e,
 		});
 	}
+};
+
+export const updateRelationship = async ({ relationshipId, ...dto }: UpdateRelationshipDto & { relationshipId: string }) => {
+	return updateItem<DatabaseRelationship>({
+		pk: DynamoKey.relationship.pk(relationshipId),
+		sk: DynamoKey.relationship.sk(relationshipId),
+		update: {
+			...dto,
+		},
+	});
+};
+
+export const aggregateRelationshipsWithAnniversary = async (anniversary: Date = new Date()) => {
+	const date = anniversary.toISOString().split('T')[0];
+
+	const params: ScanCommandInput = {
+		TableName: process.env.TABLE_NAME,
+		FilterExpression: 'begins_with(#anniversary, :anniversary) and #entityType = :entityType',
+		ExpressionAttributeNames: {
+			'#anniversary': 'anniversary',
+			'#entityType': 'entityType',
+		},
+		ExpressionAttributeValues: {
+			':anniversary': date,
+			':entityType': EntityType.RELATIONSHIP,
+		},
+
+	};
+
+	const items: DatabaseRelationship[] = [];
+
+	let res: ScanCommandOutput | undefined;
+	do {
+		res = await dynamo.scan({ ...params, ExclusiveStartKey: res?.LastEvaluatedKey });
+		if (res.Items)
+			items.push(...(res.Items as DatabaseRelationship[]));
+	} while (res.LastEvaluatedKey);
+
+	return items;
 };

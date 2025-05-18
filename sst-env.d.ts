@@ -13,6 +13,14 @@ declare module "sst" {
       "type": "sst.aws.Queue"
       "url": string
     }
+    "AnniversarySenderDLQ": {
+      "type": "sst.aws.Queue"
+      "url": string
+    }
+    "AnniversarySenderQueue": {
+      "type": "sst.aws.Queue"
+      "url": string
+    }
     "AuthSecret": {
       "type": "sst.sst.Secret"
       "value": string
@@ -139,7 +147,7 @@ declare module "sst" {
       "type": "sst.sst.Secret"
       "value": string
     }
-    "lumi-staging-cdn-key-group": {
+    "lumi-ajani-cdn-key-group": {
       "id": string
       "items": any
       "type": "aws.cloudfront/keyGroup.KeyGroup"

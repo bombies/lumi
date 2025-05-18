@@ -15,5 +15,10 @@ export const getRelationshipRequestsForUserDto = createInfiniteDataDto({
 	}),
 );
 
+export const updateRelationshipDto = z.object({
+	anniversary: z.iso.datetime(),
+}).partial();
+
 export type CreateRelationshipRequestDto = z.infer<typeof createRelationshipRequestDto>;
 export type GetRelationshipRequestsForUserDto = z.infer<typeof getRelationshipRequestsForUserDto>;
+export type UpdateRelationshipDto = z.infer<typeof updateRelationshipDto>;

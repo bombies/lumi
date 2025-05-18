@@ -83,7 +83,7 @@ export const sendNotification = async ({
 		metadata?: Record<string, any>;
 	};
 	opts?: {
-		offlineWebSocketMessage?: {
+		onlineWebSocketMessage?: {
 			mqttConnection: MqttClientType;
 			topic: string;
 		};
@@ -152,12 +152,12 @@ export const sendNotification = async ({
 				openUrl: payload.openUrl,
 			});
 		} else {
-			if (!opts?.offlineWebSocketMessage)
+			if (!opts?.onlineWebSocketMessage)
 				return console.log(`User ${user.username} is online... Skipping websocket notification`);
 
 			console.log(`${user.username} is online... Sending notification through websocket`);
-			const mqttConnection = opts.offlineWebSocketMessage.mqttConnection;
-			const topic = opts.offlineWebSocketMessage.topic;
+			const mqttConnection = opts.onlineWebSocketMessage.mqttConnection;
+			const topic = opts.onlineWebSocketMessage.topic;
 			await emitAsyncWebsocketEvent({
 				client: mqttConnection,
 				topic,
