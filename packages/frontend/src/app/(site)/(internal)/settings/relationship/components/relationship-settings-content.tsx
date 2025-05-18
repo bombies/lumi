@@ -39,9 +39,9 @@ const RelationshipSettingsContent: FC = () => {
 						{self.firstName}
 					</h3>
 					<div className="text-center tablet:text-left items-center flex gap-2">
-						<CalendarHeartIcon className="size-[16px] inline-block text-primary" />
-						{' '}
 						<p>
+							<CalendarHeartIcon className="size-[16px] inline-block text-primary shrink-0" />
+							{' '}
 							Together since
 							{' '}
 							<span className="text-primary font-semibold">
