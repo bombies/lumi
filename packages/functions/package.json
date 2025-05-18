@@ -1,5 +1,6 @@
 {
 	"name": "@lumi/functions",
+	"private": true,
 	"type": "module",
 	"version": "0.0.0",
 	"exports": [
@@ -11,12 +12,12 @@
 		"typecheck": "tsc --noEmit"
 	},
 	"dependencies": {
-		"@aws-sdk/client-dynamodb": "3.787.0",
-		"@aws-sdk/client-lambda": "^3.787.0",
-		"@aws-sdk/client-s3": "^3.787.0",
-		"@aws-sdk/client-sqs": "^3.787.0",
-		"@aws-sdk/credential-providers": "^3.787.0",
-		"@aws-sdk/lib-dynamodb": "3.787.0",
+		"@aws-sdk/client-dynamodb": "3.812.0",
+		"@aws-sdk/client-lambda": "^3.812.0",
+		"@aws-sdk/client-s3": "^3.812.0",
+		"@aws-sdk/client-sqs": "^3.812.0",
+		"@aws-sdk/credential-providers": "^3.812.0",
+		"@aws-sdk/lib-dynamodb": "3.812.0",
 		"@datastructures-js/priority-queue": "^6.3.2",
 		"@lumi/core": "*",
 		"@lumi/emails": "*",

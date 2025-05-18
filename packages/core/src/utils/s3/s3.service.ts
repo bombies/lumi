@@ -14,7 +14,7 @@ import { substituteVariables } from '../utils';
 export class StorageClient {
 	private readonly client = new S3Client();
 
-	constructor(private readonly bucket: string) {}
+	constructor(private readonly bucket: string) { }
 
 	uploadObject(key: string, body: StreamingBlobPayloadInputTypes) {
 		const uploadClient = new Upload({
@@ -159,7 +159,7 @@ export class ContentPaths {
 	private static USER_AVATAR = 'user/{userId}/avatar/';
 	private static RELATIONSHIP_MOMENTS = 'private/relationships/{relationshipId}/moments/';
 
-	private constructor() {}
+	private constructor() { }
 
 	private static replaceVariables(path: string, variables: Record<string, string>, args?: ReplaceVariablesArgs) {
 		const val = substituteVariables(path, variables);
