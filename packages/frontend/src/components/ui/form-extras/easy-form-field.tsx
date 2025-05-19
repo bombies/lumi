@@ -40,6 +40,11 @@ export type EasyFormFieldProps<T extends FieldValues> = Readonly<{
 	}) => React.ReactElement<any>;
 }>;
 
+export type EasyFormFieldComponentProps<T extends FieldValues> = Pick<
+	EasyFormFieldProps<T>,
+	'name' | 'label' | 'labelClassName' | 'className' | 'showErrorMessage' | 'optional' | 'description'
+>;
+
 export default function EasyFormField<T extends FieldValues = FieldValues>({
 	name,
 	label,

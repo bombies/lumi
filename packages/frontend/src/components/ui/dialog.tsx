@@ -4,9 +4,10 @@ import type { VariantProps } from 'class-variance-authority';
 import * as DialogPrimitive from '@radix-ui/react-dialog';
 import { cva } from 'class-variance-authority';
 import { XIcon } from 'lucide-react';
-import * as React from 'react';
 
+import * as React from 'react';
 import { cn } from '@/lib/utils';
+import { Separator } from './separator';
 
 function Dialog({ ...props }: React.ComponentProps<typeof DialogPrimitive.Root>) {
 	return <DialogPrimitive.Root data-slot="dialog" {...props} />;
@@ -100,8 +101,13 @@ function DialogContent({ className, position, size, children, hideCloseButton, .
 	);
 }
 
-function DialogHeader({ className, ...props }: React.ComponentProps<'div'>) {
-	return <div data-slot="dialog-header" className={cn('flex flex-col gap-2', className)} {...props} />;
+function DialogHeader({ className, children, ...props }: React.ComponentProps<'div'>) {
+	return (
+		<div data-slot="dialog-header" className={cn('flex flex-col gap-2', className)} {...props}>
+			{children}
+			<Separator className="my-2" />
+		</div>
+	);
 }
 
 function DialogFooter({ className, ...props }: React.ComponentProps<'div'>) {

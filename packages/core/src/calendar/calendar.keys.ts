@@ -1,3 +1,4 @@
+import type { ImportantDateType } from './calendar.types';
 import { AbstractDbKeys } from '../utils/dynamo/abstract.keys';
 
 export class ImportantDateDbKeys extends AbstractDbKeys {
@@ -26,6 +27,14 @@ export class ImportantDateDbKeys extends AbstractDbKeys {
 	}
 
 	gsi2sk(mmDD: string, eventId: string) {
+		return this.buildKey(mmDD, 'event', eventId);
+	}
+
+	gsi3pk(relationshipId: string, type: ImportantDateType) {
+		return this.buildKey(relationshipId, type);
+	}
+
+	gsi3sk(mmDD: string, eventId: string) {
 		return this.buildKey(mmDD, 'event', eventId);
 	}
 }

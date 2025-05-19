@@ -3,6 +3,7 @@
 import type { ImportantDate } from '@lumi/core/calendar/calendar.types';
 import type { FC } from 'react';
 import type { CalendarMonthDay } from '../utils';
+import { formatNumberWithOrdinalSuffix } from '@lumi/core/utils/datetime';
 import clsx from 'clsx';
 import { useMemo } from 'react';
 import { Badge } from '@/components/ui/badge';
@@ -16,15 +17,18 @@ type Props = {
 };
 
 const CalendarDay: FC<Props> = ({ importantDates, day }) => {
-	const isToday = useMemo(() => {
+	const date = useMemo(() => {
 		const date = new Date(day.dateString);
 		date.setHours(0, 0, 0, 0);
+		return date;
+	}, [day.dateString]);
 
+	const isToday = useMemo(() => {
 		const today = new Date();
 		return date.getFullYear() === today.getFullYear()
 			&& date.getMonth() === today.getMonth()
 			&& date.getDate() === today.getDate();
-	}, [day.dateString]);
+	}, [date]);
 
 	return (
 		<Dialog>
@@ -61,18 +65,32 @@ const CalendarDay: FC<Props> = ({ importantDates, day }) => {
 												<div className="space-y-2 my-2 hidden tablet:block">
 													{
 														importantDates.slice(0, Math.min(importantDates.length, 2))
-															.map(importantDate => (
-																<div
-																	key={importantDate.id}
-																	className={cn(
-																		'bg-primary/10 border border-primary/60 py-1 px-4 rounded-sm',
-																	)}
-																>
-																	<p className="text-xs font-semibold line-clamp-3 text-left">
-																		{importantDate.title}
-																	</p>
-																</div>
-															))
+															.map((importantDate) => {
+																const currentYear = date.getFullYear();
+																const repeatedCount = currentYear - new Date(importantDate.date).getFullYear();
+																return (
+																	<div
+																		key={importantDate.id}
+																		className={cn(
+																			'bg-primary/10 border border-primary/60 py-1 px-1 rounded-[6px]',
+																		)}
+																	>
+
+																		<p className="text-xs font-semibold line-clamp-3 text-left">
+																			{importantDate.annual && repeatedCount
+																				? (
+																						<span
+																							className="flex justify-center items-center rounded-t-[4px] p-1 mb-1 bg-primary h-fit text-[8px]"
+																						>
+																							{formatNumberWithOrdinalSuffix(repeatedCount)}
+																						</span>
+																					)
+																				: undefined}
+																			{importantDate.title}
+																		</p>
+																	</div>
+																);
+															})
 													}
 												</div>
 												<div className="flex justify-center tablet:hidden">
@@ -103,24 +121,37 @@ const CalendarDay: FC<Props> = ({ importantDates, day }) => {
 						{importantDates.length > 1 ? 's' : ''}
 					</p>
 					<div className="border border-border rounded-md space-y-2 p-4">
-						{importantDates.map(importantDate => (
-							<div
-								key={importantDate.id}
-								className="bg-primary/10 border border-primary/60 py-1 px-4 rounded-sm"
-							>
-								<p className="text-lg font-semibold overflow-hidden overflow-ellipsis">
-									{importantDate.title}
-								</p>
-								{importantDate.notes && (
-									<>
-										<Separator className="my-2" />
-										<p>
-											{importantDate.notes}
-										</p>
-									</>
-								)}
-							</div>
-						))}
+						{importantDates.map((importantDate) => {
+							const currentYear = date.getFullYear();
+							const repeatedCount = currentYear - new Date(importantDate.date).getFullYear();
+							return (
+								<div
+									key={importantDate.id}
+									className="bg-primary/10 border border-primary/60 py-1 px-4 rounded-sm"
+								>
+									<p className="text-lg font-semibold overflow-hidden overflow-ellipsis flex items-center gap-2">
+										{importantDate.annual && repeatedCount
+											? (
+													<span
+														className="flex justify-center items-center rounded-full py-1 px-2 bg-primary text-xs"
+													>
+														{formatNumberWithOrdinalSuffix(repeatedCount)}
+													</span>
+												)
+											: undefined}
+										{importantDate.title}
+									</p>
+									{importantDate.notes && (
+										<>
+											<Separator className="my-2" />
+											<p>
+												{importantDate.notes}
+											</p>
+										</>
+									)}
+								</div>
+							);
+						})}
 					</div>
 				</div>
 			</DialogContent>

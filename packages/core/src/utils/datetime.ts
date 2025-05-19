@@ -1,5 +1,17 @@
-export const dateToMMDD = (date: Date) =>
-	`${date.getMonth() + 1}-${date.getDate()}`;
+export const dateToMMDD = (date: Date): string => {
+	if (!(date instanceof Date) || Number.isNaN(date.getTime())) {
+		console.error('Invalid date provided to dateToMMDD');
+		throw new Error('Invalid Date');
+	}
+
+	const month = date.getMonth() + 1;
+	const day = date.getDate();
+
+	const paddedMonth = month < 10 ? `0${month}` : `${month}`;
+	const paddedDay = day < 10 ? `0${day}` : `${day}`;
+
+	return `${paddedMonth}-${paddedDay}`;
+};
 
 export const startOfMonth = (date: Date = new Date()) => {
 	const start = new Date(date);

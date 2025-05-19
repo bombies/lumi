@@ -2,7 +2,7 @@
 
 import type { FieldValues } from 'react-hook-form';
 import type { CalendarProps } from '../../calendar';
-import type { EasyFormFieldProps } from '../easy-form-field';
+import type { EasyFormFieldComponentProps } from '../easy-form-field';
 
 import { format } from 'date-fns';
 import { CalendarIcon } from 'lucide-react';
@@ -14,10 +14,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '../../popover';
 import EasyFormField from '../easy-form-field';
 import EasyFormLabel from './easy-form-label';
 
-type Props<T extends FieldValues> = Pick<
-	EasyFormFieldProps<T>,
-	'name' | 'label' | 'labelClassName' | 'className' | 'showErrorMessage' | 'optional' | 'description'
-> & {
+type Props<T extends FieldValues> = EasyFormFieldComponentProps<T> & {
 	disabled?: (date: Date) => boolean;
 } & CalendarProps;
 
