@@ -27,9 +27,9 @@ const nextConfig: NextConfig = {
 		dirs: ['.'],
 	},
 	transpilePackages: ['@lumi/core', '@lumi/emails'],
-	experimental: {
-		reactCompiler: true,
-	},
+	// experimental: {
+	// 	reactCompiler: true,
+	// },
 	async headers() {
 		return [
 			{
