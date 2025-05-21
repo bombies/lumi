@@ -3,6 +3,7 @@
 import type { ImportantDate } from '@lumi/core/calendar/calendar.types';
 import type { FC } from 'react';
 import { ChevronDoubleLeftIcon, ChevronDoubleRightIcon } from '@heroicons/react/24/solid';
+import { ImportantDateType } from '@lumi/core/calendar/calendar.types';
 import { dateToMMDD, formatNumberWithOrdinalSuffix } from '@lumi/core/utils/datetime';
 import { useMemo, useState } from 'react';
 import { useRelationship } from '@/components/providers/relationships/relationship-provder';
@@ -30,6 +31,7 @@ const ImportantDateCalendar: FC = () => {
 			if (anniversaryOffset >= 0 && anniversaryDate.getMonth() === currentMonth - 1) {
 				flattenedDates.push({
 					id: 'anniversary',
+					type: ImportantDateType.ANNIVERSARY,
 					date: anniversaryDate.toISOString(),
 					dateMMDD: anniverdaryDateMMDD,
 					annual: true,

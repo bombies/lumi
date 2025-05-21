@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
+import ImportantDateCard from './important-date-card';
 
 type Props = {
 	importantDates: ImportantDate[];
@@ -52,7 +53,14 @@ const CalendarDay: FC<Props> = ({ importantDates, day }) => {
 									{isToday && <Badge>TODAY</Badge>}
 									{importantDates.length
 										? (
-												<Badge>{importantDates.length}</Badge>
+												<Badge className="text-[8px]">
+													{importantDates.length}
+													<span className="hidden phone-big:block">
+														{' '}
+														event
+														{importantDates.length > 1 ? 's' : ''}
+													</span>
+												</Badge>
 											)
 										: undefined}
 								</p>
@@ -111,7 +119,6 @@ const CalendarDay: FC<Props> = ({ importantDates, day }) => {
 							dateStyle: 'full',
 						})}
 					</DialogTitle>
-					<Separator className="my-2" />
 				</DialogHeader>
 				<div className="space-y-6">
 					<p className="text-xl font-semibold bg-primary py-1 px-6 rounded-sm w-fit">
@@ -121,37 +128,16 @@ const CalendarDay: FC<Props> = ({ importantDates, day }) => {
 						{importantDates.length > 1 ? 's' : ''}
 					</p>
 					<div className="border border-border rounded-md space-y-2 p-4">
-						{importantDates.map((importantDate) => {
-							const currentYear = date.getFullYear();
-							const repeatedCount = currentYear - new Date(importantDate.date).getFullYear();
-							return (
-								<div
+						{importantDates.map(importantDate =>
+							(
+								<ImportantDateCard
 									key={importantDate.id}
-									className="bg-primary/10 border border-primary/60 py-1 px-4 rounded-sm"
-								>
-									<p className="text-lg font-semibold overflow-hidden overflow-ellipsis flex items-center gap-2">
-										{importantDate.annual && repeatedCount
-											? (
-													<span
-														className="flex justify-center items-center rounded-full py-1 px-2 bg-primary text-xs"
-													>
-														{formatNumberWithOrdinalSuffix(repeatedCount)}
-													</span>
-												)
-											: undefined}
-										{importantDate.title}
-									</p>
-									{importantDate.notes && (
-										<>
-											<Separator className="my-2" />
-											<p>
-												{importantDate.notes}
-											</p>
-										</>
-									)}
-								</div>
-							);
-						})}
+									importantDate={importantDate}
+									date={date}
+								/>
+
+							),
+						)}
 					</div>
 				</div>
 			</DialogContent>
