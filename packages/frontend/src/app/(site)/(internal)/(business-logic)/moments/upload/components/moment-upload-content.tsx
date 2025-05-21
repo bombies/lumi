@@ -1,12 +1,12 @@
 'use client';
 
 import type { FC } from 'react';
-import { MegaBytes } from '@/components/ui/file-upload/file-size';
-import FileUpload from '@/components/ui/file-upload/file-upload';
-
-import { DefaultVideoMediaTypes } from '@/components/ui/file-upload/media-type';
 import { UploadIcon } from 'lucide-react';
 import { useState } from 'react';
+
+import { MegaBytes } from '@/components/ui/file-upload/file-size';
+import FileUpload from '@/components/ui/file-upload/file-upload';
+import { DefaultVideoMediaTypes } from '@/components/ui/file-upload/media-type';
 import MomentUploadForm from './moment-upload-form';
 
 const MomentUploadContent: FC = () => {

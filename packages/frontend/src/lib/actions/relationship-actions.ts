@@ -1,10 +1,10 @@
 'use server';
 
-import { WebsocketTopic } from '@/components/providers/web-sockets/topics';
-import { sendServerWebsocketMessage } from '@/components/providers/web-sockets/web-socket-server-actions';
-
 import { getRelationshipForUser } from '@lumi/core/relationships/relationship.service';
 import { updateUser } from '@lumi/core/users/users.service';
+
+import { WebsocketTopic } from '@/components/providers/web-sockets/topics';
+import { sendServerWebsocketMessage } from '@/components/providers/web-sockets/web-socket-server-actions';
 import { logger } from '../logger';
 
 export const getRelationshipByUserId = async (userId: string) => {

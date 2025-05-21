@@ -1,9 +1,9 @@
 'use client';
 
 import type { FC, PropsWithChildren } from 'react';
-import { useLocalStorage } from '@/lib/hooks/useLocalStorage';
-
 import { createContext, use, useEffect, useState } from 'react';
+
+import { useLocalStorage } from '@/lib/hooks/useLocalStorage';
 
 export type ColorScheme = 'light' | 'dark';
 

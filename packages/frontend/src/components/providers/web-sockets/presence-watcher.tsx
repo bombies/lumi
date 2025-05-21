@@ -4,10 +4,10 @@ import type { Relationship } from '@lumi/core/relationships/relationship.types';
 import type { User } from '@lumi/core/users/user.types';
 import type { InferredWebSocketMessage, WebSocketEventHandler } from '@lumi/core/websockets/websockets.types';
 import type { FC } from 'react';
-import { useWebSocket } from '@/components/providers/web-sockets/web-socket-provider';
-
-import { logger } from '@/lib/logger';
 import { useCallback, useEffect, useRef, useState } from 'react';
+
+import { useWebSocket } from '@/components/providers/web-sockets/web-socket-provider';
+import { logger } from '@/lib/logger';
 import { WebsocketTopic } from './topics';
 
 const IDLE_TIMEOUT = 5 * 60 * 1000; // 5 minutes

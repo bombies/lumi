@@ -6,9 +6,9 @@ import type { InferredWebSocketMessagePayload, WebSocketEventHandler } from '@lu
 import type { FC, PropsWithChildren } from 'react';
 import type { InferredSelfStatePayload, SelfState, SelfStateData } from './self-state';
 
+import { createContext, use, useCallback, useEffect, useMemo, useState } from 'react';
 import { useWebSocket } from '@/components/providers/web-sockets/web-socket-provider';
 import { logger } from '@/lib/logger';
-import { createContext, use, useCallback, useEffect, useMemo, useState } from 'react';
 import { WebsocketTopic } from '../web-sockets/topics';
 
 type RelationshipProviderData = {

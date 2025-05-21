@@ -5,13 +5,13 @@ import type {
 	InferredWebSocketMessagePayload,
 	WebSocketMessage,
 } from '@lumi/core/websockets/websockets.types';
-import { logger } from '@/lib/logger';
 import { createWebsocketConnection } from '@lumi/core/websockets/websockets.service';
 import {
 	WebSocketToken,
 } from '@lumi/core/websockets/websockets.types';
-
 import { Resource } from 'sst';
+
+import { logger } from '@/lib/logger';
 
 export const sendServerWebsocketMessage = async <T extends Event>(
 	event: T,

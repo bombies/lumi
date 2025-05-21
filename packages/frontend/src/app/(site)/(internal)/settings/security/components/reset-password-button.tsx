@@ -2,15 +2,15 @@
 
 import type { FC } from 'react';
 import type { SubmitHandler } from 'react-hook-form';
-import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import EasyForm from '@/components/ui/form-extras/easy-form';
-
-import EasyFormInput from '@/components/ui/form-extras/fields/easy-form-input';
-import { auth } from '@/lib/better-auth/auth-client';
 import { useCallback, useState } from 'react';
 import { toast } from 'sonner';
 import { z } from 'zod';
+
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import EasyForm from '@/components/ui/form-extras/easy-form';
+import EasyFormInput from '@/components/ui/form-extras/fields/easy-form-input';
+import { auth } from '@/lib/better-auth/auth-client';
 
 const resetPasswordFormSchema = z.object({
 	oldPassword: z.string().min(1, 'Old password is required'),

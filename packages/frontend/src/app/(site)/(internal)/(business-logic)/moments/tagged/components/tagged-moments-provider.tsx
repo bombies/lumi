@@ -2,9 +2,9 @@
 
 import type { Moment, RelationshipMomentTag } from '@lumi/core/moments/moment.types';
 import type { FC, PropsWithChildren } from 'react';
-import { GetMomentsForRelationshipTag, GetRelationshipMomentTags } from '@/hooks/trpc/moment-hooks';
-
 import { createContext, use, useMemo, useState } from 'react';
+
+import { GetMomentsForRelationshipTag, GetRelationshipMomentTags } from '@/hooks/trpc/moment-hooks';
 
 type TaggedMomentsProviderData = {
 	search: {

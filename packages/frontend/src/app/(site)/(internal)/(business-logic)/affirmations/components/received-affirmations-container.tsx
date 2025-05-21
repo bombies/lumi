@@ -1,11 +1,11 @@
 'use client';
 
-import InfiniteLoader from '@/components/ui/infinite-loader';
+import { useMemo } from 'react';
 
+import InfiniteLoader from '@/components/ui/infinite-loader';
 import { Separator } from '@/components/ui/separator';
 import { GetReceivedAffirmations } from '@/hooks/trpc/affirmation-hooks';
 import { flattenPages } from '@/lib/utils';
-import { useMemo } from 'react';
 import AffirmationGroupSkeleton from './affirmation-group-skeleton';
 import MostRecentAffirmationSkeleton from './most-recent-affirmation-skeleton';
 

@@ -3,15 +3,15 @@
 import type { Moment } from '@lumi/core/moments/moment.types';
 import type { User as LumiUser } from '@lumi/core/users/user.types';
 import type { FC } from 'react';
+import { motion } from 'framer-motion';
+import { useEffect, useState } from 'react';
+
 import { WebsocketTopic } from '@/components/providers/web-sockets/topics';
 import { useWebSocket } from '@/components/providers/web-sockets/web-socket-provider';
-
 import { Separator } from '@/components/ui/separator';
 import UserAvatar from '@/components/ui/user-avatar';
 import { GetMomentTags } from '@/hooks/trpc/moment-hooks';
 import { cn } from '@/lib/utils';
-import { motion } from 'framer-motion';
-import { useEffect, useState } from 'react';
 import CommentDrawer from './comment-drawer';
 import MomentSettings from './moment-settings';
 

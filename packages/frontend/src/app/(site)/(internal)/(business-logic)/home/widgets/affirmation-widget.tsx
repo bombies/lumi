@@ -1,14 +1,14 @@
 'use client';
 
 import type { FC } from 'react';
-import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
-import { Skeleton } from '@/components/ui/skeleton';
-
-import { GetTodaysAffirmations } from '@/hooks/trpc/affirmation-hooks';
 import { HeartIcon } from '@heroicons/react/24/solid';
 import Link from 'next/link';
 import { Fragment, useMemo } from 'react';
+
+import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
+import { Skeleton } from '@/components/ui/skeleton';
+import { GetTodaysAffirmations } from '@/hooks/trpc/affirmation-hooks';
 
 const AffirmationWidget: FC = () => {
 	const { data: todaysAffirmations, isLoading: affirmationsLoading } = GetTodaysAffirmations();

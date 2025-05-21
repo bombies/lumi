@@ -2,10 +2,10 @@
 
 import type { Moment } from '@lumi/core/moments/moment.types';
 import type { FC } from 'react';
-import InfiniteLoader from '@/components/ui/infinite-loader';
 import { Separator } from '@radix-ui/react-separator';
-
 import { useMemo } from 'react';
+
+import InfiniteLoader from '@/components/ui/infinite-loader';
 import MomentCard from './moment-card';
 import MomentCardSkeleton from './moment-card-skeleton';
 

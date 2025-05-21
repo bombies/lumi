@@ -1,13 +1,13 @@
 'use client';
 
 import type { FC } from 'react';
-import { Button } from '@/components/ui/button';
-import InfiniteLoader from '@/components/ui/infinite-loader';
-
-import { Separator } from '@/components/ui/separator';
-import { GetSongRecommendations } from '@/hooks/trpc/music-sharing-hooks';
 import { RefreshCwIcon } from 'lucide-react';
 import { useMemo } from 'react';
+
+import { Button } from '@/components/ui/button';
+import InfiniteLoader from '@/components/ui/infinite-loader';
+import { Separator } from '@/components/ui/separator';
+import { GetSongRecommendations } from '@/hooks/trpc/music-sharing-hooks';
 import RecommendedTrack from '../tracks/recommended-track';
 import TrackSearchResultSkeleton from '../tracks/track-search-result-skeleton';
 

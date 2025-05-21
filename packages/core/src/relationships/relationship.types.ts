@@ -46,6 +46,7 @@ export type Relationship = {
 	partner2: string;
 	createdAt: string;
 	anniversary?: string;
+	anniversaryMMDD?: string;
 } & RelationshipExtras;
 
 export type RelationshipExtras = Partial<{
@@ -62,5 +63,13 @@ export type DatabaseRelationship = Relationship & {
 	 * rship#<id>
 	 */
 	sk: string;
+	/**
+	 * rship#anniversary
+	 */
+	gsi1pk?: string;
+	/**
+	 * <mm-dd>#rship#<rship_id>
+	 */
+	gsi1sk?: string;
 	entityType: EntityType.RELATIONSHIP;
 };

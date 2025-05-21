@@ -2,11 +2,11 @@
 
 import type { InferredWebSocketMessagePayload } from '@lumi/core/websockets/websockets.types';
 import type { FC } from 'react';
-import { StoreNotification } from '@/hooks/trpc/notification-hooks';
-import { GetSelfUserOnDemand } from '@/hooks/trpc/user-hooks';
-
 import { useEffect } from 'react';
 import { toast } from 'sonner';
+
+import { StoreNotification } from '@/hooks/trpc/notification-hooks';
+import { GetSelfUserOnDemand } from '@/hooks/trpc/user-hooks';
 import { useRelationship } from '../relationships/relationship-provder';
 import { useWebSocket } from './web-socket-provider';
 

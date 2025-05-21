@@ -1,11 +1,11 @@
 'use client';
 
 import type { FC } from 'react';
-import InfiniteLoader from '@/components/ui/infinite-loader';
+import { useMemo } from 'react';
 
+import InfiniteLoader from '@/components/ui/infinite-loader';
 import { Separator } from '@/components/ui/separator';
 import { GetSongRecommendations } from '@/hooks/trpc/music-sharing-hooks';
-import { useMemo } from 'react';
 import RecommendedTrack from '../tracks/recommended-track';
 import TrackSearchResultSkeleton from '../tracks/track-search-result-skeleton';
 

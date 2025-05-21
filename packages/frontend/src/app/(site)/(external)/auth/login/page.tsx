@@ -1,9 +1,9 @@
 import type { FC } from 'react';
-import ErrorHandler from '@/app/(site)/(external)/auth/components/error-handler';
+import { redirect } from 'next/navigation';
 
+import ErrorHandler from '@/app/(site)/(external)/auth/components/error-handler';
 import LoginForm from '@/app/(site)/(external)/auth/components/login-form';
 import { getServerSession } from '@/lib/better-auth/auth-actions';
-import { redirect } from 'next/navigation';
 
 const LoginPage: FC = async () => {
 	const session = await getServerSession();

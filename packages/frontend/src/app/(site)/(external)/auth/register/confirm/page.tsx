@@ -1,7 +1,7 @@
 import type { FC } from 'react';
-import { getServerSession } from '@/lib/better-auth/auth-actions';
-
 import { redirect } from 'next/navigation';
+
+import { getServerSession } from '@/lib/better-auth/auth-actions';
 import SignOutText from './sign-out-text';
 
 const RegisterConfirmPage: FC = async () => {

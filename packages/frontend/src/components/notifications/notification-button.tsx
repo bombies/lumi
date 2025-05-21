@@ -1,6 +1,12 @@
 'use client';
 
 import type { FC } from 'react';
+import { CheckIcon, InboxIcon } from '@heroicons/react/24/solid';
+import { BellIcon } from 'lucide-react';
+import Link from 'next/link';
+import { Fragment, useMemo } from 'react';
+import { toast } from 'sonner';
+
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import {
@@ -8,12 +14,6 @@ import {
 	GetUnreadNotificationCount,
 	MarkAllNotificationsAsRead,
 } from '@/hooks/trpc/notification-hooks';
-import { CheckIcon, InboxIcon } from '@heroicons/react/24/solid';
-import { BellIcon } from 'lucide-react';
-
-import Link from 'next/link';
-import { Fragment, useMemo } from 'react';
-import { toast } from 'sonner';
 import { Separator } from '../ui/separator';
 import NotificationPreview from './notification-preview';
 import NotificationPreviewSkeleton from './notification-preview-skeleton';

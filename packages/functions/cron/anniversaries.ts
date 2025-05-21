@@ -3,7 +3,7 @@ import type { User } from '@lumi/core/users/user.types';
 import type { APIGatewayProxyEventV2, Handler, SQSEvent } from 'aws-lambda';
 import { SQS } from '@aws-sdk/client-sqs';
 import { sendNotification } from '@lumi/core/notifications/notifications.service';
-import { aggregateRelationshipsWithAnniversary } from '@lumi/core/relationships/relationship.service';
+import { getAnniversaryRelationships } from '@lumi/core/relationships/relationship.service';
 import { getUserById } from '@lumi/core/users/users.service';
 import { createAsyncWebsocketConnection } from '@lumi/core/websockets/websockets.service';
 import { WebSocketToken } from '@lumi/core/websockets/websockets.types';
@@ -12,8 +12,8 @@ import { Resource } from 'sst';
 const queue = new SQS();
 
 export const aggregator: Handler<APIGatewayProxyEventV2> = async () => {
-	console.log('Checking for any anniversaries today....');
-	const relationships = await aggregateRelationshipsWithAnniversary();
+	console.log('Checking for any anniversaries today...');
+	const relationships = await getAnniversaryRelationships();
 
 	console.log(`Queueing affirmation notifications for ${relationships.length} relationships...`);
 	for (let i = 0; i < relationships.length; i++) {

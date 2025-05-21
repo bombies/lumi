@@ -1,10 +1,10 @@
 import type { FC } from 'react';
-import BreadcrumbBuilder from '@/components/ui/breadcrumb-builder';
-import { Button } from '@/components/ui/button';
-
-import Title from '@/components/ui/title';
 import { UploadIcon } from 'lucide-react';
 import Link from 'next/link';
+
+import BreadcrumbBuilder from '@/components/ui/breadcrumb-builder';
+import { Button } from '@/components/ui/button';
+import Title from '@/components/ui/title';
 import MomentsGrid from './components/moments-grid';
 
 const MomentsPage: FC = () => {

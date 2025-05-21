@@ -1,15 +1,15 @@
 import type { Metadata, Viewport } from 'next';
-import Providers from '@/components/providers/providers';
-import ReactScan from '@/components/react-scan';
-
-import { getServerSession } from '@/lib/better-auth/auth-actions';
-import { getHydrationHelpers } from '@/lib/trpc/server';
-
 import { Cookie } from 'next/font/google';
-
 import localFont from 'next/font/local';
 
 import Script from 'next/script';
+import Providers from '@/components/providers/providers';
+
+import ReactScan from '@/components/react-scan';
+
+import { getServerSession } from '@/lib/better-auth/auth-actions';
+
+import { getHydrationHelpers } from '@/lib/trpc/server';
 import './globals.css';
 
 const sfProDisplay = localFont({

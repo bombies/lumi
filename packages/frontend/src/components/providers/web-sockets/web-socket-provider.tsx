@@ -8,17 +8,17 @@ import type {
 	WebSocketEventHandler,
 } from '@lumi/core/websockets/websockets.types';
 import type { FC, PropsWithChildren } from 'react';
-import { connectToWebsocket } from '@/components/providers/web-sockets/web-socket-actions';
-import { UpdateUser } from '@/hooks/trpc/user-hooks';
-import { useQueue } from '@/lib/hooks/useQueue';
-
-import { logger } from '@/lib/logger';
 import { emitAsyncWebsocketEvent } from '@lumi/core/websockets/websockets.service';
 import {
 	events,
 	WebSocketToken,
 } from '@lumi/core/websockets/websockets.types';
 import { createContext, use, useCallback, useEffect, useMemo, useState } from 'react';
+
+import { connectToWebsocket } from '@/components/providers/web-sockets/web-socket-actions';
+import { UpdateUser } from '@/hooks/trpc/user-hooks';
+import { useQueue } from '@/lib/hooks/useQueue';
+import { logger } from '@/lib/logger';
 import { WebsocketTopic } from './topics';
 
 type WebSocketProviderProps = PropsWithChildren<{

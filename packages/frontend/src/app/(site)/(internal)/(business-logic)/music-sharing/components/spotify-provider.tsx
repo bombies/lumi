@@ -1,11 +1,11 @@
 'use client';
 
-import type { UseSpotifyAPIReturnType } from '@/lib/hooks/useSpotifyAPI';
 import type { ProviderAccount } from '@lumi/core/auth/better-auth.types';
 import type { FC, PropsWithChildren } from 'react';
+import type { UseSpotifyAPIReturnType } from '@/lib/hooks/useSpotifyAPI';
 
-import { useSpotifyAPI } from '@/lib/hooks/useSpotifyAPI';
 import { createContext, use, useMemo } from 'react';
+import { useSpotifyAPI } from '@/lib/hooks/useSpotifyAPI';
 
 type SpotifyProviderData = {
 	isLinked: boolean;

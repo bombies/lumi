@@ -2,14 +2,14 @@
 
 import type { SongRecommendation } from '@lumi/core/song-recommendations/song-recommendation.types';
 import type { FC } from 'react';
-import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import Image from '@/components/ui/image';
 import { PlayIcon } from '@heroicons/react/24/solid';
-
 import { SiSpotify } from '@icons-pack/react-simple-icons';
 import Link from 'next/link';
 import { useState } from 'react';
+
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import Image from '@/components/ui/image';
 import RateRecommendationButton from './rate-recommendation-button';
 
 type Props = {

@@ -1,4 +1,5 @@
 import { affirmationsRouter } from './routes/affirmations/route';
+import { calendarRouter } from './routes/calendar/route';
 import { momentsRouter } from './routes/moments/route';
 import { musicSharingRouter } from './routes/music-sharing/route';
 import { notificationsRouter } from './routes/notifications/route';
@@ -13,4 +14,5 @@ export const appRouter = router({
 	moments: momentsRouter,
 	musicSharing: musicSharingRouter,
 	notifications: notificationsRouter,
+	calendar: calendarRouter,
 });

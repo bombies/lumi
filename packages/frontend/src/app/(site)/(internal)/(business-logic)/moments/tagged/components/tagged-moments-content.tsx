@@ -1,10 +1,10 @@
 'use client';
 
 import type { FC } from 'react';
-import { Button } from '@/components/ui/button';
 import { Grid2X2Icon, Grid3X3Icon } from 'lucide-react';
-
 import { useState } from 'react';
+
+import { Button } from '@/components/ui/button';
 import CompactTaggedMomentsView from './compact-tagged-moments-view';
 import SpaciousTaggedMomentsView from './spacious-tagged-moments-view';
 import TaggedMomentsProvider from './tagged-moments-provider';

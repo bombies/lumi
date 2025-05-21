@@ -1,14 +1,14 @@
 'use client';
 
 import type { SubmitHandler } from 'react-hook-form';
+import { useCallback, useState } from 'react';
+import { z } from 'zod';
+
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-
 import EasyForm from '@/components/ui/form-extras/easy-form';
 import EasyFormInput from '@/components/ui/form-extras/fields/easy-form-input';
 import { CreateAffirmation } from '@/hooks/trpc/affirmation-hooks';
-import { useCallback, useState } from 'react';
-import { z } from 'zod';
 
 const affirmationFormSchema = z.object({
 	affirmation: z.string().min(1).max(150),

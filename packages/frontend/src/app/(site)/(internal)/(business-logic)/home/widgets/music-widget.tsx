@@ -1,14 +1,14 @@
 'use client';
 
 import type { FC } from 'react';
-import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
-import { GetSongRecommendations } from '@/hooks/trpc/music-sharing-hooks';
-
-import { cn } from '@/lib/utils';
 import { MusicalNoteIcon } from '@heroicons/react/24/solid';
 import Link from 'next/link';
 import { Fragment, useMemo } from 'react';
+
+import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
+import { GetSongRecommendations } from '@/hooks/trpc/music-sharing-hooks';
+import { cn } from '@/lib/utils';
 import RecommendedTrack from '../../music-sharing/components/tracks/recommended-track';
 import TrackSearchResultSkeleton from '../../music-sharing/components/tracks/track-search-result-skeleton';
 

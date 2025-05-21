@@ -1,6 +1,10 @@
 'use client';
 
 import type { FC } from 'react';
+import { TrashIcon } from '@heroicons/react/24/solid';
+import { useState } from 'react';
+import { toast } from 'sonner';
+
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -14,10 +18,6 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { DeleteRelationshipMomentTag } from '@/hooks/trpc/moment-hooks';
-
-import { TrashIcon } from '@heroicons/react/24/solid';
-import { useState } from 'react';
-import { toast } from 'sonner';
 
 type Props = {
 	tag: string;

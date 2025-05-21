@@ -1,9 +1,9 @@
 'use client';
 
 import type { FC } from 'react';
-import { useLocalStorage } from '@/lib/hooks/useLocalStorage';
-
 import { useEffect, useState } from 'react';
+
+import { useLocalStorage } from '@/lib/hooks/useLocalStorage';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog';
 
 const InstallPrompt: FC = () => {

@@ -1,8 +1,8 @@
 import type { FC } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-
-import { Skeleton } from '@/components/ui/skeleton';
 import { SiSpotify } from '@icons-pack/react-simple-icons';
+
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const MusicSharingSettingsSkeleton: FC = () => {
 	return (

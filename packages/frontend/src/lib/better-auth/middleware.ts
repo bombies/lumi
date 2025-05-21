@@ -10,6 +10,7 @@ const AUTH_WALLED_MATHCERS: string[] = [
 	'/music-sharing',
 	'/settings',
 	'/join',
+	'/calendar',
 ];
 
 export async function updateSession(request: NextRequest) {

@@ -1,12 +1,12 @@
 'use client';
 
 import type { FC } from 'react';
-import FooterItem from '@/components/footer/footer-item';
-import { cn } from '@/lib/utils';
 import { CameraIcon, HeartIcon, HomeIcon, MusicalNoteIcon } from '@heroicons/react/24/solid';
-
 import { usePathname } from 'next/navigation';
 import { useMemo } from 'react';
+
+import FooterItem from '@/components/footer/footer-item';
+import { cn } from '@/lib/utils';
 
 const DOCKED_MATHCERS = [/^\/moments\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/g];
 

@@ -2,13 +2,13 @@
 
 import type { EmojiPickerListCategoryHeaderProps, EmojiPickerListEmojiProps, EmojiPickerListRowProps } from 'frimousse';
 import type * as React from 'react';
-import { cn } from '@/lib/utils';
 import {
 
 	EmojiPicker as EmojiPickerPrimitive,
 } from 'frimousse';
-
 import { LoaderIcon, SearchIcon } from 'lucide-react';
+
+import { cn } from '@/lib/utils';
 
 function EmojiPicker({ className, ...props }: React.ComponentProps<typeof EmojiPickerPrimitive.Root>) {
 	return (

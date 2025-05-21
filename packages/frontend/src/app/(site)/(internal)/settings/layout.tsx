@@ -1,8 +1,8 @@
 import type { FC, PropsWithChildren } from 'react';
-import SettingsSidebar from '@/app/(site)/(internal)/settings/settings-sidebar';
-
-import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { SettingsIcon } from 'lucide-react';
+
+import SettingsSidebar from '@/app/(site)/(internal)/settings/settings-sidebar';
+import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 
 const SettingsLayout: FC<PropsWithChildren> = ({ children }) => {
 	return (

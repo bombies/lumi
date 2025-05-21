@@ -1,8 +1,8 @@
 import type { FC } from 'react';
-import NotificationButton from '@/components/notifications/notification-button';
-
-import { cn } from '@/lib/utils';
 import Link from 'next/link';
+
+import NotificationButton from '@/components/notifications/notification-button';
+import { cn } from '@/lib/utils';
 import UserProfileButton from './user-profile-button';
 
 type Props = {

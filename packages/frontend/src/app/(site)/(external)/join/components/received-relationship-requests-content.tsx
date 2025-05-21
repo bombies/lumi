@@ -3,17 +3,17 @@
 import type { RelationshipRequest } from '@lumi/core/relationships/relationship.types';
 import type { User } from '@lumi/core/users/user.types';
 import type { FC } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Skeleton } from '@/components/ui/skeleton';
-import { useRouteInvalidation } from '@/lib/hooks/useRouteInvalidation';
-
-import { trpc } from '@/lib/trpc/trpc-react';
-import { getErrorMessage } from '@/lib/trpc/utils';
 import { CheckIcon, XIcon } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useMemo } from 'react';
 import { toast } from 'sonner';
+
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useRouteInvalidation } from '@/lib/hooks/useRouteInvalidation';
+import { trpc } from '@/lib/trpc/trpc-react';
+import { getErrorMessage } from '@/lib/trpc/utils';
 
 const FetchReceivedRequests = () =>
 	trpc.relationships.getReceivedRelationshipRequests.useInfiniteQuery(

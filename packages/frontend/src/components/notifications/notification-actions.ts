@@ -2,14 +2,14 @@
 
 import type { NotificationSubscriber } from '@lumi/core/notifications/notification.types';
 import type { PushSubscription as WebPushSubscription } from 'web-push';
-import { getServerSession } from '@/lib/better-auth/auth-actions';
-
 import {
 	createNotificationSubscription,
 	deleteNotificationSubscription,
 	getNotificationSubscriptions,
 } from '@lumi/core/notifications/notifications.service';
+
 import webpush from 'web-push';
+import { getServerSession } from '@/lib/better-auth/auth-actions';
 
 webpush.setVapidDetails(
 	'mailto:contact@ajani.me',

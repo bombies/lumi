@@ -1,17 +1,17 @@
 'use client';
 
 import type { FC } from 'react';
-import { Card, CardContent, CardDescription, CardHeader } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Skeleton } from '@/components/ui/skeleton';
-import { FetchUsersByUsername } from '@/hooks/trpc/user-hooks';
-import { trpc } from '@/lib/trpc/trpc-react';
-
 import { TRPCClientError } from '@trpc/client';
 import { AnimatePresence, motion } from 'motion/react';
 import { useRouter } from 'next/navigation';
 import { useCallback, useMemo, useState } from 'react';
 import { toast } from 'sonner';
+
+import { Card, CardContent, CardDescription, CardHeader } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Skeleton } from '@/components/ui/skeleton';
+import { FetchUsersByUsername } from '@/hooks/trpc/user-hooks';
+import { trpc } from '@/lib/trpc/trpc-react';
 
 const SendUserRelationshipRequest = () => trpc.relationships.sendRelationshipRequest.useMutation();
 

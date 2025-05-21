@@ -1,12 +1,12 @@
-import type { AsyncParams } from '@/lib/types';
 import type { FC } from 'react';
-import { getServerSession } from '@/lib/better-auth/auth-actions';
+import type { AsyncParams } from '@/lib/types';
 import { getMomentDetailsById } from '@lumi/core/moments/moment.service';
 import { getUserById } from '@lumi/core/users/users.service';
 import Player from 'next-video/player';
-
 import { notFound } from 'next/navigation';
+
 import MediaThemeInstaplay from 'player.style/instaplay/react';
+import { getServerSession } from '@/lib/better-auth/auth-actions';
 import MomentDetailsContainer from './components/moment-details-container';
 
 type Props = AsyncParams<{ id: string }>;

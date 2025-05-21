@@ -1,11 +1,11 @@
 'use client';
 
 import type { SpotifyApi } from '@spotify/web-api-ts-sdk';
-import { useSpotifyData } from '@/app/(site)/(internal)/(business-logic)/music-sharing/components/spotify-provider';
+import { skipToken, useQuery } from '@tanstack/react-query';
 
+import { useSpotifyData } from '@/app/(site)/(internal)/(business-logic)/music-sharing/components/spotify-provider';
 import { auth } from '@/lib/better-auth/auth-client';
 import { logger } from '@/lib/logger';
-import { skipToken, useQuery } from '@tanstack/react-query';
 
 const useSpotifyQuery = <T>(path: string, queryCb?: (api: SpotifyApi) => Promise<T>) => {
 	const {

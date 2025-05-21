@@ -2,16 +2,16 @@
 
 import type { FC } from 'react';
 import type { SubmitHandler } from 'react-hook-form';
-import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import EasyForm from '@/components/ui/form-extras/easy-form';
-
-import EasyFormInput from '@/components/ui/form-extras/fields/easy-form-input';
-import { CreateRelationshipMomentTag } from '@/hooks/trpc/moment-hooks';
 import { TagIcon } from '@heroicons/react/24/solid';
 import { useCallback, useState } from 'react';
 import { toast } from 'sonner';
+
 import { z } from 'zod';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import EasyForm from '@/components/ui/form-extras/easy-form';
+import EasyFormInput from '@/components/ui/form-extras/fields/easy-form-input';
+import { CreateRelationshipMomentTag } from '@/hooks/trpc/moment-hooks';
 
 const momentTagCreationFormSchema = z.object({
 	tag: z.string().min(1).max(50),

@@ -2,13 +2,13 @@
 
 import type { WebSocketEventHandler } from '@lumi/core/websockets/websockets.types';
 import type { FC } from 'react';
-import { useWebSocket } from '@/components/providers/web-sockets/web-socket-provider';
+import { useEffect, useState } from 'react';
 
+import { useWebSocket } from '@/components/providers/web-sockets/web-socket-provider';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { auth } from '@/lib/better-auth/auth-client';
 import { logger } from '@/lib/logger';
-import { useEffect, useState } from 'react';
 
 const WebSocketTest: FC = () => {
 	const { data: session } = auth.useSession();

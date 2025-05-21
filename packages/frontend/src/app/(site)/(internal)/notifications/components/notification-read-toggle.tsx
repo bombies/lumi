@@ -2,12 +2,12 @@
 
 import type { StoredNotification } from '@lumi/core/notifications/notification.types';
 import type { FC } from 'react';
-import { Button } from '@/components/ui/button';
-import { UpdateNotification } from '@/hooks/trpc/notification-hooks';
 import { EnvelopeIcon, EnvelopeOpenIcon } from '@heroicons/react/24/solid';
-
 import { useCallback } from 'react';
 import { toast } from 'sonner';
+
+import { Button } from '@/components/ui/button';
+import { UpdateNotification } from '@/hooks/trpc/notification-hooks';
 
 type Props = {
 	notification: StoredNotification;

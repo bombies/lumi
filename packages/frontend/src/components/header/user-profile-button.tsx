@@ -1,12 +1,19 @@
 'use client';
 
 import type { FC } from 'react';
-import { useColorSchemeAPI } from '@/lib/hooks/useColorSchemeAPI';
-import { useSignOut } from '@/lib/hooks/useSignOut';
-import { HeartIcon, LockClosedIcon, PaintBrushIcon, UserCircleIcon, UserIcon } from '@heroicons/react/24/solid';
-
+import {
+	CalendarIcon,
+	HeartIcon,
+	LockClosedIcon,
+	PaintBrushIcon,
+	UserCircleIcon,
+	UserIcon,
+} from '@heroicons/react/24/solid';
 import { LogOutIcon, MoonIcon, SunIcon, SunMoonIcon } from 'lucide-react';
 import Link from 'next/link';
+
+import { useColorSchemeAPI } from '@/lib/hooks/useColorSchemeAPI';
+import { useSignOut } from '@/lib/hooks/useSignOut';
 import { useRelationship } from '../providers/relationships/relationship-provder';
 import {
 	DropdownMenu,
@@ -27,12 +34,16 @@ import UserAvatar from '../ui/user-avatar';
 const UserProfileButton: FC = () => {
 	const { self } = useRelationship();
 	const signOut = useSignOut();
-	const { currentColorScheme, setCurrentColorScheme, schemeIcon } = useColorSchemeAPI();
+	const { currentColorScheme, setCurrentColorScheme, schemeIcon }
+    = useColorSchemeAPI();
 
 	return (
 		<DropdownMenu>
 			<DropdownMenuTrigger asChild>
-				<button className="cursor-pointer size-[32px] flex items-center justify-center rounded-full border-2 border-primary">
+				<button
+					type="button"
+					className="cursor-pointer size-[32px] flex items-center justify-center rounded-full border-2 border-primary"
+				>
 					{self.avatarUrl
 						? (
 								<UserAvatar user={self} className="size-full border-0" hideStatus />
@@ -43,6 +54,17 @@ const UserProfileButton: FC = () => {
 				</button>
 			</DropdownMenuTrigger>
 			<DropdownMenuContent className="w-56">
+				<DropdownMenuLabel className="font-cursive text-lg">Lumi</DropdownMenuLabel>
+				<DropdownMenuSeparator />
+				<DropdownMenuGroup>
+					<DropdownMenuItem asChild>
+						<Link href="/calendar">
+							<CalendarIcon className="size-[16px] text-current" />
+							{' '}
+							Calendar
+						</Link>
+					</DropdownMenuItem>
+				</DropdownMenuGroup>
 				<DropdownMenuLabel>My Account</DropdownMenuLabel>
 				<DropdownMenuSeparator />
 				<DropdownMenuGroup>
@@ -57,7 +79,8 @@ const UserProfileButton: FC = () => {
 						<Link href="/settings/security">
 							<LockClosedIcon className="size-[16px] text-current" />
 							{' '}
-							Account &amp; Security
+							Account
+							&amp; Security
 						</Link>
 					</DropdownMenuItem>
 					<DropdownMenuItem asChild>
@@ -121,7 +144,9 @@ const UserProfileButton: FC = () => {
 				</DropdownMenuGroup>
 				<DropdownMenuSeparator />
 				<DropdownMenuGroup>
-					<DropdownMenuLabel className="text-destructive">Danger Zone</DropdownMenuLabel>
+					<DropdownMenuLabel className="text-destructive">
+						Danger Zone
+					</DropdownMenuLabel>
 					<DropdownMenuItem variant="destructive" onClick={signOut}>
 						<LogOutIcon className="size-[16px] text-current" />
 						{' '}

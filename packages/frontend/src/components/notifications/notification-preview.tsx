@@ -2,18 +2,18 @@
 
 import type { StoredNotification } from '@lumi/core/notifications/notification.types';
 import type { FC } from 'react';
-import { UpdateNotification } from '@/hooks/trpc/notification-hooks';
-import { useIsTablet } from '@/lib/hooks/useScreenSizes';
-import { cn } from '@/lib/utils';
 import { EyeIcon, InboxArrowDownIcon, SparklesIcon } from '@heroicons/react/24/solid';
 import { getRelativeTime } from '@lumi/core/utils/global-utils';
-
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useCallback, useState } from 'react';
-import { SwipeableList, SwipeableListItem, SwipeAction, TrailingActions, Type } from 'react-swipeable-list';
 
+import { SwipeableList, SwipeableListItem, SwipeAction, TrailingActions, Type } from 'react-swipeable-list';
 import { toast } from 'sonner';
+import { UpdateNotification } from '@/hooks/trpc/notification-hooks';
+import { useIsTablet } from '@/lib/hooks/useScreenSizes';
+
+import { cn } from '@/lib/utils';
 
 import { Button } from '../ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '../ui/dialog';
