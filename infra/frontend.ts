@@ -28,6 +28,8 @@ import {
 	vapidPublicKey,
 } from './secrets';
 import { contentBucket, contentCdn, contentCdnPublicKey } from './storage';
+import { otelExporter } from './telemetry';
+import { $region } from './utils';
 
 export const frontend = new sst.aws.Nextjs('Frontend', {
 	path: 'packages/frontend',
@@ -38,6 +40,7 @@ export const frontend = new sst.aws.Nextjs('Frontend', {
 	server: {
 		runtime: 'nodejs22.x',
 		install: ['sharp'],
+		layers: [$interpolate`arn:aws:lambda:${$region}:901920570463:layer:aws-otel-nodejs-amd64-ver-1-30-2:1`],
 	},
 	cachePolicy:
 		$app.stage !== 'staging' ? frontendCdnCachePolicyId.value : undefined,
@@ -98,6 +101,7 @@ export const frontend = new sst.aws.Nextjs('Frontend', {
 
 		SENTRY_AUTH_TOKEN: sentryAuthToken.value,
 		NEXT_PUBLIC_SENTRY_DSN: sentryFrontendDsn.value,
+		OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: otelExporter.url,
 	},
 	permissions: [
 		{
