@@ -1,14 +1,6 @@
 name: Build
 
 on:
-    push:
-        branches:
-            - 'features/*'
-            - 'feature/*'
-            - 'patch/*'
-            - 'hotfix/*'
-            - 'chore/*'
-            - 'dev'
     pull_request:
         branches:
             - '*'
