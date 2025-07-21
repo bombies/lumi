@@ -2,6 +2,8 @@ package dynamo
 
 import (
 	"context"
+	"fmt"
+	"reflect"
 
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
@@ -36,6 +38,10 @@ type DynamoTable struct {
 type DynamoPrimaryKey struct {
 	PK string `json:"pk"`
 	SK string `json:"sk"`
+}
+
+type DynamoEntityType struct {
+	EntityType EntityType `json:"entityType"`
 }
 
 type DynamoGSI1Keys struct {
@@ -95,6 +101,56 @@ func NewUpdateValue[T any](v T) UpdateableDynamoField[T] {
 func NewRemoveValue[T any]() UpdateableDynamoField[T] {
 	isRemove := true
 	return UpdateableDynamoField[T]{Remove: &isRemove}
+}
+
+func TransformToUpdateable(dto, record any) error {
+	dtoValue := reflect.ValueOf(dto)
+	recordValue := reflect.ValueOf(record)
+
+	// The 'record' must be a pointer to a struct so we can modify it.
+	if recordValue.Kind() != reflect.Ptr || recordValue.Elem().Kind() != reflect.Struct {
+		return fmt.Errorf("record must be a pointer to a struct")
+	}
+
+	// Dereference the pointer to get the actual struct we can set fields on.
+	recordElem := recordValue.Elem()
+	dtoType := dtoValue.Type()
+
+	// Iterate over the fields of the input DTO struct.
+	for i := 0; i < dtoValue.NumField(); i++ {
+		dtoField := dtoValue.Field(i)
+		fieldName := dtoType.Field(i).Name
+
+		// We only care about fields that are non-nil pointers.
+		if dtoField.Kind() == reflect.Ptr && !dtoField.IsNil() {
+			// Find the field with the same name in the destination record struct.
+			recordField := recordElem.FieldByName(fieldName)
+
+			// Check if the record field exists and is settable.
+			if recordField.IsValid() && recordField.CanSet() {
+				// Get the actual value from the DTO's pointer (e.g., "Busta").
+				dereferencedDtoValue := dtoField.Elem()
+
+				// Create a new instance of the UpdateableDynamoField type.
+				// e.g., creates an empty UpdateableDynamoField[string]
+				newUpdateableField := reflect.New(recordField.Type()).Elem()
+
+				// Get the 'Value' field within our new UpdateableDynamoField.
+				valueField := newUpdateableField.FieldByName("Value")
+
+				// Create a new pointer to hold the DTO's value.
+				ptrToValue := reflect.New(dereferencedDtoValue.Type())
+				ptrToValue.Elem().Set(dereferencedDtoValue)
+
+				// Set the 'Value' field to the new pointer.
+				valueField.Set(ptrToValue)
+
+				// Finally, set the field in the record struct.
+				recordField.Set(newUpdateableField)
+			}
+		}
+	}
+	return nil
 }
 
 type DynamoItem struct {
