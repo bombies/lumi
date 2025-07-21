@@ -13,30 +13,30 @@
 	},
 	"dependencies": {
 		"@aws-sdk/client-dynamodb": "3.812.0",
-		"@aws-sdk/client-lambda": "^3.812.0",
-		"@aws-sdk/client-s3": "^3.812.0",
-		"@aws-sdk/client-sqs": "^3.812.0",
-		"@aws-sdk/credential-providers": "^3.812.0",
+		"@aws-sdk/client-lambda": "^3.848.0",
+		"@aws-sdk/client-s3": "^3.848.0",
+		"@aws-sdk/client-sqs": "^3.848.0",
+		"@aws-sdk/credential-providers": "^3.848.0",
 		"@aws-sdk/lib-dynamodb": "3.812.0",
-		"@datastructures-js/priority-queue": "^6.3.2",
+		"@datastructures-js/priority-queue": "^6.3.3",
 		"@lumi/core": "*",
 		"@lumi/emails": "*",
-		"@sentry/aws-serverless": "^9.12.0",
-		"@sentry/profiling-node": "^9.12.0",
+		"@sentry/aws-serverless": "^9.40.0",
+		"@sentry/profiling-node": "^9.40.0",
 		"@trpc-limiter/redis": "^0.0.2",
-		"@trpc/client": "^11.1.0",
-		"@trpc/server": "^11.1.0",
+		"@trpc/client": "^11.4.3",
+		"@trpc/server": "^11.4.3",
 		"ffmpeg-static": "^5.2.0",
 		"ioredis": "^5.6.1",
-		"mqtt": "^5.11.0",
+		"mqtt": "^5.13.3",
 		"react": "^19.1.0",
 		"react-dom": "^19.1.0",
 		"sst": "3.14.23",
 		"standardwebhooks": "^1.0.0",
 		"web-push": "^3.6.7",
-		"zod": "^4.0.0-beta.20250412T085909"
+		"zod": "^4.0.5"
 	},
 	"devDependencies": {
-		"@types/aws-lambda": "^8.10.149"
+		"@types/aws-lambda": "^8.10.152"
 	}
 }
