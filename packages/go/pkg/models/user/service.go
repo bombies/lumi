@@ -20,7 +20,7 @@ import (
 
 type UserService struct {
 	DynamoTable   *dynamo.DynamoTable
-	StorageBucket *s3.S3Bucket
+	StorageBucket s3.BucketAPI
 	Logger        *log.Logger
 }
 

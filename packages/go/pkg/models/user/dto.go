@@ -1,9 +1,8 @@
 package user
 
 import (
-	"regexp"
-
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
+	"github.com/dlclark/regexp2"
 	"github.com/go-playground/validator/v10"
 )
 
@@ -15,10 +14,10 @@ const (
 )
 
 var (
-	UsernameRegex  = regexp.MustCompile(usernameRegexString)
-	PasswordRegex  = regexp.MustCompile(passwordRegexString)
-	FirstNameRegex = regexp.MustCompile(firstNameRegexString)
-	LastNameRegex  = regexp.MustCompile(lastNameRegexString)
+	UsernameRegex  = regexp2.MustCompile(usernameRegexString, regexp2.None)
+	PasswordRegex  = regexp2.MustCompile(passwordRegexString, regexp2.None)
+	FirstNameRegex = regexp2.MustCompile(firstNameRegexString, regexp2.Unicode)
+	LastNameRegex  = regexp2.MustCompile(lastNameRegexString, regexp2.Unicode)
 )
 
 type CreateUserDto struct {
@@ -69,19 +68,39 @@ func (dto *GetUsersByEmailDto) GetCursor() map[string]types.AttributeValue {
 }
 
 func ValidateUsername(fl validator.FieldLevel) bool {
-	return UsernameRegex.MatchString(fl.Field().String())
+	res, err := UsernameRegex.MatchString(fl.Field().String())
+	if err != nil {
+		panic(err)
+	}
+
+	return res
 }
 
 func ValidatePassword(fl validator.FieldLevel) bool {
-	return PasswordRegex.MatchString(fl.Field().String())
+	res, err := PasswordRegex.MatchString(fl.Field().String())
+	if err != nil {
+		panic(err)
+	}
+
+	return res
 }
 
 func ValidateFirstName(fl validator.FieldLevel) bool {
-	return FirstNameRegex.MatchString(fl.Field().String())
+	res, err := FirstNameRegex.MatchString(fl.Field().String())
+	if err != nil {
+		panic(err)
+	}
+
+	return res
 }
 
 func ValidateLastName(fl validator.FieldLevel) bool {
-	return LastNameRegex.MatchString(fl.Field().String())
+	res, err := LastNameRegex.MatchString(fl.Field().String())
+	if err != nil {
+		panic(err)
+	}
+
+	return res
 }
 
 func RegisterUserValidators(validator *validator.Validate) error {

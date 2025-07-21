@@ -43,6 +43,19 @@ type S3Bucket struct {
 	Logger        *log.Logger
 }
 
+type BucketAPI interface {
+	UploadObject(ctx context.Context, args UploadOjectArgs) (*manager.UploadOutput, error)
+	UploadObjects(ctx context.Context, args []UploadOjectArgs) []s3.PutObjectOutput
+	GetObject(ctx context.Context, key string) (*s3.GetObjectOutput, error)
+	GetBulkObjects(ctx context.Context, keys []string) []s3.GetObjectOutput
+	GetSignedGetURL(ctx context.Context, args GetSignedURLArgs) (*v4.PresignedHTTPRequest, error)
+	GetSignedPutURL(ctx context.Context, args GetSignedURLArgs) (*v4.PresignedHTTPRequest, error)
+	DeleteObject(ctx context.Context, key string) (*s3.DeleteObjectOutput, error)
+	DeleteObjects(ctx context.Context, keys []string) (*s3.DeleteObjectsOutput, error)
+	CopyObject(ctx context.Context, args CopyObjectArgs) (*s3.CopyObjectOutput, error)
+	MoveObject(ctx context.Context, args MoveObjectArgs) (*MoveObjectResult, error)
+}
+
 type NewBucketArgs struct {
 	BucketName string
 	Config     *aws.Config
