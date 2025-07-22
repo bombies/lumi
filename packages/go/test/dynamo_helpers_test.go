@@ -127,11 +127,17 @@ func TestAttributeMapToStruct_Success(t *testing.T) {
 	assert.Equal(t, 25, result.Age)
 }
 
+type TestUpdateStruct struct {
+	Name dynamo.UpdateableDynamoField[string] `json:"name"`
+	Age  dynamo.UpdateableDynamoField[int]    `json:"age"`
+}
+
+func (t TestUpdateStruct) GetUpdateTag() string {
+	return "test"
+}
+
 func TestGetDynamicUpdateStatements_SetOnly(t *testing.T) {
-	obj := struct {
-		Name dynamo.UpdateableDynamoField[string] `json:"name"`
-		Age  dynamo.UpdateableDynamoField[int]    `json:"age"`
-	}{
+	obj := TestUpdateStruct{
 		Name: dynamo.NewUpdateValue("John"),
 		Age:  dynamo.NewUpdateValue(30),
 	}
@@ -146,10 +152,7 @@ func TestGetDynamicUpdateStatements_SetOnly(t *testing.T) {
 }
 
 func TestGetDynamicUpdateStatements_RemoveOnly(t *testing.T) {
-	obj := struct {
-		Name dynamo.UpdateableDynamoField[string] `json:"name"`
-		Age  dynamo.UpdateableDynamoField[int]    `json:"age"`
-	}{
+	obj := TestUpdateStruct{
 		Name: dynamo.NewRemoveValue[string](),
 		Age:  dynamo.NewRemoveValue[int](),
 	}
@@ -167,10 +170,7 @@ func TestGetDynamicUpdateStatements_RemoveOnly(t *testing.T) {
 }
 
 func TestGetDynamicUpdateStatements_Mixed(t *testing.T) {
-	obj := struct {
-		Name dynamo.UpdateableDynamoField[string] `json:"name"`
-		Age  dynamo.UpdateableDynamoField[int]    `json:"age"`
-	}{
+	obj := TestUpdateStruct{
 		Name: dynamo.NewUpdateValue("John"),
 		Age:  dynamo.NewRemoveValue[int](),
 	}
@@ -188,10 +188,7 @@ func TestGetUpdateParams_Success(t *testing.T) {
 	args := dynamo.UpdateItemArgs{
 		PK: "test-pk",
 		SK: "test-sk",
-		UpdateBody: struct {
-			Name dynamo.UpdateableDynamoField[string] `json:"name"`
-			Age  dynamo.UpdateableDynamoField[int]    `json:"age"`
-		}{
+		UpdateBody: TestUpdateStruct{
 			Name: dynamo.NewUpdateValue("John"),
 			Age:  dynamo.NewUpdateValue(30),
 		},

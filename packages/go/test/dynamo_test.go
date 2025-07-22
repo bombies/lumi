@@ -79,6 +79,23 @@ func (t TestItem) GetSK() string {
 	return t.SK
 }
 
+type TestUpdateItem struct {
+	Name string `json:"name"`
+	Age  string `json:"age"`
+}
+
+func (t TestUpdateItem) GetUpdateTag() string {
+	return "test"
+}
+
+type TestUpdateItemSingle struct {
+	Name string `json:"name"`
+}
+
+func (t TestUpdateItemSingle) GetUpdateTag() string {
+	return "test"
+}
+
 func TestGetItems_NonExhaustive_Success(t *testing.T) {
 	mockClient := &MockDynamoClient{}
 	table := &dynamo.DynamoTable{
@@ -680,10 +697,7 @@ func TestUpdateItem_Success(t *testing.T) {
 		Ctx: context.Background(),
 		PK:  "test-pk",
 		SK:  "test-sk",
-		UpdateBody: struct {
-			Name string `json:"name"`
-			Age  string `json:"age"`
-		}{
+		UpdateBody: TestUpdateItem{
 			Name: "John Updated",
 			Age:  "26",
 		},
@@ -712,10 +726,8 @@ func TestUpdateItem_Error(t *testing.T) {
 		Ctx: context.Background(),
 		PK:  "test-pk",
 		SK:  "test-sk",
-		UpdateBody: struct {
-			Name string `json:"name"`
-		}{
-			Name: " Updated",
+		UpdateBody: TestUpdateItemSingle{
+			Name: "Updated",
 		},
 	}
 
