@@ -33,15 +33,6 @@ type UserRecord struct {
 	Status         UserStatus `json:"status"`
 }
 
-type UpdateableUserRecord struct {
-	FirstName      dynamo.UpdateableDynamoField[string]     `json:"firstName"`
-	LastName       dynamo.UpdateableDynamoField[string]     `json:"lastName"`
-	AvatarKey      dynamo.UpdateableDynamoField[string]     `json:"avatarKey"`
-	RelationshipId dynamo.UpdateableDynamoField[string]     `json:"relationshipId"`
-	Status         dynamo.UpdateableDynamoField[UserStatus] `json:"status"`
-	UpdatedAt      dynamo.UpdateableDynamoField[time.Time]  `json:"updatedAt"`
-}
-
 func (u UserRecord) GetPK() string {
 	return u.PK
 }
@@ -56,6 +47,19 @@ func (u UserRecord) GetGSI1() (*string, *string) {
 
 func (u UserRecord) GetGSI2() (*string, *string) {
 	return &u.GSI2PK, &u.GSI2SK
+}
+
+type UpdateableUserRecord struct {
+	FirstName      dynamo.UpdateableDynamoField[string]     `json:"firstName"`
+	LastName       dynamo.UpdateableDynamoField[string]     `json:"lastName"`
+	AvatarKey      dynamo.UpdateableDynamoField[string]     `json:"avatarKey"`
+	RelationshipId dynamo.UpdateableDynamoField[string]     `json:"relationshipId"`
+	Status         dynamo.UpdateableDynamoField[UserStatus] `json:"status"`
+	UpdatedAt      dynamo.UpdateableDynamoField[time.Time]  `json:"updatedAt"`
+}
+
+func (u UpdateableUserRecord) GetUpdateTag() string {
+	return "updateable-user-record"
 }
 
 type UserKeys struct{}

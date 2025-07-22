@@ -103,7 +103,7 @@ func TestNewBucket(t *testing.T) {
 	tests := []struct {
 		name   string
 		args   lumiS3.NewBucketArgs
-		verify func(t *testing.T, bucket lumiS3.S3Bucket)
+		verify func(t *testing.T, bucket *lumiS3.S3Bucket)
 	}{
 		{
 			name: "creates bucket with provided config",
@@ -111,7 +111,7 @@ func TestNewBucket(t *testing.T) {
 				BucketName: "test-bucket",
 				Config:     &aws.Config{Region: "us-east-1"},
 			},
-			verify: func(t *testing.T, bucket lumiS3.S3Bucket) {
+			verify: func(t *testing.T, bucket *lumiS3.S3Bucket) {
 				assert.Equal(t, "test-bucket", bucket.BucketName)
 				assert.NotNil(t, bucket.S3Client)
 				assert.NotNil(t, bucket.PresignClient)
@@ -124,7 +124,7 @@ func TestNewBucket(t *testing.T) {
 				BucketName: "test-bucket",
 				Config:     nil,
 			},
-			verify: func(t *testing.T, bucket lumiS3.S3Bucket) {
+			verify: func(t *testing.T, bucket *lumiS3.S3Bucket) {
 				assert.Equal(t, "test-bucket", bucket.BucketName)
 				assert.NotNil(t, bucket.S3Client)
 				assert.NotNil(t, bucket.PresignClient)

@@ -84,7 +84,7 @@ func GetUpdateParams(tableName *string, args UpdateItemArgs) (*dynamodb.UpdateIt
 	}, nil
 }
 
-func GetDynamicUpdateStatements(obj any) (*GetDynamicUpdateStatementsResult, error) {
+func GetDynamicUpdateStatements(obj UpdateableDynamoRecord) (*GetDynamicUpdateStatementsResult, error) {
 	setStatements, removeStatements := make([]string, 0), make([]string, 0)
 	expressionAttributeNames, expressionAttributeValues := make(map[string]string), make(map[string]any)
 	mappedObj, err := utils.StructToMap(obj)

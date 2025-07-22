@@ -170,6 +170,10 @@ type DynamoRecord interface {
 	GetSK() string
 }
 
+type UpdateableDynamoRecord interface {
+	GetUpdateTag() string
+}
+
 type DynamoGSIRecord interface {
 	DynamoRecord
 	GetGSI1() (pk *string, sk *string)
@@ -196,8 +200,9 @@ type GetItemArgs struct {
 }
 
 type BatchGetItemArgs struct {
-	Ctx  context.Context
-	Keys []DynamoPrimaryKey
+	Ctx       context.Context
+	Keys      []DynamoPrimaryKey
+	ChunkSize *int
 }
 
 type DynamoQueryOrder string
@@ -257,11 +262,32 @@ type UpdateItemArgs struct {
 	Ctx        context.Context
 	PK         string
 	SK         string
-	UpdateBody any
+	UpdateBody UpdateableDynamoRecord
 }
 
 type DeleteItemArgs struct {
 	Ctx context.Context
 	PK  string
 	SK  string
+}
+
+type WriteTransactionArgs struct {
+	Put    *WriteTransactionPutArgs
+	Delete *WriteTransactionDeleteArgs
+	Update *WriteTransactionUpdateArgs
+}
+
+type WriteTransactionPutArgs struct {
+	Item DynamoRecord
+}
+
+type WriteTransactionDeleteArgs struct {
+	PK string
+	SK string
+}
+
+type WriteTransactionUpdateArgs struct {
+	PK     string
+	SK     string
+	Update UpdateableDynamoRecord
 }

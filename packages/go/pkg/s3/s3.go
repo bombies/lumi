@@ -61,7 +61,7 @@ type NewBucketArgs struct {
 	Config     *aws.Config
 }
 
-func NewBucket(args NewBucketArgs) S3Bucket {
+func NewBucket(args NewBucketArgs) *S3Bucket {
 	bucketName, cfg := args.BucketName, args.Config
 
 	if cfg == nil {
@@ -76,7 +76,7 @@ func NewBucket(args NewBucketArgs) S3Bucket {
 	presignClient := s3.NewPresignClient(s3Client)
 	logger := log.New(os.Stdout, fmt.Sprintf("s3-bucket(%s): ", bucketName), log.LstdFlags)
 
-	return S3Bucket{
+	return &S3Bucket{
 		S3Client:      s3Client,
 		PresignClient: presignClient,
 		BucketName:    bucketName,

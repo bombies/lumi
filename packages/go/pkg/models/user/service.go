@@ -24,7 +24,7 @@ type UserService struct {
 	Logger        *log.Logger
 }
 
-func NewUserService(dynamoTable *dynamo.DynamoTable, storageBucket *s3.S3Bucket) *UserService {
+func NewUserService(dynamoTable *dynamo.DynamoTable, storageBucket s3.BucketAPI) *UserService {
 	logger := log.New(os.Stdout, "user-service: ", log.LstdFlags)
 	return &UserService{
 		DynamoTable:   dynamoTable,
@@ -92,6 +92,9 @@ func (service *UserService) CreateUser(ctx context.Context, args CreateUserArgs)
 					GSI2PK: userKeys.GSI2PK(),
 					GSI2SK: userKeys.GSI2SK(dto.Email),
 				},
+				DynamoEntityType: dynamo.DynamoEntityType{
+					EntityType: EntityTypeUserRecord,
+				},
 				Id:        userId,
 				Email:     dto.Email,
 				Username:  dto.Username,
@@ -129,6 +132,23 @@ func (service *UserService) GetUserById(ctx context.Context, args GetUserByIdArg
 	}
 
 	return res, nil
+}
+
+func (service *UserService) GetNonNilUserById(ctx context.Context, args GetUserByIdArgs) (*UserRecord, error) {
+	user, err := service.GetUserById(ctx, args)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if user == nil {
+		return nil, &models.ServiceError{
+			StatusCode: http.StatusNotFound,
+			Message:    "User not found",
+		}
+	}
+
+	return user, nil
 }
 
 func (service *UserService) GetUsersByUsername(ctx context.Context, dto GetUsersByUsernameDto) (*dynamo.GetItemsResult[UserRecord], error) {

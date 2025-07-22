@@ -1,6 +1,7 @@
 package dynamo
 
 import (
+	"context"
 	"fmt"
 	"lumi/pkg/utils"
 	"maps"
@@ -54,7 +55,10 @@ func GetItem[T DynamoRecord](table *DynamoTable, args GetItemArgs) (*T, error) {
 }
 
 func BatchGetItems[T DynamoRecord](table *DynamoTable, args BatchGetItemArgs) []T {
-	chunkedRequests := lo.Chunk(args.Keys, 50)
+	chunkedRequests := lo.Chunk(
+		args.Keys,
+		lo.TernaryF(args.ChunkSize != nil, func() int { return *args.ChunkSize }, func() int { return 50 }),
+	)
 
 	res := utils.FanOut(utils.FanOutArgs[[]DynamoPrimaryKey, T]{
 		Items:       chunkedRequests,
@@ -234,4 +238,70 @@ func DeleteItem(table *DynamoTable, args DeleteItemArgs) (bool, error) {
 	}
 
 	return true, nil
+}
+
+func WriteTransaction(table *DynamoTable, ctx context.Context, args ...WriteTransactionArgs) (*dynamodb.TransactWriteItemsOutput, error) {
+	return table.DynamoClient.TransactWriteItems(ctx, &dynamodb.TransactWriteItemsInput{
+		TransactItems: lo.Reduce(
+			args,
+			func(acc []types.TransactWriteItem, arg WriteTransactionArgs, _ int) []types.TransactWriteItem {
+				put, delete, update := arg.Put, arg.Delete, arg.Update
+
+				if put != nil {
+					mappedItem, err := StructToAttributeMap(put.Item)
+					if err != nil {
+						fmt.Printf("[ERROR] Could not convert struct to attribute map: %v\n", err)
+					} else {
+						acc = append(acc, types.TransactWriteItem{
+							Put: &types.Put{
+								TableName: &table.TableName,
+								Item:      mappedItem,
+							},
+						})
+					}
+				}
+
+				if delete != nil {
+					acc = append(acc, types.TransactWriteItem{
+						Delete: &types.Delete{
+							TableName: &table.TableName,
+							Key: map[string]types.AttributeValue{
+								"pk": &types.AttributeValueMemberS{
+									Value: delete.PK,
+								},
+								"sk": &types.AttributeValueMemberS{
+									Value: delete.SK,
+								},
+							},
+						},
+					})
+				}
+
+				if update != nil {
+					res, err := GetDynamicUpdateStatements(update.Update)
+					if err != nil {
+						fmt.Printf("[ERROR] Could not get dynamic update statements: %v\n", err)
+					} else {
+						acc = append(acc, types.TransactWriteItem{
+							Update: &types.Update{
+								TableName: &table.TableName,
+								Key: map[string]types.AttributeValue{
+									"pk": &types.AttributeValueMemberS{
+										Value: update.PK,
+									},
+									"sk": &types.AttributeValueMemberS{
+										Value: update.SK,
+									},
+								},
+								UpdateExpression:          &res.UpdateStatements,
+								ExpressionAttributeNames:  res.ExpressionAttributeNames,
+								ExpressionAttributeValues: res.ExpressionAttributeValues,
+							},
+						})
+					}
+				}
+
+				return acc
+			}, []types.TransactWriteItem{}),
+	})
 }

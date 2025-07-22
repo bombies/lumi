@@ -1,8 +1,8 @@
 package models
 
 type ServiceError struct {
-	StatusCode int
-	Message    string
+	StatusCode int    `json:"status_code"`
+	Message    string `json:"message"`
 }
 
 func (e *ServiceError) Error() string {

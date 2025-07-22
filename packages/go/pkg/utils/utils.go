@@ -44,7 +44,7 @@ func ChunkArray[T any](array []T, chunkSize *int) [][]T {
 
 	var chunks [][]T
 	for i := 0; i < len(array); i += *chunkSize {
-		end := min(i + *chunkSize, len(array))
+		end := min(i+*chunkSize, len(array))
 		chunks = append(chunks, array[i:end])
 	}
 	return chunks
