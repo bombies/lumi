@@ -327,8 +327,8 @@ func (service *UserService) UpdateUser(ctx context.Context, userId string, dto U
 	})
 }
 
+// After this function has been successfully called, a call must be made to RelationshipService#DeleteUserRelationship
 func (service *UserService) DeleteUser(ctx context.Context, userId string) (bool, error) {
-	// TODO: Delete any relationships the user may be in
 	userKeys := UserKeys{}
 	return dynamo.DeleteItem(service.DynamoTable, dynamo.DeleteItemArgs{
 		Ctx: ctx,

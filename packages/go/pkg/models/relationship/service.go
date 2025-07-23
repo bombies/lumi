@@ -27,11 +27,12 @@ type RelationshipService struct {
 
 type RelationshipServiceArgs struct {
 	DynamoTable   *dynamo.DynamoTable
+	UserService   *user.UserService
 	StorageBucket s3.BucketAPI
 }
 
 func NewRelationshipService(args RelationshipServiceArgs) *RelationshipService {
-	dynamoTable, storageBucket := args.DynamoTable, args.StorageBucket
+	dynamoTable, storageBucket, userService := args.DynamoTable, args.StorageBucket, args.UserService
 	logger := log.New(os.Stdout, "relationship-service: ", log.LstdFlags)
 
 	dbName, err := resource.Get("ContentBucket", "name")
@@ -46,7 +47,10 @@ func NewRelationshipService(args RelationshipServiceArgs) *RelationshipService {
 		})
 	}
 
-	userService := user.NewUserService(dynamoTable, storageBucket)
+	if userService == nil {
+		userService = user.NewUserService(dynamoTable, storageBucket)
+	}
+
 	return &RelationshipService{
 		DynamoTable: dynamoTable,
 		UserService: userService,
