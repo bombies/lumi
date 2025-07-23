@@ -54,7 +54,7 @@ func GetItem[T DynamoRecord](table *DynamoTable, args GetItemArgs) (*T, error) {
 	return AttributeMapToStruct[T](res.Item)
 }
 
-func BatchGetItems[T DynamoRecord](table *DynamoTable, args BatchGetItemArgs) []T {
+func BatchGetItems[T DynamoRecord](table *DynamoTable, args BatchGetItemsArgs) []T {
 	chunkedRequests := lo.Chunk(
 		args.Keys,
 		lo.TernaryF(args.ChunkSize != nil, func() int { return *args.ChunkSize }, func() int { return 50 }),
@@ -119,7 +119,84 @@ func BatchGetItems[T DynamoRecord](table *DynamoTable, args BatchGetItemArgs) []
 	return res.Results
 }
 
-func GetItems[T DynamoRecord](table *DynamoTable, args GetItemsParams[T]) (*GetItemsResult[T], error) {
+func BatchWriteItems(table *DynamoTable, ctx context.Context, args ...BatchWriteItemsArgs) []dynamodb.BatchWriteItemOutput {
+	chunkedArgs := utils.ChunkArray(args, lo.ToPtr(25))
+	res := utils.FanOut(utils.FanOutArgs[[]BatchWriteItemsArgs, dynamodb.BatchWriteItemOutput]{
+		Items:       chunkedArgs,
+		WorkerCount: len(chunkedArgs),
+		WorkerCallback: func(workerId int, jobs <-chan []BatchWriteItemsArgs, results chan<- utils.FanOutJobResult[dynamodb.BatchWriteItemOutput]) {
+			for args := range jobs {
+				res, err := table.DynamoClient.BatchWriteItem(
+					ctx,
+					&dynamodb.BatchWriteItemInput{
+						RequestItems: lo.Reduce(
+							args,
+							func(acc map[string][]types.WriteRequest, arg BatchWriteItemsArgs, _ int) map[string][]types.WriteRequest {
+								params, ok := acc[table.TableName]
+
+								if !ok {
+									params = make([]types.WriteRequest, 0)
+								}
+
+								if arg.Delete != nil {
+									params = append(params, types.WriteRequest{
+										DeleteRequest: &types.DeleteRequest{
+											Key: map[string]types.AttributeValue{
+												"pk": &types.AttributeValueMemberS{
+													Value: arg.Delete.PK,
+												},
+												"sk": &types.AttributeValueMemberS{
+													Value: arg.Delete.SK,
+												},
+											},
+										},
+									})
+								}
+
+								if arg.Put != nil {
+									mappedItem, err := StructToAttributeMap(arg.Put.Item)
+									if err != nil {
+										fmt.Printf("[ERROR] Could not convert struct to attribute map: %v\n", err)
+									} else {
+										params = append(params, types.WriteRequest{
+											PutRequest: &types.PutRequest{
+												Item: mappedItem,
+											},
+										})
+									}
+								}
+
+								acc[table.TableName] = params
+								return acc
+							},
+							make(map[string][]types.WriteRequest),
+						),
+					},
+				)
+
+				if err != nil {
+					results <- utils.FanOutJobResult[dynamodb.BatchWriteItemOutput]{
+						Err: err,
+					}
+				} else {
+					results <- utils.FanOutJobResult[dynamodb.BatchWriteItemOutput]{
+						JobResult: res,
+					}
+				}
+			}
+		},
+	})
+
+	if errors := res.Errors; len(errors) > 0 {
+		fmt.Println("[ERROR] Some items could not be deleted. Details:")
+		for _, error := range errors {
+			fmt.Println("\t", error)
+		}
+	}
+	return res.Results
+}
+
+func GetItems[T DynamoRecord](table *DynamoTable, args GetItemsParams[T]) (*InfiniteData[T], error) {
 	queryExpression := args.QueryExpression
 	filterExpression := queryExpression.Filter
 	mapper := args.Mapper
@@ -178,7 +255,7 @@ func GetItems[T DynamoRecord](table *DynamoTable, args GetItemsParams[T]) (*GetI
 			return nil, err
 		}
 
-		return &GetItemsResult[T]{
+		return &InfiniteData[T]{
 			Data:       data,
 			NextCursor: nil,
 		}, nil
@@ -191,7 +268,7 @@ func GetItems[T DynamoRecord](table *DynamoTable, args GetItemsParams[T]) (*GetI
 
 		results := UnwrapItems(res.Items, mapper)
 
-		return &GetItemsResult[T]{
+		return &InfiniteData[T]{
 			Data:       results,
 			NextCursor: res.LastEvaluatedKey,
 		}, nil
@@ -238,6 +315,21 @@ func DeleteItem(table *DynamoTable, args DeleteItemArgs) (bool, error) {
 	}
 
 	return true, nil
+}
+
+func DeleteManyItems(table *DynamoTable, ctx context.Context, keys []DynamoPrimaryKey) []dynamodb.BatchWriteItemOutput {
+	args := lo.Map(
+		keys,
+		func(key DynamoPrimaryKey, _ int) BatchWriteItemsArgs {
+			return BatchWriteItemsArgs{
+				Delete: &WriteDeleteArgs{
+					PK: key.PK,
+					SK: key.SK,
+				},
+			}
+		},
+	)
+	return BatchWriteItems(table, ctx, args...)
 }
 
 func WriteTransaction(table *DynamoTable, ctx context.Context, args ...WriteTransactionArgs) (*dynamodb.TransactWriteItemsOutput, error) {

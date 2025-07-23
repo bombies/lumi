@@ -199,10 +199,15 @@ type GetItemArgs struct {
 	ProjectedAttributes []string
 }
 
-type BatchGetItemArgs struct {
+type BatchGetItemsArgs struct {
 	Ctx       context.Context
 	Keys      []DynamoPrimaryKey
 	ChunkSize *int
+}
+
+type BatchWriteItemsArgs struct {
+	Put    *WritePutArgs
+	Delete *WriteDeleteArgs
 }
 
 type DynamoQueryOrder string
@@ -233,11 +238,6 @@ type GetItemsParams[T DynamoRecord] struct {
 	QueryExpression     DynamoQueryExpression
 	Exhaustive          *bool
 	Mapper              func(T) T
-}
-
-type GetItemsResult[T any] struct {
-	Data       []T
-	NextCursor map[string]types.AttributeValue
 }
 
 type ProjectionFields struct {
@@ -272,21 +272,21 @@ type DeleteItemArgs struct {
 }
 
 type WriteTransactionArgs struct {
-	Put    *WriteTransactionPutArgs
-	Delete *WriteTransactionDeleteArgs
-	Update *WriteTransactionUpdateArgs
+	Put    *WritePutArgs
+	Delete *WriteDeleteArgs
+	Update *WriteUpdateArgs
 }
 
-type WriteTransactionPutArgs struct {
+type WritePutArgs struct {
 	Item DynamoRecord
 }
 
-type WriteTransactionDeleteArgs struct {
+type WriteDeleteArgs struct {
 	PK string
 	SK string
 }
 
-type WriteTransactionUpdateArgs struct {
+type WriteUpdateArgs struct {
 	PK     string
 	SK     string
 	Update UpdateableDynamoRecord

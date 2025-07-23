@@ -1,8 +1,6 @@
 package relationship
 
 import (
-	"time"
-
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
 )
 
@@ -12,12 +10,12 @@ type CreateRelationshipRequestDto struct {
 }
 
 type GetRelationshipRequestsForUserDto struct {
-	Limit  int                             `json:"limit" validate:"min=1,max=100"`
+	Limit  int32                           `json:"limit" validate:"min=1,max=100"`
 	Cursor map[string]types.AttributeValue `json:"cursor"`
 	UserId string                          `json:"userId" validate:"required"`
 }
 
-func (dto *GetRelationshipRequestsForUserDto) GetLimit() int {
+func (dto *GetRelationshipRequestsForUserDto) GetLimit() int32 {
 	return dto.Limit
 }
 
@@ -26,5 +24,5 @@ func (dto *GetRelationshipRequestsForUserDto) GetCursor() map[string]types.Attri
 }
 
 type UpdateRelationshipDto struct {
-	Anniversary *time.Time `json:"anniversary" validate:"datetime"`
+	Anniversary *string `json:"anniversary" validate:"datetime=2006-01-02T15:04:05Z07:00"`
 }

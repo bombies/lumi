@@ -634,7 +634,7 @@ func TestBatchGetItems_Success(t *testing.T) {
 		{PK: "pk2", SK: "sk2"},
 	}
 
-	args := dynamo.BatchGetItemArgs{
+	args := dynamo.BatchGetItemsArgs{
 		Ctx:  context.Background(),
 		Keys: keys,
 	}
@@ -662,7 +662,7 @@ func TestBatchGetItems_Error(t *testing.T) {
 		{PK: "pk1", SK: "sk1"},
 	}
 
-	args := dynamo.BatchGetItemArgs{
+	args := dynamo.BatchGetItemsArgs{
 		Ctx:  context.Background(),
 		Keys: keys,
 	}

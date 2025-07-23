@@ -26,7 +26,7 @@ type RelationshipService struct {
 }
 
 type RelationshipServiceArgs struct {
-	DynamoTable   dynamo.DynamoTable
+	DynamoTable   *dynamo.DynamoTable
 	StorageBucket s3.BucketAPI
 }
 
@@ -46,9 +46,9 @@ func NewRelationshipService(args RelationshipServiceArgs) *RelationshipService {
 		})
 	}
 
-	userService := user.NewUserService(&dynamoTable, storageBucket)
+	userService := user.NewUserService(dynamoTable, storageBucket)
 	return &RelationshipService{
-		DynamoTable: &dynamoTable,
+		DynamoTable: dynamoTable,
 		UserService: userService,
 		Logger:      logger,
 	}
@@ -182,7 +182,17 @@ func (rs *RelationshipService) SendRelationshipRequest(ctx context.Context, send
 		}
 	}
 
-	// TODO: Handle automatic relationship request acceptance
+	reuqestFromReceiver, err := rs.GetRelationshipRequestBySenderAndReceiver(ctx, receiverId, senderId)
+	if err != nil {
+		return nil, err
+	} else if reuqestFromReceiver != nil {
+		_, err = rs.AcceptRelationshipRequest(ctx, receiverId, reuqestFromReceiver.Id)
+		if err != nil {
+			return nil, err
+		}
+
+		return nil, nil
+	}
 
 	id := utils.GetUUID()
 	keys := RelationshipRequestKeys{}
@@ -236,14 +246,14 @@ func (rs *RelationshipService) GetRelationshipRequestById(ctx context.Context, r
 	return res, nil
 }
 
-func (rs *RelationshipService) GetReceivedRelationshipRequestForUser(ctx context.Context, dto GetRelationshipRequestsForUserDto) (*models.InfiniteData[RelationshipRequestRecord], error) {
+func (rs *RelationshipService) GetReceivedRelationshipRequestForUser(ctx context.Context, dto GetRelationshipRequestsForUserDto) (*dynamo.InfiniteData[RelationshipRequestRecord], error) {
 	return rs.getRelationshipRequestsForUser(ctx, GetRelationshipRequestsForUserArgs{
 		Dto:   dto,
 		Index: GetRelationshipRequestsIndexGSI2,
 	})
 }
 
-func (rs *RelationshipService) GetSentRelationshipRequestForUser(ctx context.Context, dto GetRelationshipRequestsForUserDto) (*models.InfiniteData[RelationshipRequestRecord], error) {
+func (rs *RelationshipService) GetSentRelationshipRequestForUser(ctx context.Context, dto GetRelationshipRequestsForUserDto) (*dynamo.InfiniteData[RelationshipRequestRecord], error) {
 	return rs.getRelationshipRequestsForUser(ctx, GetRelationshipRequestsForUserArgs{
 		Dto:   dto,
 		Index: GetRelationshipRequestsIndexGSI1,
@@ -262,7 +272,7 @@ type GetRelationshipRequestsForUserArgs struct {
 	Index GetRelationshipRequestsIndex
 }
 
-func (rs *RelationshipService) getRelationshipRequestsForUser(ctx context.Context, args GetRelationshipRequestsForUserArgs) (*models.InfiniteData[RelationshipRequestRecord], error) {
+func (rs *RelationshipService) getRelationshipRequestsForUser(ctx context.Context, args GetRelationshipRequestsForUserArgs) (*dynamo.InfiniteData[RelationshipRequestRecord], error) {
 	dto, indexLower := args.Dto, strings.ToLower(string(args.Index))
 
 	keys := RelationshipRequestKeys{}
@@ -313,7 +323,7 @@ func (rs *RelationshipService) getRelationshipRequestsForUser(ctx context.Contex
 
 	usersRes := dynamo.BatchGetItems[user.UserRecord](
 		rs.DynamoTable,
-		dynamo.BatchGetItemArgs{
+		dynamo.BatchGetItemsArgs{
 			Ctx: ctx,
 			Keys: lo.Map(
 				userIds.List(),
@@ -345,9 +355,9 @@ func (rs *RelationshipService) getRelationshipRequestsForUser(ctx context.Contex
 		}
 	}
 
-	return &models.InfiniteData[RelationshipRequestRecord]{
-		Data:   data,
-		Cursor: res.NextCursor,
+	return &dynamo.InfiniteData[RelationshipRequestRecord]{
+		Data:       data,
+		NextCursor: res.NextCursor,
 	}, nil
 }
 
@@ -438,18 +448,18 @@ func (rs *RelationshipService) AcceptRelationshipRequest(ctx context.Context, us
 		rs.DynamoTable,
 		ctx,
 		dynamo.WriteTransactionArgs{
-			Put: &dynamo.WriteTransactionPutArgs{
+			Put: &dynamo.WritePutArgs{
 				Item: relationship,
 			},
 		},
 		dynamo.WriteTransactionArgs{
-			Delete: &dynamo.WriteTransactionDeleteArgs{
+			Delete: &dynamo.WriteDeleteArgs{
 				PK: relationshipRequestKeys.PK(requestId),
 				SK: relationshipRequestKeys.PK(requestId),
 			},
 		},
 		dynamo.WriteTransactionArgs{
-			Update: &dynamo.WriteTransactionUpdateArgs{
+			Update: &dynamo.WriteUpdateArgs{
 				PK: userKeys.PK(sender.Id),
 				SK: userKeys.SK(sender.Id),
 				Update: user.UpdateableUserRecord{
@@ -458,7 +468,7 @@ func (rs *RelationshipService) AcceptRelationshipRequest(ctx context.Context, us
 			},
 		},
 		dynamo.WriteTransactionArgs{
-			Update: &dynamo.WriteTransactionUpdateArgs{
+			Update: &dynamo.WriteUpdateArgs{
 				PK: userKeys.PK(receiver.Id),
 				SK: userKeys.SK(receiver.Id),
 				Update: user.UpdateableUserRecord{
@@ -493,13 +503,13 @@ func (rs *RelationshipService) DeleteUserRelationship(ctx context.Context, userI
 		rs.DynamoTable,
 		ctx,
 		dynamo.WriteTransactionArgs{
-			Delete: &dynamo.WriteTransactionDeleteArgs{
+			Delete: &dynamo.WriteDeleteArgs{
 				PK: relationshipKeys.PK(relationship.Id),
 				SK: relationshipKeys.SK(relationship.Id),
 			},
 		},
 		dynamo.WriteTransactionArgs{
-			Update: &dynamo.WriteTransactionUpdateArgs{
+			Update: &dynamo.WriteUpdateArgs{
 				PK: userKeys.PK(relationship.Partner1),
 				SK: userKeys.SK(relationship.Partner1),
 				Update: user.UpdateableUserRecord{
@@ -508,7 +518,7 @@ func (rs *RelationshipService) DeleteUserRelationship(ctx context.Context, userI
 			},
 		},
 		dynamo.WriteTransactionArgs{
-			Update: &dynamo.WriteTransactionUpdateArgs{
+			Update: &dynamo.WriteUpdateArgs{
 				PK: userKeys.PK(relationship.Partner2),
 				SK: userKeys.SK(relationship.Partner2),
 				Update: user.UpdateableUserRecord{
@@ -527,12 +537,17 @@ func (rs *RelationshipService) DeleteUserRelationship(ctx context.Context, userI
 
 func (rs *RelationshipService) UpdateRelationship(ctx context.Context, relationshipId string, dto UpdateRelationshipDto) (*RelationshipRecord, error) {
 	relationshipKeys := RelationshipKeys{}
-	update := UpdateableRelationshipRecord{
-		Anniversary: dynamo.NewUpdateValue(dto.Anniversary.Format(time.RFC3339)),
-	}
+	update := UpdateableRelationshipRecord{}
 
 	if dto.Anniversary != nil {
-		mmDD := utils.DateToMMDD(*dto.Anniversary)
+		newAnniversary, err := time.Parse(time.RFC3339, *dto.Anniversary)
+
+		if err != nil {
+			return nil, err
+		}
+
+		mmDD := utils.DateToMMDD(newAnniversary)
+		update.Anniversary = dynamo.NewUpdateValue(*dto.Anniversary)
 		update.AnniversaryMMDD = dynamo.NewUpdateValue(mmDD)
 		update.GSI1PK = dynamo.NewUpdateValue(relationshipKeys.GSI1PK())
 		update.GSI1SK = dynamo.NewUpdateValue(relationshipKeys.GSI1SK(mmDD, relationshipId))

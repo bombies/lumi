@@ -151,7 +151,7 @@ func (service *UserService) GetNonNilUserById(ctx context.Context, args GetUserB
 	return user, nil
 }
 
-func (service *UserService) GetUsersByUsername(ctx context.Context, dto GetUsersByUsernameDto) (*dynamo.GetItemsResult[UserRecord], error) {
+func (service *UserService) GetUsersByUsername(ctx context.Context, dto GetUsersByUsernameDto) (*dynamo.InfiniteData[UserRecord], error) {
 	userKeys := UserKeys{}
 	return dynamo.GetItems(service.DynamoTable, dynamo.GetItemsParams[UserRecord]{
 		Ctx:   ctx,
@@ -205,7 +205,7 @@ func (service *UserService) GetUserByUsername(ctx context.Context, username stri
 	return nil, nil
 }
 
-func (service *UserService) GetUsersByEmail(ctx context.Context, dto GetUsersByEmailDto) (*dynamo.GetItemsResult[UserRecord], error) {
+func (service *UserService) GetUsersByEmail(ctx context.Context, dto GetUsersByEmailDto) (*dynamo.InfiniteData[UserRecord], error) {
 	userKeys := UserKeys{}
 	return dynamo.GetItems(service.DynamoTable, dynamo.GetItemsParams[UserRecord]{
 		Ctx:   ctx,
