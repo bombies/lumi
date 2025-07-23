@@ -59,6 +59,11 @@ type DynamoGSI3Keys struct {
 	GSI3SK string `json:"gsi3sk"`
 }
 
+type OptionalDynamoGSI3Keys struct {
+	GSI3PK *string `json:"gsi3pk"`
+	GSI3SK *string `json:"gsi3sk"`
+}
+
 type DynamoGSI4Keys struct {
 	GSI4PK string `json:"gsi4pk"`
 	GSI4SK string `json:"gsi4sk"`

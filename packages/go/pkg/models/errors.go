@@ -1,7 +1,7 @@
 package models
 
 type ServiceError struct {
-	StatusCode int    `json:"status_code"`
+	StatusCode int    `json:"code"`
 	Message    string `json:"message"`
 }
 
