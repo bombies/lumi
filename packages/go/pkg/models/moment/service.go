@@ -86,8 +86,37 @@ func (ms *MomentService) CreateMomentDetails(ctx context.Context, userId, relati
 		return nil, err
 	}
 
-	if len(dto.Tags) > 0 {
-		// TODO: Create tags
+	if tags := dto.Tags; len(tags) > 0 {
+		tagsCreationResult := utils.FanOut(utils.FanOutArgs[string, MomentTagRecord]{
+			Items:       tags,
+			WorkerCount: len(tags),
+			WorkerCallback: func(workerId int, jobs <-chan string, results chan<- utils.FanOutJobResult[MomentTagRecord]) {
+				for tag := range jobs {
+					tagRecord, err := ms.CreateMomentTag(ctx, userId, relationshipId, CreateMomentTagDto{
+						Tag:      tag,
+						MomentId: id,
+					})
+
+					if err != nil {
+						results <- utils.FanOutJobResult[MomentTagRecord]{
+							Err: err,
+						}
+						continue
+					}
+
+					results <- utils.FanOutJobResult[MomentTagRecord]{
+						JobResult: tagRecord,
+					}
+				}
+			},
+		})
+
+		if errs := tagsCreationResult.Errors; len(errs) > 0 {
+			ms.Logger.Printf("[ERROR] There were some errors creating tags for moment with ID %s\n", id)
+			for _, err := range errs {
+				ms.Logger.Println(fmt.Errorf("\t%w\n", err.Err))
+			}
+		}
 	}
 
 	attachUrlsToMoment(ctx, AttachUrlsToMomentArgs{
