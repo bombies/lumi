@@ -7,12 +7,16 @@ import (
 	"lumi/pkg/models"
 	"lumi/pkg/models/user"
 	"lumi/pkg/utils"
+	"lumi/pkg/websockets"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
+	"github.com/SherClockHolmes/webpush-go"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/samber/lo"
+	"github.com/sst/sst/v3/sdk/golang/resource"
 )
 
 type NotificationService struct {
@@ -85,13 +89,114 @@ type SendNotificationArgs struct {
 	Payload NotificationPayload
 }
 
+type OnlineWebSocketMessageArgs struct {
+	MqttConnection websockets.WebsocketService
+	Topic          string
+}
+
 type SendNotificationOpts struct {
-	OnlineWebSocketMessage any
+	OnlineWebSocketMessage *OnlineWebSocketMessageArgs
 	OnSuccess              func()
 }
 
 func (ns *NotificationService) SendNotification(ctx context.Context, args SendNotificationArgs, opts ...SendNotificationOpts) {
-	// TODO: Implement notification sending logic with websockets.
+	userRecord, payload := args.User, args.Payload
+
+	if userRecord.Status == user.UserStatusOffline || userRecord.Status == user.UserStatusIdle {
+		ns.Logger.Printf("%s is offline or idle... Sending notification through webpush\n", userRecord.Username)
+
+		notificationSubs, err := ns.GetNotificationSubscriptions(ctx, userRecord.Id)
+		if err != nil {
+			ns.Logger.Printf("Error getting notification subscriptions for user %s: %s\n", userRecord.Username, err.Error())
+			return
+		}
+
+		vapidPubKey, err := resource.Get("VapidPublicKey", "value")
+		if err != nil {
+			ns.Logger.Printf("Error getting VAPID public key: %s\n", err.Error())
+			return
+		}
+
+		vapidPrivKey, err := resource.Get("VapidPrivateKey", "value")
+		if err != nil {
+			ns.Logger.Printf("Error getting VAPID private key: %s\n", err.Error())
+			return
+		}
+
+		for _, sub := range notificationSubs.Data {
+			var subService string
+
+			if strings.Contains(sub.Endpoint, "mozilla") {
+				subService = "mozilla"
+			} else if strings.Contains(sub.Endpoint, "fcm") {
+				subService = "Firebase Cloud Messaging"
+			} else if strings.Contains(sub.Endpoint, "apple") {
+				subService = "Apple"
+			} else {
+				subService = "Unknown"
+			}
+
+			resp, err := webpush.SendNotification(
+				nil,
+				&webpush.Subscription{
+					Endpoint: sub.Endpoint,
+					Keys: webpush.Keys{
+						Auth:   sub.Keys.Auth,
+						P256dh: sub.Keys.P256dh,
+					},
+				},
+				&webpush.Options{
+					Subscriber:      "contact@ajani.me",
+					VAPIDPublicKey:  vapidPubKey.(string),
+					VAPIDPrivateKey: vapidPrivKey.(string),
+				},
+			)
+
+			if err != nil {
+				ns.Logger.Printf("(%s) Error sending webpush notification to user %s: %s\n", subService, userRecord.Username, err.Error())
+				continue
+			}
+
+			defer resp.Body.Close()
+			ns.Logger.Printf("Successfully sent the notication to the %s subscriber!", subService)
+		}
+	} else {
+		if len(opts) == 0 || opts[0].OnlineWebSocketMessage == nil {
+			ns.Logger.Printf("User %s is online... Skipping websocket notification\n", userRecord.Username)
+			return
+		}
+
+		ns.Logger.Printf("User %s is online... Sending notification through websocket\n", userRecord.Username)
+		wsArgs := *opts[0].OnlineWebSocketMessage
+		ws, topic := wsArgs.MqttConnection, wsArgs.Topic
+
+		if !ws.IsConnected() {
+			ns.Logger.Printf("Websocket is not connected... Skipping websocket notification\n")
+			return
+		}
+
+		ws.EmitEvent(websockets.EmitEventArgs{
+			Topic: topic,
+			Event: websockets.WebsocketEventNotification,
+			Payload: websockets.NotificationPayload{
+				ReceiverID: userRecord.Id,
+				From: websockets.NotificationFrom{
+					Type: "system",
+				},
+				Message: websockets.NotificationMessage{
+					Title:   payload.Title,
+					Content: payload.Body,
+				},
+				Metadata: payload.Metadata,
+			},
+			Source: websockets.WebsocketMessageSourceServer,
+		})
+
+		ns.Logger.Printf("Sent notification to %s\n", userRecord.Username)
+		if opts[0].OnSuccess != nil {
+			opts[0].OnSuccess()
+		}
+	}
 }
 
 func (ns *NotificationService) StoreNotification(ctx context.Context, userId string, dto CreateNotificationDto) (*NotificationRecord, error) {
