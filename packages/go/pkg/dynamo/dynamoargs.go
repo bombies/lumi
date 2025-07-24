@@ -270,6 +270,12 @@ type UpdateItemArgs struct {
 	UpdateBody UpdateableDynamoRecord
 }
 
+type UpdateManyItemArgs struct {
+	PK         string
+	SK         string
+	UpdateBody UpdateableDynamoRecord
+}
+
 type DeleteItemArgs struct {
 	Ctx context.Context
 	PK  string

@@ -188,7 +188,7 @@ func BatchWriteItems(table *DynamoTable, ctx context.Context, args ...BatchWrite
 	})
 
 	if errors := res.Errors; len(errors) > 0 {
-		fmt.Println("[ERROR] Some items could not be deleted. Details:")
+		fmt.Println("[ERROR] Some items could not be written. Details:")
 		for _, error := range errors {
 			fmt.Println("\t", error)
 		}
@@ -295,6 +295,38 @@ func UpdateItem[T DynamoRecord](table *DynamoTable, args UpdateItemArgs) (*T, er
 	}
 
 	return parsedAttributes, nil
+}
+
+func UpdateMany[T DynamoRecord](table *DynamoTable, ctx context.Context, args []UpdateManyItemArgs) ([]dynamodb.TransactWriteItemsOutput, []error) {
+	requestParams := lo.Map(
+		args,
+		func(item UpdateManyItemArgs, _ int) WriteTransactionArgs {
+			return WriteTransactionArgs{
+				Update: &WriteUpdateArgs{
+					PK:     item.PK,
+					SK:     item.SK,
+					Update: item.UpdateBody,
+				},
+			}
+		},
+	)
+
+	chunkedParams := lo.Chunk(requestParams, 75)
+	res := utils.FanOut(utils.FanOutArgs[[]WriteTransactionArgs, dynamodb.TransactWriteItemsOutput]{
+		Items:       chunkedParams,
+		WorkerCount: len(chunkedParams),
+		WorkerCallback: func(workerId int, jobs <-chan []WriteTransactionArgs, results chan<- utils.FanOutJobResult[dynamodb.TransactWriteItemsOutput]) {
+			for params := range jobs {
+				res, err := WriteTransaction(table, ctx, params...)
+				results <- utils.FanOutJobResult[dynamodb.TransactWriteItemsOutput]{
+					JobResult: res,
+					Err:       err,
+				}
+			}
+		},
+	})
+
+	return res.Results, lo.Map(res.Errors, func(err utils.FanOutJobResult[dynamodb.TransactWriteItemsOutput], _ int) error { return err.Err })
 }
 
 func DeleteItem(table *DynamoTable, args DeleteItemArgs) (bool, error) {

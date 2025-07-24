@@ -144,6 +144,7 @@ func UnwrapItems[T any](items []map[string]types.AttributeValue, mapper func(T) 
 					results <- utils.FanOutJobResult[T]{
 						Err: fmt.Errorf("[worker %v] error converting unwrapped attribute values to struct: %w", workerId, err),
 					}
+					continue
 				}
 
 				if mapper != nil {
