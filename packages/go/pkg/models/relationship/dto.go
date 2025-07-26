@@ -5,14 +5,14 @@ import (
 )
 
 type CreateRelationshipRequestDto struct {
-	SenderId   string `json:"senderId" validate:"required"`
-	ReceiverId string `json:"receiverId" validate:"required"`
+	SenderId   string `json:"senderId" binding:"required"`
+	ReceiverId string `json:"receiverId" binding:"required"`
 }
 
 type GetRelationshipRequestsForUserDto struct {
-	Limit  int32                           `json:"limit" validate:"min=1,max=100"`
-	Cursor map[string]types.AttributeValue `json:"cursor"`
-	UserId string                          `json:"userId" validate:"required"`
+	Limit  int32                           `json:"limit" form:"limit" binding:"min=1,max=100"`
+	Cursor map[string]types.AttributeValue `json:"cursor" form:"cursor"`
+	UserId string                          `json:"userId" form:"userId" binding:"required"`
 }
 
 func (dto *GetRelationshipRequestsForUserDto) GetLimit() int32 {
@@ -24,5 +24,5 @@ func (dto *GetRelationshipRequestsForUserDto) GetCursor() map[string]types.Attri
 }
 
 type UpdateRelationshipDto struct {
-	Anniversary *string `json:"anniversary" validate:"datetime=2006-01-02T15:04:05Z07:00"`
+	Anniversary *string `json:"anniversary" time_format:"2006-01-02T15:04:05Z07:00"`
 }

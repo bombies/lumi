@@ -35,15 +35,15 @@ func NewRelationshipService(args RelationshipServiceArgs) *RelationshipService {
 	dynamoTable, storageBucket, userService := args.DynamoTable, args.StorageBucket, args.UserService
 	logger := log.New(os.Stdout, "relationship-service: ", log.LstdFlags)
 
-	dbName, err := resource.Get("ContentBucket", "name")
-
-	if err != nil {
-		logger.Panicf("Could not get the content bucket name: %v\n", err)
-	}
-
 	if storageBucket == nil {
+		bucketName, err := resource.Get("ContentBucket", "name")
+
+		if err != nil {
+			logger.Panicf("Could not get the content bucket name: %v\n", err)
+		}
+
 		storageBucket = s3.NewBucket(s3.NewBucketArgs{
-			BucketName: dbName.(string),
+			BucketName: bucketName.(string),
 		})
 	}
 

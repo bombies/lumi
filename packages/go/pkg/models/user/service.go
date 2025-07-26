@@ -343,6 +343,13 @@ type GetUserAvatarUploadUrlArgs struct {
 }
 
 func (service *UserService) GetUserAvatarUploadUrl(ctx context.Context, args GetUserAvatarUploadUrlArgs) (*v4.PresignedHTTPRequest, error) {
+	if service.StorageBucket == nil {
+		return nil, &models.ServiceError{
+			StatusCode: http.StatusBadRequest,
+			Message:    "Could not generate an avatar upload URL because in the current context, the storage bucket is not available.",
+		}
+	}
+
 	key, err := s3.ContentPathsUserAvatar(args.UserId, fmt.Sprintf("%s.%s", args.ObjectKey, args.FileExtension))
 	if err != nil {
 		return nil, err

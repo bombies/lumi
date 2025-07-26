@@ -1,6 +1,6 @@
 package models
 
 type GetUploadUrlDto struct {
-	ObjectKey     string `json:"objectKey"`
-	FileExtension string `json:"fileExtension"`
+	ObjectKey     string `json:"objectKey" form:"objectKey"`
+	FileExtension string `json:"fileExtension" form:"fileExtension"`
 }

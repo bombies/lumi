@@ -7,24 +7,24 @@ import (
 )
 
 type CreateMomentDetailsDto struct {
-	Title              string   `json:"title" validate:"required,max=90,min=1"`
-	Description        string   `json:"description" validate:"max=1024"`
-	ObjectKey          string   `json:"objectKey" validate:"required"`
+	Title              string   `json:"title" binding:"required,max=90,min=1"`
+	Description        string   `json:"description" binding:"max=1024"`
+	ObjectKey          string   `json:"objectKey" binding:"required"`
 	ThumbnailObjectKey *string  `json:"thumbnailObjectKey"`
 	Tags               []string `json:"tags"`
 }
 
 type UpdateMomentDetailsDto struct {
-	Title              *string  `json:"title" validate:"max=90,min=1"`
-	Description        *string  `json:"description" validate:"max=1024"`
+	Title              *string  `json:"title" binding:"max=90,min=1"`
+	Description        *string  `json:"description" binding:"max=1024"`
 	ThumbnailObjectKey *string  `json:"thumbnailObjectKey"`
 	Tags               []string `json:"tags"`
 }
 
 type GetInfiniteMomentsDto struct {
-	Limit  *int32                          `json:"limit" validate:"min=1,max=100"`
-	Cursor map[string]types.AttributeValue `json:"cursor"`
-	Order  *dynamo.DynamoQueryOrder        `json:"order"`
+	Limit  *int32                          `json:"limit" form:"limit" binding:"min=1,max=100"`
+	Cursor map[string]types.AttributeValue `json:"cursor" form:"cursor"`
+	Order  *dynamo.DynamoQueryOrder        `json:"order" form:"order"`
 }
 
 func (dto *GetInfiniteMomentsDto) GetLimit() int32 {
@@ -46,10 +46,10 @@ func (dto *GetInfiniteMomentsDto) GetOrder() dynamo.DynamoQueryOrder {
 }
 
 type GetInfiniteMomentMessagesDto struct {
-	MomentId string                          `json:"momentId" validate:"required,uuid4"`
-	Limit    *int32                          `json:"limit" validate:"min=1,max=100"`
-	Cursor   map[string]types.AttributeValue `json:"cursor"`
-	Order    *dynamo.DynamoQueryOrder        `json:"order"`
+	MomentId string                          `json:"momentId" form:"momentId" binding:"required,uuid4"`
+	Limit    *int32                          `json:"limit" form:"limit" binding:"min=1,max=100"`
+	Cursor   map[string]types.AttributeValue `json:"cursor" form:"cursor"`
+	Order    *dynamo.DynamoQueryOrder        `json:"order" form:"order"`
 }
 
 func (dto *GetInfiniteMomentMessagesDto) GetLimit() int32 {
@@ -71,25 +71,25 @@ func (dto *GetInfiniteMomentMessagesDto) GetOrder() dynamo.DynamoQueryOrder {
 }
 
 type CreateMomentMessageDto struct {
-	MomentId  string  `json:"momentId" validate:"required,uuid4"`
-	Content   string  `json:"content" validate:"required,min=1,max=1024"`
-	RepliedTo string  `json:"repliedTo" validate:"uuid4"`
-	Id        *string `json:"id" validate:"uuid4"`
-	Timestamp *string `json:"timestamp" validate:"datetime=2006-01-02T15:04:05Z07:00"`
+	MomentId  string  `json:"momentId" binding:"required,uuid4"`
+	Content   string  `json:"content" binding:"required,min=1,max=1024"`
+	RepliedTo string  `json:"repliedTo" binding:"uuid4"`
+	Id        *string `json:"id" binding:"uuid4"`
+	Timestamp *string `json:"timestamp" time_format:"2006-01-02T15:04:05Z07:00"`
 }
 
 type UpdateMomentMessageDto struct {
-	Content   *string             `json:"content" validate:"min=1,max=1024"`
+	Content   *string             `json:"content" binding:"min=1,max=1024"`
 	Reaction  *string             `json:"reaction"`
-	State     *MomentMessageState `json:"state" validate:"oneof=sent delivered read"`
-	MessageId string              `json:"messageId" validate:"required,uuid4"`
+	State     *MomentMessageState `json:"state" binding:"oneof=sent delivered read"`
+	MessageId string              `json:"messageId" binding:"required,uuid4"`
 }
 
 type SearchMomentsDto struct {
-	Query  string                             `json:"query"`
-	Limit  *int32                             `json:"limit" validate:"min=1,max=100"`
-	Cursor [2]map[string]types.AttributeValue `json:"cursor"`
-	Order  *dynamo.DynamoQueryOrder           `json:"order"`
+	Query  string                             `json:"query" form:"query"`
+	Limit  *int32                             `json:"limit" form:"limit" binding:"min=1,max=100"`
+	Cursor [2]map[string]types.AttributeValue `json:"cursor" form:"cursor"`
+	Order  *dynamo.DynamoQueryOrder           `json:"order" form:"order"`
 }
 
 func (dto *SearchMomentsDto) GetLimit() int32 {
@@ -111,9 +111,9 @@ func (dto *SearchMomentsDto) GetOrder() dynamo.DynamoQueryOrder {
 }
 
 type GetRelationshipMomentTagsDto struct {
-	Query  string                          `json:"query"`
-	Limit  *int32                          `json:"limit" validate:"min=1,max=100"`
-	Cursor map[string]types.AttributeValue `json:"cursor"`
+	Query  string                          `json:"query" form:"query"`
+	Limit  *int32                          `json:"limit" form:"limit" binding:"min=1,max=100"`
+	Cursor map[string]types.AttributeValue `json:"cursor" form:"cursor"`
 }
 
 func (dto *GetRelationshipMomentTagsDto) GetLimit() int32 {
@@ -128,19 +128,19 @@ func (dto *GetRelationshipMomentTagsDto) GetCursor() map[string]types.AttributeV
 }
 
 type CreateRelationshipMomentTagDto struct {
-	Tag string `json:"tag" validate:"required,min=1,max=50"`
+	Tag string `json:"tag" binding:"required,min=1,max=50"`
 }
 
 type CreateMomentTagDto struct {
-	Tag      string `json:"tag" validate:"required,min=1,max=50"`
-	MomentId string `json:"momentId" validate:"uuid4"`
+	Tag      string `json:"tag" binding:"required,min=1,max=50"`
+	MomentId string `json:"momentId" binding:"uuid4"`
 }
 
 type GetMomentsByTagDto struct {
-	TagQuery string                          `json:"tagQuery"`
-	Limit    *int32                          `json:"limit" validate:"min=1,max=100"`
-	Cursor   map[string]types.AttributeValue `json:"cursor"`
-	Order    *dynamo.DynamoQueryOrder        `json:"order"`
+	TagQuery string                          `json:"tagQuery" form:"tagQuery"`
+	Limit    *int32                          `json:"limit" form:"limit" binding:"min=1,max=100"`
+	Cursor   map[string]types.AttributeValue `json:"cursor" form:"cursor"`
+	Order    *dynamo.DynamoQueryOrder        `json:"order" form:"order"`
 }
 
 func (dto *GetMomentsByTagDto) GetLimit() int32 {
@@ -162,6 +162,6 @@ func (dto *GetMomentsByTagDto) GetOrder() dynamo.DynamoQueryOrder {
 }
 
 type DeleteMomentTagDto struct {
-	MomentId string `json:"momentId" validate:"required,uuid4"`
-	Tag      string `json:"tag" validate:"required,min=1,max=50"`
+	MomentId string `json:"momentId" binding:"required,uuid4"`
+	Tag      string `json:"tag" binding:"required,min=1,max=50"`
 }

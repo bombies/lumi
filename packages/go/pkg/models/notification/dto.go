@@ -7,16 +7,16 @@ import (
 )
 
 type CreateNotificationDto struct {
-	Title   string  `json:"title" validate:"required"`
-	Content string  `json:"content" validate:"required"`
+	Title   string  `json:"title" binding:"required"`
+	Content string  `json:"content" binding:"required"`
 	OpenUrl *string `json:"openUrl,omitempty"`
 	Read    *bool   `json:"read,omitempty"`
 }
 
 type GetNotificationsDto struct {
-	TagQuery string                          `json:"tagQuery"`
-	Limit    *int32                          `json:"limit" validate:"min=1,max=100"`
-	Cursor   map[string]types.AttributeValue `json:"cursor"`
+	TagQuery string                          `json:"tagQuery" form:"tagQuery"`
+	Limit    *int32                          `json:"limit" form:"limit" binding:"min=1,max=100"`
+	Cursor   map[string]types.AttributeValue `json:"cursor" form:"cursor"`
 }
 
 func (dto *GetNotificationsDto) GetLimit() int32 {
@@ -38,10 +38,10 @@ const (
 )
 
 type GetFilteredNotificationsDto struct {
-	TagQuery string                          `json:"tagQuery"`
-	Limit    *int32                          `json:"limit" validate:"min=1,max=100"`
-	Cursor   map[string]types.AttributeValue `json:"cursor"`
-	Filter   NotificationFilter              `json:"filter" validate:"oneof=read unread"`
+	TagQuery string                          `json:"tagQuery" form:"tagQuery"`
+	Limit    *int32                          `json:"limit" form:"limit" binding:"min=1,max=100"`
+	Cursor   map[string]types.AttributeValue `json:"cursor" form:"cursor"`
+	Filter   NotificationFilter              `json:"filter" form:"filter" binding:"oneof=read unread"`
 }
 
 func (dto *GetFilteredNotificationsDto) GetLimit() int32 {

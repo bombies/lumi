@@ -1,6 +1,6 @@
 module lumi/stream
 
-replace lumi/core => ../../
+replace lumi => ../../
 
 go 1.24.5
 
