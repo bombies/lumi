@@ -62,6 +62,12 @@ func NewApp() *App {
 }
 
 func registerAllEndpoints(router *gin.Engine, table *dynamo.DynamoTable, bucket *s3.S3Bucket) {
+	for _, route := range getAllRoutes(router, table, bucket) {
+		route.RegisterEndpoints()
+	}
+}
+
+func getAllRoutes(router *gin.Engine, table *dynamo.DynamoTable, bucket *s3.S3Bucket) []routes.Route {
 	userService := user.NewUserService(table, bucket)
 
 	userRoute := &routes.UserRoute{
@@ -69,7 +75,8 @@ func registerAllEndpoints(router *gin.Engine, table *dynamo.DynamoTable, bucket 
 		UserService:    userService,
 		ProtectedGroup: utils.ProtectedRoute(router, "/users"),
 	}
-	userRoute.RegisterEndpoints()
+
+	return []routes.Route{userRoute}
 }
 
 func (app *App) Handler(ctx context.Context, req events.APIGatewayV2HTTPRequest) (events.APIGatewayV2HTTPResponse, error) {
