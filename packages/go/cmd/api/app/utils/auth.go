@@ -4,6 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
+	apierr "lumi/api/app/errors"
+	"lumi/api/app/globals"
+	"lumi/pkg/models/relationship"
 	"net/http"
 	"os"
 	"strings"
@@ -51,7 +55,7 @@ func SetupJWKSCache(ctx context.Context) error {
 func GetBearerToken(c *gin.Context) (string, error) {
 	authHeader := c.GetHeader("Authorization")
 	if authHeader == "" {
-		return "", errors.New("authorization header is required")
+		return "", nil
 	}
 
 	parts := strings.Split(authHeader, " ")
@@ -63,6 +67,10 @@ func GetBearerToken(c *gin.Context) (string, error) {
 }
 
 func DecodeBearerToken(ctx context.Context, token string) (*TokenClaims, error) {
+	if token == "" {
+		return nil, apierr.MissingTokenError{}
+	}
+
 	expectedIssuer := os.Getenv("FRONTEND_URL")
 	expectedAudience := os.Getenv("FRONTEND_URL")
 	jwksURL := os.Getenv("FRONTEND_URL") + "/api/auth/jwks"
@@ -147,4 +155,77 @@ func ProtectedRoute(router *gin.Engine, path string) *gin.RouterGroup {
 		ctx.Set("user", *claims)
 		ctx.Next()
 	})
+}
+
+func RelationshipRoute(router *gin.Engine, path string) gin.IRoutes {
+	table := globals.DynamoTable
+
+	if table == nil {
+		panic("The Dynamo table has not been initialized yet! Cannot create a relationship route middleware.")
+	}
+
+	relationshipService := relationship.NewRelationshipService(relationship.RelationshipServiceArgs{
+		DynamoTable: table,
+	})
+
+	group := ProtectedRoute(router, path)
+	return group.Use(func(ctx *gin.Context) {
+		user, ok := ctx.Get("user")
+
+		if !ok {
+			ctx.AbortWithStatusJSON(
+				http.StatusUnauthorized,
+				gin.H{"code": http.StatusUnauthorized, "message": "You must be authorized to use this endpoint!"},
+			)
+			return
+		}
+
+		claims := user.(TokenClaims)
+
+		relationship, err := relationshipService.GetRelationshipForUser(ctx, claims.Id)
+
+		if err != nil {
+			log.Println(fmt.Errorf("failed to get relationship for user: %w", err))
+			ctx.AbortWithStatusJSON(
+				http.StatusInternalServerError,
+				gin.H{"code": http.StatusInternalServerError, "message": "Internal server error."},
+			)
+			return
+		}
+
+		if relationship == nil {
+			ctx.AbortWithStatusJSON(
+				http.StatusForbidden,
+				gin.H{"code": http.StatusForbidden, "message": "You are not in a relationship!"},
+			)
+			return
+		}
+
+		ctx.Set("relationship", *relationship)
+		ctx.Next()
+	})
+}
+
+func GetFromContext[T any](c *gin.Context, key string) (*T, error) {
+	item, ok := c.Get(key)
+
+	if !ok {
+		return nil, fmt.Errorf("unable to fetch item with key \"%s\" from context", key)
+	}
+
+	castedItem, ok := item.(T)
+
+	if !ok {
+		return nil, fmt.Errorf("could not cast item with key \"%s\" from context. there is an invalid type", key)
+	}
+
+	return &castedItem, nil
+}
+
+func GetUserFromContext(c *gin.Context) (*TokenClaims, error) {
+	return GetFromContext[TokenClaims](c, "user")
+}
+
+func GetRelationshipFromContext(c *gin.Context) (*relationship.RelationshipRecord, error) {
+	return GetFromContext[relationship.RelationshipRecord](c, "relationship")
 }

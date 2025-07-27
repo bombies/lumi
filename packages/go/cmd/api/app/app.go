@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"lumi/api/app/globals"
 	"lumi/api/app/routes"
 	"lumi/api/app/utils"
 	"lumi/pkg/dynamo"
@@ -40,19 +41,19 @@ func NewApp() *App {
 		panic(err)
 	}
 
-	dynamoTable := dynamo.DynamoTable{
+	globals.DynamoTable = &dynamo.DynamoTable{
 		TableName:    tableName.(string),
 		DynamoClient: dynamodb.NewFromConfig(cfg),
 	}
 
-	s3Bucket := s3.NewBucket(s3.NewBucketArgs{
+	globals.S3Bucket = s3.NewBucket(s3.NewBucketArgs{
 		BucketName: bucketName.(string),
 		Config:     &cfg,
 	})
 
 	r := gin.Default()
 
-	registerAllEndpoints(r, &dynamoTable, s3Bucket)
+	registerAllEndpoints(r)
 
 	lambda := ginadapter.NewV2(r)
 	return &App{
@@ -61,19 +62,21 @@ func NewApp() *App {
 	}
 }
 
-func registerAllEndpoints(router *gin.Engine, table *dynamo.DynamoTable, bucket *s3.S3Bucket) {
-	for _, route := range getAllRoutes(router, table, bucket) {
+func registerAllEndpoints(router *gin.Engine) {
+	for _, route := range getAllRoutes(router) {
 		route.RegisterEndpoints()
 	}
 }
 
-func getAllRoutes(router *gin.Engine, table *dynamo.DynamoTable, bucket *s3.S3Bucket) []routes.Route {
-	userService := user.NewUserService(table, bucket)
+func getAllRoutes(router *gin.Engine) []routes.Route {
+	userService := user.NewUserService(globals.DynamoTable, globals.S3Bucket)
+
+	protectedGroup := utils.ProtectedRoute(router, "/")
 
 	userRoute := &routes.UserRoute{
 		Router:         router,
 		UserService:    userService,
-		ProtectedGroup: utils.ProtectedRoute(router, "/users"),
+		ProtectedGroup: protectedGroup,
 	}
 
 	return []routes.Route{userRoute}

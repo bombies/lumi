@@ -27,10 +27,26 @@ func ParseQueryParams[T any](c *gin.Context) (*T, error) {
 }
 
 func HandleResponse[I any](c *gin.Context, inputHandler func() (*I, error), responseHandler func(input *I) (any, error)) {
-	dto, err := inputHandler()
+	var dto *I
+	var err error
+
+	if inputHandler != nil {
+		dto, err = inputHandler()
+	}
+
 	if err != nil {
 		c.AbortWithError(http.StatusBadRequest, err)
 		return
+	}
+
+	if dto == nil && inputHandler != nil {
+		c.AbortWithStatusJSON(
+			http.StatusInternalServerError,
+			gin.H{
+				"code":    http.StatusInternalServerError,
+				"message": "Internal server error",
+			},
+		)
 	}
 
 	response, err := responseHandler(dto)
@@ -42,7 +58,7 @@ func HandleResponse[I any](c *gin.Context, inputHandler func() (*I, error), resp
 			return
 		}
 
-		c.JSON(
+		c.AbortWithStatusJSON(
 			http.StatusInternalServerError,
 			gin.H{
 				"code":    http.StatusInternalServerError,
