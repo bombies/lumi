@@ -2,6 +2,7 @@ package utils
 
 import (
 	"errors"
+	"log"
 	"lumi/pkg/models"
 	"net/http"
 
@@ -40,24 +41,7 @@ func HandleResponse[I any](c *gin.Context, inputHandler func() (*I, error), resp
 	}
 
 	if dto == nil && inputHandler != nil {
-		c.AbortWithStatusJSON(
-			http.StatusInternalServerError,
-			gin.H{
-				"code":    http.StatusInternalServerError,
-				"message": "Internal server error",
-			},
-		)
-	}
-
-	response, err := responseHandler(dto)
-
-	if err != nil {
-		var serviceError *models.ServiceError
-		if errors.As(err, &serviceError) {
-			c.JSON(serviceError.StatusCode, serviceError)
-			return
-		}
-
+		log.Println(errors.New("dto is nil but the input handler isn't"))
 		c.AbortWithStatusJSON(
 			http.StatusInternalServerError,
 			gin.H{
@@ -66,6 +50,25 @@ func HandleResponse[I any](c *gin.Context, inputHandler func() (*I, error), resp
 			},
 		)
 		return
+	}
+
+	response, err := responseHandler(dto)
+
+	if err != nil {
+		switch err := err.(type) {
+		case *models.ServiceError:
+			c.AbortWithStatusJSON(err.StatusCode, err)
+			return
+		default:
+			c.AbortWithStatusJSON(
+				http.StatusInternalServerError,
+				gin.H{
+					"code":    http.StatusInternalServerError,
+					"message": "Internal server error",
+				},
+			)
+			return
+		}
 	}
 
 	c.JSON(http.StatusOK, response)

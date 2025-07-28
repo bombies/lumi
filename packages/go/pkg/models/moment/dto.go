@@ -46,10 +46,9 @@ func (dto *GetInfiniteMomentsDto) GetOrder() dynamo.DynamoQueryOrder {
 }
 
 type GetInfiniteMomentMessagesDto struct {
-	MomentId string                          `json:"momentId" form:"momentId" binding:"required,uuid4"`
-	Limit    *int32                          `json:"limit" form:"limit" binding:"min=1,max=100"`
-	Cursor   map[string]types.AttributeValue `json:"cursor" form:"cursor"`
-	Order    *dynamo.DynamoQueryOrder        `json:"order" form:"order"`
+	Limit  *int32                          `json:"limit" form:"limit" binding:"min=1,max=100"`
+	Cursor map[string]types.AttributeValue `json:"cursor" form:"cursor"`
+	Order  *dynamo.DynamoQueryOrder        `json:"order" form:"order"`
 }
 
 func (dto *GetInfiniteMomentMessagesDto) GetLimit() int32 {
@@ -71,7 +70,6 @@ func (dto *GetInfiniteMomentMessagesDto) GetOrder() dynamo.DynamoQueryOrder {
 }
 
 type CreateMomentMessageDto struct {
-	MomentId  string  `json:"momentId" binding:"required,uuid4"`
 	Content   string  `json:"content" binding:"required,min=1,max=1024"`
 	RepliedTo string  `json:"repliedTo" binding:"uuid4"`
 	Id        *string `json:"id" binding:"uuid4"`
@@ -79,10 +77,9 @@ type CreateMomentMessageDto struct {
 }
 
 type UpdateMomentMessageDto struct {
-	Content   *string             `json:"content" binding:"min=1,max=1024"`
-	Reaction  *string             `json:"reaction"`
-	State     *MomentMessageState `json:"state" binding:"oneof=sent delivered read"`
-	MessageId string              `json:"messageId" binding:"required,uuid4"`
+	Content  *string             `json:"content" binding:"min=1,max=1024"`
+	Reaction *string             `json:"reaction"`
+	State    *MomentMessageState `json:"state" binding:"oneof=sent delivered read"`
 }
 
 type SearchMomentsDto struct {
@@ -110,6 +107,10 @@ func (dto *SearchMomentsDto) GetOrder() dynamo.DynamoQueryOrder {
 	return *dto.Order
 }
 
+type ReactToMessageDto struct {
+	Reaction string `json:"reaction" binding:"required"`
+}
+
 type GetRelationshipMomentTagsDto struct {
 	Query  string                          `json:"query" form:"query"`
 	Limit  *int32                          `json:"limit" form:"limit" binding:"min=1,max=100"`
@@ -132,8 +133,7 @@ type CreateRelationshipMomentTagDto struct {
 }
 
 type CreateMomentTagDto struct {
-	Tag      string `json:"tag" binding:"required,min=1,max=50"`
-	MomentId string `json:"momentId" binding:"uuid4"`
+	Tag string `json:"tag" binding:"required,min=1,max=50"`
 }
 
 type GetMomentsByTagDto struct {

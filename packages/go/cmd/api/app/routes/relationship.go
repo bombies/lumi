@@ -11,7 +11,6 @@ import (
 )
 
 type RelationshipRoute struct {
-	Router              *gin.Engine
 	ProtectedGroup      *gin.RouterGroup
 	RelationshipRoute   gin.IRoutes
 	UserService         *user.UserService
@@ -22,20 +21,22 @@ func (route *RelationshipRoute) RegisterEndpoints() {
 	protectedRouter := route.ProtectedGroup
 	relationshipRouter := route.RelationshipRoute
 
-	_ = relationshipRouter
-
-	protectedRouter.POST("/relationships/send", route.SendRelationshipRequest)
-	protectedRouter.POST("/relationships/accept", route.AcceptRelationshipRequest)
-	protectedRouter.POST("/relationships/reject", route.RejectRelationshipRequest)
-	protectedRouter.GET("/relationships/sent", route.GetSentRelationshipRequests)
-	protectedRouter.GET("/relationships/received", route.GetReceivedRelationshipRequests)
-	relationshipRouter.GET("/relationships", route.GetRelationship)
-	relationshipRouter.GET("/relationships/partner", route.GetRelationshipPartner)
-	relationshipRouter.POST("/relationships/leave", route.LeaveRelationship)
-	relationshipRouter.PATCH("/relationships", route.UpdateRelationship)
+	protectedRouter.POST(route.endpoint("/send"), route.sendRelationshipRequest)
+	protectedRouter.POST(route.endpoint("/accept/:id"), route.acceptRelationshipRequest)
+	protectedRouter.POST(route.endpoint("/reject/:id"), route.rejectRelationshipRequest)
+	protectedRouter.GET(route.endpoint("/sent"), route.getSentRelationshipRequests)
+	protectedRouter.GET(route.endpoint("/received"), route.getReceivedRelationshipRequests)
+	relationshipRouter.GET(route.endpoint(), route.getRelationship)
+	relationshipRouter.PATCH(route.endpoint(), route.updateRelationship)
+	relationshipRouter.GET(route.endpoint("/partner"), route.getRelationshipPartner)
+	relationshipRouter.POST(route.endpoint("/leave"), route.leaveRelationship)
 }
 
-func (route *RelationshipRoute) SendRelationshipRequest(c *gin.Context) {
+func (route *RelationshipRoute) endpoint(path ...string) string {
+	return buildEndpointString("relationships", path...)
+}
+
+func (route *RelationshipRoute) sendRelationshipRequest(c *gin.Context) {
 	utils.HandleResponse(
 		c,
 		func() (*globals.SingleInputDTO[string], error) {
@@ -51,39 +52,37 @@ func (route *RelationshipRoute) SendRelationshipRequest(c *gin.Context) {
 	)
 }
 
-func (route *RelationshipRoute) AcceptRelationshipRequest(c *gin.Context) {
+func (route *RelationshipRoute) acceptRelationshipRequest(c *gin.Context) {
 	utils.HandleResponse(
 		c,
-		func() (*globals.SingleInputDTO[string], error) {
-			return utils.ParseDto[globals.SingleInputDTO[string]](c)
-		},
-		func(input *globals.SingleInputDTO[string]) (any, error) {
+		nil,
+		func(input *any) (any, error) {
+			requestId := c.Param("id")
 			claims, err := utils.GetUserFromContext(c)
 			if err != nil {
 				return nil, err
 			}
-			return route.RelationshipService.AcceptRelationshipRequest(c, claims.Id, input.Input)
+			return route.RelationshipService.AcceptRelationshipRequest(c, claims.Id, requestId)
 		},
 	)
 }
 
-func (route *RelationshipRoute) RejectRelationshipRequest(c *gin.Context) {
+func (route *RelationshipRoute) rejectRelationshipRequest(c *gin.Context) {
 	utils.HandleResponse(
 		c,
-		func() (*globals.SingleInputDTO[string], error) {
-			return utils.ParseDto[globals.SingleInputDTO[string]](c)
-		},
-		func(input *globals.SingleInputDTO[string]) (any, error) {
+		nil,
+		func(input *any) (any, error) {
+			requestId := c.Param("id")
 			claims, err := utils.GetUserFromContext(c)
 			if err != nil {
 				return nil, err
 			}
-			return route.RelationshipService.DeleteRelationshipRequestById(c, claims.Id, input.Input)
+			return route.RelationshipService.DeleteRelationshipRequestById(c, claims.Id, requestId)
 		},
 	)
 }
 
-func (route *RelationshipRoute) GetSentRelationshipRequests(c *gin.Context) {
+func (route *RelationshipRoute) getSentRelationshipRequests(c *gin.Context) {
 	utils.HandleResponse(
 		c,
 		func() (*relationship.GetRelationshipRequestsForUserDto, error) {
@@ -99,7 +98,7 @@ func (route *RelationshipRoute) GetSentRelationshipRequests(c *gin.Context) {
 	)
 }
 
-func (route *RelationshipRoute) GetReceivedRelationshipRequests(c *gin.Context) {
+func (route *RelationshipRoute) getReceivedRelationshipRequests(c *gin.Context) {
 	utils.HandleResponse(
 		c,
 		func() (*relationship.GetRelationshipRequestsForUserDto, error) {
@@ -115,7 +114,7 @@ func (route *RelationshipRoute) GetReceivedRelationshipRequests(c *gin.Context) 
 	)
 }
 
-func (route *RelationshipRoute) GetRelationship(c *gin.Context) {
+func (route *RelationshipRoute) getRelationship(c *gin.Context) {
 	utils.HandleResponse(
 		c,
 		nil,
@@ -126,7 +125,7 @@ func (route *RelationshipRoute) GetRelationship(c *gin.Context) {
 	)
 }
 
-func (route *RelationshipRoute) GetRelationshipPartner(c *gin.Context) {
+func (route *RelationshipRoute) getRelationshipPartner(c *gin.Context) {
 	utils.HandleResponse(
 		c,
 		nil,
@@ -149,7 +148,7 @@ func (route *RelationshipRoute) GetRelationshipPartner(c *gin.Context) {
 	)
 }
 
-func (route *RelationshipRoute) LeaveRelationship(c *gin.Context) {
+func (route *RelationshipRoute) leaveRelationship(c *gin.Context) {
 	utils.HandleResponse(
 		c,
 		nil,
@@ -163,7 +162,7 @@ func (route *RelationshipRoute) LeaveRelationship(c *gin.Context) {
 	)
 }
 
-func (route *RelationshipRoute) UpdateRelationship(c *gin.Context) {
+func (route *RelationshipRoute) updateRelationship(c *gin.Context) {
 	utils.HandleResponse(
 		c,
 		func() (*relationship.UpdateRelationshipDto, error) {

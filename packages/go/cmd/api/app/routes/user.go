@@ -18,13 +18,17 @@ func (route *UserRoute) RegisterEndpoints() {
 	router := route.Router
 	protectedRouter := route.ProtectedGroup
 
-	router.GET("/users/username", route.getUsersByUsername)
-	router.GET("/users/email", route.getUsersByEmail)
-	protectedRouter.PATCH("/users/self", route.updateSelf)
-	protectedRouter.GET("/users/self", route.getSelf)
-	protectedRouter.GET("/users/avatar-upload-url", route.getUserAvatarUploadUser)
-	protectedRouter.GET("/users/:id", route.getStrippedUserById)
-	protectedRouter.DELETE("/users/self", route.deleteSelf)
+	router.GET(route.endpoint("/username"), route.getUsersByUsername)
+	router.GET(route.endpoint("/email"), route.getUsersByEmail)
+	protectedRouter.PATCH(route.endpoint("/self"), route.updateSelf)
+	protectedRouter.GET(route.endpoint("/self"), route.getSelf)
+	protectedRouter.DELETE(route.endpoint("/self"), route.deleteSelf)
+	protectedRouter.GET(route.endpoint("/avatar-upload-url"), route.getUserAvatarUploadUser)
+	protectedRouter.GET(route.endpoint("/:id"), route.getStrippedUserById)
+}
+
+func (route *UserRoute) endpoint(path ...string) string {
+	return buildEndpointString("users", path...)
 }
 
 func (route *UserRoute) getUsersByUsername(c *gin.Context) {

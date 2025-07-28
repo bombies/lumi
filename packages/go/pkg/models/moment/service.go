@@ -92,9 +92,8 @@ func (ms *MomentService) CreateMomentDetails(ctx context.Context, userId, relati
 			WorkerCount: len(tags),
 			WorkerCallback: func(workerId int, jobs <-chan string, results chan<- utils.FanOutJobResult[MomentTagRecord]) {
 				for tag := range jobs {
-					tagRecord, err := ms.CreateMomentTag(ctx, userId, relationshipId, CreateMomentTagDto{
-						Tag:      tag,
-						MomentId: id,
+					tagRecord, err := ms.CreateMomentTag(ctx, userId, relationshipId, id, CreateMomentTagDto{
+						Tag: tag,
 					})
 
 					if err != nil {
@@ -164,9 +163,9 @@ func (ms *MomentService) GetMomentDetailsById(ctx context.Context, id string, op
 	return res, nil
 }
 
-func (ms *MomentService) GetMomentsForRelationship(ctx context.Context, relationshipId string, dto GetInfiniteMomentsDto) ([]MomentRecord, error) {
+func (ms *MomentService) GetMomentsForRelationship(ctx context.Context, relationshipId string, dto GetInfiniteMomentsDto) (*dynamo.InfiniteData[MomentRecord], error) {
 	keys := MomentKeys{}
-	res, err := dynamo.GetItems(
+	return dynamo.GetItems(
 		ms.DynamoTable,
 		dynamo.GetItemsParams[MomentRecord]{
 			Ctx:   ctx,
@@ -192,17 +191,11 @@ func (ms *MomentService) GetMomentsForRelationship(ctx context.Context, relation
 			},
 		},
 	)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return res.Data, nil
 }
 
-func (ms *MomentService) GetMomentsForUser(ctx context.Context, userId string, dto GetInfiniteMomentsDto) ([]MomentRecord, error) {
+func (ms *MomentService) GetMomentsForUser(ctx context.Context, userId string, dto GetInfiniteMomentsDto) (*dynamo.InfiniteData[MomentRecord], error) {
 	keys := MomentKeys{}
-	res, err := dynamo.GetItems(
+	return dynamo.GetItems(
 		ms.DynamoTable,
 		dynamo.GetItemsParams[MomentRecord]{
 			Ctx:   ctx,
@@ -228,12 +221,6 @@ func (ms *MomentService) GetMomentsForUser(ctx context.Context, userId string, d
 			},
 		},
 	)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return res.Data, nil
 }
 
 func (ms *MomentService) SearchMoments(ctx context.Context, relationshipId string, dto SearchMomentsDto) (*dynamo.InfiniteDataTupledCursor[MomentRecord], error) {
@@ -442,7 +429,7 @@ func (ms *MomentService) DeleteMomentDetails(ctx context.Context, momentId strin
 	})
 }
 
-func (ms *MomentService) CreateMomentMessage(ctx context.Context, userId string, dto CreateMomentMessageDto) (*MomentMessageRecord, error) {
+func (ms *MomentService) CreateMomentMessage(ctx context.Context, userId string, momentId string, dto CreateMomentMessageDto) (*MomentMessageRecord, error) {
 	id := lo.TernaryF(dto.Id != nil, func() string { return *dto.Id }, func() string { return utils.GetUUID() })
 	timestamp, keys := lo.TernaryF(
 		dto.Timestamp != nil,
@@ -468,7 +455,7 @@ func (ms *MomentService) CreateMomentMessage(ctx context.Context, userId string,
 				SK: keys.SK(id),
 			},
 			DynamoGSI1Keys: dynamo.DynamoGSI1Keys{
-				GSI1PK: keys.GSI1PK(dto.MomentId),
+				GSI1PK: keys.GSI1PK(momentId),
 				GSI1SK: keys.GSI1SK(timestamp),
 			},
 			DynamoEntityType: dynamo.DynamoEntityType{
@@ -476,7 +463,7 @@ func (ms *MomentService) CreateMomentMessage(ctx context.Context, userId string,
 			},
 			Id:        id,
 			SenderId:  userId,
-			MomentId:  dto.MomentId,
+			MomentId:  momentId,
 			Content:   dto.Content,
 			RepliedTo: dto.RepliedTo,
 			State:     lo.ToPtr(MomentMessageStateDelivered),
@@ -485,7 +472,15 @@ func (ms *MomentService) CreateMomentMessage(ctx context.Context, userId string,
 	})
 }
 
-func (ms *MomentService) GetMessagesForMoment(ctx context.Context, dto GetInfiniteMomentMessagesDto) (*dynamo.InfiniteData[MomentMessageRecord], error) {
+func (ms *MomentService) GetMomentMessageById(ctx context.Context, messageId string) (*MomentMessageRecord, error) {
+	return dynamo.GetItem[MomentMessageRecord](ms.DynamoTable, dynamo.GetItemArgs{
+		Ctx: ctx,
+		PK:  MomentMessageKeys{}.PK(messageId),
+		SK:  MomentMessageKeys{}.SK(messageId),
+	})
+}
+
+func (ms *MomentService) GetMessagesForMoment(ctx context.Context, momentId string, dto GetInfiniteMomentMessagesDto) (*dynamo.InfiniteData[MomentMessageRecord], error) {
 	keys := MomentMessageKeys{}
 	return dynamo.GetItems(ms.DynamoTable, dynamo.GetItemsParams[MomentMessageRecord]{
 		Ctx:   ctx,
@@ -493,7 +488,7 @@ func (ms *MomentService) GetMessagesForMoment(ctx context.Context, dto GetInfini
 		QueryExpression: dynamo.DynamoQueryExpression{
 			Expression: "#gsi1pk = :gsi1pk",
 			Variables: map[string]any{
-				":gsi1pk": keys.GSI1PK(dto.MomentId),
+				":gsi1pk": keys.GSI1PK(momentId),
 			},
 		},
 		Cursor: dto.Cursor,
@@ -502,7 +497,7 @@ func (ms *MomentService) GetMessagesForMoment(ctx context.Context, dto GetInfini
 	})
 }
 
-func (ms *MomentService) UpdateMomentMessage(ctx context.Context, dto UpdateMomentMessageDto) (*MomentMessageRecord, error) {
+func (ms *MomentService) UpdateMomentMessage(ctx context.Context, messageId string, dto UpdateMomentMessageDto) (*MomentMessageRecord, error) {
 	var updateBody UpdateableMomentMessageRecord
 	if err := dynamo.TransformToUpdateable(dto, &updateBody); err != nil {
 		return nil, err
@@ -515,8 +510,8 @@ func (ms *MomentService) UpdateMomentMessage(ctx context.Context, dto UpdateMome
 	keys := MomentMessageKeys{}
 	return dynamo.UpdateItem[MomentMessageRecord](ms.DynamoTable, dynamo.UpdateItemArgs{
 		Ctx:        ctx,
-		PK:         keys.PK(dto.MessageId),
-		SK:         keys.SK(dto.MessageId),
+		PK:         keys.PK(messageId),
+		SK:         keys.SK(messageId),
 		UpdateBody: updateBody,
 	})
 
@@ -714,13 +709,13 @@ func (ms *MomentService) CreateRelationshipMomentTag(
 	})
 }
 
-func (ms *MomentService) CreateMomentTag(ctx context.Context, userId, relationshipId string, dto CreateMomentTagDto) (*MomentTagRecord, error) {
+func (ms *MomentService) CreateMomentTag(ctx context.Context, userId, relationshipId, momentId string, dto CreateMomentTagDto) (*MomentTagRecord, error) {
 	normalizedTag, keys := normalizeMomentTag(dto.Tag), MomentTagKeys{}
 	return dynamo.PutItem(ms.DynamoTable, dynamo.PutItemArgs[MomentTagRecord]{
 		Ctx: ctx,
 		Item: MomentTagRecord{
 			DynamoPrimaryKey: dynamo.DynamoPrimaryKey{
-				PK: keys.PK(dto.MomentId),
+				PK: keys.PK(momentId),
 				SK: keys.SK(normalizedTag),
 			},
 			DynamoGSI1Keys: dynamo.DynamoGSI1Keys{
@@ -730,7 +725,7 @@ func (ms *MomentService) CreateMomentTag(ctx context.Context, userId, relationsh
 			DynamoEntityType: dynamo.DynamoEntityType{
 				EntityType: EntityTypeMomentTag,
 			},
-			MomentId:       dto.MomentId,
+			MomentId:       momentId,
 			Tag:            normalizedTag,
 			TaggerId:       userId,
 			RelationshipId: relationshipId,

@@ -6,8 +6,10 @@ import (
 	"lumi/api/app/routes"
 	"lumi/api/app/utils"
 	"lumi/pkg/dynamo"
+	"lumi/pkg/models/moment"
 	"lumi/pkg/models/relationship"
 	"lumi/pkg/models/user"
+	"lumi/pkg/redis"
 	"lumi/pkg/s3"
 
 	"github.com/aws/aws-lambda-go/events"
@@ -52,6 +54,8 @@ func NewApp() *App {
 		Config:     &cfg,
 	})
 
+	globals.RedisClient = redis.NewRedisClient()
+
 	r := gin.Default()
 
 	registerAllEndpoints(r)
@@ -70,13 +74,18 @@ func registerAllEndpoints(router *gin.Engine) {
 }
 
 func getAllRoutes(router *gin.Engine) []routes.Route {
-	dynamoTable, s3Bucket := globals.DynamoTable, globals.S3Bucket
+	dynamoTable, s3Bucket, redisClient := globals.DynamoTable, globals.S3Bucket, globals.RedisClient
 
 	userService := user.NewUserService(dynamoTable, s3Bucket)
 	relationshipService := relationship.NewRelationshipService(relationship.RelationshipServiceArgs{
 		DynamoTable:   dynamoTable,
 		UserService:   userService,
 		StorageBucket: s3Bucket,
+	})
+	momentService := moment.NewMomentService(moment.MomentServiceArgs{
+		DynamoTable:   dynamoTable,
+		StorageBucket: s3Bucket,
+		RedisClient:   redisClient,
 	})
 
 	protectedGroup := utils.ProtectedRoute(router, "/")
@@ -89,14 +98,22 @@ func getAllRoutes(router *gin.Engine) []routes.Route {
 	}
 
 	relationshipRoute := &routes.RelationshipRoute{
-		Router:              router,
 		ProtectedGroup:      protectedGroup,
 		RelationshipRoute:   relationshipGroup,
 		UserService:         userService,
 		RelationshipService: relationshipService,
 	}
 
-	return []routes.Route{userRoute, relationshipRoute}
+	momentRoute := &routes.MomentRoute{
+		RelationshipRoute: relationshipGroup,
+		MomentService:     momentService,
+	}
+
+	return []routes.Route{
+		userRoute,
+		relationshipRoute,
+		momentRoute,
+	}
 }
 
 func (app *App) Handler(ctx context.Context, req events.APIGatewayV2HTTPRequest) (events.APIGatewayV2HTTPResponse, error) {

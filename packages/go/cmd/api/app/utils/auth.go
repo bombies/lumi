@@ -229,3 +229,19 @@ func GetUserFromContext(c *gin.Context) (*TokenClaims, error) {
 func GetRelationshipFromContext(c *gin.Context) (*relationship.RelationshipRecord, error) {
 	return GetFromContext[relationship.RelationshipRecord](c, "relationship")
 }
+
+func GetContextObjects(c *gin.Context) (*TokenClaims, *relationship.RelationshipRecord, error) {
+	relationship, err := GetRelationshipFromContext(c)
+
+	if err != nil {
+		return nil, nil, err
+	}
+
+	user, err := GetUserFromContext(c)
+
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return user, relationship, nil
+}
