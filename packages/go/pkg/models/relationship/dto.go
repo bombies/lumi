@@ -12,7 +12,6 @@ type CreateRelationshipRequestDto struct {
 type GetRelationshipRequestsForUserDto struct {
 	Limit  int32                           `json:"limit" form:"limit" binding:"min=1,max=100"`
 	Cursor map[string]types.AttributeValue `json:"cursor" form:"cursor"`
-	UserId string                          `json:"userId" form:"userId" binding:"required"`
 }
 
 func (dto *GetRelationshipRequestsForUserDto) GetLimit() int32 {

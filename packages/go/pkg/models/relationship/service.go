@@ -250,15 +250,15 @@ func (rs *RelationshipService) GetRelationshipRequestById(ctx context.Context, r
 	return res, nil
 }
 
-func (rs *RelationshipService) GetReceivedRelationshipRequestForUser(ctx context.Context, dto GetRelationshipRequestsForUserDto) (*dynamo.InfiniteData[RelationshipRequestRecord], error) {
-	return rs.getRelationshipRequestsForUser(ctx, GetRelationshipRequestsForUserArgs{
+func (rs *RelationshipService) GetReceivedRelationshipRequestForUser(ctx context.Context, userId string, dto GetRelationshipRequestsForUserDto) (*dynamo.InfiniteData[RelationshipRequestRecord], error) {
+	return rs.getRelationshipRequestsForUser(ctx, userId, GetRelationshipRequestsForUserArgs{
 		Dto:   dto,
 		Index: GetRelationshipRequestsIndexGSI2,
 	})
 }
 
-func (rs *RelationshipService) GetSentRelationshipRequestForUser(ctx context.Context, dto GetRelationshipRequestsForUserDto) (*dynamo.InfiniteData[RelationshipRequestRecord], error) {
-	return rs.getRelationshipRequestsForUser(ctx, GetRelationshipRequestsForUserArgs{
+func (rs *RelationshipService) GetSentRelationshipRequestForUser(ctx context.Context, userId string, dto GetRelationshipRequestsForUserDto) (*dynamo.InfiniteData[RelationshipRequestRecord], error) {
+	return rs.getRelationshipRequestsForUser(ctx, userId, GetRelationshipRequestsForUserArgs{
 		Dto:   dto,
 		Index: GetRelationshipRequestsIndexGSI1,
 	})
@@ -276,7 +276,7 @@ type GetRelationshipRequestsForUserArgs struct {
 	Index GetRelationshipRequestsIndex
 }
 
-func (rs *RelationshipService) getRelationshipRequestsForUser(ctx context.Context, args GetRelationshipRequestsForUserArgs) (*dynamo.InfiniteData[RelationshipRequestRecord], error) {
+func (rs *RelationshipService) getRelationshipRequestsForUser(ctx context.Context, userId string, args GetRelationshipRequestsForUserArgs) (*dynamo.InfiniteData[RelationshipRequestRecord], error) {
 	dto, indexLower := args.Dto, strings.ToLower(string(args.Index))
 
 	keys := RelationshipRequestKeys{}
@@ -295,8 +295,8 @@ func (rs *RelationshipService) getRelationshipRequestsForUser(ctx context.Contex
 					),
 					fmt.Sprintf(":%ssk", indexLower): lo.Ternary(
 						args.Index == GetRelationshipRequestsIndex(dynamo.GSI1),
-						keys.GSI1SK(dto.UserId),
-						keys.GSI2SK(dto.UserId),
+						keys.GSI1SK(userId),
+						keys.GSI2SK(userId),
 					),
 				},
 			},
@@ -317,7 +317,7 @@ func (rs *RelationshipService) getRelationshipRequestsForUser(ctx context.Contex
 	lo.ForEach(
 		data,
 		func(request RelationshipRequestRecord, _ int) {
-			if request.Sender != dto.UserId {
+			if request.Sender != userId {
 				userIds.Add(request.Sender)
 			} else {
 				userIds.Add(request.Receiver)
@@ -352,7 +352,7 @@ func (rs *RelationshipService) getRelationshipRequestsForUser(ctx context.Contex
 	}
 
 	for idx, request := range data {
-		otherUser, ok := fetchedUsers[lo.Ternary(request.Sender == dto.UserId, request.Receiver, request.Sender)]
+		otherUser, ok := fetchedUsers[lo.Ternary(request.Sender == userId, request.Receiver, request.Sender)]
 
 		if ok {
 			data[idx].OtherUser = &otherUser

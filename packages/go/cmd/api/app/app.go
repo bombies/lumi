@@ -6,6 +6,7 @@ import (
 	"lumi/api/app/routes"
 	"lumi/api/app/utils"
 	"lumi/pkg/dynamo"
+	"lumi/pkg/models/relationship"
 	"lumi/pkg/models/user"
 	"lumi/pkg/s3"
 
@@ -69,9 +70,17 @@ func registerAllEndpoints(router *gin.Engine) {
 }
 
 func getAllRoutes(router *gin.Engine) []routes.Route {
-	userService := user.NewUserService(globals.DynamoTable, globals.S3Bucket)
+	dynamoTable, s3Bucket := globals.DynamoTable, globals.S3Bucket
+
+	userService := user.NewUserService(dynamoTable, s3Bucket)
+	relationshipService := relationship.NewRelationshipService(relationship.RelationshipServiceArgs{
+		DynamoTable:   dynamoTable,
+		UserService:   userService,
+		StorageBucket: s3Bucket,
+	})
 
 	protectedGroup := utils.ProtectedRoute(router, "/")
+	relationshipGroup := utils.RelationshipRoute(router, "/")
 
 	userRoute := &routes.UserRoute{
 		Router:         router,
@@ -79,7 +88,15 @@ func getAllRoutes(router *gin.Engine) []routes.Route {
 		ProtectedGroup: protectedGroup,
 	}
 
-	return []routes.Route{userRoute}
+	relationshipRoute := &routes.RelationshipRoute{
+		Router:              router,
+		ProtectedGroup:      protectedGroup,
+		RelationshipRoute:   relationshipGroup,
+		UserService:         userService,
+		RelationshipService: relationshipService,
+	}
+
+	return []routes.Route{userRoute, relationshipRoute}
 }
 
 func (app *App) Handler(ctx context.Context, req events.APIGatewayV2HTTPRequest) (events.APIGatewayV2HTTPResponse, error) {
