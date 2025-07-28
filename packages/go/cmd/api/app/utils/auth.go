@@ -104,22 +104,22 @@ func DecodeBearerToken(ctx context.Context, token string) (*TokenClaims, error) 
 	}
 
 	var email string
-	if err := parsedToken.Get("id", &email); err != nil {
+	if err := parsedToken.Get("email", &email); err != nil {
 		return nil, fmt.Errorf("failed to extract email from token: %w", err)
 	}
 
 	var emailVerified bool
-	if err := parsedToken.Get("id", &emailVerified); err != nil {
+	if err := parsedToken.Get("emailVerified", &emailVerified); err != nil {
 		return nil, fmt.Errorf("failed to extract emailVerified from token: %w", err)
 	}
 
 	var name string
-	if err := parsedToken.Get("id", &name); err != nil {
+	if err := parsedToken.Get("name", &name); err != nil {
 		return nil, fmt.Errorf("failed to extract name from token: %w", err)
 	}
 
 	var image string
-	if err := parsedToken.Get("id", &image); err != nil {
+	if err := parsedToken.Get("image", &image); err != nil {
 		return nil, fmt.Errorf("failed to extract image from token: %w", err)
 	}
 

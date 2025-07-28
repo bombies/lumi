@@ -5,19 +5,14 @@ import (
 	"lumi/api/app/globals"
 	"lumi/api/app/routes"
 	"lumi/api/app/utils"
-	"lumi/pkg/dynamo"
 	"lumi/pkg/models/moment"
 	"lumi/pkg/models/relationship"
 	"lumi/pkg/models/user"
-	"lumi/pkg/redis"
-	"lumi/pkg/s3"
+	"net/http"
 
 	"github.com/aws/aws-lambda-go/events"
-	"github.com/aws/aws-sdk-go-v2/config"
-	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	ginadapter "github.com/awslabs/aws-lambda-go-api-proxy/gin"
 	"github.com/gin-gonic/gin"
-	"github.com/sst/sst/v3/sdk/golang/resource"
 )
 
 type App struct {
@@ -26,38 +21,7 @@ type App struct {
 }
 
 func NewApp() *App {
-	cfg, err := config.LoadDefaultConfig(context.TODO())
-
-	if err != nil {
-		panic(err)
-	}
-
-	tableName, err := resource.Get("Database", "name")
-
-	if err != nil {
-		panic(err)
-	}
-
-	bucketName, err := resource.Get("ContentBucket", "name")
-
-	if err != nil {
-		panic(err)
-	}
-
-	globals.DynamoTable = &dynamo.DynamoTable{
-		TableName:    tableName.(string),
-		DynamoClient: dynamodb.NewFromConfig(cfg),
-	}
-
-	globals.S3Bucket = s3.NewBucket(s3.NewBucketArgs{
-		BucketName: bucketName.(string),
-		Config:     &cfg,
-	})
-
-	globals.RedisClient = redis.NewRedisClient()
-
 	r := gin.Default()
-
 	registerAllEndpoints(r)
 
 	lambda := ginadapter.NewV2(r)
@@ -71,6 +35,12 @@ func registerAllEndpoints(router *gin.Engine) {
 	for _, route := range getAllRoutes(router) {
 		route.RegisterEndpoints()
 	}
+
+	router.GET("/health", func(ctx *gin.Context) {
+		ctx.JSON(http.StatusOK, gin.H{
+			"status": "healthy",
+		})
+	})
 }
 
 func getAllRoutes(router *gin.Engine) []routes.Route {
@@ -117,6 +87,5 @@ func getAllRoutes(router *gin.Engine) []routes.Route {
 }
 
 func (app *App) Handler(ctx context.Context, req events.APIGatewayV2HTTPRequest) (events.APIGatewayV2HTTPResponse, error) {
-	utils.SetupJWKSCache(ctx)
 	return app.LambdaAdapter.ProxyWithContext(ctx, req)
 }
