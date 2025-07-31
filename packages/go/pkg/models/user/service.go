@@ -14,7 +14,6 @@ import (
 	"os"
 	"time"
 
-	v4 "github.com/aws/aws-sdk-go-v2/aws/signer/v4"
 	"github.com/samber/lo"
 )
 
@@ -152,6 +151,13 @@ func (service *UserService) GetNonNilUserById(ctx context.Context, args GetUserB
 }
 
 func (service *UserService) GetUsersByUsername(ctx context.Context, dto GetUsersByUsernameDto) (*dynamo.InfiniteData[UserRecord], error) {
+	if dto.Username == "" {
+		return nil, &models.ServiceError{
+			StatusCode: http.StatusBadRequest,
+			Message:    "Username is required",
+		}
+	}
+
 	userKeys := UserKeys{}
 	return dynamo.GetItems(service.DynamoTable, dynamo.GetItemsParams[UserRecord]{
 		Ctx:   ctx,
@@ -342,7 +348,7 @@ type GetUserAvatarUploadUrlArgs struct {
 	UserId string
 }
 
-func (service *UserService) GetUserAvatarUploadUrl(ctx context.Context, args GetUserAvatarUploadUrlArgs) (*v4.PresignedHTTPRequest, error) {
+func (service *UserService) GetUserAvatarUploadUrl(ctx context.Context, args GetUserAvatarUploadUrlArgs) (*string, error) {
 	if service.StorageBucket == nil {
 		return nil, &models.ServiceError{
 			StatusCode: http.StatusBadRequest,
@@ -355,7 +361,7 @@ func (service *UserService) GetUserAvatarUploadUrl(ctx context.Context, args Get
 		return nil, err
 	}
 
-	return service.StorageBucket.GetSignedPutURL(ctx, s3.GetSignedURLArgs{
+	res, err := service.StorageBucket.GetSignedPutURL(ctx, s3.GetSignedURLArgs{
 		Key:       key,
 		ExpiresIn: lo.ToPtr(5 * time.Minute),
 		ContentType: lo.Ternary(
@@ -364,6 +370,12 @@ func (service *UserService) GetUserAvatarUploadUrl(ctx context.Context, args Get
 			nil,
 		),
 	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &res.URL, nil
 }
 
 func (service *UserService) attachAvatarToUser(ur *UserRecord) error {

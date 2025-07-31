@@ -29,19 +29,19 @@ type CreateUserDto struct {
 }
 
 type UpdateUserDto struct {
-	FirstName      *string     `json:"firstName,omitempty" binding:"firstname"`
-	LastName       *string     `json:"lastName,omitempty" binding:"lastname"`
+	FirstName      *string     `json:"firstName,omitempty" binding:"omitempty,firstname"`
+	LastName       *string     `json:"lastName,omitempty" binding:"omitempty,lastname"`
 	Verified       *bool       `json:"verified,omitempty"`
 	AvatarKey      *string     `json:"avatarKey,omitempty"`
 	RelationshipId *string     `json:"relationshipId,omitempty"`
-	Status         *UserStatus `json:"status,omitempty" binding:"oneof=online offline idle"`
+	Status         *UserStatus `json:"status,omitempty" binding:"omitempty,oneof=online offline idle"`
 }
 
 type GetUsersByUsernameDto struct {
-	Limit       int                             `json:"limit" form:"limit" binding:"min=1,max=100"`
-	Cursor      map[string]types.AttributeValue `json:"cursor" form:"cursor"`
-	Username    string                          `json:"username" form:"username" binding:"required"`
-	Projections []string                        `json:"projections" form:"projections" binding:"dive,oneof=id email username firstName lastName avatarKey relationshipId status"`
+	Limit       int                             `json:"limit" form:"limit" binding:"omitempty,min=1,max=100"`
+	Cursor      map[string]types.AttributeValue `json:"cursor" form:"cursor" binding:"omitempty"`
+	Username    string                          `json:"username" form:"username" binding:"omitempty"`
+	Projections []string                        `json:"projections" form:"projections" binding:"omitempty,dive,oneof=id email username firstName lastName avatarKey relationshipId status"`
 }
 
 func (dto *GetUsersByUsernameDto) GetLimit() int {

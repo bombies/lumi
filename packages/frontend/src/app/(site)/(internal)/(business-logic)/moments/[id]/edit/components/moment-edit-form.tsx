@@ -43,8 +43,8 @@ const MomentEditForm: FC<Props> = ({ moment }) => {
 		hasNextPage: hasMoreTags,
 		fetchNextPage: fetchMoreTags,
 		isFetchingNextPage: isFetchingMoreTags,
-	} = GetRelationshipMomentTags(tagSearch.length ? tagSearch : undefined, 20);
-	const { mutateAsync: updateDetails, isPending: isUpdatingDetails } = UpdateMomentDetails();
+	} = GetRelationshipMomentTags({ query: tagSearch, limit: 20 });
+	const { mutateAsync: updateDetails, isPending: isUpdatingDetails } = UpdateMomentDetails(moment.id);
 	const { data: currentTags, isLoading: currentTagsLoading } = GetMomentTags(moment.id);
 	const router = useRouter();
 
@@ -62,7 +62,7 @@ const MomentEditForm: FC<Props> = ({ moment }) => {
 	const onSubmit = useCallback<SubmitHandler<MomentFormDetailsSchema>>(
 		async (data) => {
 			try {
-				await updateDetails({ momentId: moment.id, ...data });
+				await updateDetails({ ...data });
 
 				// Handle success
 				toast.success('Successfully updated moment details!');

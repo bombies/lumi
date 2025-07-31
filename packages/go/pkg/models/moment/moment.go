@@ -17,12 +17,12 @@ type MomentRecord struct {
 	NormalizedTitle    string    `json:"normalizedTitle"`
 	Description        string    `json:"description"`
 	ObjectKey          string    `json:"objectKey"`
-	ThumbnailObjectKey *string   `json:"thumbnailObjectKey"`
+	ThumbnailObjectKey *string   `json:"thumbnailObjectKey,omitempty"`
 	RelationshipId     string    `json:"relationshipId"`
 	UserId             string    `json:"userId"`
 	CreatedAt          time.Time `json:"createdAt"`
-	VideoURL           *string   `json:"videoUrl"`
-	ThumbnailUrl       *string   `json:"thumbnailUrl"`
+	VideoURL           *string   `json:"videoUrl,omitempty"`
+	ThumbnailUrl       *string   `json:"thumbnailUrl,omitempty"`
 }
 
 func (mr MomentRecord) GetPK() string {

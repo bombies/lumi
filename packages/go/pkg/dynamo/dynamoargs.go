@@ -45,53 +45,53 @@ type DynamoEntityType struct {
 }
 
 type DynamoGSI1Keys struct {
-	GSI1PK string `json:"gsi1pk"`
-	GSI1SK string `json:"gsi1sk"`
+	GSI1PK string `json:"gsi1pk,omitempty"`
+	GSI1SK string `json:"gsi1sk,omitempty"`
 }
 
 type DynamoGSI2Keys struct {
-	GSI2PK string `json:"gsi2pk"`
-	GSI2SK string `json:"gsi2sk"`
+	GSI2PK string `json:"gsi2pk,omitempty"`
+	GSI2SK string `json:"gsi2sk,omitempty"`
 }
 
 type DynamoGSI3Keys struct {
-	GSI3PK string `json:"gsi3pk"`
-	GSI3SK string `json:"gsi3sk"`
+	GSI3PK string `json:"gsi3pk,omitempty"`
+	GSI3SK string `json:"gsi3sk,omitempty"`
 }
 
 type OptionalDynamoGSI3Keys struct {
-	GSI3PK *string `json:"gsi3pk"`
-	GSI3SK *string `json:"gsi3sk"`
+	GSI3PK *string `json:"gsi3pk,omitempty"`
+	GSI3SK *string `json:"gsi3sk,omitempty"`
 }
 
 type DynamoGSI4Keys struct {
-	GSI4PK string `json:"gsi4pk"`
-	GSI4SK string `json:"gsi4sk"`
+	GSI4PK string `json:"gsi4pk,omitempty"`
+	GSI4SK string `json:"gsi4sk,omitempty"`
 }
 
 type UpdateablePrimaryKey struct {
-	PK UpdateableDynamoField[string] `json:"pk"`
-	SK UpdateableDynamoField[string] `json:"sk"`
+	PK UpdateableDynamoField[string] `json:"pk,omitempty"`
+	SK UpdateableDynamoField[string] `json:"sk,omitempty"`
 }
 
 type UpdateableGlobalIndex1Keys struct {
-	GSI1PK UpdateableDynamoField[string] `json:"gsi1pk"`
-	GSI1SK UpdateableDynamoField[string] `json:"gsi1sk"`
+	GSI1PK UpdateableDynamoField[string] `json:"gsi1pk,omitempty"`
+	GSI1SK UpdateableDynamoField[string] `json:"gsi1sk,omitempty"`
 }
 
 type UpdateableGlobalIndex2Keys struct {
-	GSI2PK UpdateableDynamoField[string] `json:"gsi2pk"`
-	GSI2SK UpdateableDynamoField[string] `json:"gsi2sk"`
+	GSI2PK UpdateableDynamoField[string] `json:"gsi2pk,omitempty"`
+	GSI2SK UpdateableDynamoField[string] `json:"gsi2sk,omitempty"`
 }
 
 type UpdateableGlobalIndex3Keys struct {
-	GSI3PK UpdateableDynamoField[string] `json:"gsi3pk"`
-	GSI3SK UpdateableDynamoField[string] `json:"gsi3sk"`
+	GSI3PK UpdateableDynamoField[string] `json:"gsi3pk,omitempty"`
+	GSI3SK UpdateableDynamoField[string] `json:"gsi3sk,omitempty"`
 }
 
 type UpdateableGlobalIndex4Keys struct {
-	GSI4PK UpdateableDynamoField[string] `json:"gsi4pk"`
-	GSI4SK UpdateableDynamoField[string] `json:"gsi4sk"`
+	GSI4PK UpdateableDynamoField[string] `json:"gsi4pk,omitempty"`
+	GSI4SK UpdateableDynamoField[string] `json:"gsi4sk,omitempty"`
 }
 
 type UpdateableDynamoField[T any] struct {

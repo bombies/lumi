@@ -164,7 +164,7 @@ func TestUserService_GetUserAvatarUploadUrl(t *testing.T) {
 			} else {
 				assert.NoError(t, err)
 				assert.NotNil(t, result)
-				assert.Contains(t, result.URL, "presigned-url")
+				assert.Contains(t, *result, "presigned-url")
 			}
 
 			mockBucket.AssertExpectations(t)

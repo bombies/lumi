@@ -2,6 +2,7 @@ package utils
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"lumi/pkg/models"
 	"net/http"
@@ -11,7 +12,7 @@ import (
 
 func ParseDto[T any](c *gin.Context) (*T, error) {
 	var dto T
-	if err := c.BindJSON(dto); err != nil {
+	if err := c.BindJSON(&dto); err != nil {
 		return nil, err
 	}
 
@@ -20,7 +21,7 @@ func ParseDto[T any](c *gin.Context) (*T, error) {
 
 func ParseQueryParams[T any](c *gin.Context) (*T, error) {
 	var dto T
-	if err := c.ShouldBindQuery(dto); err != nil {
+	if err := c.ShouldBindQuery(&dto); err != nil {
 		return nil, err
 	}
 
@@ -36,7 +37,7 @@ func HandleResponse[I any](c *gin.Context, inputHandler func() (*I, error), resp
 	}
 
 	if err != nil {
-		c.AbortWithError(http.StatusBadRequest, err)
+		c.AbortWithError(http.StatusBadRequest, fmt.Errorf("failed to handle response: %w", err))
 		return
 	}
 
@@ -60,6 +61,7 @@ func HandleResponse[I any](c *gin.Context, inputHandler func() (*I, error), resp
 			c.AbortWithStatusJSON(err.StatusCode, err)
 			return
 		default:
+			log.Println(fmt.Errorf("there was an unexpected error: %w", err))
 			c.AbortWithStatusJSON(
 				http.StatusInternalServerError,
 				gin.H{

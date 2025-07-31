@@ -177,8 +177,8 @@ func (ms *MomentService) GetMomentsForRelationship(ctx context.Context, relation
 				},
 			},
 			Cursor: dto.Cursor,
-			Order:  dto.Order,
-			Limit:  dto.Limit,
+			Order:  lo.ToPtr(dto.GetOrder()),
+			Limit:  lo.ToPtr(dto.GetLimit()),
 			Mapper: func(mr MomentRecord) MomentRecord {
 				attachUrlsToMoment(
 					ctx,
@@ -206,9 +206,9 @@ func (ms *MomentService) GetMomentsForUser(ctx context.Context, userId string, d
 					":gsi2pk": keys.GSI2PK(userId),
 				},
 			},
-			Cursor: dto.Cursor,
-			Order:  dto.Order,
-			Limit:  dto.Limit,
+			Cursor: dto.GetCursor(),
+			Order:  lo.ToPtr(dto.GetOrder()),
+			Limit:  lo.ToPtr(dto.GetLimit()),
 			Mapper: func(mr MomentRecord) MomentRecord {
 				attachUrlsToMoment(
 					ctx,
@@ -242,9 +242,9 @@ func (ms *MomentService) SearchMoments(ctx context.Context, relationshipId strin
 					},
 				},
 			},
-			Limit:  dto.Limit,
+			Limit:  lo.ToPtr(dto.GetLimit()),
 			Cursor: dto.Cursor[0],
-			Order:  dto.Order,
+			Order:  lo.ToPtr(dto.GetOrder()),
 			Mapper: func(mr MomentRecord) MomentRecord {
 				attachUrlsToMoment(
 					ctx,
@@ -267,8 +267,8 @@ func (ms *MomentService) SearchMoments(ctx context.Context, relationshipId strin
 		relationshipId,
 		GetMomentsByTagDto{
 			TagQuery: dto.Query,
-			Limit:    dto.Limit,
-			Order:    dto.Order,
+			Limit:    lo.ToPtr(dto.GetLimit()),
+			Order:    lo.ToPtr(dto.GetOrder()),
 			Cursor:   dto.Cursor[1],
 		},
 	)
@@ -625,8 +625,8 @@ func (ms *MomentService) GetRelationshipMomentTags(ctx context.Context, relation
 			Expression: fmt.Sprintf("#pk = :pk%s", lo.Ternary(dto.Query != "", " AND begins_with(#sk)", "")),
 			Variables:  variables,
 		},
-		Cursor: dto.Cursor,
-		Limit:  dto.Limit,
+		Cursor: dto.GetCursor(),
+		Limit:  lo.ToPtr(dto.GetLimit()),
 		Order:  lo.ToPtr(dynamo.AscendingQueryOrder),
 	})
 }
@@ -749,8 +749,8 @@ func (ms *MomentService) GetMomentsByTag(ctx context.Context, relationshipId str
 				},
 			},
 			Cursor: dto.Cursor,
-			Order:  dto.Order,
-			Limit:  dto.Limit,
+			Order:  lo.ToPtr(dto.GetOrder()),
+			Limit:  lo.ToPtr(dto.GetLimit()),
 		},
 	)
 

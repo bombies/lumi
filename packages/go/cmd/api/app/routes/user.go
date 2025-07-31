@@ -98,10 +98,19 @@ func (route *UserRoute) getUserAvatarUploadUser(c *gin.Context) {
 			if err != nil {
 				return nil, err
 			}
-			return route.UserService.GetUserAvatarUploadUrl(c, user.GetUserAvatarUploadUrlArgs{
+
+			url, err := route.UserService.GetUserAvatarUploadUrl(c, user.GetUserAvatarUploadUrlArgs{
 				GetUploadUrlDto: *input,
 				UserId:          claims.Id,
 			})
+
+			if err != nil {
+				return nil, err
+			}
+
+			return gin.H{
+				"url": url,
+			}, nil
 		},
 	)
 }

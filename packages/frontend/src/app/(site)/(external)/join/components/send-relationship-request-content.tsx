@@ -1,19 +1,22 @@
 'use client';
 
 import type { FC } from 'react';
+import { useMutation } from '@tanstack/react-query';
 import { TRPCClientError } from '@trpc/client';
 import { AnimatePresence, motion } from 'motion/react';
 import { useRouter } from 'next/navigation';
 import { useCallback, useMemo, useState } from 'react';
-import { toast } from 'sonner';
 
+import { toast } from 'sonner';
 import { Card, CardContent, CardDescription, CardHeader } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { FetchUsersByUsername } from '@/hooks/trpc/user-hooks';
-import { trpc } from '@/lib/trpc/trpc-react';
+import { apiClient } from '@/lib/api/api';
 
-const SendUserRelationshipRequest = () => trpc.relationships.sendRelationshipRequest.useMutation();
+const SendUserRelationshipRequest = () => useMutation({
+	mutationFn: (receiverId: string) => apiClient.relationships.sendRelationshipRequest(receiverId),
+});
 
 const SendRelationshipRequestContent: FC = () => {
 	const [searchQuery, setSearchQuery] = useState('');
@@ -86,6 +89,7 @@ const SendRelationshipRequestContent: FC = () => {
 										? (
 												flatUsers?.map(user => (
 													<button
+														type="button"
 														key={user.id}
 														disabled={isSending}
 														onClick={() => sendRequest(user.id)}

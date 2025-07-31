@@ -4,29 +4,34 @@ import type { RelationshipRequest } from '@lumi/core/relationships/relationship.
 import type { User } from '@lumi/core/users/user.types';
 import type { FC } from 'react';
 import { TrashIcon } from '@heroicons/react/24/solid';
+import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useMemo } from 'react';
-import { toast } from 'sonner';
 
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useRouteInvalidation } from '@/lib/hooks/useRouteInvalidation';
-import { trpc } from '@/lib/trpc/trpc-react';
+import { apiClient } from '@/lib/api/api';
 import { getErrorMessage } from '@/lib/trpc/utils';
 
 const FetchSentRequests = () =>
-	trpc.relationships.getSentRelationshipRequests.useInfiniteQuery(
-		{},
-		{
-			getNextPageParam: lastPage => lastPage.cursor,
-		},
-	);
+	useInfiniteQuery({
+		queryKey: ['relationships', 'requests', 'sent'],
+		initialPageParam: null as Record<string, any> | null,
+		queryFn: ({ pageParam }) =>
+			apiClient.relationships.getSentRelationshipRequests({
+				limit: 10,
+				cursor: pageParam,
+			}),
+		getNextPageParam: lastPage => lastPage.nextCursor,
+	});
 
 const DeleteRelationshipRequest = () => {
-	const invalidateRoute = useRouteInvalidation([trpc.relationships.getSentRelationshipRequests]);
-	return trpc.relationships.removeRelationshipRequest.useMutation({
-		onSuccess() {
-			invalidateRoute();
+	const queryClient = useQueryClient();
+	return useMutation({
+		mutationFn: (requestId: string) => apiClient.relationships.rejectRelationshipRequest(requestId),
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ['relationships', 'requests', 'sent'] });
 		},
 	});
 };

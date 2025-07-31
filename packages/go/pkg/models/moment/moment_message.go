@@ -23,12 +23,12 @@ type MomentMessageRecord struct {
 	SenderId  string              `json:"senderId"`
 	MomentId  string              `json:"momentId"`
 	Content   string              `json:"content"`
-	RepliedTo string              `json:"repliedTo"`
-	Reaction  string              `json:"reaction"`
+	RepliedTo string              `json:"repliedTo,omitempty"`
+	Reaction  string              `json:"reaction,omitempty"`
 	IsDeleted bool                `json:"isDeleted"`
-	State     *MomentMessageState `json:"state"`
+	State     *MomentMessageState `json:"state,omitempty"`
 	Timestamp time.Time           `json:"timestamp"`
-	UpdatedAt *time.Time          `json:"updatedAt"`
+	UpdatedAt *time.Time          `json:"updatedAt,omitempty"`
 }
 
 func (mm MomentMessageRecord) GetPK() string {

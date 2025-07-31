@@ -20,17 +20,17 @@ type UserRecord struct {
 	dynamo.DynamoGSI1Keys
 	dynamo.DynamoGSI2Keys
 	dynamo.DynamoEntityType
-	Id             string     `json:"id"`
-	Email          string     `json:"email"`
-	Username       string     `json:"username"`
-	FirstName      string     `json:"firstName"`
-	LastName       string     `json:"lastName"`
-	CreatedAt      time.Time  `json:"createdAt"`
-	UpdatedAt      time.Time  `json:"updatedAt"`
-	AvatarKey      string     `json:"avatarKey"`
-	AvatarUrl      *string    `json:"avatarUrl"`
-	RelationshipId string     `json:"relationshipId"`
-	Status         UserStatus `json:"status"`
+	Id             string     `json:"id,omitempty"`
+	Email          string     `json:"email,omitempty"`
+	Username       string     `json:"username,omitempty"`
+	FirstName      string     `json:"firstName,omitempty"`
+	LastName       string     `json:"lastName,omitempty"`
+	CreatedAt      time.Time  `json:"createdAt,omitempty"`
+	UpdatedAt      time.Time  `json:"updatedAt,omitempty"`
+	AvatarKey      string     `json:"avatarKey,omitempty"`
+	AvatarUrl      *string    `json:"avatarUrl,omitempty"`
+	RelationshipId string     `json:"relationshipId,omitempty"`
+	Status         UserStatus `json:"status,omitempty"`
 }
 
 func (u UserRecord) GetPK() string {

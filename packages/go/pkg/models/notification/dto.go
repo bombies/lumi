@@ -15,7 +15,7 @@ type CreateNotificationDto struct {
 
 type GetNotificationsDto struct {
 	TagQuery string                          `json:"tagQuery" form:"tagQuery"`
-	Limit    *int32                          `json:"limit" form:"limit" binding:"min=1,max=100"`
+	Limit    *int32                          `json:"limit,omitempty" form:"limit" binding:"omitempty,min=1,max=100"`
 	Cursor   map[string]types.AttributeValue `json:"cursor" form:"cursor"`
 }
 
@@ -39,7 +39,7 @@ const (
 
 type GetFilteredNotificationsDto struct {
 	TagQuery string                          `json:"tagQuery" form:"tagQuery"`
-	Limit    *int32                          `json:"limit" form:"limit" binding:"min=1,max=100"`
+	Limit    *int32                          `json:"limit,omitempty" form:"limit" binding:"omitempty,min=1,max=100"`
 	Cursor   map[string]types.AttributeValue `json:"cursor" form:"cursor"`
 	Filter   NotificationFilter              `json:"filter" form:"filter" binding:"oneof=read unread"`
 }

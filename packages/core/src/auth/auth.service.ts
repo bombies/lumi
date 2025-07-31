@@ -7,7 +7,7 @@ import { createRemoteJWKSet, jwtVerify, SignJWT } from 'jose';
 import { JWSInvalid, JWTExpired } from 'jose/errors';
 import { createUser, getUserByEmail } from '../users/users.service';
 
-export const registerUser = async (dto: RegisterUserDto) => {
+export const registerUser = async ({ password, ...dto }: RegisterUserDto) => {
 	let existingUser = await getUserByEmail(dto.email);
 	if (existingUser)
 		throw new TRPCError({

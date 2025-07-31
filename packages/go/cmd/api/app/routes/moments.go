@@ -117,9 +117,9 @@ func (route *MomentRoute) getMoments(c *gin.Context) {
 			} else if tag != "" {
 				return route.MomentService.GetMomentsByTag(c, tag, moment.GetMomentsByTagDto{
 					TagQuery: tag,
-					Limit:    input.Limit,
-					Cursor:   input.Cursor,
-					Order:    input.Order,
+					Limit:    lo.ToPtr(input.GetLimit()),
+					Cursor:   input.GetCursor(),
+					Order:    lo.ToPtr(input.GetOrder()),
 				})
 			} else {
 				return route.MomentService.GetMomentsForRelationship(c, relationship.Id, *input)
@@ -541,7 +541,14 @@ func (route *MomentRoute) getMomentUploadUrl(c *gin.Context) {
 				return nil, err
 			}
 
-			return route.MomentService.GetMomentUploadUrl(c, relationship.Id, *input)
+			res, err := route.MomentService.GetMomentUploadUrl(c, relationship.Id, *input)
+			if err != nil {
+				return nil, err
+			}
+
+			return gin.H{
+				"url": res.URL,
+			}, nil
 		},
 	)
 }

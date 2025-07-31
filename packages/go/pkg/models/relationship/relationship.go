@@ -15,11 +15,11 @@ type RelationshipRecord struct {
 	Id              string           `json:"id"`
 	Partner1        string           `json:"partner1"`
 	Partner2        string           `json:"partner2"`
-	Partner         *user.UserRecord `json:"partner"`
-	Self            *user.UserRecord `json:"self"`
+	Partner         *user.UserRecord `json:"partner,omitempty"`
+	Self            *user.UserRecord `json:"self,omitempty"`
 	CreatedAt       time.Time        `json:"createdAt"`
-	Anniversary     string           `json:"anniversary"`
-	AnniversaryMMDD string           `json:"anniversaryMMDD"`
+	Anniversary     string           `json:"anniversary,omitempty"`
+	AnniversaryMMDD string           `json:"anniversaryMMDD,omitempty"`
 }
 
 func (r RelationshipRecord) GetPK() string {
@@ -36,8 +36,8 @@ func (r RelationshipRecord) GetGSI1() (*string, *string) {
 
 type UpdateableRelationshipRecord struct {
 	dynamo.UpdateableGlobalIndex1Keys
-	Anniversary     dynamo.UpdateableDynamoField[string] `json:"anniversary"`
-	AnniversaryMMDD dynamo.UpdateableDynamoField[string] `json:"anniversaryMMDD"`
+	Anniversary     dynamo.UpdateableDynamoField[string] `json:"anniversary,omitempty"`
+	AnniversaryMMDD dynamo.UpdateableDynamoField[string] `json:"anniversaryMMDD,omitempty"`
 }
 
 func (r UpdateableRelationshipRecord) GetUpdateTag() string {

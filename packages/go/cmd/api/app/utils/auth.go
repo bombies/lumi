@@ -120,7 +120,11 @@ func DecodeBearerToken(ctx context.Context, token string) (*TokenClaims, error) 
 
 	var image string
 	if err := parsedToken.Get("image", &image); err != nil {
-		return nil, fmt.Errorf("failed to extract image from token: %w", err)
+		if strings.Contains(err.Error(), "source value is invalid (<nil>)") {
+			image = ""
+		} else {
+			return nil, fmt.Errorf("failed to extract image from token: %w", err)
+		}
 	}
 
 	return &TokenClaims{

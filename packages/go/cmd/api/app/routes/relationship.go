@@ -1,7 +1,6 @@
 package routes
 
 import (
-	"lumi/api/app/globals"
 	"lumi/api/app/utils"
 	"lumi/pkg/models/relationship"
 	"lumi/pkg/models/user"
@@ -21,7 +20,7 @@ func (route *RelationshipRoute) RegisterEndpoints() {
 	protectedRouter := route.ProtectedGroup
 	relationshipRouter := route.RelationshipRoute
 
-	protectedRouter.POST(route.endpoint("/send"), route.sendRelationshipRequest)
+	protectedRouter.POST(route.endpoint("/send/:id"), route.sendRelationshipRequest)
 	protectedRouter.POST(route.endpoint("/accept/:id"), route.acceptRelationshipRequest)
 	protectedRouter.POST(route.endpoint("/reject/:id"), route.rejectRelationshipRequest)
 	protectedRouter.GET(route.endpoint("/sent"), route.getSentRelationshipRequests)
@@ -39,15 +38,14 @@ func (route *RelationshipRoute) endpoint(path ...string) string {
 func (route *RelationshipRoute) sendRelationshipRequest(c *gin.Context) {
 	utils.HandleResponse(
 		c,
-		func() (*globals.SingleInputDTO[string], error) {
-			return utils.ParseDto[globals.SingleInputDTO[string]](c)
-		},
-		func(input *globals.SingleInputDTO[string]) (any, error) {
+		nil,
+		func(input *any) (any, error) {
+			receiverId := c.Param("id")
 			claims, err := utils.GetUserFromContext(c)
 			if err != nil {
 				return nil, err
 			}
-			return route.RelationshipService.SendRelationshipRequest(c, claims.Id, input.Input)
+			return route.RelationshipService.SendRelationshipRequest(c, claims.Id, receiverId)
 		},
 	)
 }
@@ -86,7 +84,7 @@ func (route *RelationshipRoute) getSentRelationshipRequests(c *gin.Context) {
 	utils.HandleResponse(
 		c,
 		func() (*relationship.GetRelationshipRequestsForUserDto, error) {
-			return utils.ParseDto[relationship.GetRelationshipRequestsForUserDto](c)
+			return utils.ParseQueryParams[relationship.GetRelationshipRequestsForUserDto](c)
 		},
 		func(input *relationship.GetRelationshipRequestsForUserDto) (any, error) {
 			claims, err := utils.GetUserFromContext(c)
@@ -102,7 +100,7 @@ func (route *RelationshipRoute) getReceivedRelationshipRequests(c *gin.Context) 
 	utils.HandleResponse(
 		c,
 		func() (*relationship.GetRelationshipRequestsForUserDto, error) {
-			return utils.ParseDto[relationship.GetRelationshipRequestsForUserDto](c)
+			return utils.ParseQueryParams[relationship.GetRelationshipRequestsForUserDto](c)
 		},
 		func(input *relationship.GetRelationshipRequestsForUserDto) (any, error) {
 			claims, err := utils.GetUserFromContext(c)
@@ -119,8 +117,8 @@ func (route *RelationshipRoute) getRelationship(c *gin.Context) {
 		c,
 		nil,
 		func(input *any) (any, error) {
-			claims, err := utils.GetRelationshipFromContext(c)
-			return *claims, err
+			relationship, err := utils.GetRelationshipFromContext(c)
+			return *relationship, err
 		},
 	)
 }

@@ -280,11 +280,12 @@ func (rs *RelationshipService) getRelationshipRequestsForUser(ctx context.Contex
 	dto, indexLower := args.Dto, strings.ToLower(string(args.Index))
 
 	keys := RelationshipRequestKeys{}
+
 	res, err := dynamo.GetItems(
 		rs.DynamoTable,
 		dynamo.GetItemsParams[RelationshipRequestRecord]{
 			Ctx:   ctx,
-			Index: lo.ToPtr(dynamo.GSI1),
+			Index: lo.ToPtr(dynamo.DynamoTableIndex(args.Index)),
 			QueryExpression: dynamo.DynamoQueryExpression{
 				Expression: fmt.Sprintf("#%spk = :%spk AND #%ssk = :%ssk", indexLower, indexLower, indexLower, indexLower),
 				Variables: map[string]any{

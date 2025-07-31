@@ -75,8 +75,8 @@ const dialogVariants = cva(
 	},
 );
 
-export type DialogProps = React.ComponentProps<typeof DialogPrimitive.Content> &
-	VariantProps<typeof dialogVariants> & {
+export type DialogProps = React.ComponentProps<typeof DialogPrimitive.Content>
+	& VariantProps<typeof dialogVariants> & {
 		hideCloseButton?: boolean;
 	};
 

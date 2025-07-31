@@ -13,6 +13,8 @@ import (
 	"github.com/aws/aws-lambda-go/events"
 	ginadapter "github.com/awslabs/aws-lambda-go-api-proxy/gin"
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
+	"github.com/go-playground/validator/v10"
 )
 
 type App struct {
@@ -23,6 +25,10 @@ type App struct {
 func NewApp() *App {
 	r := gin.Default()
 	registerAllEndpoints(r)
+
+	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
+		user.RegisterUserValidators(v)
+	}
 
 	lambda := ginadapter.NewV2(r)
 	return &App{
