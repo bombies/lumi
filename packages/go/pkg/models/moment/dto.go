@@ -140,7 +140,7 @@ type GetMomentsByTagDto struct {
 	TagQuery string                          `json:"tagQuery" form:"tagQuery"`
 	Limit    *int32                          `json:"limit,omitempty" form:"limit" binding:"omitempty,min=1,max=100"`
 	Cursor   map[string]types.AttributeValue `json:"cursor" form:"cursor"`
-	Order    *dynamo.DynamoQueryOrder        `json:"order,omitempty" form:"order"`
+	Order    *dynamo.DynamoQueryOrder        `json:"order,omitempty" form:"order" binding:"omitempty,oneof=asc desc"`
 }
 
 func (dto *GetMomentsByTagDto) GetLimit() int32 {

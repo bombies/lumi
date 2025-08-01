@@ -25,7 +25,7 @@ type WebsocketService struct {
 type CreateWebsocketConnectionArgs struct {
 	Endpoint   string
 	Authorizer string
-	Token      string
+	Token      WebsocketToken
 	Identifier string
 }
 
@@ -39,7 +39,7 @@ func NewSocketService(dynamoTable *dynamo.DynamoTable) *WebsocketService {
 
 func (ws *WebsocketService) CreateConnection(args CreateWebsocketConnectionArgs) error {
 	if ws.Client != nil && ws.Client.IsConnected() {
-		ws.Client.Disconnect(250)
+		ws.Client.Disconnect(75)
 	}
 
 	clientId := fmt.Sprintf("client_%s", lo.Ternary(args.Identifier != "", args.Identifier, utils.GetUUID()))
@@ -59,7 +59,7 @@ func (ws *WebsocketService) CreateConnection(args CreateWebsocketConnectionArgs)
 
 	password := clientId
 	if args.Token != "" {
-		password += "::" + args.Token
+		password += "::" + string(args.Token)
 	}
 	opts.SetPassword(password)
 

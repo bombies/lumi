@@ -4,33 +4,47 @@ import (
 	"context"
 	"crypto/rand"
 	"encoding/binary"
+	"fmt"
 	"log"
 	"lumi/pkg/dynamo"
 	"lumi/pkg/models"
+	"lumi/pkg/models/notification"
 	"lumi/pkg/models/relationship"
 	"lumi/pkg/models/user"
 	"lumi/pkg/utils"
+	"lumi/pkg/websockets"
 	"math"
 	"net/http"
 	"os"
+	"strings"
+	"time"
 
+	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/samber/lo"
 	"github.com/samber/lo/mutable"
+	"github.com/sst/sst/v3/sdk/golang/resource"
 )
 
 type AffirmationService struct {
 	DynamoTable         *dynamo.DynamoTable
 	RelationshipService *relationship.RelationshipService
+	WebsocketService    *websockets.WebsocketService
+	NotificationService *notification.NotificationService
 	Logger              *log.Logger
 }
 
 type AffirmationServiceArgs struct {
 	DynamoTable         *dynamo.DynamoTable
 	RelationshipService *relationship.RelationshipService
+	WebsocketService    *websockets.WebsocketService
+	NotificationService *notification.NotificationService
 }
 
 func NewAffirmationService(args AffirmationServiceArgs) *AffirmationService {
-	dynamoTable, relationshipService := args.DynamoTable, args.RelationshipService
+	dynamoTable,
+		relationshipService,
+		notificationService,
+		ws := args.DynamoTable, args.RelationshipService, args.NotificationService, args.WebsocketService
 
 	if dynamoTable == nil {
 		panic("DynamoTable is required for the AffirmationService")
@@ -43,10 +57,19 @@ func NewAffirmationService(args AffirmationServiceArgs) *AffirmationService {
 		})
 	}
 
+	if notificationService == nil {
+		notificationService = notification.NewNotificationService(dynamoTable)
+	}
+
+	if ws == nil {
+		ws = websockets.NewSocketService(dynamoTable)
+	}
+
 	logger := log.New(os.Stdout, "affirmation-service: ", log.LstdFlags)
 	return &AffirmationService{
 		DynamoTable:         dynamoTable,
 		RelationshipService: relationshipService,
+		WebsocketService:    ws,
 		Logger:              logger,
 	}
 }
@@ -229,4 +252,252 @@ func (as *AffirmationService) UpdateAffirmation(ctx context.Context, ownerId, re
 		SK:         keys.SK(ownerId, affirmationId),
 		UpdateBody: updateBody,
 	})
+}
+
+func (as *AffirmationService) DeleteAffirmation(ctx context.Context, ownerId, relationshipId, affirmationId string) (*AffirmationRecord, error) {
+	affirmation, err := as.GetAffirmationById(ctx, ownerId, relationshipId, affirmationId)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if affirmation == nil {
+		return nil, &models.ServiceError{
+			StatusCode: http.StatusNotFound,
+			Message:    "Affirmation not found",
+		}
+	}
+
+	keys := AffirmationKeys{}
+	_, err = dynamo.DeleteItem(as.DynamoTable, dynamo.DeleteItemArgs{
+		Ctx: ctx,
+		PK:  keys.PK(relationshipId),
+		SK:  keys.SK(ownerId, affirmationId),
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return affirmation, nil
+}
+
+func (as *AffirmationService) DeleteAffirmationsForRelationship(ctx context.Context, relationshipId string) ([]dynamodb.BatchWriteItemOutput, error) {
+	keys := AffirmationKeys{}
+	receivedAffirmationKeys := ReceivedAffirmationKeys{}
+
+	relationshipAffirmations, err := dynamo.GetItems(
+		as.DynamoTable,
+		dynamo.GetItemsParams[AffirmationRecord]{
+			QueryExpression: dynamo.DynamoQueryExpression{
+				Expression: "#pk = :pk",
+				Variables: map[string]any{
+					":pk": keys.PK(relationshipId),
+				},
+			},
+			Exhaustive: lo.ToPtr(true),
+		},
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	receivedAffirmations, err := dynamo.GetItems(
+		as.DynamoTable,
+		dynamo.GetItemsParams[ReceivedAffirmationRecord]{
+			QueryExpression: dynamo.DynamoQueryExpression{
+				Expression: "#pk = :pk",
+				Variables: map[string]any{
+					":pk": receivedAffirmationKeys.PK(relationshipId),
+				},
+			},
+			Exhaustive: lo.ToPtr(true),
+		},
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	affirmationRecords := lo.Map(
+		relationshipAffirmations.Data,
+		func(affirmation AffirmationRecord, _ int) dynamo.DynamoRecord {
+			return affirmation
+		},
+	)
+
+	receivedRecords := lo.Map(
+		receivedAffirmations.Data,
+		func(affirmation ReceivedAffirmationRecord, _ int) dynamo.DynamoRecord {
+			return affirmation
+		},
+	)
+
+	combinedRecords := make([]dynamo.DynamoRecord, 0)
+	combinedRecords = append(combinedRecords, affirmationRecords...)
+	combinedRecords = append(combinedRecords, receivedRecords...)
+
+	args := lo.Map(
+		combinedRecords,
+		func(record dynamo.DynamoRecord, _ int) dynamo.BatchWriteItemsArgs {
+			return dynamo.BatchWriteItemsArgs{
+				Delete: &dynamo.WriteDeleteArgs{
+					PK: record.GetPK(),
+					SK: record.GetSK(),
+				},
+			}
+		},
+	)
+
+	return dynamo.BatchWriteItems(
+		as.DynamoTable,
+		ctx,
+		args...,
+	), nil
+}
+
+func (as *AffirmationService) CreateReceivedAffirmation(ctx context.Context, receiver, relationshipId, affirmation string) (*ReceivedAffirmationRecord, error) {
+	timestamp, keys := time.Now(), ReceivedAffirmationKeys{}
+	return dynamo.PutItem(
+		as.DynamoTable,
+		dynamo.PutItemArgs[ReceivedAffirmationRecord]{
+			Ctx: ctx,
+			Item: ReceivedAffirmationRecord{
+				DynamoPrimaryKey: dynamo.DynamoPrimaryKey{
+					PK: keys.PK(relationshipId),
+					SK: keys.SK(receiver, timestamp),
+				},
+				DynamoEntityType: dynamo.DynamoEntityType{
+					EntityType: EntityTypeReceivedAffirmation,
+				},
+				Affirmation: affirmation,
+				Timestamp:   timestamp,
+			},
+		},
+	)
+}
+
+func (as *AffirmationService) GetReceivedAffirmations(ctx context.Context, userId, relationshipId string, dto GetReceivedAffirmationsDto) (*dynamo.InfiniteData[ReceivedAffirmationRecord], error) {
+	keys := ReceivedAffirmationKeys{}
+	return dynamo.GetItems(
+		as.DynamoTable,
+		dynamo.GetItemsParams[ReceivedAffirmationRecord]{
+			Ctx: ctx,
+			QueryExpression: dynamo.DynamoQueryExpression{
+				Expression: "#pk = :pk AND begins_with(#sk, :sk)",
+				Variables: map[string]any{
+					":pk": keys.PK(relationshipId),
+					":sk": keys.BuildKey(userId),
+				},
+			},
+			Limit:  lo.ToPtr(dto.GetLimit()),
+			Cursor: dto.GetCursor(),
+			Order:  lo.ToPtr(dto.GetOrder()),
+		},
+	)
+}
+
+func (as *AffirmationService) GetTodaysReceivedAffirmations(ctx context.Context, userId, relationshipId string) ([]ReceivedAffirmationRecord, error) {
+	today, keys := strings.Split(time.Now().Format(time.RFC3339), "T")[0], ReceivedAffirmationKeys{}
+	data, err := dynamo.GetItems(
+		as.DynamoTable,
+		dynamo.GetItemsParams[ReceivedAffirmationRecord]{
+			Ctx: ctx,
+			QueryExpression: dynamo.DynamoQueryExpression{
+				Expression: "#pk = :pk AND begins_with(#sk, :sk)",
+				Variables: map[string]any{
+					":pk": keys.PK(relationshipId),
+					":sk": keys.BuildKey(userId, today),
+				},
+			},
+			Exhaustive: lo.ToPtr(true),
+		},
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return data.Data, nil
+}
+
+type SendAffirmationToUserOpts struct {
+	Partner *user.UserRecord
+}
+
+func (as *AffirmationService) SendAffirmationToUser(
+	ctx context.Context,
+	userRecord user.UserRecord,
+	dto SendCustomAffirmationDto,
+	opts ...SendAffirmationToUserOpts,
+) (bool, error) {
+	if userRecord.RelationshipId == "" {
+		return false, &models.ServiceError{
+			StatusCode: http.StatusBadRequest,
+			Message:    "You aren't in a relationship!",
+		}
+	}
+
+	var partner *user.UserRecord
+	if len(opts) > 0 && opts[0].Partner != nil {
+		partner = opts[0].Partner
+	} else {
+		p, err := as.RelationshipService.GetPartnerForUser(ctx, userRecord.Id)
+		if err != nil {
+			return false, err
+		}
+
+		if p == nil {
+			return false, &models.ServiceError{
+				StatusCode: http.StatusBadRequest,
+				Message:    "You aren't in a relationship!",
+			}
+		}
+
+		partner = p
+	}
+
+	wsEndpoint, err := resource.Get("RealtimeServer", "endpoint")
+	if err != nil {
+		return false, err
+	}
+
+	wsAuthorizer, err := resource.Get("RealtimeServer", "authorizer")
+	if err != nil {
+		return false, err
+	}
+
+	err = as.WebsocketService.CreateConnection(websockets.CreateWebsocketConnectionArgs{
+		Endpoint:   wsEndpoint.(string),
+		Authorizer: wsAuthorizer.(string),
+		Token:      websockets.WebsocketTokenGlobal,
+	})
+
+	if err != nil {
+		return false, err
+	}
+
+	defer as.WebsocketService.CloseConnection()
+	return as.NotificationService.SendNotification(
+		ctx,
+		notification.SendNotificationArgs{
+			User: userRecord,
+			Payload: notification.NotificationPayload{
+				Title:   fmt.Sprintf("%s says", partner.FirstName),
+				Body:    dto.Affirmation,
+				OpenUrl: lo.ToPtr("/affirmations"),
+			},
+		},
+		notification.SendNotificationOpts{
+			OnlineWebSocketMessage: &notification.OnlineWebSocketMessageArgs{
+				MqttConnection: *as.WebsocketService,
+				Topic:          fmt.Sprintf("%s/%s/notifications", os.Getenv("NOTIFICATIONS_TOPIC"), userRecord.Id),
+			},
+			OnSuccess: func() {
+				_, err = as.CreateReceivedAffirmation(ctx, userRecord.Id, userRecord.RelationshipId, dto.Affirmation)
+				as.Logger.Println(fmt.Errorf("there was an error attempting to create the received affirmation record for a custom affirmation: %w", err))
+			},
+		},
+	)
 }

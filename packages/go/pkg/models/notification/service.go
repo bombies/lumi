@@ -2,6 +2,7 @@ package notification
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"lumi/pkg/dynamo"
 	"lumi/pkg/models"
@@ -99,7 +100,7 @@ type SendNotificationOpts struct {
 	OnSuccess              func()
 }
 
-func (ns *NotificationService) SendNotification(ctx context.Context, args SendNotificationArgs, opts ...SendNotificationOpts) {
+func (ns *NotificationService) SendNotification(ctx context.Context, args SendNotificationArgs, opts ...SendNotificationOpts) (bool, error) {
 	userRecord, payload := args.User, args.Payload
 
 	if userRecord.Status == user.UserStatusOffline || userRecord.Status == user.UserStatusIdle {
@@ -108,19 +109,19 @@ func (ns *NotificationService) SendNotification(ctx context.Context, args SendNo
 		notificationSubs, err := ns.GetNotificationSubscriptions(ctx, userRecord.Id)
 		if err != nil {
 			ns.Logger.Printf("Error getting notification subscriptions for user %s: %s\n", userRecord.Username, err.Error())
-			return
+			return false, err
 		}
 
 		vapidPubKey, err := resource.Get("VapidPublicKey", "value")
 		if err != nil {
 			ns.Logger.Printf("Error getting VAPID public key: %s\n", err.Error())
-			return
+			return false, err
 		}
 
 		vapidPrivKey, err := resource.Get("VapidPrivateKey", "value")
 		if err != nil {
 			ns.Logger.Printf("Error getting VAPID private key: %s\n", err.Error())
-			return
+			return false, err
 		}
 
 		for _, sub := range notificationSubs.Data {
@@ -163,7 +164,7 @@ func (ns *NotificationService) SendNotification(ctx context.Context, args SendNo
 	} else {
 		if len(opts) == 0 || opts[0].OnlineWebSocketMessage == nil {
 			ns.Logger.Printf("User %s is online... Skipping websocket notification\n", userRecord.Username)
-			return
+			return true, nil
 		}
 
 		ns.Logger.Printf("User %s is online... Sending notification through websocket\n", userRecord.Username)
@@ -172,7 +173,7 @@ func (ns *NotificationService) SendNotification(ctx context.Context, args SendNo
 
 		if !ws.IsConnected() {
 			ns.Logger.Printf("Websocket is not connected... Skipping websocket notification\n")
-			return
+			return false, fmt.Errorf("could not send notification: websocket not connected")
 		}
 
 		ws.EmitEvent(websockets.EmitEventArgs{
@@ -197,6 +198,8 @@ func (ns *NotificationService) SendNotification(ctx context.Context, args SendNo
 			opts[0].OnSuccess()
 		}
 	}
+
+	return true, nil
 }
 
 func (ns *NotificationService) StoreNotification(ctx context.Context, userId string, dto CreateNotificationDto) (*NotificationRecord, error) {

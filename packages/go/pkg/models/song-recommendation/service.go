@@ -19,7 +19,7 @@ type SongRecommendationService struct {
 	Logger      *log.Logger
 }
 
-func NewMomentService(dynamoTable *dynamo.DynamoTable) *SongRecommendationService {
+func NewSongRecommendationService(dynamoTable *dynamo.DynamoTable) *SongRecommendationService {
 	logger := log.New(os.Stdout, "song-rec-service: ", log.LstdFlags)
 	return &SongRecommendationService{
 		DynamoTable: dynamoTable,

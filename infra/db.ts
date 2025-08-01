@@ -41,13 +41,13 @@ export const db = new sst.aws.Dynamo('Database', {
 db.subscribe(
 	appify('RelationshipStreamHandler'),
 	{
-		handler: 'packages/functions/db/stream.handler',
+		handler: 'packages/go/cmd/stream',
 		link: [db, redisHost, redisPort, redisUser, redisPassword],
 		environment: {
 			TABLE_NAME: db.name,
 			SENTRY_AUTH_TOKEN: sentryAuthToken.value,
 		},
-		runtime: 'nodejs22.x',
+		runtime: 'go',
 	},
 	{
 		filters: [
