@@ -48,6 +48,7 @@ db.subscribe(
 			SENTRY_AUTH_TOKEN: sentryAuthToken.value,
 		},
 		runtime: 'go',
+		architecture: 'arm64',
 	},
 	{
 		filters: [
@@ -67,9 +68,10 @@ db.subscribe(
 db.subscribe(
 	appify('MomentMetadataDeletionHandler'),
 	{
-		handler: 'packages/functions/db/moment-deletion.handler',
+		handler: 'packages/go/cmd/moment-deletion',
 		link: [db, contentBucket],
-		runtime: 'nodejs22.x',
+		runtime: 'go',
+		architecture: 'arm64',
 		environment: {
 			SENTRY_AUTH_TOKEN: sentryAuthToken.value,
 		},
@@ -93,7 +95,7 @@ db.subscribe(
 db.subscribe(
 	appify('MomentThumbnailTranscoder'),
 	{
-		handler: 'packages/functions/db/moment-thumbnail-transcoder.handler',
+		handler: 'packages/go/cmd/thumbnail-transcoder',
 		link: [contentBucket, db, redisHost, redisPort, redisUser, redisPassword],
 		environment: {
 			APP_STAGE: $app.stage,
@@ -103,8 +105,12 @@ db.subscribe(
 			CDN_URL: $interpolate`${contentCdn.domainUrl.apply(domainUrl => domainUrl ?? contentCdn.url)}`,
 			SENTRY_AUTH_TOKEN: sentryAuthToken.value,
 		},
-		runtime: 'nodejs22.x',
-		nodejs: { install: ['ffmpeg-static'] },
+		runtime: 'go',
+		architecture: 'arm64',
+		copyFiles: [{
+			from: 'bin/ffmpeg-arm',
+			to: 'bin/ffmpeg',
+		}],
 	},
 	{
 		filters: [
