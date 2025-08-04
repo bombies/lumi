@@ -1,6 +1,7 @@
 package test
 
 import (
+	"fmt"
 	"lumi/pkg/dynamo"
 	"testing"
 
@@ -340,4 +341,340 @@ func TestUnwrapAttributes(t *testing.T) {
 	}
 
 	assert.Equal(t, expected, result)
+}
+func TestNullifyDynamoItem_WithPK(t *testing.T) {
+	item := map[string]types.AttributeValue{
+		"pk":   &types.AttributeValueMemberS{Value: "test-pk"},
+		"sk":   &types.AttributeValueMemberS{Value: "test-sk"},
+		"name": &types.AttributeValueMemberS{Value: "John"},
+	}
+
+	result := dynamo.NullifyDynamoItem(item)
+
+	assert.NotNil(t, result)
+	assert.Equal(t, item, result)
+}
+
+func TestNullifyDynamoItem_WithoutPK(t *testing.T) {
+	item := map[string]types.AttributeValue{
+		"sk":   &types.AttributeValueMemberS{Value: "test-sk"},
+		"name": &types.AttributeValueMemberS{Value: "John"},
+	}
+
+	result := dynamo.NullifyDynamoItem(item)
+
+	assert.Nil(t, result)
+}
+
+func TestNullifyDynamoItem_EmptyMap(t *testing.T) {
+	item := map[string]types.AttributeValue{}
+
+	result := dynamo.NullifyDynamoItem(item)
+
+	assert.Nil(t, result)
+}
+
+func TestNullifyDynamoItem_NilMap(t *testing.T) {
+	var item map[string]types.AttributeValue
+
+	result := dynamo.NullifyDynamoItem(item)
+
+	assert.Nil(t, result)
+}
+
+func TestNullifyDynamoItem_PKWithNullValue(t *testing.T) {
+	item := map[string]types.AttributeValue{
+		"pk":   &types.AttributeValueMemberNULL{Value: true},
+		"name": &types.AttributeValueMemberS{Value: "John"},
+	}
+
+	result := dynamo.NullifyDynamoItem(item)
+
+	assert.NotNil(t, result)
+	assert.Equal(t, item, result)
+}
+
+func TestNullifyDynamoItem_PKWithEmptyString(t *testing.T) {
+	item := map[string]types.AttributeValue{
+		"pk":   &types.AttributeValueMemberS{Value: ""},
+		"name": &types.AttributeValueMemberS{Value: "John"},
+	}
+
+	result := dynamo.NullifyDynamoItem(item)
+
+	assert.NotNil(t, result)
+	assert.Equal(t, item, result)
+}
+
+func TestNullifyDynamoItem_OnlyPK(t *testing.T) {
+	item := map[string]types.AttributeValue{
+		"pk": &types.AttributeValueMemberS{Value: "test-pk"},
+	}
+
+	result := dynamo.NullifyDynamoItem(item)
+
+	assert.NotNil(t, result)
+	assert.Equal(t, item, result)
+}
+
+func TestNullifyDynamoItem_PKCaseSensitive(t *testing.T) {
+	item := map[string]types.AttributeValue{
+		"PK":   &types.AttributeValueMemberS{Value: "test-pk"},
+		"name": &types.AttributeValueMemberS{Value: "John"},
+	}
+
+	result := dynamo.NullifyDynamoItem(item)
+
+	assert.Nil(t, result)
+}
+
+func TestNullifyDynamoItem_PKWithDifferentTypes(t *testing.T) {
+	testCases := []struct {
+		name string
+		item map[string]types.AttributeValue
+	}{
+		{
+			name: "PK as Number",
+			item: map[string]types.AttributeValue{
+				"pk": &types.AttributeValueMemberN{Value: "123"},
+			},
+		},
+		{
+			name: "PK as Boolean",
+			item: map[string]types.AttributeValue{
+				"pk": &types.AttributeValueMemberBOOL{Value: true},
+			},
+		},
+		{
+			name: "PK as Binary",
+			item: map[string]types.AttributeValue{
+				"pk": &types.AttributeValueMemberB{Value: []byte("test")},
+			},
+		},
+		{
+			name: "PK as List",
+			item: map[string]types.AttributeValue{
+				"pk": &types.AttributeValueMemberL{Value: []types.AttributeValue{
+					&types.AttributeValueMemberS{Value: "test"},
+				}},
+			},
+		},
+		{
+			name: "PK as Map",
+			item: map[string]types.AttributeValue{
+				"pk": &types.AttributeValueMemberM{Value: map[string]types.AttributeValue{
+					"nested": &types.AttributeValueMemberS{Value: "value"},
+				}},
+			},
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			result := dynamo.NullifyDynamoItem(tc.item)
+			assert.NotNil(t, result)
+			assert.Equal(t, tc.item, result)
+		})
+	}
+}
+
+func TestNullifyDynamoItems_AllValidItems(t *testing.T) {
+	items := []map[string]types.AttributeValue{
+		{
+			"pk":   &types.AttributeValueMemberS{Value: "test-pk-1"},
+			"name": &types.AttributeValueMemberS{Value: "John"},
+		},
+		{
+			"pk":   &types.AttributeValueMemberS{Value: "test-pk-2"},
+			"name": &types.AttributeValueMemberS{Value: "Jane"},
+		},
+	}
+
+	result := dynamo.NullifyDynamoItems(items)
+
+	assert.Len(t, result, 2)
+	assert.Equal(t, items, result)
+}
+
+func TestNullifyDynamoItems_AllInvalidItems(t *testing.T) {
+	items := []map[string]types.AttributeValue{
+		{
+			"sk":   &types.AttributeValueMemberS{Value: "test-sk-1"},
+			"name": &types.AttributeValueMemberS{Value: "John"},
+		},
+		{
+			"sk":   &types.AttributeValueMemberS{Value: "test-sk-2"},
+			"name": &types.AttributeValueMemberS{Value: "Jane"},
+		},
+	}
+
+	result := dynamo.NullifyDynamoItems(items)
+
+	assert.Len(t, result, 0)
+	assert.Empty(t, result)
+}
+
+func TestNullifyDynamoItems_MixedItems(t *testing.T) {
+	items := []map[string]types.AttributeValue{
+		{
+			"pk":   &types.AttributeValueMemberS{Value: "test-pk-1"},
+			"name": &types.AttributeValueMemberS{Value: "John"},
+		},
+		{
+			"sk":   &types.AttributeValueMemberS{Value: "test-sk-2"},
+			"name": &types.AttributeValueMemberS{Value: "Jane"},
+		},
+		{
+			"pk":   &types.AttributeValueMemberS{Value: "test-pk-3"},
+			"name": &types.AttributeValueMemberS{Value: "Bob"},
+		},
+	}
+
+	result := dynamo.NullifyDynamoItems(items)
+
+	assert.Len(t, result, 2)
+	assert.Equal(t, "test-pk-1", result[0]["pk"].(*types.AttributeValueMemberS).Value)
+	assert.Equal(t, "test-pk-3", result[1]["pk"].(*types.AttributeValueMemberS).Value)
+}
+
+func TestNullifyDynamoItems_EmptySlice(t *testing.T) {
+	items := []map[string]types.AttributeValue{}
+
+	result := dynamo.NullifyDynamoItems(items)
+
+	assert.Len(t, result, 0)
+	assert.Empty(t, result)
+}
+
+func TestNullifyDynamoItems_NilSlice(t *testing.T) {
+	var items []map[string]types.AttributeValue
+
+	result := dynamo.NullifyDynamoItems(items)
+
+	assert.Len(t, result, 0)
+	assert.Empty(t, result)
+}
+
+func TestNullifyDynamoItems_WithEmptyMaps(t *testing.T) {
+	items := []map[string]types.AttributeValue{
+		{
+			"pk":   &types.AttributeValueMemberS{Value: "test-pk-1"},
+			"name": &types.AttributeValueMemberS{Value: "John"},
+		},
+		{}, // Empty map
+		{
+			"pk":   &types.AttributeValueMemberS{Value: "test-pk-2"},
+			"name": &types.AttributeValueMemberS{Value: "Jane"},
+		},
+	}
+
+	result := dynamo.NullifyDynamoItems(items)
+
+	assert.Len(t, result, 2)
+	assert.Equal(t, "test-pk-1", result[0]["pk"].(*types.AttributeValueMemberS).Value)
+	assert.Equal(t, "test-pk-2", result[1]["pk"].(*types.AttributeValueMemberS).Value)
+}
+
+func TestNullifyDynamoItems_WithNilMaps(t *testing.T) {
+	items := []map[string]types.AttributeValue{
+		{
+			"pk":   &types.AttributeValueMemberS{Value: "test-pk-1"},
+			"name": &types.AttributeValueMemberS{Value: "John"},
+		},
+		nil, // Nil map
+		{
+			"pk":   &types.AttributeValueMemberS{Value: "test-pk-2"},
+			"name": &types.AttributeValueMemberS{Value: "Jane"},
+		},
+	}
+
+	result := dynamo.NullifyDynamoItems(items)
+
+	assert.Len(t, result, 2)
+	assert.Equal(t, "test-pk-1", result[0]["pk"].(*types.AttributeValueMemberS).Value)
+	assert.Equal(t, "test-pk-2", result[1]["pk"].(*types.AttributeValueMemberS).Value)
+}
+
+func TestNullifyDynamoItems_LargeDataset(t *testing.T) {
+	items := make([]map[string]types.AttributeValue, 1000)
+	expectedValidCount := 0
+
+	for i := 0; i < 1000; i++ {
+		if i%2 == 0 {
+			// Valid item with PK
+			items[i] = map[string]types.AttributeValue{
+				"pk":   &types.AttributeValueMemberS{Value: fmt.Sprintf("test-pk-%d", i)},
+				"name": &types.AttributeValueMemberS{Value: fmt.Sprintf("User-%d", i)},
+			}
+			expectedValidCount++
+		} else {
+			// Invalid item without PK
+			items[i] = map[string]types.AttributeValue{
+				"sk":   &types.AttributeValueMemberS{Value: fmt.Sprintf("test-sk-%d", i)},
+				"name": &types.AttributeValueMemberS{Value: fmt.Sprintf("User-%d", i)},
+			}
+		}
+	}
+
+	result := dynamo.NullifyDynamoItems(items)
+
+	assert.Len(t, result, expectedValidCount)
+	assert.Equal(t, 500, len(result))
+
+	// Verify all returned items have PK
+	for _, item := range result {
+		_, hasPK := item["pk"]
+		assert.True(t, hasPK)
+	}
+}
+
+func TestNullifyDynamoItems_PreservesOrder(t *testing.T) {
+	items := []map[string]types.AttributeValue{
+		{
+			"pk":   &types.AttributeValueMemberS{Value: "pk-1"},
+			"name": &types.AttributeValueMemberS{Value: "First"},
+		},
+		{
+			"pk":   &types.AttributeValueMemberS{Value: "pk-2"},
+			"name": &types.AttributeValueMemberS{Value: "Second"},
+		},
+		{
+			"pk":   &types.AttributeValueMemberS{Value: "pk-3"},
+			"name": &types.AttributeValueMemberS{Value: "Third"},
+		},
+	}
+
+	result := dynamo.NullifyDynamoItems(items)
+
+	assert.Len(t, result, 3)
+	assert.Equal(t, "pk-1", result[0]["pk"].(*types.AttributeValueMemberS).Value)
+	assert.Equal(t, "pk-2", result[1]["pk"].(*types.AttributeValueMemberS).Value)
+	assert.Equal(t, "pk-3", result[2]["pk"].(*types.AttributeValueMemberS).Value)
+	assert.Equal(t, "First", result[0]["name"].(*types.AttributeValueMemberS).Value)
+	assert.Equal(t, "Second", result[1]["name"].(*types.AttributeValueMemberS).Value)
+	assert.Equal(t, "Third", result[2]["name"].(*types.AttributeValueMemberS).Value)
+}
+
+func TestNullifyDynamoItems_DoesNotModifyOriginal(t *testing.T) {
+	originalItems := []map[string]types.AttributeValue{
+		{
+			"pk":   &types.AttributeValueMemberS{Value: "test-pk"},
+			"name": &types.AttributeValueMemberS{Value: "John"},
+		},
+		{
+			"sk":   &types.AttributeValueMemberS{Value: "test-sk"},
+			"name": &types.AttributeValueMemberS{Value: "Jane"},
+		},
+	}
+
+	// Create a copy to compare against
+	originalCopy := make([]map[string]types.AttributeValue, len(originalItems))
+	copy(originalCopy, originalItems)
+
+	result := dynamo.NullifyDynamoItems(originalItems)
+
+	// Verify original slice is unchanged
+	assert.Equal(t, originalCopy, originalItems)
+	assert.Len(t, result, 1)
+	assert.Equal(t, "test-pk", result[0]["pk"].(*types.AttributeValueMemberS).Value)
 }

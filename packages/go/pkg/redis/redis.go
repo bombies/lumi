@@ -30,17 +30,17 @@ func NewRedisClient() *redis.Client {
 		panic(fmt.Errorf("failed to get RedisPort: %w", err))
 	}
 
-	return redis.NewClient(&redis.Options{
-		Addr:     fmt.Sprintf("%s:%s", redisHost.(string), redisPort.(string)),
-		Username: redisUser.(string),
-		Password: redisPassword.(string),
-		DB:       0,
-	})
+	opt, err := redis.ParseURL(fmt.Sprintf("rediss://%s:%s@%s:%s", redisUser.(string), redisPassword.(string), redisHost.(string), redisPort.(string)))
+	if err != nil {
+		panic(fmt.Errorf("failed to parse Redis URL: %w", err))
+	}
+
+	return redis.NewClient(opt)
 }
 
 func Key(suffix string) string {
 	stage := os.Getenv("APP_STAGE")
-	return fmt.Sprintf("lmui::%s::%s", stage, suffix)
+	return fmt.Sprintf("lumi::%s::%s", stage, suffix)
 }
 
 type HashKeys struct{}

@@ -1,7 +1,7 @@
 'use client';
 
 import type { CreateMomentDetailsDto, CreateMomentMessageDto, CreateMomentTagDto, ReactToMessageDto, UpdateMomentDetailsDto, UpdateMomentMessageDto } from '@/lib/api/modules/moment/moment.dto';
-import type { InfiniteDataArgs, InfiniteDataWithOrderArgs } from '@/lib/api/types/dto.types';
+import type { GetUploadUrlDto, InfiniteDataArgs, InfiniteDataWithOrderArgs } from '@/lib/api/types/dto.types';
 
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -128,7 +128,7 @@ export const DeleteMomentMessage = (momentId: string, messageId: string) => {
 
 export const GetMomentUploadUrl = () =>
 	useMutation({
-		mutationFn: () => apiClient.moments.getMomentUploadUrl(),
+		mutationFn: (params: GetUploadUrlDto) => apiClient.moments.getMomentUploadUrl(params),
 	});
 
 const GetRelationshipMomentTagsQueryKey = ['moments', 'relationshiptags'];
@@ -142,7 +142,6 @@ export const GetRelationshipMomentTags = ({
 		initialPageParam: null as Record<string, any> | null,
 		queryFn: ({ pageParam }) =>
 			apiClient.moments.getRelationshipMomentMomentTags({ query, ...args, cursor: pageParam }),
-		enabled: query.length > 0,
 		getNextPageParam: lastPage => lastPage.nextCursor,
 
 	});

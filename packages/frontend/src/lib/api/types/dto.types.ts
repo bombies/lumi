@@ -42,3 +42,8 @@ export type InfiniteDataOrderArgs = {
 };
 
 export type InfiniteDataWithOrderArgs = Partial<InfiniteDataArgs & InfiniteDataOrderArgs>;
+
+export type GetUploadUrlDto = {
+	objectKey: string;
+	fileExtension: string;
+};

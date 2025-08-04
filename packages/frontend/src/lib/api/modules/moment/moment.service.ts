@@ -13,7 +13,7 @@ import type {
 } from '@/lib/api/modules/moment/moment.dto';
 import type { Moment, MomentMessage, MomentTag, RelationshipMomentTag } from '@/lib/api/modules/moment/moment.model';
 import type { PresignedURLResponse } from '@/lib/api/types/api.types';
-import type { InfiniteData, TupledInfiniteData } from '@/lib/api/types/dto.types';
+import type { GetUploadUrlDto, InfiniteData, TupledInfiniteData } from '@/lib/api/types/dto.types';
 import { ApiService } from '@/lib/api/modules/service';
 
 export class MomentService extends ApiService {
@@ -89,7 +89,7 @@ export class MomentService extends ApiService {
 		return this.api.delete<boolean>(this.endpoint(`/${momentId}/tags/${tag}`));
 	}
 
-	getMomentUploadUrl() {
-		return this.api.get<PresignedURLResponse>(this.endpoint('/upload-url'));
+	getMomentUploadUrl(params: GetUploadUrlDto) {
+		return this.api.get<PresignedURLResponse>(this.endpoint('/upload-url', params));
 	}
 }

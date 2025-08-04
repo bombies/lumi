@@ -28,7 +28,7 @@ func SignCdnUrl(ctx context.Context, args SignCdnUrlArgs) (string, error) {
 	}
 
 	privateKeyReader := strings.NewReader(privateKey)
-	signedPrivateKey, err := sign.LoadPEMPrivKey(privateKeyReader)
+	signedPrivateKey, err := sign.LoadPEMPrivKeyPKCS8AsSigner(privateKeyReader)
 
 	if err != nil {
 		return "", err

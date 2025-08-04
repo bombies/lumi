@@ -19,7 +19,7 @@ func PutItem[T DynamoRecord](table *DynamoTable, args PutItemArgs[T]) (*T, error
 		return nil, err
 	}
 
-	res, err := table.DynamoClient.PutItem(args.Ctx, &dynamodb.PutItemInput{
+	_, err = table.DynamoClient.PutItem(args.Ctx, &dynamodb.PutItemInput{
 		TableName: &table.TableName,
 		Item:      mappedItem,
 	})
@@ -28,7 +28,7 @@ func PutItem[T DynamoRecord](table *DynamoTable, args PutItemArgs[T]) (*T, error
 		return nil, err
 	}
 
-	return AttributeMapToStruct[T](res.Attributes)
+	return AttributeMapToStruct[T](mappedItem)
 }
 
 func GetItem[T DynamoRecord](table *DynamoTable, args GetItemArgs) (*T, error) {
@@ -43,7 +43,9 @@ func GetItem[T DynamoRecord](table *DynamoTable, args GetItemArgs) (*T, error) {
 			},
 		},
 		ProjectionExpression: lo.TernaryF(args.ProjectedAttributes != nil, func() *string {
-			return lo.ToPtr(strings.Join(args.ProjectedAttributes, ","))
+			customProjections := args.ProjectedAttributes
+			joinedProjections := append(defaultProjections, customProjections...)
+			return lo.ToPtr(strings.Join(joinedProjections, ","))
 		}, func() *string { return nil }),
 	})
 
@@ -51,7 +53,7 @@ func GetItem[T DynamoRecord](table *DynamoTable, args GetItemArgs) (*T, error) {
 		return nil, err
 	}
 
-	return AttributeMapToStruct[T](res.Item)
+	return AttributeMapToStruct[T](NullifyDynamoItem(res.Item))
 }
 
 func BatchGetItems[T DynamoRecord](table *DynamoTable, args BatchGetItemsArgs) []T {
@@ -94,7 +96,7 @@ func BatchGetItems[T DynamoRecord](table *DynamoTable, args BatchGetItemsArgs) [
 			}
 
 			for _, item := range res.Responses[table.TableName] {
-				structItem, err := AttributeMapToStruct[T](item)
+				structItem, err := AttributeMapToStruct[T](NullifyDynamoItem(item))
 				if err != nil {
 					results <- utils.FanOutJobResult[T]{
 						Err: err,
@@ -266,7 +268,7 @@ func GetItems[T DynamoRecord](table *DynamoTable, args GetItemsParams[T]) (*Infi
 			return nil, err
 		}
 
-		results := UnwrapItems(res.Items, mapper)
+		results := UnwrapItems(NullifyDynamoItems(res.Items), mapper)
 
 		return &InfiniteData[T]{
 			Data:       results,

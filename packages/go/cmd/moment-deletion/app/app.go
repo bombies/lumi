@@ -51,7 +51,7 @@ func (app *App) Handler(ctx context.Context, event events.DynamoDBEvent) {
 				Ctx:   ctx,
 				Index: lo.ToPtr(dynamo.GSI1),
 				QueryExpression: dynamo.DynamoQueryExpression{
-					Expression: "#gsi1pk = :gsi1sk",
+					Expression: "#gsi1pk = :gsi1pk",
 					Variables: map[string]any{
 						":gsi1pk": momentMessageKeys.GSI1PK(momentId),
 					},
@@ -69,6 +69,7 @@ func (app *App) Handler(ctx context.Context, event events.DynamoDBEvent) {
 		relatedTagRecords, err := dynamo.GetItems(
 			globals.DynamoTable,
 			dynamo.GetItemsParams[moment.RelationshipMomentTagRecord]{
+				Ctx: ctx,
 				QueryExpression: dynamo.DynamoQueryExpression{
 					Expression: "#pk = :pk",
 					Variables: map[string]any{

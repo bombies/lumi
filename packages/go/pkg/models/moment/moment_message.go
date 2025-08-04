@@ -58,7 +58,7 @@ func (mm UpdateableMomentMessageRecord) GetUpdateTag() string {
 type MomentMessageKeys struct{}
 
 func (keys MomentMessageKeys) BuildKey(suffix ...string) string {
-	return dynamo.BuildDynamoKey("moment::message#", suffix...)
+	return dynamo.BuildDynamoKey("moment::message", suffix...)
 }
 
 func (keys MomentMessageKeys) PK(messageId string) string {

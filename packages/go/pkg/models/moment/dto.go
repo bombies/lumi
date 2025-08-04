@@ -10,21 +10,21 @@ type CreateMomentDetailsDto struct {
 	Title              string   `json:"title" binding:"required,max=90,min=1"`
 	Description        string   `json:"description" binding:"max=1024"`
 	ObjectKey          string   `json:"objectKey" binding:"required"`
-	ThumbnailObjectKey *string  `json:"thumbnailObjectKey"`
-	Tags               []string `json:"tags"`
+	ThumbnailObjectKey *string  `json:"thumbnailObjectKey,omitempty"`
+	Tags               []string `json:"tags,omitempty"`
 }
 
 type UpdateMomentDetailsDto struct {
-	Title              *string  `json:"title" binding:"max=90,min=1"`
-	Description        *string  `json:"description" binding:"max=1024"`
-	ThumbnailObjectKey *string  `json:"thumbnailObjectKey"`
-	Tags               []string `json:"tags"`
+	Title              *string  `json:"title,omitempty" binding:"omitempty,max=90,min=1"`
+	Description        *string  `json:"description,omitempty" binding:"omitempty,max=1024"`
+	ThumbnailObjectKey *string  `json:"thumbnailObjectKey,omitempty"`
+	Tags               []string `json:"tags,omitempty"`
 }
 
 type GetInfiniteMomentsDto struct {
-	Limit  *int32                          `json:"limit" form:"limit" binding:"min=1,max=100"`
-	Cursor map[string]types.AttributeValue `json:"cursor" form:"cursor"`
-	Order  *dynamo.DynamoQueryOrder        `json:"order" form:"order"`
+	Limit  *int32                          `json:"limit,omitempty" form:"limit" binding:"omitempty,min=1,max=100"`
+	Cursor map[string]types.AttributeValue `json:"cursor,omitempty" form:"cursor"`
+	Order  *dynamo.DynamoQueryOrder        `json:"order,omitempty" form:"order"`
 }
 
 func (dto *GetInfiniteMomentsDto) GetLimit() int32 {
@@ -46,9 +46,9 @@ func (dto *GetInfiniteMomentsDto) GetOrder() dynamo.DynamoQueryOrder {
 }
 
 type GetInfiniteMomentMessagesDto struct {
-	Limit  *int32                          `json:"limit" form:"limit" binding:"min=1,max=100"`
-	Cursor map[string]types.AttributeValue `json:"cursor" form:"cursor"`
-	Order  *dynamo.DynamoQueryOrder        `json:"order" form:"order"`
+	Limit  *int32                          `json:"limit,omitempty" form:"limit" binding:"omitempty,min=1,max=100"`
+	Cursor map[string]types.AttributeValue `json:"cursor,omitempty" form:"cursor"`
+	Order  *dynamo.DynamoQueryOrder        `json:"order,omitempty" form:"order"`
 }
 
 func (dto *GetInfiniteMomentMessagesDto) GetLimit() int32 {
@@ -112,7 +112,7 @@ type ReactToMessageDto struct {
 }
 
 type GetRelationshipMomentTagsDto struct {
-	Query  string                          `json:"query" form:"query"`
+	Query  string                          `json:"query,omitempty" form:"query"`
 	Limit  *int32                          `json:"limit,omitempty" form:"limit" binding:"omitempty,min=1,max=100"`
 	Cursor map[string]types.AttributeValue `json:"cursor" form:"cursor"`
 }

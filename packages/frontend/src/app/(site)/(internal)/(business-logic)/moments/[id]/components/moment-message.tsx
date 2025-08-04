@@ -36,7 +36,7 @@ type Props = {
 
 const MomentMessageElement: FC<Props> = ({ message }) => {
 	const { getScrollViewport } = useMomentMessageGroupData();
-	const { mutateAsync: deleteMomentMessage } = DeleteMomentMessage();
+	const { mutateAsync: deleteMomentMessage } = DeleteMomentMessage(message.momentId, message.id);
 
 	const { self, partner, relationship, sendNotificationToPartner } = useRelationship();
 	const { emitEvent, addEventHandler, removeEventHandler } = useWebSocket();
@@ -83,10 +83,10 @@ const MomentMessageElement: FC<Props> = ({ message }) => {
 
 	const deleteMessage = useCallback(async () => {
 		const oldMsg = optimisticMessage;
-		updateMessage({ content: '[deleted]', isDeleted: true });
+		updateMessage({ content: 'This message has been deleted.', isDeleted: true });
 
 		try {
-			await deleteMomentMessage(message.id);
+			await deleteMomentMessage();
 
 			await emitEvent('momentMessageDelete', {
 				senderId: self.id,
@@ -139,7 +139,7 @@ const MomentMessageElement: FC<Props> = ({ message }) => {
 
 		const messageDeletionHandler: WebSocketEventHandler<'momentMessageDelete'> = (payload) => {
 			if (payload.messageId === message.id) {
-				updateMessage({ content: '[deleted]', isDeleted: true });
+				updateMessage({ content: 'This message has been deleted.', isDeleted: true });
 			}
 		};
 

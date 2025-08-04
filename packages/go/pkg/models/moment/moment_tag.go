@@ -25,6 +25,14 @@ func (mr RelationshipMomentTagRecord) GetSK() string {
 	return mr.SK
 }
 
+type UpdateableRelationshipMomentTagRecord struct {
+	AssociationCount dynamo.UpdateableDynamoField[int] `json:"associationCount,omitempty"`
+}
+
+func (ur UpdateableRelationshipMomentTagRecord) GetUpdateTag() string {
+	return "updateable-relationship-moment-tag"
+}
+
 type RelationshipMomentTagKeys struct{}
 
 func (keys RelationshipMomentTagKeys) BuildKey(suffix ...string) string {

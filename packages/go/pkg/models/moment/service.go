@@ -118,10 +118,18 @@ func (ms *MomentService) CreateMomentDetails(ctx context.Context, userId, relati
 		}
 	}
 
-	attachUrlsToMoment(ctx, AttachUrlsToMomentArgs{
+	ms.Logger.Printf("Moment before attachment: %v\n", momentDetails)
+
+	err = attachUrlsToMoment(ctx, AttachUrlsToMomentArgs{
 		Moment:      momentDetails,
 		RedisClient: ms.RedisClient,
 	})
+
+	if err != nil {
+		ms.Logger.Printf("There was an error attempting to attach urls to moment: %v", err)
+	}
+
+	ms.Logger.Printf("Moment after attachment: %v\n", momentDetails)
 
 	return momentDetails, nil
 }
@@ -180,13 +188,18 @@ func (ms *MomentService) GetMomentsForRelationship(ctx context.Context, relation
 			Order:  lo.ToPtr(dto.GetOrder()),
 			Limit:  lo.ToPtr(dto.GetLimit()),
 			Mapper: func(mr MomentRecord) MomentRecord {
-				attachUrlsToMoment(
+				err := attachUrlsToMoment(
 					ctx,
 					AttachUrlsToMomentArgs{
 						Moment:      &mr,
 						RedisClient: ms.RedisClient,
 					},
 				)
+
+				if err != nil {
+					ms.Logger.Printf("There was an error attempting to attach urls to moment: %v", err)
+				}
+
 				return mr
 			},
 		},
@@ -492,8 +505,8 @@ func (ms *MomentService) GetMessagesForMoment(ctx context.Context, momentId stri
 			},
 		},
 		Cursor: dto.Cursor,
-		Order:  dto.Order,
-		Limit:  dto.Limit,
+		Order:  lo.ToPtr(dto.GetOrder()),
+		Limit:  lo.ToPtr(dto.GetLimit()),
 	})
 }
 

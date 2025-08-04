@@ -36,7 +36,7 @@ func (route *MomentRoute) RegisterEndpoints() {
 	relationshipRoute.GET(route.endpoint("/:id/tags"), route.getTagsForMoment)
 	relationshipRoute.POST(route.endpoint("/:id/tags"), route.createTagForMoment)
 	relationshipRoute.DELETE(route.endpoint("/:id/tags/:tag"), route.deleteTagForMoment)
-	relationshipRoute.GET(route.endpoint("upload-url"), route.getMomentUploadUrl)
+	relationshipRoute.GET(route.endpoint("/upload-url"), route.getMomentUploadUrl)
 }
 
 func (route *MomentRoute) endpoint(path ...string) string {
@@ -92,7 +92,7 @@ func (route *MomentRoute) getMoments(c *gin.Context) {
 	utils.HandleResponse(
 		c,
 		func() (*moment.GetInfiniteMomentsDto, error) {
-			return utils.ParseDto[moment.GetInfiniteMomentsDto](c)
+			return utils.ParseQueryParams[moment.GetInfiniteMomentsDto](c)
 		},
 		func(input *moment.GetInfiniteMomentsDto) (any, error) {
 			claims, relationship, err := utils.GetContextObjects(c)
@@ -123,7 +123,6 @@ func (route *MomentRoute) getMoments(c *gin.Context) {
 				})
 			} else {
 				return route.MomentService.GetMomentsForRelationship(c, relationship.Id, *input)
-
 			}
 		},
 	)

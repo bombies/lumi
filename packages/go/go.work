@@ -4,4 +4,8 @@ use (
 	.
 	./cmd/stream
 	./cmd/api
+	./cmd/moment-deletion
+	./cmd/thumbnail-transcoder
+	./cmd/relationship-moment-tag
+	./cmd/moment-tag
 )

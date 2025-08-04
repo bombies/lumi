@@ -112,8 +112,8 @@ func signMomentUrl(ctx context.Context, args SignMomentUrlArgs) (string, error) 
 		redisClient = lumiRedis.NewRedisClient()
 	}
 
-	cachedUrl, err := redisClient.Get(ctx, key).Result()
-	if err == redis.Nil {
+	cachedUrl := redisClient.Get(ctx, key).Val()
+	if cachedUrl == "" {
 		signedUrl, err := s3.SignCdnUrl(ctx, s3.SignCdnUrlArgs{
 			Url:       url,
 			ExpiresIn: lo.ToPtr(30 * time.Minute),

@@ -41,7 +41,7 @@ export const frontend = new sst.aws.Nextjs('Frontend', {
 	},
 	cachePolicy:
 		$app.stage !== 'staging' ? frontendCdnCachePolicyId.value : undefined,
-	openNextVersion: '3.6.1',
+	openNextVersion: '3.7.4',
 	warm: $app.stage === 'production' ? 5 : 0,
 	link: [
 		trpc,

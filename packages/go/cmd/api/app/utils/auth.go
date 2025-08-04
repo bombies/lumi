@@ -189,7 +189,7 @@ func RelationshipRoute(router *gin.Engine, path string) gin.IRoutes {
 		relationship, err := relationshipService.GetRelationshipForUser(ctx, claims.Id)
 
 		if err != nil {
-			log.Println(fmt.Errorf("failed to get relationship for user: %w", err))
+			log.Println(fmt.Errorf("failed to get relationship for user (%s): %w ", claims.Id, err))
 			ctx.AbortWithStatusJSON(
 				http.StatusInternalServerError,
 				gin.H{"code": http.StatusInternalServerError, "message": "Internal server error."},

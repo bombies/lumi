@@ -108,50 +108,82 @@ func NewRemoveValue[T any]() UpdateableDynamoField[T] {
 	return UpdateableDynamoField[T]{Remove: &isRemove}
 }
 
-func TransformToUpdateable(dto, record any) error {
-	dtoValue := reflect.ValueOf(dto)
-	recordValue := reflect.ValueOf(record)
+func TransformToUpdateable(src any, dst UpdateableDynamoRecord) error {
+	srcValue := reflect.ValueOf(src)
+	dstValue := reflect.ValueOf(dst)
 
-	// The 'record' must be a pointer to a struct so we can modify it.
-	if recordValue.Kind() != reflect.Ptr || recordValue.Elem().Kind() != reflect.Struct {
-		return fmt.Errorf("record must be a pointer to a struct")
+	// Only dereference src if it's a pointer
+	if srcValue.Kind() == reflect.Ptr {
+		srcValue = srcValue.Elem()
 	}
 
-	// Dereference the pointer to get the actual struct we can set fields on.
-	recordElem := recordValue.Elem()
-	dtoType := dtoValue.Type()
+	// dst must be a pointer to a struct so we can modify it in-place
+	if dstValue.Kind() != reflect.Ptr || dstValue.Elem().Kind() != reflect.Struct {
+		return fmt.Errorf("dst must be a pointer to a struct")
+	}
 
-	// Iterate over the fields of the input DTO struct.
-	for i := 0; i < dtoValue.NumField(); i++ {
-		dtoField := dtoValue.Field(i)
-		fieldName := dtoType.Field(i).Name
+	// Ensure src is a struct
+	if srcValue.Kind() != reflect.Struct {
+		return fmt.Errorf("src must be a struct")
+	}
 
-		// We only care about fields that are non-nil pointers.
-		if dtoField.Kind() == reflect.Ptr && !dtoField.IsNil() {
-			// Find the field with the same name in the destination record struct.
+	// Get the struct we can set fields on
+	recordElem := dstValue.Elem()
+	srcType := srcValue.Type()
+
+	// Iterate over the fields of the input DTO struct
+	for i := 0; i < srcValue.NumField(); i++ {
+		srcField := srcValue.Field(i)
+		fieldName := srcType.Field(i).Name
+
+		// We only care about fields that are non-nil pointers
+		if srcField.Kind() == reflect.Ptr && !srcField.IsNil() {
+			// Find the field with the same name in the destination record struct
 			recordField := recordElem.FieldByName(fieldName)
 
-			// Check if the record field exists and is settable.
+			// Check if the record field exists and is settable
 			if recordField.IsValid() && recordField.CanSet() {
-				// Get the actual value from the DTO's pointer (e.g., "Busta").
-				dereferencedDtoValue := dtoField.Elem()
+				// Get the actual value from the DTO's pointer
+				dereferencedSrcValue := srcField.Elem()
 
-				// Create a new instance of the UpdateableDynamoField type.
-				// e.g., creates an empty UpdateableDynamoField[string]
-				newUpdateableField := reflect.New(recordField.Type()).Elem()
+				// Create a new instance of the UpdateableDynamoField type
+				fieldType := recordField.Type()
 
-				// Get the 'Value' field within our new UpdateableDynamoField.
-				valueField := newUpdateableField.FieldByName("Value")
+				// Handle pointer types properly
+				var newUpdateableField reflect.Value
+				if fieldType.Kind() == reflect.Ptr {
+					newUpdateableField = reflect.New(fieldType.Elem())
+				} else {
+					newUpdateableField = reflect.New(fieldType).Elem()
+				}
 
-				// Create a new pointer to hold the DTO's value.
-				ptrToValue := reflect.New(dereferencedDtoValue.Type())
-				ptrToValue.Elem().Set(dereferencedDtoValue)
+				// Ensure we have a struct to work with
+				var structValue reflect.Value
+				if newUpdateableField.Kind() == reflect.Ptr {
+					structValue = newUpdateableField.Elem()
+				} else {
+					structValue = newUpdateableField
+				}
 
-				// Set the 'Value' field to the new pointer.
+				// Get the 'Value' field within our new UpdateableDynamoField
+				valueField := structValue.FieldByName("Value")
+				if !valueField.IsValid() {
+					continue
+				}
+
+				// Create a new pointer to hold the DTO's value
+				ptrToValue := reflect.New(dereferencedSrcValue.Type())
+				ptrToValue.Elem().Set(dereferencedSrcValue)
+
+				// Set the 'Value' field to the new pointer
 				valueField.Set(ptrToValue)
 
-				// Finally, set the field in the record struct.
-				recordField.Set(newUpdateableField)
+				// Finally, set the field in the record struct
+				if fieldType.Kind() == reflect.Ptr {
+					recordField.Set(newUpdateableField)
+				} else {
+					recordField.Set(structValue)
+				}
 			}
 		}
 	}

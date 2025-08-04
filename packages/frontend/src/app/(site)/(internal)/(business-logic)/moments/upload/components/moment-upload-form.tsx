@@ -45,7 +45,7 @@ const MomentUploadForm: FC<Props> = ({ momentFile, onCancel }) => {
 		hasNextPage: hasMoreTags,
 		fetchNextPage: fetchMoreTags,
 		isFetchingNextPage: isFetchingMoreTags,
-	} = GetRelationshipMomentTags(tagSearch.length ? tagSearch : undefined, 20);
+	} = GetRelationshipMomentTags({ query: tagSearch, limit: 20 });
 	const {
 		uploadJob: uploadMoment,
 		isUploading: momentUploading,

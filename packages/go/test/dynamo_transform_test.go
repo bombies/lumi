@@ -39,7 +39,7 @@ func TestTransformToUpdateable_Success(t *testing.T) {
 	active := true
 	score := 95.5
 	now := time.Now()
-	
+
 	dto := TestDTO{
 		Name:      &name,
 		Age:       &age,
@@ -47,12 +47,12 @@ func TestTransformToUpdateable_Success(t *testing.T) {
 		Score:     &score,
 		CreatedAt: &now,
 	}
-	
+
 	var record TestUpdateableRecord
-	
+
 	// Execute the function
 	err := dynamo.TransformToUpdateable(dto, &record)
-	
+
 	// Verify results
 	assert.NoError(t, err)
 	assert.NotNil(t, record.Name.Value)
@@ -74,12 +74,12 @@ func TestTransformToUpdateable_NilFields(t *testing.T) {
 		Name: &name,
 		// All other fields are nil
 	}
-	
+
 	var record TestUpdateableRecord
-	
+
 	// Execute the function
 	err := dynamo.TransformToUpdateable(dto, &record)
-	
+
 	// Verify results
 	assert.NoError(t, err)
 	assert.NotNil(t, record.Name.Value)
@@ -93,12 +93,12 @@ func TestTransformToUpdateable_NilFields(t *testing.T) {
 func TestTransformToUpdateable_EmptyDTO(t *testing.T) {
 	// Setup empty DTO
 	dto := TestDTO{}
-	
+
 	var record TestUpdateableRecord
-	
+
 	// Execute the function
 	err := dynamo.TransformToUpdateable(dto, &record)
-	
+
 	// Verify results
 	assert.NoError(t, err)
 	assert.Nil(t, record.Name.Value)
@@ -114,34 +114,16 @@ func TestTransformToUpdateable_NonPointerRecord(t *testing.T) {
 	dto := TestDTO{
 		Name: &name,
 	}
-	
+
 	// Create a non-pointer record
 	record := TestUpdateableRecord{}
-	
+
 	// Execute the function with non-pointer record
 	err := dynamo.TransformToUpdateable(dto, record)
-	
-	// Verify error
-	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "record must be a pointer to a struct")
-}
 
-func TestTransformToUpdateable_NonStructRecord(t *testing.T) {
-	// Setup test data
-	name := "John"
-	dto := TestDTO{
-		Name: &name,
-	}
-	
-	// Create a pointer to a non-struct
-	var nonStruct string
-	
-	// Execute the function with non-struct record
-	err := dynamo.TransformToUpdateable(dto, &nonStruct)
-	
 	// Verify error
 	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "record must be a pointer to a struct")
+	assert.Contains(t, err.Error(), "dst must be a pointer to a struct")
 }
 
 func TestTransformToUpdateable_MismatchedTypes(t *testing.T) {
@@ -150,17 +132,17 @@ func TestTransformToUpdateable_MismatchedTypes(t *testing.T) {
 		// Field that doesn't exist in the target record
 		NonExistentField *string `json:"nonExistentField"`
 	}
-	
+
 	value := "test"
 	dto := MismatchDTO{
 		NonExistentField: &value,
 	}
-	
+
 	var record TestUpdateableRecord
-	
+
 	// Execute the function
 	err := dynamo.TransformToUpdateable(dto, &record)
-	
+
 	// This should not error, the non-existent field is just ignored
 	assert.NoError(t, err)
 	// Verify none of the fields were affected

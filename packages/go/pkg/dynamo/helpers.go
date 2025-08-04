@@ -11,6 +11,8 @@ import (
 	"github.com/samber/lo"
 )
 
+var defaultProjections = []string{"pk", "sk"}
+
 func GetProjectionFields(fields []string) ProjectionFields {
 	return ProjectionFields{
 		ProjectionExpression:      GetProjectionExpression(fields),
@@ -23,8 +25,10 @@ func GetProjectionExpression(fields []string) string {
 		return ""
 	}
 
+	allFields := append(fields, defaultProjections...)
+
 	return strings.Join(
-		lo.Map(fields, func(field string, _ int) string {
+		lo.Map(allFields, func(field string, _ int) string {
 			return fmt.Sprintf("#%s", field)
 		}),
 		", ",
@@ -34,7 +38,12 @@ func GetProjectionExpression(fields []string) string {
 func GetProjectionExpressionNames(fields []string) map[string]string {
 	expressionAttributeNames := make(map[string]string)
 
-	for _, field := range fields {
+	if len(fields) == 0 {
+		return expressionAttributeNames
+	}
+
+	allFields := append(fields, defaultProjections...)
+	for _, field := range allFields {
 		expressionAttributeNames[fmt.Sprintf("#%s", field)] = field
 	}
 
@@ -45,18 +54,27 @@ func QueryWithPaginationExhaustion[T any](args QueryWithPaginationExhaustionArgs
 	table, ctx, params, mapper := args.Table, args.Ctx, args.Params, args.Mapper
 	results := make([]T, 0)
 
+	// Validate context is not nil
+	if ctx == nil {
+		return nil, fmt.Errorf("context cannot be nil")
+	}
+
 	for {
 		res, err := table.DynamoClient.Query(ctx, params)
 		if err != nil {
 			return nil, err
 		}
 
-		unwrappedItems := UnwrapItems(res.Items, mapper)
+		unwrappedItems := UnwrapItems(NullifyDynamoItems(res.Items), mapper)
 		results = append(results, unwrappedItems...)
 
-		if lastKey := res.LastEvaluatedKey; len(lastKey) == 0 {
+		lastKey := res.LastEvaluatedKey
+		if len(lastKey) == 0 {
 			break
 		}
+
+		// Update params with the last evaluated key for pagination
+		params.ExclusiveStartKey = lastKey
 	}
 
 	return results, nil
@@ -212,6 +230,10 @@ func UnwrapAttributeValue(attr types.AttributeValue) any {
 }
 
 func UnwrapAttributes(attrs map[string]types.AttributeValue) map[string]any {
+	if attrs == nil {
+		return nil
+	}
+
 	unwrapped := make(map[string]any, len(attrs))
 	for key, value := range attrs {
 		unwrapped[key] = UnwrapAttributeValue(value)
@@ -263,6 +285,26 @@ func StructToAttributeMap[T any](item T) (map[string]types.AttributeValue, error
 }
 
 func AttributeMapToStruct[T any](wrappedMap map[string]types.AttributeValue) (*T, error) {
+	if wrappedMap == nil {
+		return nil, nil
+	}
+
 	unwrappedMap := UnwrapAttributes(wrappedMap)
 	return utils.MapToStruct[T](unwrappedMap)
+}
+
+func NullifyDynamoItem(item map[string]types.AttributeValue) map[string]types.AttributeValue {
+	_, ok := item["pk"]
+
+	if !ok {
+		return nil
+	}
+
+	return item
+}
+
+func NullifyDynamoItems(items []map[string]types.AttributeValue) []map[string]types.AttributeValue {
+	return lo.Filter(items, func(item map[string]types.AttributeValue, _ int) bool {
+		return NullifyDynamoItem(item) != nil
+	})
 }

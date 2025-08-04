@@ -12,6 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import EasyForm from '@/components/ui/form-extras/easy-form';
 import EasyFormInput from '@/components/ui/form-extras/fields/easy-form-input';
 import { CreateRelationshipMomentTag } from '@/hooks/trpc/moment-hooks';
+import { getErrorMessage } from '@/lib/trpc/utils';
 
 const momentTagCreationFormSchema = z.object({
 	tag: z.string().min(1).max(50),
@@ -34,7 +35,7 @@ const CreateMomentTagButton: FC<Props> = ({ disabled }) => {
 					setDialogOpen(false);
 					return 'Successfully created moment tag!';
 				},
-				error: e => e.message.message ?? 'Could not create moment tag.',
+				error: e => getErrorMessage(e, { defaultMessage: 'Could not create moment tag' }),
 			});
 		},
 		[createMomentTag],

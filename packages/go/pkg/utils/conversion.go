@@ -7,6 +7,10 @@ import (
 )
 
 func MapToStruct[T any](data map[string]any) (*T, error) {
+	if data == nil {
+		return nil, nil
+	}
+
 	jsonData, err := json.Marshal(data)
 	if err != nil {
 		return nil, err

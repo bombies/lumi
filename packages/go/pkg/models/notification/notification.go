@@ -99,6 +99,10 @@ type UpdateableUnreadNotificationCountRecord struct {
 	Count *dynamo.UpdateableDynamoField[int] `json:"count"`
 }
 
+func (r UpdateableUnreadNotificationCountRecord) GetUpdateTag() string {
+	return `updateable-unread-notification-count-record`
+}
+
 type UnreadNotificationCountKeys struct{}
 
 func (keys UnreadNotificationCountKeys) BuildKey(suffix ...string) string {

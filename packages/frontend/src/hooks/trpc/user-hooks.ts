@@ -2,6 +2,7 @@
 
 import type { UpdateUserDto } from '@/lib/api/modules/user/user.dto';
 
+import type { GetUploadUrlDto } from '@/lib/api/types/dto.types';
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api/api';
 import { useSingleMediaUploader } from './utils/media-utils';
@@ -25,7 +26,7 @@ export const GetSelfUserOnDemand = () => useMutation({
 });
 
 export const GetUserAvatarUploadUrl = () => useMutation({
-	mutationFn: () => apiClient.users.getUserAvatarUploadUser(),
+	mutationFn: (params: GetUploadUrlDto) => apiClient.users.getUserAvatarUploadUser(params),
 });
 
 export const FetchUsersByUsername = ({ searchQuery }: { searchQuery: string }) =>

@@ -58,7 +58,7 @@ func ContentPathsUserAvatar(userId, file string, opts ...ReplaceVariablesOpts) (
 		return "", err
 	}
 
-	return val + file, nil
+	return val + "/" + file, nil
 }
 
 func ContentPathsRelationshipMoments(relationshipId, file string, opts ...ReplaceVariablesOpts) (string, error) {
@@ -73,5 +73,5 @@ func ContentPathsRelationshipMoments(relationshipId, file string, opts ...Replac
 		return "", err
 	}
 
-	return val + file, nil
+	return val + "/" + file, nil
 }
