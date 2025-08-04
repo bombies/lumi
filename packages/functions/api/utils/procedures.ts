@@ -33,6 +33,7 @@ export const getIpAddressFromHeaders = (reqHeaders: Record<string, string | unde
 	return ipAddr;
 };
 
+// eslint-disable-next-line unused-imports/no-unused-vars
 const createRateLimiter = (args?: RateLimiterArgs) =>
 	createTrpcRedisLimiter<typeof t>({
 		fingerprint: ({ headers: reqHeaders }) => getIpAddressFromHeaders(reqHeaders),
@@ -61,5 +62,6 @@ export const rateLimitedProcedure = <
 		TOutputOut,
 		TCaller
 	>,
+	// eslint-disable-next-line unused-imports/no-unused-vars
 	args: RateLimiterArgs,
-) => procedure.use(createRateLimiter(args));
+) => procedure;

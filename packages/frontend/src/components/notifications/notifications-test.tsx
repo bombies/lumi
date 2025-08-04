@@ -8,10 +8,10 @@ import { GetSelfUser } from '@/hooks/trpc/user-hooks';
 
 const NotificationsTest: FC = () => {
 	const { data: user } = GetSelfUser();
-	const { subscription, subscribe, sendNotification, unsubscribe, browserAllowsNotifications } = useNotifications();
+	const { subscription, subscribe, sendNotification, unsubscribe, isSupported } = useNotifications();
 
 	return (
-		browserAllowsNotifications && (
+		isSupported && (
 			<div>
 				{subscription
 					? (

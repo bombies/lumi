@@ -17,6 +17,7 @@ import { createContext, use, useCallback, useEffect, useMemo, useState } from 'r
 
 import { connectToWebsocket } from '@/components/providers/web-sockets/web-socket-actions';
 import { UpdateUser } from '@/hooks/trpc/user-hooks';
+import { UserStatus } from '@/lib/api/modules/user/user.model';
 import { useQueue } from '@/lib/hooks/useQueue';
 import { logger } from '@/lib/logger';
 import { WebsocketTopic } from './topics';
@@ -75,7 +76,7 @@ const WebSocketProvider: FC<WebSocketProviderProps> = ({ children, user, endpoin
 	});
 	const { enqueue: enqueuePostConnectionAction, startProcessing: processPostConnectionActions } = useQueue<
 		() => any | Promise<any>
-	>({
+			>({
 				process: async (fn) => {
 					await fn();
 				},
@@ -128,7 +129,7 @@ const WebSocketProvider: FC<WebSocketProviderProps> = ({ children, user, endpoin
 		async (topic: string) => {
 			enqueuePostConnectionAction(() => mqttConnection?.subscribeAsync({ [topic]: { qos: 1 } }));
 		},
-		[mqttConnection],
+		[enqueuePostConnectionAction, mqttConnection],
 	);
 
 	useEffect(() => {
@@ -153,7 +154,7 @@ const WebSocketProvider: FC<WebSocketProviderProps> = ({ children, user, endpoin
 					});
 					logger.debug(`Successfully subscribed to topic! (${clientId})`);
 					logger.debug(`Now sending status updates... (${clientId})`);
-					await updateUser({ status: 'online' });
+					await updateUser({ status: UserStatus.OFFLINE });
 					await emitAsyncWebsocketEvent({
 						client: connection,
 						topic: WebsocketTopic.relationshipWSTopic(relationshipId),
@@ -166,7 +167,7 @@ const WebSocketProvider: FC<WebSocketProviderProps> = ({ children, user, endpoin
 						client: connection,
 						topic: WebsocketTopic.relationshipWSTopic(relationshipId),
 						event: 'presence',
-						payload: { userId: user.id, username: user.username, status: 'online' },
+						payload: { userId: user.id, username: user.username, status: UserStatus.ONLINE },
 						source: 'client',
 					});
 					setMqttConnection(connection);
@@ -191,7 +192,7 @@ const WebSocketProvider: FC<WebSocketProviderProps> = ({ children, user, endpoin
 			},
 			async onDisconnect(clientId) {
 				logger.debug(`Handling disconnect for ${clientId}`);
-				await updateUser({ status: 'offline' });
+				await updateUser({ status: UserStatus.OFFLINE });
 				await emitAsyncWebsocketEvent({
 					client: connection,
 					topic: WebsocketTopic.relationshipWSTopic(relationshipId),
@@ -202,7 +203,7 @@ const WebSocketProvider: FC<WebSocketProviderProps> = ({ children, user, endpoin
 					client: connection,
 					topic: WebsocketTopic.relationshipWSTopic(relationshipId),
 					event: 'presence',
-					payload: { userId: user.id, username: user.username, status: 'offline' },
+					payload: { userId: user.id, username: user.username, status: UserStatus.OFFLINE },
 				});
 				setMqttConnection(null);
 				setConnectionStatus('disconnected');
