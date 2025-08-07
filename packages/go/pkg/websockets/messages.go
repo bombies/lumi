@@ -38,7 +38,7 @@ type MomentChatPayload struct {
 	SenderID  string `json:"senderId"`
 	Message   string `json:"message"`
 	MessageID string `json:"messageId,omitempty"`
-	Timestamp string `json:"timestamp"`
+	Timestamp string `json:"timestamp,omitempty"`
 	MomentID  string `json:"momentId"`
 }
 
@@ -77,6 +77,7 @@ type NotificationFrom struct {
 type NotificationMessage struct {
 	Title   string `json:"title"`
 	Content string `json:"content"`
+	OpenUrl string `json:"openUrl,omitempty"`
 }
 
 type NotificationPayload struct {
@@ -96,6 +97,14 @@ const (
 type WebsocketMessage struct {
 	Type      WebsocketEvent         `json:"type"`
 	Payload   json.RawMessage        `json:"payload"`
+	Timestamp time.Time              `json:"timestamp"`
+	Id        string                 `json:"id,omitempty"`
+	Source    WebsocketMessageSource `json:"source,omitempty"`
+}
+
+type TypedWebsocketMessage[T any] struct {
+	Type      WebsocketEvent         `json:"type"`
+	Payload   T                      `json:"payload"`
 	Timestamp time.Time              `json:"timestamp"`
 	Id        string                 `json:"id,omitempty"`
 	Source    WebsocketMessageSource `json:"source,omitempty"`

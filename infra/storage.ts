@@ -1,27 +1,14 @@
 import { contentCdnKeyGroupId, contentCdnPublicKeyId } from './secrets';
 import { appify } from './utils';
 
-const originAccessIdentity = new aws.cloudfront.OriginAccessIdentity(appify('ContentCdnOriginAccessIdentity'));
-
-export const contentBucket = new sst.aws.Bucket(`ContentBucket`, {
-	transform: {
-		policy(args) {
-			args.policy = {
-				Version: '2012-10-17',
-				Statement: [
-					{
-						Effect: 'Allow',
-						Principal: {
-							AWS: originAccessIdentity.iamArn,
-						},
-						Action: ['s3:GetObject'],
-						Resource: [$interpolate`${contentBucket.arn}/*`],
-					},
-				],
-			};
-		},
-	},
+const contentCdnOac = new aws.cloudfront.OriginAccessControl(appify('ContentCdnOac'), {
+	description: 'Origin Access Control for Content CDN',
+	originAccessControlOriginType: 's3',
+	signingBehavior: 'always',
+	signingProtocol: 'sigv4',
 });
+
+export const contentBucket = new sst.aws.Bucket(`ContentBucket`);
 
 const customCdnKeyStages = new Set(['production', 'staging']);
 
@@ -45,9 +32,7 @@ export const contentCdn = new sst.aws.Cdn('ContentCdn', {
 		{
 			domainName: contentBucket.nodes.bucket.bucketRegionalDomainName,
 			originId: contentBucketOriginId,
-			s3OriginConfig: {
-				originAccessIdentity: originAccessIdentity.cloudfrontAccessIdentityPath,
-			},
+			originAccessControlId: contentCdnOac.id,
 		},
 	],
 	domain: $app.stage === 'production' ? 'cdn.lumi.ajani.me' : undefined,

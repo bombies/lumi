@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
 	if (!userId) throw new Error('User ID not provided when attempting to delete user');
 	await deleteUser(userId);
 
-	console.log('Successfully deleted user with ID: ', userId);
+	console.log('Successfully deleted user with ID: ', userId?.replace(/[\r\n]/g, ''));
 
 	redirect('/');
 }

@@ -18,6 +18,11 @@ type MockDynamoClient struct {
 	mock.Mock
 }
 
+func (m *MockDynamoClient) Scan(ctx context.Context, params *dynamodb.ScanInput, optFns ...func(*dynamodb.Options)) (*dynamodb.ScanOutput, error) {
+	args := m.Called(ctx, params)
+	return args.Get(0).(*dynamodb.ScanOutput), args.Error(1)
+}
+
 func (m *MockDynamoClient) Query(ctx context.Context, params *dynamodb.QueryInput, optFns ...func(*dynamodb.Options)) (*dynamodb.QueryOutput, error) {
 	args := m.Called(ctx, params)
 	return args.Get(0).(*dynamodb.QueryOutput), args.Error(1)

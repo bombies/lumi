@@ -1,8 +1,8 @@
 {
 	"name": "@lumi/functions",
-	"private": true,
 	"type": "module",
 	"version": "0.0.0",
+	"private": true,
 	"exports": [
 		"./api/types/*.ts",
 		"./api/router.ts",
@@ -31,7 +31,7 @@
 		"mqtt": "^5.13.3",
 		"react": "^19.1.0",
 		"react-dom": "^19.1.0",
-		"sst": "3.14.23",
+		"sst": "3.17.10",
 		"standardwebhooks": "^1.0.0",
 		"web-push": "^3.6.7",
 		"zod": "^4.0.5"

@@ -27,6 +27,7 @@ export const createWebsocketConnection = ({
 	authorizer,
 	token,
 	identifier,
+	username,
 	...args
 }: CreateWebsocketConnectionArgs): { client: MqttClientType; clientId: string } => {
 	const clientId = `client_${identifier ? `${identifier}_${createId()}` : createId()}`;
@@ -34,7 +35,7 @@ export const createWebsocketConnection = ({
 		client: mqtt.connect(`wss://${endpoint}/mqtt?x-amz-customauthorizer-name=${authorizer}`, {
 			protocolVersion: 5,
 			manualConnect: true,
-			username: '',
+			username,
 			password: `${clientId}${token ? `::${token}` : ''}`,
 			clientId,
 			...args,
@@ -87,7 +88,7 @@ export const emitAsyncWebsocketEvent = async <T extends Event>({
 		topic,
 		JSON.stringify({
 			type: event,
-			timestamp: Date.now(),
+			timestamp: new Date().toISOString(),
 			source: source ?? 'server',
 			payload,
 		} satisfies WebSocketMessage<T, typeof payload>),
@@ -104,7 +105,7 @@ export const emitWebsocketEventSync = <T extends Event>({
 		topic,
 		JSON.stringify({
 			type: event,
-			timestamp: Date.now(),
+			timestamp: new Date().toISOString(),
 			source: source ?? 'server',
 			payload,
 		} satisfies WebSocketMessage<T, typeof payload>),
@@ -112,7 +113,7 @@ export const emitWebsocketEventSync = <T extends Event>({
 
 export const storeWebsocketHeartbeat = async (
 	clientId: string,
-	timestamp: number,
+	timestamp: string,
 	payload: InferredWebSocketMessage<'heartbeat'>['payload'],
 ) => {
 	const heartbeat: WebSocketHeartbeat = {

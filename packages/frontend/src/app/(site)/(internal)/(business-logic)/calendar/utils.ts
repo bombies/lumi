@@ -1,10 +1,16 @@
-import dayjs from 'dayjs';
-import weekday from 'dayjs/plugin/weekday';
-import weekOfYear from 'dayjs/plugin/weekOfYear';
-import { range } from 'ramda';
+import {
+	addMonths,
+	format,
+	getDay,
+	getDaysInMonth,
+	getMonth,
+	getYear,
+	subMonths,
+} from 'date-fns';
 
-dayjs.extend(weekday);
-dayjs.extend(weekOfYear);
+const range = (start: number, end: number): number[] => {
+	return Array.from({ length: end - start }, (_, i) => start + i);
+};
 
 export const daysOfWeek = [
 	'Sunday',
@@ -35,14 +41,12 @@ export type CalendarDropdownOptions = {
 export function getMonthDropdownOptions(): CalendarDropdownOptions[] {
 	return range(1, 13).map(m => ({
 		value: m,
-		label: dayjs()
-			.month(m - 1)
-			.format('MMMM'),
+		label: format(new Date(2000, m - 1, 1), 'MMMM'),
 	}));
 }
 
 export function getNumberOfDaysInMonth(year: number, month: number) {
-	return dayjs(`${year}-${month}-01`).daysInMonth();
+	return getDaysInMonth(new Date(year, month - 1));
 }
 
 export type CalendarMonthDay = {
@@ -55,7 +59,7 @@ export function createDaysForCurrentMonth(year: number, month: number): Calendar
 	return Array.from({ length: getNumberOfDaysInMonth(year, month) })
 		.map((_, index) => {
 			return {
-				dateString: dayjs(`${year}-${month}-${index + 1}`).format(),
+				dateString: format(new Date(year, month - 1, index + 1), 'yyyy-MM-dd\'T\'HH:mm:ss.SSSxxx'),
 				dayOfMonth: index + 1,
 				isCurrentMonth: true,
 			};
@@ -64,24 +68,21 @@ export function createDaysForCurrentMonth(year: number, month: number): Calendar
 
 export function createDaysForPreviousMonth(year: number, month: number, currentMonthDays: CalendarMonthDay[]): CalendarMonthDay[] {
 	const firstDayOfTheMonthWeekday = getWeekday(currentMonthDays[0].dateString);
-	const previousMonth = dayjs(`${year}-${month}-01`).subtract(1, 'month');
+	const previousMonth = subMonths(new Date(year, month - 1, 1), 1);
 
 	const visibleNumberOfDaysFromPreviousMonth = firstDayOfTheMonthWeekday;
 
-	const previousMonthLastMondayDayOfMonth = dayjs(
-		currentMonthDays[0].dateString,
-	)
-		.subtract(visibleNumberOfDaysFromPreviousMonth, 'day')
-		.date();
+	const firstDayOfCurrentMonth = new Date(year, month - 1, 1);
+	const previousMonthLastMondayDate = new Date(firstDayOfCurrentMonth.getTime() - visibleNumberOfDaysFromPreviousMonth * 24 * 60 * 60 * 1000);
+	const previousMonthLastMondayDayOfMonth = previousMonthLastMondayDate.getDate();
 
 	return Array.from({ length: visibleNumberOfDaysFromPreviousMonth })
 		.map((_, index) => {
 			return {
-				dateString: dayjs(
-					`${previousMonth.year()}-${previousMonth.month() + 1}-${
-						previousMonthLastMondayDayOfMonth + index
-					}`,
-				).format('YYYY-MM-D'),
+				dateString: format(
+					new Date(getYear(previousMonth), getMonth(previousMonth), previousMonthLastMondayDayOfMonth + index),
+					'yyyy-M-d',
+				),
 				dayOfMonth: previousMonthLastMondayDayOfMonth + index,
 				isCurrentMonth: false,
 				isPreviousMonth: true,
@@ -93,15 +94,16 @@ export function createDaysForNextMonth(year: number, month: number, currentMonth
 	const lastDayOfTheMonthWeekday = getWeekday(
 		`${year}-${month}-${currentMonthDays.length}`,
 	);
-	const nextMonth = dayjs(`${year}-${month}-01`).add(1, 'month');
+	const nextMonth = addMonths(new Date(year, month - 1, 1), 1);
 	const visibleNumberOfDaysFromNextMonth = 6 - lastDayOfTheMonthWeekday;
 
 	return Array.from({ length: visibleNumberOfDaysFromNextMonth })
 		.map((day, index) => {
 			return {
-				dateString: dayjs(
-					`${nextMonth.year()}-${nextMonth.month() + 1}-${index + 1}`,
-				).format('YYYY-MM-DD'),
+				dateString: format(
+					new Date(getYear(nextMonth), getMonth(nextMonth), index + 1),
+					'yyyy-MM-dd',
+				),
 				dayOfMonth: index + 1,
 				isCurrentMonth: false,
 				isNextMonth: true,
@@ -111,7 +113,7 @@ export function createDaysForNextMonth(year: number, month: number, currentMonth
 
 // sunday === 0, saturday === 6
 export function getWeekday(dateString: string) {
-	return dayjs(dateString).weekday();
+	return getDay(new Date(dateString));
 }
 
 export function isWeekendDay(dateString: string) {

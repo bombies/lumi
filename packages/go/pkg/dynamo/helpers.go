@@ -80,6 +80,36 @@ func QueryWithPaginationExhaustion[T any](args QueryWithPaginationExhaustionArgs
 	return results, nil
 }
 
+func ScanWithPaginationExhaustion[T any](args ScanWithPaginationExhaustionArgs[T]) ([]T, error) {
+	table, ctx, params, mapper := args.Table, args.Ctx, args.Params, args.Mapper
+	results := make([]T, 0)
+
+	// Validate context is not nil
+	if ctx == nil {
+		return nil, fmt.Errorf("context cannot be nil")
+	}
+
+	for {
+		res, err := table.DynamoClient.Scan(ctx, params)
+		if err != nil {
+			return nil, err
+		}
+
+		unwrappedItems := UnwrapItems(NullifyDynamoItems(res.Items), mapper)
+		results = append(results, unwrappedItems...)
+
+		lastKey := res.LastEvaluatedKey
+		if len(lastKey) == 0 {
+			break
+		}
+
+		// Update params with the last evaluated key for pagination
+		params.ExclusiveStartKey = lastKey
+	}
+
+	return results, nil
+}
+
 func GetUpdateParams(tableName *string, args UpdateItemArgs) (*dynamodb.UpdateItemInput, error) {
 	updateStatementArgs, err := GetDynamicUpdateStatements(args.UpdateBody)
 

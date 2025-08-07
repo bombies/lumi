@@ -43,11 +43,11 @@ export const connectToWebsocket = ({
 	});
 
 	mqttConnection.on('packetsend', (packet) => {
-		logger.debug(`Packet Send: (${clientId})`, packet);
+		logger.debug(`Packet Send: (${clientId})`, JSON.stringify(packet).replace(/[\r\n]/g, ''));
 	});
 
 	mqttConnection.on('packetreceive', (packet) => {
-		logger.debug(`Packet Receive: (${clientId})`, packet);
+		logger.debug(`Packet Receive: (${clientId})`, JSON.stringify(packet).replace(/[\r\n]/g, ''));
 	});
 
 	mqttConnection.on('connect', async () => {
@@ -61,7 +61,7 @@ export const connectToWebsocket = ({
 	});
 
 	mqttConnection.on('error', async (e) => {
-		console.error('WS Error:', e);
+		console.error('WS Error:', JSON.stringify(e).replace(/[\r\n]/g, ''));
 		const cb = onError?.(e, clientId);
 		if (cb instanceof Promise) await cb;
 	});

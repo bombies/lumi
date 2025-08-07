@@ -77,10 +77,12 @@ export const goApi = new sst.aws.Function('GoApi', {
 	timeout: '30 seconds',
 	architecture: 'arm64',
 	versioning: true,
-	concurrency: {
-		provisioned: $dev ? 1 : 5,
-		reserved: 10,
-	},
+	concurrency: $dev
+		? undefined
+		: {
+				provisioned: 5,
+				reserved: 10,
+			},
 	link: [
 		contentBucket,
 		db,

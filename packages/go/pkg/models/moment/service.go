@@ -443,9 +443,9 @@ func (ms *MomentService) DeleteMomentDetails(ctx context.Context, momentId strin
 }
 
 func (ms *MomentService) CreateMomentMessage(ctx context.Context, userId string, momentId string, dto CreateMomentMessageDto) (*MomentMessageRecord, error) {
-	id := lo.TernaryF(dto.Id != nil, func() string { return *dto.Id }, func() string { return utils.GetUUID() })
+	id := lo.TernaryF(dto.Id != nil && *dto.Id != "", func() string { return *dto.Id }, func() string { return utils.GetUUID() })
 	timestamp, keys := lo.TernaryF(
-		dto.Timestamp != nil,
+		dto.Timestamp != nil && *dto.Timestamp != "",
 		func() time.Time {
 			timestamp := *dto.Timestamp
 			timeStruct, err := time.Parse(time.RFC3339, timestamp)

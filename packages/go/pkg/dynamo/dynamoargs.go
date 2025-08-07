@@ -19,6 +19,7 @@ const (
 )
 
 type DynamoAPI interface {
+	Scan(ctx context.Context, params *dynamodb.ScanInput, optFns ...func(*dynamodb.Options)) (*dynamodb.ScanOutput, error)
 	Query(ctx context.Context, params *dynamodb.QueryInput, optFns ...func(*dynamodb.Options)) (*dynamodb.QueryOutput, error)
 	GetItem(ctx context.Context, params *dynamodb.GetItemInput, optFns ...func(*dynamodb.Options)) (*dynamodb.GetItemOutput, error)
 	PutItem(ctx context.Context, params *dynamodb.PutItemInput, optFns ...func(*dynamodb.Options)) (*dynamodb.PutItemOutput, error)
@@ -286,6 +287,13 @@ type QueryWithPaginationExhaustionArgs[T any] struct {
 	Table  *DynamoTable
 	Ctx    context.Context
 	Params *dynamodb.QueryInput
+	Mapper func(T) T
+}
+
+type ScanWithPaginationExhaustionArgs[T any] struct {
+	Table  *DynamoTable
+	Ctx    context.Context
+	Params *dynamodb.ScanInput
 	Mapper func(T) T
 }
 

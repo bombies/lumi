@@ -6,7 +6,13 @@ import { useEffect } from 'react';
 
 export default function GlobalError({ error }: { error: Error & { digest?: string } }) {
 	useEffect(() => {
-		Sentry.captureException(error);
+		// Sanitize error message to prevent XSS
+		const sanitizedError = {
+			...error,
+			message: error.message?.replace(/[<>"'&]/g, '') || 'Unknown error',
+			stack: error.stack?.replace(/[<>"'&]/g, ''),
+		};
+		Sentry.captureException(sanitizedError);
 	}, [error]);
 
 	return (

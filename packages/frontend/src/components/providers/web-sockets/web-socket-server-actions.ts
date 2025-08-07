@@ -41,7 +41,7 @@ export const sendServerWebsocketMessage = async <T extends Event>(
 			JSON.stringify({
 				type: event,
 				payload,
-				timestamp: Date.now(),
+				timestamp: new Date().toISOString(),
 				source: 'server',
 			} satisfies WebSocketMessage<T>),
 		);

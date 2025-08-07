@@ -3,7 +3,7 @@ export default $config({
 	app(input) {
 		return {
 			name: 'lumi',
-			removal: input?.stage === 'production' ? 'retain' : 'remove',
+			removal: ['production', 'staging', 'ajani'].includes(input?.stage) ? 'retain' : 'remove',
 			protect: ['production'].includes(input?.stage),
 			home: 'aws',
 			providers: { std: '2.2.0' },

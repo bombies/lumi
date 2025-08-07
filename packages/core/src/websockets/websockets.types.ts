@@ -14,7 +14,7 @@ export enum WebSocketSubTopic {
 }
 
 export type WebSocketHeartbeat = {
-	timestamp: number;
+	timestamp: string;
 	payload: InferredWebSocketMessage<'heartbeat'>['payload'];
 };
 
@@ -35,7 +35,7 @@ export type WebSocketMessage<E extends keyof WebSocketMessageMap, T = InferredWe
 	payload: T & {
 		openUrl?: string;
 	};
-	timestamp: number;
+	timestamp: string;
 	id?: string;
 	source?: 'server' | 'client';
 };
@@ -146,9 +146,9 @@ export type Event = keyof WebSocketMessageMap;
 export type InferredWebSocketMessage<T extends Event> = WebSocketMessageMap[T];
 export type InferredWebSocketMessagePayload<T extends Event> = InferredWebSocketMessage<T>['payload'];
 
-export type WebSocketEventHandler<T extends Event> =
-	| ((payload: InferredWebSocketMessagePayload<T>) => void)
-	| ((payload: InferredWebSocketMessagePayload<T>) => Promise<void>);
+export type WebSocketEventHandler<T extends Event>
+	= | ((payload: InferredWebSocketMessagePayload<T>) => void)
+		| ((payload: InferredWebSocketMessagePayload<T>) => Promise<void>);
 
 export const generateWSEventPayload = <T extends Event>(type: T, payload: InferredWebSocketMessage<T>['payload']) =>
 	payload;

@@ -34,7 +34,7 @@ const SpotifyUnlinkButton: FC<Props> = ({ spotifyIdentity }) => {
 								window.location.reload();
 								return 'Successfully disconnected your Spotify account!';
 							} else {
-								logger.error('Failed to unlink Spotify account', response.error);
+								logger.error('Failed to unlink Spotify account', JSON.stringify(response.error).replace(/[\r\n]/g, ''));
 								return 'Failed to unlink Spotify account';
 							}
 						},

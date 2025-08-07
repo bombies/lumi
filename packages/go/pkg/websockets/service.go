@@ -2,6 +2,7 @@ package websockets
 
 import (
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -61,7 +62,7 @@ func (ws *WebsocketService) CreateConnection(args CreateWebsocketConnectionArgs)
 	if args.Token != "" {
 		password += "::" + string(args.Token)
 	}
-	opts.SetPassword(password)
+	opts.SetPassword(base64.StdEncoding.EncodeToString([]byte(password)))
 
 	opts.SetOnConnectHandler(func(client mqtt.Client) {
 		ws.Logger.Printf("Connected successfully to %s\n", args.Endpoint)
@@ -76,7 +77,7 @@ func (ws *WebsocketService) CreateConnection(args CreateWebsocketConnectionArgs)
 	ws.Client = mqtt.NewClient(opts)
 
 	if token := ws.Client.Connect(); token.WaitTimeout(10*time.Second) && token.Error() != nil {
-		return fmt.Errorf("failed to connect: %w", token.Error())
+		return fmt.Errorf("failed to connect to %s: %w", socketUrl, token.Error())
 	}
 
 	return nil

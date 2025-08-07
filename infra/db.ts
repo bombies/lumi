@@ -42,7 +42,7 @@ db.subscribe(
 	appify('RelationshipStreamHandler'),
 	{
 		handler: 'packages/go/cmd/stream',
-		link: [db, redisHost, redisPort, redisUser, redisPassword],
+		link: [db, redisHost, redisPort, redisUser, redisPassword, contentBucket],
 		environment: {
 			TABLE_NAME: db.name,
 			SENTRY_AUTH_TOKEN: sentryAuthToken.value,

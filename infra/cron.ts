@@ -16,9 +16,10 @@ export const affirmationSenderQueue = new sst.aws.Queue('AffirmationSenderQueue'
 
 affirmationSenderQueue.subscribe({
 	name: appify('AffirmationSenderHandler'),
-	handler: 'packages/functions/affirmations/sender.handler',
+	handler: 'packages/go/cmd/affirmation-sender',
 	link: [realtimeServer, vapidPublicKey, vapidPrivateKey, db],
-	runtime: 'nodejs22.x',
+	runtime: 'go',
+	architecture: 'arm64',
 	environment: {
 		NOTIFICATIONS_TOPIC: notificationsTopic,
 		TABLE_NAME: db.name,
@@ -33,12 +34,14 @@ affirmationSenderQueue.subscribe({
 export const affirmationSenderJob = new sst.aws.Cron('AffirmationAggregatorJob', {
 	schedule: $dev ? 'rate(30 minutes)' : 'cron(0 14 * * ? *)',
 	function: {
-		handler: 'packages/functions/affirmations/aggregator.handler',
-		runtime: 'nodejs22.x',
+		handler: 'packages/go/cmd/affirmation-aggregator',
+		runtime: 'go',
+		architecture: 'arm64',
 		link: [db, affirmationSenderQueue],
 		environment: {
 			TABLE_NAME: db.name,
 			SENTRY_AUTH_TOKEN: sentryAuthToken.value,
+			QUEUE_URL: affirmationSenderQueue.url,
 		},
 	},
 });

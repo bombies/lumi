@@ -139,6 +139,7 @@ const WebSocketProvider: FC<WebSocketProviderProps> = ({ children, user, endpoin
 			endpoint,
 			authorizer,
 			identifier: `user:${user.id}`,
+			username: `${user.id}`,
 			token: `${WebSocketToken.RELATIONSHIP_USER}::${relationshipId}`,
 			keepalive: 600,
 			async onConnect(_, clientId) {

@@ -22,7 +22,6 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/samber/lo"
 	"github.com/samber/lo/mutable"
-	"github.com/sst/sst/v3/sdk/golang/resource"
 )
 
 type AffirmationService struct {
@@ -458,27 +457,14 @@ func (as *AffirmationService) SendAffirmationToUser(
 		partner = p
 	}
 
-	wsEndpoint, err := resource.Get("RealtimeServer", "endpoint")
-	if err != nil {
-		return false, err
-	}
-
-	wsAuthorizer, err := resource.Get("RealtimeServer", "authorizer")
-	if err != nil {
-		return false, err
-	}
-
-	err = as.WebsocketService.CreateConnection(websockets.CreateWebsocketConnectionArgs{
-		Endpoint:   wsEndpoint.(string),
-		Authorizer: wsAuthorizer.(string),
-		Token:      websockets.WebsocketTokenGlobal,
-	})
+	err := as.WebsocketService.OpenConnection()
 
 	if err != nil {
 		return false, err
 	}
 
 	defer as.WebsocketService.CloseConnection()
+
 	return as.NotificationService.SendNotification(
 		ctx,
 		notification.SendNotificationArgs{
@@ -495,7 +481,7 @@ func (as *AffirmationService) SendAffirmationToUser(
 				Topic:          fmt.Sprintf("%s/%s/notifications", os.Getenv("NOTIFICATIONS_TOPIC"), userRecord.Id),
 			},
 			OnSuccess: func() {
-				_, err = as.CreateReceivedAffirmation(ctx, userRecord.Id, userRecord.RelationshipId, dto.Affirmation)
+				_, err := as.CreateReceivedAffirmation(ctx, userRecord.Id, userRecord.RelationshipId, dto.Affirmation)
 				as.Logger.Println(fmt.Errorf("there was an error attempting to create the received affirmation record for a custom affirmation: %w", err))
 			},
 		},
