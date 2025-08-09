@@ -1,6 +1,5 @@
 'use client';
 
-import type { SongRecommendation } from '@lumi/core/song-recommendations/song-recommendation.types';
 import type { FC } from 'react';
 import { ChatBubbleLeftIcon, ClockIcon, StarIcon } from '@heroicons/react/24/solid';
 import { format } from 'date-fns';
@@ -21,6 +20,7 @@ import UserAvatar from '@/components/ui/user-avatar';
 import { cn } from '@/lib/utils';
 import DeleteRecommendationButton from '../buttons/delete-recommendation-button';
 import ListenRecommendationButton from '../buttons/listen-recommendation-button';
+import { SongRecommendation } from '@/lib/api/modules/music/music.model';
 
 type Props = {
 	track: SongRecommendation;

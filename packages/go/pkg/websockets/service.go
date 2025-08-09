@@ -2,7 +2,6 @@ package websockets
 
 import (
 	"context"
-	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -62,7 +61,7 @@ func (ws *WebsocketService) CreateConnection(args CreateWebsocketConnectionArgs)
 	if args.Token != "" {
 		password += "::" + string(args.Token)
 	}
-	opts.SetPassword(base64.StdEncoding.EncodeToString([]byte(password)))
+	opts.SetPassword(password)
 
 	opts.SetOnConnectHandler(func(client mqtt.Client) {
 		ws.Logger.Printf("Connected successfully to %s\n", args.Endpoint)

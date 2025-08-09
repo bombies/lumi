@@ -1,12 +1,12 @@
 'use client';
 
-import type { SongRecommendation } from '@lumi/core/song-recommendations/song-recommendation.types';
 import type { FC } from 'react';
 import type { SubmitHandler } from 'react-hook-form';
+import type { SongRecommendation } from '@/lib/api/modules/music/music.model';
 import { StarIcon } from '@heroicons/react/24/solid';
 import { useCallback, useState } from 'react';
-import { z } from 'zod';
 
+import { z } from 'zod';
 import { useRelationship } from '@/components/providers/relationships/relationship-provder';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -30,14 +30,13 @@ type FormSchema = z.infer<typeof formSchema>;
 
 const RateRecommendationButton: FC<Props> = ({ track, onRate }) => {
 	const { self, sendNotificationToPartner } = useRelationship();
-	const { mutateAsync: updateSongRec, isPending: isUpdatingSongRec } = UpdateSongRecommendation();
+	const { mutateAsync: updateSongRec, isPending: isUpdatingSongRec } = UpdateSongRecommendation(track.id);
 	const [dialogOpen, setDialogOpen] = useState(false);
 
 	const handleSubmit = useCallback<SubmitHandler<FormSchema>>(
 		async (data) => {
 			try {
 				await updateSongRec({
-					recId: track.id,
 					rating: data.rating,
 					comments: data.comments,
 					listened: true,
@@ -52,7 +51,7 @@ const RateRecommendationButton: FC<Props> = ({ track, onRate }) => {
 				});
 			} catch {}
 		},
-		[onRate, self.firstName, sendNotificationToPartner, track.id, track.track.name, updateSongRec],
+		[onRate, self.firstName, sendNotificationToPartner, track.track.name, updateSongRec],
 	);
 
 	return (

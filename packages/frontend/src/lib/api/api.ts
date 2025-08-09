@@ -1,6 +1,7 @@
 import type { AxiosError, AxiosInstance, InternalAxiosRequestConfig } from 'axios';
 import axios from 'axios';
 import { MomentService } from '@/lib/api/modules/moment/moment.service';
+import { MusicService } from '@/lib/api/modules/music/music.service';
 import { RelationshipService } from '@/lib/api/modules/relationship/relationship.service';
 import { UserService } from '@/lib/api/modules/user/user.service';
 import { auth } from '../better-auth/auth-client';
@@ -38,6 +39,7 @@ export class ApiClient {
 	users = new UserService(this);
 	relationships = new RelationshipService(this);
 	moments = new MomentService(this);
+	music = new MusicService(this);
 
 	public static getInstance(): ApiClient {
 		if (!ApiClient.instance) {

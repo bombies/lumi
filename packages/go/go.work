@@ -16,4 +16,6 @@ use (
 	./cmd/websocket/presence
 	./cmd/websocket/notifications
 	./cmd/websocket/moment-message
+	./cmd/cron/anniversaries/aggregator
+	./cmd/cron/anniversaries/sender
 )

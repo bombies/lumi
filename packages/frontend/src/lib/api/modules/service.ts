@@ -8,7 +8,7 @@ export abstract class ApiService {
 		return !params ? endpoint : this.urlWithParams(`${endpoint}`, params);
 	}
 
-	protected urlWithParams(url: string, params?: Record<string, any>) {
+	private urlWithParams(url: string, params?: Record<string, any>) {
 		if (!params || Object.keys(params).length === 0) {
 			return url;
 		}

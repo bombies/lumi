@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log"
 	"lumi/pkg/constructs"
@@ -44,8 +45,6 @@ func main() {
 }
 
 func handler(ctx context.Context, event events.IoTCoreCustomAuthorizerRequest) (events.IoTCoreCustomAuthorizerResponse, error) {
-	logger.Println("test")
-
 	lc, ok := lambdacontext.FromContext(ctx)
 	if !ok {
 		logger.Println("failed to get lambda context")
@@ -55,10 +54,13 @@ func handler(ctx context.Context, event events.IoTCoreCustomAuthorizerRequest) (
 	arnSplit := strings.Split(lc.InvokedFunctionArn, ":")
 	partition, region, accountId := arnSplit[1], arnSplit[3], arnSplit[4]
 
+	protocolJson, _ := json.Marshal(event.ProtocolData)
+	logger.Println(string(protocolJson))
+
 	token := string(event.ProtocolData.MQTT.Password)
 	allowedPaths, err := authorize(ctx, token)
 	if err != nil {
-		logger.Println("failed to authorize", err)
+		logger.Println("failed to authorize: ", err)
 		return denyResponse(event.ProtocolData.MQTT.Username), nil
 	}
 
@@ -95,7 +97,7 @@ func authorize(ctx context.Context, token string) (AllowedPaths, error) {
 
 	parts := strings.Split(token, "::")
 	if len(parts) != 3 {
-		return AllowedPaths{}, fmt.Errorf("invalid token format: expected 3 parts, got %d", len(parts))
+		return AllowedPaths{}, fmt.Errorf("invalid token format: expected 3 parts, got %d (%s)", len(parts), token)
 	}
 	clientID, identifier, args := parts[0], parts[1], parts[2]
 

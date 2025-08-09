@@ -477,7 +477,7 @@ func (as *AffirmationService) SendAffirmationToUser(
 		},
 		notification.SendNotificationOpts{
 			OnlineWebSocketMessage: &notification.OnlineWebSocketMessageArgs{
-				MqttConnection: *as.WebsocketService,
+				MqttConnection: as.WebsocketService,
 				Topic:          fmt.Sprintf("%s/%s/notifications", os.Getenv("NOTIFICATIONS_TOPIC"), userRecord.Id),
 			},
 			OnSuccess: func() {

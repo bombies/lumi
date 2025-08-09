@@ -91,7 +91,7 @@ type SendNotificationArgs struct {
 }
 
 type OnlineWebSocketMessageArgs struct {
-	MqttConnection websockets.WebsocketService
+	MqttConnection *websockets.WebsocketService
 	Topic          string
 }
 

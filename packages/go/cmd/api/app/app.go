@@ -7,6 +7,7 @@ import (
 	"lumi/api/app/utils"
 	"lumi/pkg/models/moment"
 	"lumi/pkg/models/relationship"
+	songrecommendation "lumi/pkg/models/song-recommendation"
 	"lumi/pkg/models/user"
 	"net/http"
 
@@ -63,6 +64,7 @@ func getAllRoutes(router *gin.Engine) []routes.Route {
 		StorageBucket: s3Bucket,
 		RedisClient:   redisClient,
 	})
+	songRecService := songrecommendation.NewSongRecommendationService(dynamoTable)
 
 	protectedGroup := utils.ProtectedRoute(router, "/")
 	relationshipGroup := utils.RelationshipRoute(router, "/")
@@ -85,10 +87,16 @@ func getAllRoutes(router *gin.Engine) []routes.Route {
 		MomentService:     momentService,
 	}
 
+	songRecommendationRoute := &routes.SongRecommendationRoute{
+		RelationshipRoute: relationshipGroup,
+		SongRecService:    songRecService,
+	}
+
 	return []routes.Route{
 		userRoute,
 		relationshipRoute,
 		momentRoute,
+		songRecommendationRoute,
 	}
 }
 
