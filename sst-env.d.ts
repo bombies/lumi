@@ -49,6 +49,11 @@ declare module "sst" {
       "type": "sst.sst.Secret"
       "value": string
     }
+    "GoApi": {
+      "name": string
+      "type": "sst.aws.Function"
+      "url": string
+    }
     "MailerHost": {
       "type": "sst.sst.Secret"
       "value": string

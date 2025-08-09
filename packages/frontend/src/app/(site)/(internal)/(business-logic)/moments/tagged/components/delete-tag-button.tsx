@@ -26,7 +26,7 @@ type Props = {
 
 const DeleteTagButton: FC<Props> = ({ tag, onDelete }) => {
 	const [dialogOpen, setDialogOpen] = useState(false);
-	const { mutateAsync: deleteTag, isPending: isDeleting } = DeleteRelationshipMomentTag();
+	const { mutateAsync: deleteTag, isPending: isDeleting } = DeleteRelationshipMomentTag(tag);
 
 	return (
 		<AlertDialog open={dialogOpen} onOpenChange={setDialogOpen}>
@@ -57,7 +57,7 @@ const DeleteTagButton: FC<Props> = ({ tag, onDelete }) => {
 						disabled={isDeleting}
 						className="bg-destructive hover:bg-destructive/80"
 						onClick={async () => {
-							toast.promise(deleteTag(tag), {
+							toast.promise(deleteTag(), {
 								loading: `Deleting #${tag}...`,
 								success() {
 									setDialogOpen(false);

@@ -1,9 +1,9 @@
 'use client';
 
-import type { Moment, RelationshipMomentTag } from '@lumi/core/moments/moment.types';
 import type { FC, PropsWithChildren } from 'react';
-import { createContext, use, useMemo, useState } from 'react';
+import type { Moment, RelationshipMomentTag } from '@/lib/api/modules/moment/moment.model';
 
+import { createContext, use, useMemo, useState } from 'react';
 import { GetMomentsForRelationshipTag, GetRelationshipMomentTags } from '@/hooks/trpc/moment-hooks';
 
 type TaggedMomentsProviderData = {
@@ -20,7 +20,7 @@ type TaggedMomentsProviderData = {
 	};
 	selection: {
 		selectedTag?: string;
-		setSelectedTag: (tag: string | undefined) => void;
+		setSelectedTag: (tag: string) => void;
 	};
 	moments: {
 		moments: Moment[];
@@ -47,16 +47,16 @@ const TaggedMomentsProvider: FC<PropsWithChildren> = ({ children }) => {
 		hasNextPage: hasMoreTags,
 		fetchNextPage: fetchMoreTags,
 		isFetchingNextPage: isFetchingMoreTags,
-	} = GetRelationshipMomentTags(tagSearch.length ? tagSearch : undefined, 20);
+	} = GetRelationshipMomentTags({ query: tagSearch, limit: 20 });
 
-	const [selectedTag, setSelectedTag] = useState<string>();
+	const [selectedTag, setSelectedTag] = useState<string>('');
 	const {
 		data: momentPages,
 		isLoading: momentsLoading,
 		hasNextPage: hasMoreMoments,
 		fetchNextPage: fetchMoreMoments,
 		isFetchingNextPage: isFetchingMoreMoments,
-	} = GetMomentsForRelationshipTag(selectedTag, { limit: 20, order: 'desc' });
+	} = GetMomentsForRelationshipTag({ tag: selectedTag, limit: 20, order: 'desc' });
 
 	const memoizedValue = useMemo<TaggedMomentsProviderData>(
 		() => ({

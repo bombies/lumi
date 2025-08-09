@@ -81,7 +81,7 @@ export const auth = betterAuth({
 				const details = await sendSignUpEmail({ email: data.user.email, siteUrl: data.url });
 				logger.debug('Sucessfully sent email!', details);
 			} catch (e) {
-				logger.error('Failed to send sign up email', e);
+				logger.error('Failed to send sign up email', JSON.stringify(e).replace(/[\r\n]/g, ''));
 			}
 		},
 		sendOnSignUp: true,

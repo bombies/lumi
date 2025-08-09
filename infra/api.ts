@@ -65,6 +65,54 @@ export const trpc = new sst.aws.Function('Trpc', {
 	handler: 'packages/functions/api/index.handler',
 });
 
+export const goApi = new sst.aws.Function('GoApi', {
+	url: $dev
+		? true
+		: {
+				cors: {
+					allowOrigins: [`https://${webDNS}`],
+				},
+			},
+	runtime: 'go',
+	timeout: '30 seconds',
+	architecture: 'arm64',
+	versioning: true,
+	concurrency: $dev
+		? undefined
+		: {
+				provisioned: 5,
+				reserved: 10,
+			},
+	link: [
+		contentBucket,
+		db,
+		mailerHostSecret,
+		mailerPasswordSecret,
+		mailerUserSecret,
+		mailerPortSecret,
+		redisHost,
+		redisPort,
+		redisUser,
+		redisPassword,
+		realtimeServer,
+		vapidPublicKey,
+		vapidPrivateKey,
+	],
+	environment: {
+		APP_STAGE: $app.stage,
+		AUTH_SECRET: authSecret.value,
+		TABLE_NAME: db.name,
+		NOTIFICATIONS_TOPIC: notificationsTopic,
+		WEB_SOCKET_TOKEN: websocketToken.value,
+		CDN_PRIVATE_KEY: cdnPrivateKey,
+		KEY_PAIR_ID: contentCdnPublicKey.id,
+		CDN_URL: $interpolate`${contentCdn.domainUrl.apply(domainUrl => domainUrl ?? contentCdn.url)}`,
+		FRONTEND_URL: !$dev ? `https://${webDNS}` : 'https://localhost:3000',
+		...defaultSentryEnvironmentVariables,
+	},
+	handler: 'packages/go/cmd/api',
+});
+
 let apiCdn: sst.aws.Cdn | undefined;
 
 if (!$dev)

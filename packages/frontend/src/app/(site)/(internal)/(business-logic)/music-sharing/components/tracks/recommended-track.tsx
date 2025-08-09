@@ -1,9 +1,8 @@
 'use client';
 
-import type { SongRecommendation } from '@lumi/core/song-recommendations/song-recommendation.types';
 import type { FC } from 'react';
 import { ChatBubbleLeftIcon, ClockIcon, StarIcon } from '@heroicons/react/24/solid';
-import moment from 'moment';
+import { format } from 'date-fns';
 import { useMemo } from 'react';
 
 import { useRelationship } from '@/components/providers/relationships/relationship-provder';
@@ -21,6 +20,7 @@ import UserAvatar from '@/components/ui/user-avatar';
 import { cn } from '@/lib/utils';
 import DeleteRecommendationButton from '../buttons/delete-recommendation-button';
 import ListenRecommendationButton from '../buttons/listen-recommendation-button';
+import { SongRecommendation } from '@/lib/api/modules/music/music.model';
 
 type Props = {
 	track: SongRecommendation;
@@ -71,7 +71,7 @@ const RecommendedTrack: FC<Props> = ({ track: { track: trackDetails, ...track },
 						{type !== 'listened' && (
 							<span className="text-xs text-foreground/60 inline-flex items-center gap-1">
 								<ClockIcon className="size-3" />
-								{moment(trackDetails.duration).format('mm:ss')}
+								{format(new Date(trackDetails.duration), 'mm:ss')}
 							</span>
 						)}
 						{/* {track.explicit && <span className="text-xs p-1 bg-black/50 rounded-xs">EXPLICIT</span>} */}

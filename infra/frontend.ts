@@ -1,4 +1,4 @@
-import { trpc } from './api';
+import { goApi, trpc } from './api';
 import { db } from './db';
 import { apiDNS, webDNS } from './dns';
 import { notificationsTopic, realtimeServer } from './realtime';
@@ -41,10 +41,11 @@ export const frontend = new sst.aws.Nextjs('Frontend', {
 	},
 	cachePolicy:
 		$app.stage !== 'staging' ? frontendCdnCachePolicyId.value : undefined,
-	openNextVersion: '3.6.1',
+	openNextVersion: '3.7.4',
 	warm: $app.stage === 'production' ? 5 : 0,
 	link: [
 		trpc,
+		goApi,
 		contentBucket,
 		db,
 		mailerHostSecret,
@@ -79,6 +80,7 @@ export const frontend = new sst.aws.Nextjs('Frontend', {
 		APP_STAGE: $app.stage,
 		NEXT_PUBLIC_APP_STAGE: $app.stage,
 		NEXT_PUBLIC_TRPC_URL: !$dev ? `https://${apiDNS}` : trpc.url,
+		NEXT_PUBLIC_API_URL: !$dev ? `https://${apiDNS}` : goApi.url,
 		NEXT_PUBLIC_CANONICAL_URL: !$dev
 			? `https://${webDNS}`
 			: 'https://localhost:3000',

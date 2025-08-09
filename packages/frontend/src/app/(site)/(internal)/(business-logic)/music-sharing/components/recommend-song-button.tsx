@@ -34,24 +34,26 @@ const RecommendSongButton: FC = () => {
 			onClick={() => {
 				setDialogOpen(false);
 				setQuery(undefined);
+				const sanitizedName = track.name.replace(/[<>"'&]/g, '');
+				const sanitizedArtist = track.artists[0].name.replace(/[<>"'&]/g, '');
 				toast.promise(
 					recommendSong({
 						id: track.id,
-						name: track.name,
+						name: sanitizedName,
 						uri: track.uri,
-						artistName: track.artists[0].name,
+						artistName: sanitizedArtist,
 						duration: track.duration_ms,
 						albumImage: track.album.images[0].url,
 					}),
 					{
-						loading: `Recommending ${track.name} by ${track.artists[0].name}`,
+						loading: `Recommending ${sanitizedName} by ${sanitizedArtist}`,
 						async success() {
 							await sendNotificationToPartner({
 								title: '🎵 Song Recommendation',
-								content: `${track.name} by ${track.artists[0].name}`,
+								content: `${sanitizedName} by ${sanitizedArtist}`,
 								openUrl: '/music-sharing',
 							});
-							return `You have recommended ${track.name} by ${track.artists[0].name}`;
+							return `You have recommended ${sanitizedName} by ${sanitizedArtist}`;
 						},
 						error(e) {
 							return getErrorMessage(e, {

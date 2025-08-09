@@ -2,6 +2,7 @@ import type { TRPCClientErrorLike } from '@trpc/client';
 import type { AnyTRPCClientTypes } from '@trpc/server';
 import { TRPCClientError } from '@trpc/client';
 import { TRPCError } from '@trpc/server';
+import { AxiosError } from 'axios';
 import { toast } from 'sonner';
 
 type GetErrorMessageArgs = {
@@ -12,6 +13,8 @@ type GetErrorMessageArgs = {
 export const getErrorMessage = (e: any, args?: GetErrorMessageArgs) => {
 	if (e instanceof TRPCClientError || e instanceof TRPCError) {
 		return e.message;
+	} else if (e instanceof AxiosError) {
+		return e.response?.data.message || 'Something went wrong!';
 	} else if (e instanceof Error && args?.useErrorObjectMessage) {
 		return e.message;
 	} else {

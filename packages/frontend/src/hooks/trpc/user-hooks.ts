@@ -1,36 +1,59 @@
 'use client';
 
-import { skipToken } from '@tanstack/react-query';
+import type { UpdateUserDto } from '@/lib/api/modules/user/user.dto';
 
-import { useRouteInvalidation } from '@/lib/hooks/useRouteInvalidation';
-import { trpc } from '@/lib/trpc/trpc-react';
+import type { GetUploadUrlDto } from '@/lib/api/types/dto.types';
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { apiClient } from '@/lib/api/api';
 import { useSingleMediaUploader } from './utils/media-utils';
 
 export const UpdateUser = () => {
-	const invalidateRoutes = useRouteInvalidation([trpc.users.getSelf]);
-	return trpc.users.updateSelf.useMutation({
-		onSuccess() {
-			invalidateRoutes();
+	const queryClient = useQueryClient();
+	return useMutation({
+		mutationFn: (data: UpdateUserDto) => apiClient.users.updateSelf(data),
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ['users', 'self'] });
 		},
 	});
 };
-export const GetSelfUser = () => trpc.users.getSelf.useQuery();
-export const GetSelfUserOnDemand = () => trpc.users.getSelfOnDemand.useMutation();
-export const GetUserAvatarUploadUrl = () => trpc.users.getUserAvatarUploadUrl.useMutation();
+export const GetSelfUser = () => useQuery({
+	queryKey: ['users', 'self'],
+	queryFn: () => apiClient.users.getSelf(),
+});
+
+export const GetSelfUserOnDemand = () => useMutation({
+	mutationFn: () => apiClient.users.getSelf(),
+});
+
+export const GetUserAvatarUploadUrl = () => useMutation({
+	mutationFn: (params: GetUploadUrlDto) => apiClient.users.getUserAvatarUploadUser(params),
+});
 
 export const FetchUsersByUsername = ({ searchQuery }: { searchQuery: string }) =>
-	trpc.users.getUsersByUsername.useInfiniteQuery(
-		searchQuery.length > 0 ? { username: searchQuery, projections: ['id', 'username'] } : skipToken,
-		{
-			getNextPageParam: lastPage => lastPage.nextCursor,
-		},
-	);
+	useInfiniteQuery({
+		queryKey: ['users', 'username', searchQuery],
+		initialPageParam: null as Record<string, any> | null,
+		queryFn: ({ pageParam }) =>
+			apiClient.users.getUsersByUsername({
+				username: searchQuery,
+				limit: 10,
+				cursor: pageParam,
+				projections: ['id', 'username'],
+			}),
+		getNextPageParam: lastPage => lastPage.nextCursor,
+		enabled: searchQuery.length > 0,
+	});
 
 export const UploadUserAvatar = () => {
 	const { mutateAsync: fetchAvatarUploadUrl } = GetUserAvatarUploadUrl();
 	return useSingleMediaUploader(fetchAvatarUploadUrl);
 };
 
-export const GetUserByIdSafe = (userId: string) => trpc.users.getUserByIdSafe.useQuery(userId);
+export const GetUserByIdSafe = (userId: string) => useQuery({
+	queryKey: ['users', 'id'],
+	queryFn: () => apiClient.users.getUserById(userId),
+});
 
-export const DeleteSelf = () => trpc.users.deleteSelf.useMutation();
+export const DeleteSelf = () => useMutation({
+	mutationFn: () => apiClient.users.deleteSelf(),
+});

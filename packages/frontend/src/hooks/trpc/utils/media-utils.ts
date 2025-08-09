@@ -1,13 +1,15 @@
 'use client';
 
 import type { DefaultError, UseMutateAsyncFunction } from '@tanstack/react-query';
+import type { PresignedURLResponse } from '@/lib/api/types/api.types';
+import type { GetUploadUrlDto } from '@/lib/api/types/dto.types';
 import axios from 'axios';
 import { useCallback, useState } from 'react';
 
 export const useSingleMediaUploader = <
-	TData = unknown,
+	TData extends PresignedURLResponse = any,
 	TError = DefaultError,
-	TVariables extends { fileExtension: string; objectKey: string } | void = void,
+	TVariables extends GetUploadUrlDto = any,
 	TContext = unknown,
 >(
 	urlFetcher: UseMutateAsyncFunction<TData, TError, TVariables, TContext>,
@@ -34,10 +36,10 @@ export const useSingleMediaUploader = <
 					objectKey,
 				} as TVariables);
 
-				if (typeof uploadUrl !== 'string') throw new Error('Invalid upload URL');
+				if (!uploadUrl.url) throw new Error('Invalid upload URL');
 
 				await axios
-					.put(uploadUrl, file, {
+					.put(uploadUrl.url, file, {
 						onUploadProgress: (progressEvent) => {
 							if (!progressEvent.total) return;
 							const progress = Math.round((progressEvent.loaded / progressEvent.total) * 100);

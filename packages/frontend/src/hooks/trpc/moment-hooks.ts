@@ -1,152 +1,206 @@
 'use client';
 
-import { skipToken } from '@tanstack/react-query';
-import { toast } from 'sonner';
+import type { CreateMomentDetailsDto, CreateMomentMessageDto, CreateMomentTagDto, ReactToMessageDto, UpdateMomentDetailsDto, UpdateMomentMessageDto } from '@/lib/api/modules/moment/moment.dto';
+import type { GetUploadUrlDto, InfiniteDataArgs, InfiniteDataWithOrderArgs } from '@/lib/api/types/dto.types';
 
-import { useRouteInvalidation } from '@/lib/hooks/useRouteInvalidation';
-import { trpc } from '@/lib/trpc/trpc-react';
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
+import { apiClient } from '@/lib/api/api';
 import { useSingleMediaUploader } from './utils/media-utils';
 
 export const CreateMomentDetails = () =>
-	trpc.moments.createMomentDetails.useMutation({
+	useMutation({
+		mutationFn: (data: CreateMomentDetailsDto) => apiClient.moments.createMomentDetails(data),
 		onSuccess() {
 			toast.success('Successfully uploaded your moment!');
 		},
 	});
-export const GetMomentDetails = (momentId: string) => trpc.moments.getMomentDetails.useQuery(momentId);
+
+const GetMomentDetailsQueryKey = (momentId: string) => ['moment', 'details', momentId];
+
+export const GetMomentDetails = (momentId: string) =>
+	useQuery({
+		queryKey: GetMomentDetailsQueryKey(momentId),
+		queryFn: () => apiClient.moments.getMomentDetails(momentId),
+	});
+
+const SearchMomentsQueryKey = (query: string) => ['moments', 'search', query];
 
 export const SearchMoments = (
 	query: string,
-	args?: {
-		limit?: number;
-		order?: 'asc' | 'desc';
-	},
+	args?: InfiniteDataWithOrderArgs,
 ) =>
-	trpc.moments.searchMoments.useInfiniteQuery(
-		{
-			query,
-			...args,
+	useInfiniteQuery({
+		queryKey: SearchMomentsQueryKey(query),
+		initialPageParam: null as [Record<string, any> | null, Record<string, any> | null] | null,
+		queryFn: ({ pageParam }) => {
+			return apiClient.moments.searchMoments({ query, ...args, cursor: pageParam });
 		},
-		{
-			getNextPageParam: (lastPage) => {
-				const [titleCursor, tagCursor] = lastPage.nextCursor;
-				if (!titleCursor && !tagCursor) return undefined;
-				else return lastPage.nextCursor;
-			},
+		getNextPageParam: (lastPage) => {
+			const [titleCursor, tagCursor] = lastPage.nextCursor;
+			if (!titleCursor && !tagCursor) return undefined;
+			else return lastPage.nextCursor;
 		},
-	);
+		enabled: query.length > 0,
+	});
 
-export const GetMoments = (userId?: string, args?: { limit?: number; order?: 'asc' | 'desc'; search?: string }) =>
+const GetMomentsQueryKey = ['moments'];
+
+export const GetMoments = (
+	userId?: string,
+	args?: InfiniteDataWithOrderArgs & { search?: string },
+) =>
 	args?.search
 		? SearchMoments(args.search, { limit: args.limit, order: args.order })
-		: trpc.moments.getMoments.useInfiniteQuery(
-				{ userId, limit: args?.limit },
-				{
-					getNextPageParam: lastPage => lastPage.nextCursor,
+		// eslint-disable-next-line react-hooks/rules-of-hooks
+		: useInfiniteQuery({
+				queryKey: GetMomentsQueryKey,
+				initialPageParam: null as Record<string, any> | null,
+				queryFn: ({ pageParam }) => {
+					return apiClient.moments.getMoments({
+						limit: args?.limit,
+						order: args?.order,
+						user: userId,
+						cursor: pageParam,
+					});
 				},
-			);
+				getNextPageParam: lastPage => lastPage.nextCursor,
 
-export const UpdateMomentDetails = () => {
-	const invalidateRoutes = useRouteInvalidation([trpc.moments.getMomentDetails]);
-	return trpc.moments.updateMomentDetails.useMutation({
-		onSuccess: () => invalidateRoutes(),
+			});
+
+export const UpdateMomentDetails = (momentId: string) => {
+	const queryClient = useQueryClient();
+	return useMutation({
+		mutationFn: (dto: UpdateMomentDetailsDto) => apiClient.moments.updateMomentDetails(momentId, dto),
+		onSuccess: () => queryClient.invalidateQueries({ queryKey: GetMomentDetailsQueryKey(momentId) }),
 	});
 };
 
-export const DeleteMomentDetails = () => {
-	return trpc.moments.deleteMomentDetails.useMutation();
-};
-
-export const GetMessagesForMoment = (momentId: string) =>
-	trpc.moments.getMessagesForMoment.useInfiniteQuery(
-		{
-			momentId,
-		},
-		{
-			staleTime: Infinity,
-			getNextPageParam: lastPage => lastPage.nextCursor,
-		},
-	);
-
-export const CreateMomentMessage = () => {
-	const invalidateRoutes = useRouteInvalidation([trpc.moments.getMessagesForMoment]);
-	return trpc.moments.createMomentMessage.useMutation({
-		onSuccess: () => invalidateRoutes(),
+export const DeleteMomentDetails = (momentId: string) => {
+	return useMutation({
+		mutationFn: () => apiClient.moments.deleteMomentDetails(momentId),
 	});
 };
 
-export const SetMomentMessageReaction = () => {
-	const invalidateRoutes = useRouteInvalidation([trpc.moments.getMessagesForMoment]);
-	return trpc.moments.reactToMessage.useMutation({
-		onSuccess: () => invalidateRoutes(),
+const GetMessagesForMomentQueryKey = (momentId: string) => ['moments', 'messages', momentId];
+
+export const GetMessagesForMoment = ({ momentId, ...args }: InfiniteDataWithOrderArgs & { momentId: string }) =>
+	useInfiniteQuery({
+		queryKey: GetMessagesForMomentQueryKey(momentId),
+		initialPageParam: null as Record<string, any> | null,
+		queryFn: ({ pageParam }) =>
+			apiClient.moments.getMessagesForMoment(momentId, { cursor: pageParam, ...args }),
+		getNextPageParam: lastPage => lastPage.nextCursor,
+
+	});
+
+export const CreateMomentMessage = (momentId: string) => {
+	const queryClient = useQueryClient();
+	return useMutation({
+		mutationFn: (dto: CreateMomentMessageDto) => apiClient.moments.createMomentMessage(momentId, dto),
+		onSuccess: () => queryClient.invalidateQueries({ queryKey: GetMessagesForMomentQueryKey(momentId) }),
 	});
 };
 
-export const EditMomentMessage = () => {
-	const invalidateRoutes = useRouteInvalidation([trpc.moments.getMessagesForMoment]);
-	return trpc.moments.editMessage.useMutation({
-		onSuccess: () => invalidateRoutes(),
+export const SetMomentMessageReaction = (momentId: string, messageId: string) => {
+	const queryClient = useQueryClient();
+	return useMutation({
+		mutationFn: (dto: ReactToMessageDto) => apiClient.moments.reactToMessage(momentId, messageId, dto),
+		onSuccess: () => queryClient.invalidateQueries({ queryKey: GetMessagesForMomentQueryKey(momentId) }),
 	});
 };
 
-export const DeleteMomentMessage = () => {
-	const invalidateRoutes = useRouteInvalidation([trpc.moments.getMessagesForMoment]);
-	return trpc.moments.deleteMomentMessage.useMutation({
-		onSuccess: () => invalidateRoutes(),
+export const EditMomentMessage = (momentId: string, messageId: string) => {
+	const queryClient = useQueryClient();
+	return useMutation({
+		mutationFn: (dto: UpdateMomentMessageDto) => apiClient.moments.editMomentMessage(momentId, messageId, dto),
+		onSuccess: () => queryClient.invalidateQueries({ queryKey: GetMessagesForMomentQueryKey(momentId) }),
 	});
 };
 
-export const GetMomentUploadUrl = () => trpc.moments.getMomentUploadUrl.useMutation();
+export const DeleteMomentMessage = (momentId: string, messageId: string) => {
+	const queryClient = useQueryClient();
+	return useMutation({
+		mutationFn: () => apiClient.moments.deleteMomentMessage(momentId, messageId),
+		onSuccess: () => queryClient.invalidateQueries({ queryKey: GetMessagesForMomentQueryKey(momentId) }),
+	});
+};
 
-export const GetRelationshipMomentTags = (query?: string, limit?: number) =>
-	trpc.moments.getRelationshipMomentTags.useInfiniteQuery(
-		{ query, limit },
-		{
-			getNextPageParam: lastPage => lastPage.nextCursor,
-		},
-	);
+export const GetMomentUploadUrl = () =>
+	useMutation({
+		mutationFn: (params: GetUploadUrlDto) => apiClient.moments.getMomentUploadUrl(params),
+	});
+
+const GetRelationshipMomentTagsQueryKey = ['moments', 'relationshiptags'];
+
+export const GetRelationshipMomentTags = ({
+	query,
+	...args
+}: InfiniteDataArgs & { query: string }) =>
+	useInfiniteQuery({
+		queryKey: GetRelationshipMomentTagsQueryKey,
+		initialPageParam: null as Record<string, any> | null,
+		queryFn: ({ pageParam }) =>
+			apiClient.moments.getRelationshipMomentMomentTags({ query, ...args, cursor: pageParam }),
+		getNextPageParam: lastPage => lastPage.nextCursor,
+
+	});
+
+const GetMomentsForRelationshipTagQueryKey = (tag: string) => ['moments', 'relationshiptag', tag];
 
 export const GetMomentsForRelationshipTag = (
-	tag?: string,
-	args?: {
-		limit?: number;
-		order?: 'asc' | 'desc';
-	},
+	{
+		tag,
+		...args
+	}: InfiniteDataWithOrderArgs & { tag: string },
 ) =>
-	trpc.moments.getMomentsByTag.useInfiniteQuery(
-		tag ? { tagQuery: tag, limit: args?.limit, order: args?.order } : skipToken,
-		{
-			getNextPageParam: lastPage => lastPage.cursor,
-		},
-	);
+	useInfiniteQuery({
+		queryKey: GetMomentsForRelationshipTagQueryKey(tag),
+		initialPageParam: null as Record<string, any> | null,
+		queryFn: ({ pageParam }) =>
+			apiClient.moments.getMoments({ tag, ...args, cursor: pageParam }),
+		enabled: tag.length > 0,
+		getNextPageParam: lastPage => lastPage.nextCursor,
+
+	});
 
 export const CreateRelationshipMomentTag = () => {
-	const invalidateRoutes = useRouteInvalidation([trpc.moments.getRelationshipMomentTags]);
-	return trpc.moments.createRelationshipMomentTag.useMutation({
-		onSuccess: () => invalidateRoutes(),
+	const queryClient = useQueryClient();
+	return useMutation({
+		mutationFn: (dto: CreateMomentTagDto) => apiClient.moments.createRelationshipMomentTag(dto),
+		onSuccess: () => queryClient.invalidateQueries({ queryKey: GetRelationshipMomentTagsQueryKey }),
 	});
 };
 
-export const DeleteRelationshipMomentTag = () => {
-	const invalidateRoutes = useRouteInvalidation([trpc.moments.getRelationshipMomentTags]);
-	return trpc.moments.deleteRelationshipMomentTag.useMutation({
-		onSuccess: () => invalidateRoutes(),
+export const DeleteRelationshipMomentTag = (tag: string) => {
+	const queryClient = useQueryClient();
+	return useMutation({
+		mutationFn: () => apiClient.moments.deleteRelationshipMomentTag(tag),
+		onSuccess: () => queryClient.invalidateQueries({ queryKey: GetRelationshipMomentTagsQueryKey }),
 	});
 };
 
-export const GetMomentTags = (momentId: string) => trpc.moments.getTagsForMoment.useQuery(momentId);
+const GetMomentTagsQueryKey = ['moment', 'tags'];
 
-export const CreateMomentTag = () => {
-	const invalidateRoutes = useRouteInvalidation([trpc.moments.getTagsForMoment]);
-	return trpc.moments.createTagForMoment.useMutation({
-		onSuccess: () => invalidateRoutes(),
+export const GetMomentTags = (momentId: string) =>
+	useQuery({
+		queryKey: GetMomentTagsQueryKey,
+		queryFn: () => apiClient.moments.getTagsForMoment(momentId),
+	});
+
+export const CreateMomentTag = (momentId: string) => {
+	const queryClient = useQueryClient();
+	return useMutation({
+		mutationFn: (dto: CreateMomentTagDto) => apiClient.moments.createTagForMoment(momentId, dto),
+		onSuccess: () => queryClient.invalidateQueries({ queryKey: GetMomentTagsQueryKey }),
 	});
 };
 
-export const DeleteMomentTag = () => {
-	const invalidateRoutes = useRouteInvalidation([trpc.moments.getTagsForMoment]);
-	return trpc.moments.deleteTagForMoment.useMutation({
-		onSuccess: () => invalidateRoutes(),
+export const DeleteMomentTag = (momentId: string) => {
+	const queryClient = useQueryClient();
+	return useMutation({
+		mutationFn: () => apiClient.moments.getTagsForMoment(momentId),
+		onSuccess: () => queryClient.invalidateQueries({ queryKey: GetMomentTagsQueryKey }),
 	});
 };
 

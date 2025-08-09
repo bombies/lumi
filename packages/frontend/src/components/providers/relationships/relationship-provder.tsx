@@ -48,9 +48,9 @@ const RelationshipProvider: FC<RelationshipProviderProps> = ({ children, relatio
 
 	useEffect(() => {
 		const presenceHandler: WebSocketEventHandler<'presence'> = (payload) => {
-			logger.debug('presence event received', payload);
+			logger.debug('presence event received', JSON.stringify(payload).replace(/[\r\n]/g, ''));
 			if (payload.userId !== partner.id) return;
-			logger.debug('handling partner presence event', payload);
+			logger.debug('handling partner presence event', JSON.stringify(payload).replace(/[\r\n]/g, ''));
 			setPartnerState(state => ({ ...state, status: payload.status }));
 		};
 

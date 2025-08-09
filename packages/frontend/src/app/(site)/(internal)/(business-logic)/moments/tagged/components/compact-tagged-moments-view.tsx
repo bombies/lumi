@@ -69,7 +69,7 @@ export const CompactTaggedMomentsView: FC = () => {
 				/>
 				{selectedTag && (
 					<>
-						<DeleteTagButton tag={selectedTag} onDelete={() => setSelectedTag(undefined)} />
+						<DeleteTagButton tag={selectedTag} onDelete={() => setSelectedTag('')} />
 					</>
 				)}
 				<CreateMomentTagButton />

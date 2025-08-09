@@ -2,6 +2,17 @@
 self.addEventListener('push', (event) => {
 	if (event.data) {
 		const data = event.data.json();
+		// Verify origin and data structure for security
+		if (!data || typeof data !== 'object' || !data.title || typeof data.title !== 'string') {
+			return;
+		}
+		// Validate expected fields to ensure legitimate source
+		const allowedFields = ['title', 'body', 'icon', 'openUrl'];
+		const hasUnexpectedFields = Object.keys(data).some(key => !allowedFields.includes(key));
+		if (hasUnexpectedFields) {
+			return;
+		}
+
 		console.log('Received push data', data);
 		const { openUrl, body } = data;
 		const options = {
@@ -23,10 +34,15 @@ self.addEventListener('notificationclick', (event) => {
 	event.notification.close();
 
 	const { openUrl } = event.notification.data;
+	// Authorization check - validate URL is from trusted domain
+	if (openUrl && !openUrl.startsWith('/')) {
+		console.warn('Unauthorized URL blocked:', openUrl);
+		return;
+	}
+	const baseUrl = process.env.NODE_ENV === 'development' ? 'https://localhost:3000' : process.env.NEXT_PUBLIC_CANONICAL_URL;
+	const fullUrl = `${baseUrl}${openUrl || ''}`;
 	event.waitUntil(
 		// eslint-disable-next-line no-undef
-		clients.openWindow(
-			`${process.env.NODE_ENV === 'development' ? 'https://localhost:3000' : process.env.NEXT_PUBLIC_CANONICAL_URL}${openUrl || ''}`,
-		),
+		clients.openWindow(fullUrl),
 	);
 });

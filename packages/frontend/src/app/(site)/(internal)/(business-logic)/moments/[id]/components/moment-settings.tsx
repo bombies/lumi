@@ -25,12 +25,12 @@ type Props = {
 
 const MomentSettings: FC<Props> = ({ moment }) => {
 	const router = useRouter();
-	const { mutateAsync: doMomentDeletion, isPending: isDeleting } = DeleteMomentDetails();
+	const { mutateAsync: doMomentDeletion, isPending: isDeleting } = DeleteMomentDetails(moment.id);
 
 	const deleteMoment = useCallback(async () => {
 		try {
 			toast.promise(
-				doMomentDeletion({ momentId: moment.id }).then(() => {
+				doMomentDeletion().then(() => {
 					router.push('/moments');
 				}),
 				{
@@ -44,7 +44,7 @@ const MomentSettings: FC<Props> = ({ moment }) => {
 				},
 			);
 		} catch {}
-	}, [doMomentDeletion, moment.id, router]);
+	}, [doMomentDeletion, router]);
 
 	return (
 		<DropdownMenu>

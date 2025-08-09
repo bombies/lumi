@@ -16,7 +16,11 @@ const SpotifyLinkButton: FC<Props> = ({ next }) => {
 		<Button
 			className="bg-foreground hover:bg-foreground/80 text-background"
 			onClick={async () => {
-				const redirectUrl = `https://${window.location.hostname}${window.location.port ? `:${window.location.port}` : ''}${next || ''}`;
+				// Sanitize and validate next parameter
+				const sanitizedNext = next?.replace(/[<>"'&]/g, '') || '';
+				// Ensure next parameter is a relative path
+				const safePath = sanitizedNext.startsWith('/') ? sanitizedNext : '';
+				const redirectUrl = `https://${window.location.hostname}${window.location.port ? `:${window.location.port}` : ''}${safePath}`;
 				console.log(redirectUrl);
 
 				const response = await auth.linkSocial({
@@ -24,7 +28,7 @@ const SpotifyLinkButton: FC<Props> = ({ next }) => {
 					callbackURL: redirectUrl,
 				});
 
-				if (response.data) {
+				if (response.data && response.data.url.startsWith('https://')) {
 					window.location.href = response.data.url;
 				} else {
 					logger.error('Failed to link Spotify account', response.error);

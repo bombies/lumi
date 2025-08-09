@@ -56,7 +56,7 @@ const CommentDrawer: FC<Props> = ({ moment }) => {
 		hasNextPage,
 		fetchNextPage,
 		isFetchingNextPage,
-	} = GetMessagesForMoment(moment.id);
+	} = GetMessagesForMoment({ momentId: moment.id });
 	const { self, partner, sendNotificationToPartner, selfState } = useRelationship();
 	const { addEventHandler, removeEventHandler, emitEvent } = useWebSocket();
 	const [drawerOpen, setDrawerOpen] = useState(false);

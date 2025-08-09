@@ -1,0 +1,21 @@
+go 1.24.5
+
+use (
+	.
+	./cmd/stream
+	./cmd/api
+	./cmd/moment-deletion
+	./cmd/thumbnail-transcoder
+	./cmd/relationship-moment-tag
+	./cmd/moment-tag
+	./cmd/affirmation-aggregator
+	./cmd/affirmation-sender
+	./cmd/websocket/heartbeat
+	./cmd/websocket/cleanup
+	./cmd/websocket/authorizer
+	./cmd/websocket/presence
+	./cmd/websocket/notifications
+	./cmd/websocket/moment-message
+	./cmd/cron/anniversaries/aggregator
+	./cmd/cron/anniversaries/sender
+)

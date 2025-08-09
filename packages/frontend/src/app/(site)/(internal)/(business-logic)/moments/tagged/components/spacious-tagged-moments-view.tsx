@@ -68,14 +68,14 @@ const SpaciousTaggedMomentsView: FC = () => {
 						)
 					: (
 							<>
-								<Button variant="default:flat" onClick={() => setSelectedTag(undefined)} className="relative">
+								<Button variant="default:flat" onClick={() => setSelectedTag('')} className="relative">
 									#
 									{selectedTag}
 									<span className="absolute -top-2 -right-2 p-1 rounded-full bg-destructive/40 border border-destructive text-destructive">
 										<XIcon className="size-[12px]" />
 									</span>
 								</Button>
-								<DeleteTagButton tag={selectedTag} onDelete={() => setSelectedTag(undefined)} />
+								<DeleteTagButton tag={selectedTag} onDelete={() => setSelectedTag('')} />
 							</>
 						)}
 				<CreateMomentTagButton />

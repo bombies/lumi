@@ -3,42 +3,52 @@
 import type { RelationshipRequest } from '@lumi/core/relationships/relationship.types';
 import type { User } from '@lumi/core/users/user.types';
 import type { FC } from 'react';
+import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { CheckIcon, XIcon } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useMemo } from 'react';
-import { toast } from 'sonner';
 
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useRouteInvalidation } from '@/lib/hooks/useRouteInvalidation';
-import { trpc } from '@/lib/trpc/trpc-react';
+import { apiClient } from '@/lib/api/api';
 import { getErrorMessage } from '@/lib/trpc/utils';
 
 const FetchReceivedRequests = () =>
-	trpc.relationships.getReceivedRelationshipRequests.useInfiniteQuery(
-		{},
-		{
-			getNextPageParam: lastPage => lastPage.cursor,
-		},
-	);
+	useInfiniteQuery({
+		queryKey: ['relationships', 'requests', 'received'],
+		initialPageParam: null as Record<string, any> | null,
+		queryFn: ({ pageParam }) =>
+			apiClient.relationships.getReceivedRelationshipRequests({
+				limit: 10,
+				cursor: pageParam,
+			}),
+		getNextPageParam: lastPage => lastPage.nextCursor,
+	});
 
 const AcceptRelationshipRequest = () => {
-	const invalidateRoute = useRouteInvalidation([trpc.relationships.getReceivedRelationshipRequests]);
+	const queryClient = useQueryClient();
 	const router = useRouter();
-	return trpc.relationships.acceptRelationshipRequest.useMutation({
-		onSuccess() {
-			invalidateRoute();
+	return useMutation({
+		mutationFn: (requestId: string) => apiClient.relationships.acceptRelationshipRequest(requestId),
+		onSuccess: () => {
+			queryClient.invalidateQueries({
+				queryKey: ['relationships', 'requests', 'received'],
+			});
 			router.push('/home');
 		},
 	});
 };
 
 const RejectRelationshipRequest = () => {
-	const invalidateRoute = useRouteInvalidation([trpc.relationships.getReceivedRelationshipRequests]);
-	return trpc.relationships.removeRelationshipRequest.useMutation({
-		onSuccess() {
-			invalidateRoute();
+	const queryClient = useQueryClient();
+	return useMutation({
+		mutationFn: (requestId: string) => apiClient.relationships.rejectRelationshipRequest(requestId),
+		onSuccess: () => {
+			queryClient.invalidateQueries({
+				queryKey: ['relationships', 'requests', 'received'],
+			});
 		},
 	});
 };

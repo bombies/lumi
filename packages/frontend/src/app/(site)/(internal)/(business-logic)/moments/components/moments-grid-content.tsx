@@ -11,7 +11,7 @@ import MomentCardSkeleton from './moment-card-skeleton';
 
 type Props = {
 	moments?: Moment[];
-	momentPages?: { pages: { data: Moment[] }[] };
+	momentPages?: { pages: { data: Moment[] | null }[] };
 	momentsLoading?: boolean;
 	isSearching?: boolean;
 	searchActive?: boolean;
@@ -33,14 +33,16 @@ const MomentsGridContent: FC<Props> = ({
 	const moments = useMemo(() => {
 		if (momentArr) return momentArr;
 		const flatMoments = momentPages?.pages.flatMap(page => page.data);
-		const dedupedMoments = flatMoments?.reduce(
-			(acc, moment) => {
-				if (!acc.some(existingMoment => existingMoment.id === moment.id)) acc.push(moment);
+		const dedupedMoments = flatMoments
+			?.filter(val => val !== null && val !== undefined)
+			.reduce(
+				(acc, moment) => {
+					if (!acc.some(existingMoment => existingMoment.id === moment.id)) acc.push(moment);
 
-				return acc;
-			},
-			[] as typeof flatMoments,
-		);
+					return acc;
+				},
+				[] as Moment[],
+			);
 		return dedupedMoments?.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 	}, [momentArr, momentPages?.pages]);
 

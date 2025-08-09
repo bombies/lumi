@@ -1,10 +1,10 @@
 'use client';
 
-import type { SongRecommendation } from '@lumi/core/song-recommendations/song-recommendation.types';
 import type { FC } from 'react';
+import type { SongRecommendation } from '@/lib/api/modules/music/music.model';
 import TrashIcon from '@heroicons/react/24/solid/TrashIcon';
-import { toast } from 'sonner';
 
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { DeleteSongRecommendation } from '@/hooks/trpc/music-sharing-hooks';
 import { getErrorMessage } from '@/lib/trpc/utils';
@@ -14,7 +14,7 @@ type Props = {
 };
 
 const DeleteRecommendationButton: FC<Props> = ({ track }) => {
-	const { mutateAsync: deleteRec, isPending: isDeleting } = DeleteSongRecommendation();
+	const { mutateAsync: deleteRec, isPending: isDeleting } = DeleteSongRecommendation(track.id);
 	return (
 		<Button
 			size="icon"
@@ -22,7 +22,7 @@ const DeleteRecommendationButton: FC<Props> = ({ track }) => {
 			tooltip="Delete Recommendation"
 			loading={isDeleting}
 			onClick={() => {
-				toast.promise(deleteRec(track.id), {
+				toast.promise(deleteRec(), {
 					loading: 'Deleting recommendation...',
 					success: 'Recommendation deleted!',
 					error(e) {

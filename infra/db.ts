@@ -41,13 +41,14 @@ export const db = new sst.aws.Dynamo('Database', {
 db.subscribe(
 	appify('RelationshipStreamHandler'),
 	{
-		handler: 'packages/functions/db/stream.handler',
-		link: [db, redisHost, redisPort, redisUser, redisPassword],
+		handler: 'packages/go/cmd/stream',
+		link: [db, redisHost, redisPort, redisUser, redisPassword, contentBucket],
 		environment: {
 			TABLE_NAME: db.name,
 			SENTRY_AUTH_TOKEN: sentryAuthToken.value,
 		},
-		runtime: 'nodejs22.x',
+		runtime: 'go',
+		architecture: 'arm64',
 	},
 	{
 		filters: [
@@ -67,9 +68,10 @@ db.subscribe(
 db.subscribe(
 	appify('MomentMetadataDeletionHandler'),
 	{
-		handler: 'packages/functions/db/moment-deletion.handler',
+		handler: 'packages/go/cmd/moment-deletion',
 		link: [db, contentBucket],
-		runtime: 'nodejs22.x',
+		runtime: 'go',
+		architecture: 'arm64',
 		environment: {
 			SENTRY_AUTH_TOKEN: sentryAuthToken.value,
 		},
@@ -93,7 +95,7 @@ db.subscribe(
 db.subscribe(
 	appify('MomentThumbnailTranscoder'),
 	{
-		handler: 'packages/functions/db/moment-thumbnail-transcoder.handler',
+		handler: 'packages/go/cmd/thumbnail-transcoder',
 		link: [contentBucket, db, redisHost, redisPort, redisUser, redisPassword],
 		environment: {
 			APP_STAGE: $app.stage,
@@ -103,8 +105,12 @@ db.subscribe(
 			CDN_URL: $interpolate`${contentCdn.domainUrl.apply(domainUrl => domainUrl ?? contentCdn.url)}`,
 			SENTRY_AUTH_TOKEN: sentryAuthToken.value,
 		},
-		runtime: 'nodejs22.x',
-		nodejs: { install: ['ffmpeg-static'] },
+		runtime: 'go',
+		architecture: 'arm64',
+		copyFiles: [{
+			from: 'bin/ffmpeg-arm',
+			to: 'bin/ffmpeg',
+		}],
 	},
 	{
 		filters: [
@@ -125,9 +131,10 @@ db.subscribe(
 db.subscribe(
 	appify('MomentTagOperationHandler'),
 	{
-		handler: 'packages/functions/db/moment-tag.handler',
+		handler: 'packages/go/cmd/moment-tag',
 		link: [db, redisHost, redisPort, redisUser, redisPassword],
-		runtime: 'nodejs22.x',
+		runtime: 'go',
+		architecture: 'arm64',
 		environment: {
 			TABLE_NAME: db.name,
 			SENTRY_AUTH_TOKEN: sentryAuthToken.value,
@@ -152,8 +159,9 @@ db.subscribe(
 db.subscribe(
 	appify('RelationshipMomentTagDeletionHandler'),
 	{
-		handler: 'packages/functions/db/relationship-moment-tag.handler',
-		runtime: 'nodejs22.x',
+		handler: 'packages/go/cmd/relationship-moment-tag',
+		runtime: 'go',
+		architecture: 'arm64',
 		link: [db, redisHost, redisPort, redisUser, redisPassword],
 		environment: {
 			TABLE_NAME: db.name,
